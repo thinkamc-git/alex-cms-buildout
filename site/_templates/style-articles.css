@@ -1,0 +1,742 @@
+/* ============================================================
+   Alex M. Chong — Article Templates Stylesheet
+   File: style-articles.css (renamed from style.css for clarity)
+
+   Scope: the article-style content templates only — the rendering
+   surfaces for article, journal-entry, live-session, experiment,
+   and experiment-html. Page-style chrome (landing, about, resume,
+   etc.) lives in style-pages.css.
+
+   When a new layout introduces a token or component, extend the
+   relevant section below — don't pull from the design system
+   wholesale. Every rule here should be reachable from a page.
+   ------------------------------------------------------------
+   Sections:
+     1. Reset
+     2. Tokens
+     3. Base shell
+     4. Layout chrome (.layout-nav, .layout-footer)
+     5. Article layout
+   ============================================================ */
+
+
+/* ── 1. Reset ───────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+a { color: inherit; }
+
+
+/* ── 2. Tokens ──────────────────────────────────────────── */
+
+:root {
+  /* Foundation colors */
+  --primary:   #191715;
+  --secondary: #494846;
+  --muted:     #818080;
+  --neutral:   #E8E8E8;
+  --surface:   #F8F8F8;
+  --canvas-bg: #F3F2F1;
+  --accent:    #6B7F6E;
+  --white:     #FFFFFF;
+
+  /* Primary tints — derived from --primary */
+  --ink-12: rgba(25,23,21,0.12);
+  --ink-18: rgba(25,23,21,0.18);
+  --ink-30: rgba(25,23,21,0.30);
+
+  /* Category pool — extend as new pages introduce categories.
+     Each layout opts in via data-category="<name>" on its root. */
+  --c-terracotta: #7D4631;
+
+  /* Rule weights */
+  --rule:       1px solid var(--primary);
+  --rule-30:    1px solid var(--ink-30);
+  --rule-faint: 1px solid var(--ink-18);
+
+  /* Type families */
+  --font:       'Barlow', sans-serif;
+  --font-cond:  'Barlow Condensed', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --font-mono:  'JetBrains Mono', monospace;
+
+  /* Type scale (only sizes used by current pages) */
+  --text-h0:      48px;
+  --text-h4:      24px;
+  --text-h5:      22px;
+  --text-body-lg: 20px;
+  --text-md:      16px;
+  --text-base:    14px;
+  --text-pill:    12px;
+  --text-label:   11px;
+
+  /* Spacing scale */
+  --space-4:   4px;
+  --space-8:   8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+  --space-80: 80px;
+
+  /* Layout */
+  --r-card: 4px;
+  --r-pill: 4px;
+  --r-tag:  3px;
+
+  /* Dot-grid paper texture (inline SVG, no asset dependency) */
+  --dot-grid: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23e8e8e8%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221.5%22%20fill%3D%22%23b8b6b2%22%20opacity%3D%220.15%22/%3E%3C/svg%3E");
+}
+
+
+/* ── 3. Base shell ──────────────────────────────────────── */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-weight: 500;
+  color: var(--primary);
+  background-color: var(--neutral);
+  background-image: var(--dot-grid);
+  background-size: 4px 4px;
+  background-repeat: repeat;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip; /* contain viewport-width hero figures */
+}
+
+
+/* ── 4. Layout chrome ───────────────────────────────────── */
+
+.layout-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 var(--space-48);
+  background: var(--neutral);
+  border-bottom: var(--rule-30);
+}
+.layout-nav-logo {
+  min-width: 100px;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-body-lg);
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-nav-links { display: flex; gap: var(--space-4); }
+.layout-nav-links a {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--canvas-bg);
+  border: var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--text-pill);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.layout-nav-links a:hover { background: var(--primary); color: var(--surface); }
+
+.layout-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px var(--space-48);
+  background: var(--neutral);
+  border-top: var(--rule-30);
+}
+.layout-footer-left,
+.layout-footer-right a {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-footer-right { display: flex; gap: var(--space-16); }
+
+
+/* ── 5. Article layout ──────────────────────────────────────
+   Long-form reading template. Single centred column, generous
+   line-height, opening serif, pull quote, tag footer. Category
+   tint is driven by [data-category] on the <article> root —
+   adding a new category is one mapping line below.
+   ──────────────────────────────────────────────────────── */
+
+/* Category mapping — one line per hue, driven by data-category */
+.article[data-category="terracotta"] { --c-current: var(--c-terracotta); }
+
+.article-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-64);
+  background: var(--surface);
+  border-bottom: var(--rule-faint);
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.article-breadcrumb-root {
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+}
+.article-breadcrumb-root:hover { color: var(--primary); }
+.article-breadcrumb-sep { color: var(--muted); }
+.article-breadcrumb-current { font-weight: 700; color: var(--primary); }
+
+.article {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-56) var(--space-40) var(--space-80);
+}
+
+.article-header { margin-bottom: var(--space-40); }
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-bottom: var(--space-20);
+  font-family: var(--font-cond);
+  text-transform: uppercase;
+}
+.article-category {
+  font-size: var(--text-pill);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--c-current, var(--primary));
+}
+.article-meta-sep { color: var(--ink-18); }
+.article-meta-date,
+.article-meta-updated {
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: var(--muted);
+}
+
+.article-title {
+  font-size: var(--text-h0);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin-bottom: var(--space-20);
+}
+.article-title-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  display: inline-block; /* prevents descender clipping */
+}
+
+/* Modifier: full Instrument Serif italic title (no Barlow base) */
+.article-title.is-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Summary: optional short deck rendered as a larger-body paragraph
+   below the title. Drawn from the `summary` field. Hide when empty. */
+.article-summary {
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--secondary);
+  margin-bottom: var(--space-32);
+}
+
+/* Author byline: avatar + name + short tagline, rendered as a single
+   inline line ("Alex M. Chong – UX Design Director & Career Coach").
+   Drawn from the Author config (single-author site today; injected into
+   every page). The full Author config has four fields — image, name,
+   short_description, extended_description. The byline uses the first
+   three; the footer Author Bio block uses image + extended_description. */
+.article-author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: var(--rule-faint);
+}
+.article-author-info {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  min-width: 0;
+}
+.article-author-name { font-weight: 600; color: var(--primary); }
+.article-author-separator { color: var(--muted); margin: 0 4px; }
+.article-author-tagline { font-weight: 500; color: var(--secondary); }
+
+/* Author Bio: extended description block in the footer area. Image plus
+   the long-form bio paragraph. Independently toggleable from the byline. */
+.article-author-bio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-24);
+  margin: var(--space-48) 0 var(--space-24);
+  padding: var(--space-32);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.article-author-bio-extended {
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: var(--secondary);
+  margin: 0;
+}
+
+/* Shared avatar styling for both byline (48px) and bio (80px). */
+.article-author-avatar,
+.article-author-bio-avatar {
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--canvas-bg);
+  border: var(--rule-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--secondary);
+  overflow: hidden;
+}
+.article-author-avatar { width: 48px; height: 48px; font-size: var(--text-body-lg); }
+.article-author-bio-avatar { width: 80px; height: 80px; font-size: 32px; }
+.article-author-avatar img,
+.article-author-bio-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-series {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: var(--space-32);
+  border-bottom: var(--rule-faint);
+}
+.article-series-pill {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 35%, transparent);
+  color: var(--c-current, var(--primary));
+}
+.article-series-progress {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.article-series-dots { display: flex; gap: 3px; align-items: center; }
+.article-series-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-current, var(--primary)) 20%, transparent);
+}
+.article-series-dot.is-active {
+  background: var(--c-current, var(--primary));
+}
+
+/* Special tag (Principle / Framework) — articles only. Renders inline with
+   the series row when set. Tinted by the active category colour. */
+.article-special-tag {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 40%, transparent);
+  color: var(--c-current, var(--primary));
+  background: transparent;
+}
+
+/* ── Article hero image ─────────────────────────────────────
+   Optional hero figure that sits between the article header and
+   the prose body. Rendered as its own block so the CMS can toggle
+   it independently of inline images in the body. The data-size
+   attribute drives the same default / wide / full variants used
+   by figures inside .article-prose.
+   ──────────────────────────────────────────────────────── */
+
+.article-hero {
+  margin: 0 0 var(--space-40);
+}
+.article-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
+.article-hero figcaption {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+.article-hero[data-size="wide"],
+.article-hero[data-size="full"] {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+}
+.article-hero[data-size="wide"] {
+  width: min(1080px, calc(100vw - var(--space-32) * 2));
+}
+.article-hero[data-size="full"] {
+  width: 100vw;
+}
+.article-hero[data-size="full"] img {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+.article-hero[data-size="wide"] figcaption,
+.article-hero[data-size="full"] figcaption {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ── Article prose ──────────────────────────────────────────
+   Wraps the rich-text body. The selectors below style the bare
+   HTML the CMS editor (Tiptap) emits — no per-paragraph classes
+   needed in the body. Add new tag styles here as the editor's
+   block library grows.
+   ──────────────────────────────────────────────────────── */
+
+.article-prose { margin-top: var(--space-40); }
+.article-prose > * + * { margin-top: var(--space-20); }
+
+/* Default paragraph */
+.article-prose p {
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.8;
+  color: var(--secondary);
+}
+
+/* Lede: the first paragraph styled as Instrument Serif italic intro.
+   `:first-of-type` matches the first <p> in the prose, so the rule still
+   applies when a hero figure precedes it. */
+.article-prose > p:first-of-type {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h4);
+  line-height: 1.5;
+  color: var(--secondary);
+}
+
+/* Headings — body content only (article H1 is outside .article-prose) */
+.article-prose h2 {
+  font-size: var(--text-h4);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--primary);
+  margin-top: var(--space-48);
+}
+.article-prose h3 {
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  color: var(--primary);
+  margin-top: var(--space-32);
+}
+.article-prose h4 {
+  font-family: var(--font-cond);
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-top: var(--space-32);
+}
+
+/* Pull quote */
+.article-prose blockquote {
+  border-left: 2px solid var(--primary);
+  padding-left: 28px;
+  margin: 36px 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h5);
+  line-height: 1.45;
+  color: var(--primary);
+}
+
+/* Lists */
+.article-prose ul,
+.article-prose ol {
+  padding-left: var(--space-24);
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--secondary);
+}
+.article-prose li + li { margin-top: var(--space-8); }
+.article-prose li::marker { color: var(--muted); }
+
+/* Inline elements */
+.article-prose a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-30);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.article-prose a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.article-prose strong { font-weight: 700; color: var(--primary); }
+.article-prose em { font-style: italic; }
+
+/* Inline + block code */
+.article-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--canvas-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: var(--rule-faint);
+  color: var(--primary);
+}
+.article-prose pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  background: var(--canvas-bg);
+  padding: var(--space-16) var(--space-20);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+  overflow-x: auto;
+  color: var(--primary);
+}
+.article-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Section break */
+.article-prose hr {
+  border: 0;
+  border-top: var(--rule-faint);
+  margin: var(--space-48) 0;
+}
+
+/* Figures (img + caption) */
+.article-prose figure { margin: var(--space-32) 0; }
+.article-prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
+.article-prose figcaption {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+
+/* Figure size variants — author-toggleable per image (CMS sets data-size).
+   Default: figure fills the article column (~640px content width).
+   wide:    extends beyond the column, capped at 1080px or viewport.
+   full:    viewport-width hero (NYT-style oversized image).
+   The position:relative + left:50% + translateX(-50%) trick centres
+   the figure in the viewport regardless of its constrained parent. */
+.article-prose figure[data-size="wide"],
+.article-prose figure[data-size="full"] {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+}
+.article-prose figure[data-size="wide"] {
+  width: min(1080px, calc(100vw - var(--space-32) * 2));
+}
+.article-prose figure[data-size="full"] {
+  width: 100vw;
+}
+.article-prose figure[data-size="full"] img {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+/* Caption stays at column-readable width even when the image is wide. */
+.article-prose figure[data-size="wide"] figcaption,
+.article-prose figure[data-size="full"] figcaption {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Figure size toggle (demo only) ──────────────────────────
+   Authoring affordance to preview each size on this static page.
+   In the CMS this control lives in the Tiptap floating menu —
+   it does NOT render on the public article page. Styled as
+   editor scaffolding (mono, dashed) so it reads as not-content. */
+.figure-size-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: 6px var(--space-12);
+  margin-top: var(--space-32);
+  border: 1px dashed var(--ink-30);
+  border-radius: var(--r-card);
+  background: var(--canvas-bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--muted);
+}
+.figure-size-toggle-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.figure-size-toggle button {
+  padding: 3px 8px;
+  border: 1px solid var(--ink-18);
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.figure-size-toggle button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.figure-size-toggle button[aria-pressed="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
+}
+.article-prose .figure-size-toggle + figure { margin-top: var(--space-12); }
+
+/* Series prev/next navigation — rendered only when template = series.
+   Sits between the body end and the tag footer. Tinted by --c-current. */
+.article-series-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  margin-top: var(--space-40);
+  padding-top: var(--space-32);
+  border-top: var(--rule-faint);
+}
+.article-series-nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-20);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 25%, transparent);
+  border-radius: var(--r-card);
+  text-decoration: none;
+  color: var(--primary);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.article-series-nav-link:hover {
+  border-color: var(--c-current, var(--primary));
+  background: color-mix(in srgb, var(--c-current, var(--primary)) 4%, transparent);
+}
+.article-series-nav-link.is-next {
+  text-align: right;
+  align-items: flex-end;
+}
+.article-series-nav-direction {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.article-series-nav-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--primary);
+}
+
+.article-tags {
+  margin-top: var(--space-40);
+  padding-top: var(--space-24);
+  border-top: var(--rule-faint);
+}
+.article-tags-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-12);
+}
+.article-tags-list { display: flex; gap: 6px; flex-wrap: wrap; }
+.article-tag {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-tag);
+  border: 1px solid var(--ink-18);
+  color: var(--muted);
+  background: transparent;
+}

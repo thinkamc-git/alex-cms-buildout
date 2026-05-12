@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layout — alex m. chong</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-articles.css">
+
+  <style>
+    /* ════════════════════════════════════════════════════════════
+       TEMPORARY: Editorial layout iteration.
+       --------------------------------------------------------------
+       Single layout based on the user's reference. Hierarchy matches
+       the concept (split top bar → title → summary → special tag
+       row → date row → byline row with rules → body); values use
+       design-system tokens rather than the reference's exact pixels.
+       ════════════════════════════════════════════════════════════ */
+
+    :root {
+      --c-purple: #5D5376;
+      --c-amber:  #81642A;
+      --c-violet: #6C4D7A;
+    }
+    .article[data-category="purple"] { --c-current: var(--c-purple); }
+    .article[data-category="amber"]  { --c-current: var(--c-amber); }
+    .article[data-category="violet"] { --c-current: var(--c-violet); }
+
+    /* ── Sticky toolbar ───────────────────────────────────── */
+    .preview-toolbar-stack {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-12);
+      padding: var(--space-12) var(--space-32);
+      background: var(--canvas-bg);
+      border-bottom: 1px dashed var(--ink-30);
+      font-family: var(--font-mono);
+      font-size: var(--text-label);
+      color: var(--muted);
+    }
+    .preview-toolbar-label {
+      text-transform: uppercase;
+      letter-spacing: 0.10em;
+      font-weight: 500;
+      min-width: 64px;
+    }
+    .preview-toolbar button {
+      padding: 5px 12px;
+      border: 1px solid var(--ink-18);
+      border-radius: 3px;
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: var(--text-label);
+      color: var(--secondary);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .preview-toolbar button:hover { border-color: var(--primary); color: var(--primary); }
+    .preview-toolbar button[aria-pressed="true"] {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--surface);
+    }
+
+    .type-variant[hidden] { display: none; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       NEW EDITORIAL LAYOUT
+       --------------------------------------------------------------
+       Header structure (top to bottom):
+         1. Top split bar — category (left) | series row (right)
+         2. Title (serif italic)
+         3. Summary (left-aligned paragraph)
+         4. Special Tag (own row, prominent)
+         5. Date row — published (prominent) + updated (italic footnote)
+         6. Byline row (rules above and below) — author left, read time right
+       Body and footer follow normally below.
+       ════════════════════════════════════════════════════════════ */
+
+    /* Top split bar — replaces the old single meta line */
+    .article-topstrip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-24);
+      margin-bottom: var(--space-40);
+    }
+    .article-topstrip .article-category {
+      font-family: var(--font-cond);
+      font-size: var(--text-md);
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-current, var(--primary));
+    }
+    .article-topstrip-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Title — slightly larger than default 48 to land the visual weight */
+    .layouts-edit .article-title.is-serif {
+      font-size: 56px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-32);
+    }
+
+    /* Summary */
+    .layouts-edit .article-summary {
+      font-size: var(--text-body-lg);
+      line-height: 1.5;
+      color: var(--secondary);
+      margin-bottom: var(--space-32);
+    }
+
+    /* Special Tag standalone row */
+    .article-tag-row {
+      margin-bottom: var(--space-32);
+    }
+
+    /* Date row — published + updated, in the design system's
+       condensed-uppercase meta style. Bumped to 13px (from the
+       original 11px) so the date isn't buried as a footnote. */
+    .article-dates {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-12);
+      margin-bottom: var(--space-24);
+    }
+    .article-pub-date {
+      font-family: var(--font-cond);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+    .article-updated-date {
+      font-family: var(--font-cond);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Byline row with rules above and below */
+    .article-byline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-24);
+      padding: var(--space-20) 0;
+      border-top: var(--rule-faint);
+      border-bottom: var(--rule-faint);
+      margin-bottom: var(--space-40);
+    }
+    /* Author block in the byline row — strip the default border + padding */
+    .article-byline-row .article-author {
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    /* Stack name and tagline rather than the inline "Name – Tagline" form */
+    .article-byline-row .article-author-info {
+      display: block;
+      line-height: 1.3;
+    }
+    .article-byline-row .article-author-name {
+      display: block;
+      font-weight: 700;
+      font-size: var(--text-md);
+    }
+    .article-byline-row .article-author-separator { display: none; }
+    .article-byline-row .article-author-tagline {
+      display: block;
+      font-size: var(--text-base);
+      color: var(--secondary);
+      margin-top: 2px;
+    }
+    .article-read-time {
+      font-family: var(--font);
+      font-size: var(--text-base);
+      color: var(--secondary);
+      flex-shrink: 0;
+    }
+
+    /* ── Type-specific styles ──────────────────────────────────
+       These belong with the other type-specific page styles
+       (currently inline in article.html) — duplicated here so
+       layouts.html renders them while we iterate on the layout. */
+
+    /* Journal: key statement replaces the title. Sized to carry
+       equivalent visual weight to the article-title in the new
+       layout (44px Instrument Serif italic with a category-tinted
+       left rule). */
+    .journal-key-statement {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-weight: 400;
+      font-size: 44px;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--primary);
+      border-left: 3px solid var(--c-current, var(--primary));
+      padding-left: var(--space-24);
+      margin: 0 0 var(--space-32);
+    }
+    /* Entry number — matches the category's Barlow Condensed style,
+       just muted. Uses "#014" format with light tracking. */
+    .journal-number {
+      font-family: var(--font-cond);
+      font-size: var(--text-md);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    /* Live session event card. Combined when/where panel + format tags
+       into one cohesive card — same surface treatment as the author bio
+       block (white surface, faint border, padding 32, rounded). The
+       primary event values (date and location) are set in Instrument
+       Serif italic for editorial flair. */
+    .event-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-32);
+      margin: 0 0 var(--space-32);
+      padding: var(--space-32);
+      background: var(--surface);
+      border: var(--rule-faint);
+      border-radius: var(--r-card);
+    }
+    .event-card-tags {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding-top: var(--space-24);
+      border-top: var(--rule-faint);
+    }
+    .event-meta-block-label {
+      font-family: var(--font-cond);
+      font-size: var(--text-label);
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--space-12);
+    }
+    .event-date,
+    .event-location {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--primary);
+    }
+    .event-time,
+    .event-cost-detail {
+      font-family: var(--font);
+      font-size: var(--text-md);
+      color: var(--secondary);
+      margin-top: var(--space-8);
+    }
+    .event-format-tag {
+      font-family: var(--font-cond);
+      font-size: var(--text-pill);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: var(--r-tag);
+      border: 1px solid var(--ink-18);
+      color: var(--secondary);
+      background: transparent;
+    }
+    .event-format-tag.is-free {
+      color: #246636;
+      border-color: rgba(36,102,54,0.4);
+      background: rgba(36,102,54,0.08);
+    }
+    .event-format-tag.is-in-person {
+      color: #6B4010;
+      border-color: rgba(107,64,16,0.4);
+      background: rgba(107,64,16,0.07);
+    }
+
+    /* Experiment placeholder (stand-in for the readfile() output) */
+    .experiment-placeholder {
+      margin: var(--space-32) 0;
+      padding: var(--space-48) var(--space-32);
+      background: #1C1028;
+      color: var(--white);
+      border-radius: var(--r-card);
+      text-align: center;
+    }
+    .experiment-placeholder-path {
+      font-family: var(--font-mono);
+      font-size: var(--text-pill);
+      letter-spacing: 0.04em;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: var(--space-16);
+    }
+    .experiment-placeholder-title {
+      font-family: var(--font);
+      font-size: var(--text-h5);
+      font-weight: 600;
+      margin-bottom: var(--space-16);
+    }
+    .experiment-placeholder-note {
+      font-family: var(--font);
+      font-size: var(--text-pill);
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .experiment-placeholder code {
+      font-family: var(--font-mono);
+      background: rgba(255,255,255,0.08);
+      padding: 1px 6px;
+      border-radius: 2px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* Spacing tweaks for body/footer continuity */
+    .layouts-edit .article-prose { margin-top: 0; }
+
+    /* Smaller, less prominent author bio footer.
+       Dark surface (primary), tighter padding, smaller avatar and
+       smaller body text — dialled down so the footer reads as a
+       quiet signature rather than a callout block. */
+    .layouts-edit .article-author-bio {
+      align-items: center;
+      gap: var(--space-16);
+      padding: var(--space-20) var(--space-24);
+      background: var(--primary);
+      border: 0;
+      margin-top: var(--space-48);
+    }
+    .layouts-edit .article-author-bio-avatar {
+      width: 44px;
+      height: 44px;
+      font-size: var(--text-md);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.85);
+    }
+    .layouts-edit .article-author-bio-extended {
+      font-size: var(--text-base);
+      line-height: 1.6;
+      color: rgba(255,255,255,0.72);
+    }
+
+  </style>
+</head>
+<body class="layouts-edit">
+
+  <div class="preview-toolbar-stack">
+    <header class="preview-toolbar" role="tablist" aria-label="Content type">
+      <span class="preview-toolbar-label">Type</span>
+      <button type="button" data-type-btn="article" aria-pressed="true">Article</button>
+      <button type="button" data-type-btn="journal">Journal</button>
+      <button type="button" data-type-btn="live-session">Live Session</button>
+      <button type="button" data-type-btn="experiment">Experiment</button>
+    </header>
+  </div>
+
+
+  <!-- ══════════ ARTICLE ══════════ -->
+  <section class="type-variant" data-type="article">
+
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <a class="article-breadcrumb-root" href="#">Writing</a>
+      <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
+      <span class="article-breadcrumb-current">UX Industry</span>
+    </nav>
+
+    <article class="article" data-category="terracotta">
+
+      <!-- 1. Top split bar -->
+      <div class="article-topstrip">
+        <span class="article-category">UX Industry</span>
+        <div class="article-topstrip-right">
+          <span class="article-series-pill">UX 2.0 Series</span>
+          <span class="article-series-progress">Part 2 of 3</span>
+          <span class="article-series-dots" aria-hidden="true">
+            <span class="article-series-dot"></span>
+            <span class="article-series-dot is-active"></span>
+            <span class="article-series-dot"></span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 2. Title -->
+      <h1 class="article-title is-serif">What comes after the UI Technician</h1>
+
+      <!-- 3. Summary -->
+      <p class="article-summary">
+        AI didn't break UX — it stripped away the methods that hid what the discipline was always supposed to be. The reset is a return to thinking, not a story about new tools.
+      </p>
+
+      <!-- 4. Special Tag -->
+      <div class="article-tag-row">
+        <span class="article-special-tag">Principle</span>
+      </div>
+
+      <!-- 5. Date row -->
+      <div class="article-dates">
+        <span class="article-pub-date">Mar 4, 2026</span>
+        <span class="article-updated-date">Updated May 2, 2026</span>
+      </div>
+
+      <!-- 6. Byline row (rules above + below) -->
+      <div class="article-byline-row">
+        <div class="article-author">
+          <div class="article-author-avatar">AC</div>
+          <div class="article-author-info">
+            <span class="article-author-name">Alex M. Chong</span>
+            <span class="article-author-tagline">UX Design Director &amp; Career Coach</span>
+          </div>
+        </div>
+        <span class="article-read-time">14 min read</span>
+      </div>
+
+      <figure class="article-hero" data-size="wide">
+        <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80" alt="A workspace with notebooks and a laptop on a wooden desk">
+        <figcaption>The post-AI workspace: the stack got smaller, the questions got sharper.</figcaption>
+      </figure>
+
+      <div class="article-prose">
+        <p>UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+        <p>For two decades, UX justified its existence through its methods. The research process, the prototype handoff, the usability study — these were the discipline. They were hard to do without a specialist, which gave the role its shape.</p>
+        <blockquote>"The gap between strategist and executor sits openly in the room now."</blockquote>
+        <p>UX 2.0 is the return of foundational design thinking as the core competency — well beyond a story about new tools.</p>
+      </div>
+
+      <aside class="article-author-bio">
+        <div class="article-author-bio-avatar">AC</div>
+        <p class="article-author-bio-extended">Alex is a design director and career coach based in Toronto. He's spent twelve years shipping consumer and enterprise software, and now writes about what design leadership looks like when AI dissolves the easy excuses.</p>
+      </aside>
+
+      <footer class="article-tags">
+        <div class="article-tags-list">
+          <span class="article-tag">Discipline History</span>
+          <span class="article-tag">Reframe</span>
+          <span class="article-tag">UX 2.0</span>
+        </div>
+      </footer>
+    </article>
+
+  </section>
+
+
+  <!-- ══════════ JOURNAL ══════════ -->
+  <section class="type-variant" data-type="journal" hidden>
+
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <a class="article-breadcrumb-root" href="#">Journal</a>
+      <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
+      <span class="article-breadcrumb-current">Introspection</span>
+    </nav>
+
+    <article class="article" data-category="purple">
+
+      <!-- Top split bar (right side: entry number) -->
+      <div class="article-topstrip">
+        <span class="article-category">Introspection</span>
+        <div class="article-topstrip-right">
+          <span class="journal-number">#014</span>
+        </div>
+      </div>
+
+      <!-- Key statement replaces the title -->
+      <p class="journal-key-statement">
+        I keep returning to the question of who the work is for, even when nobody asks.
+      </p>
+
+      <!-- Date row (no updated date for this entry) -->
+      <div class="article-dates">
+        <span class="article-pub-date">Apr 18, 2026</span>
+      </div>
+
+      <!-- Byline row (no read time slot) -->
+      <div class="article-byline-row">
+        <div class="article-author">
+          <div class="article-author-avatar">AC</div>
+          <div class="article-author-info">
+            <span class="article-author-name">Alex M. Chong</span>
+            <span class="article-author-tagline">UX Design Director &amp; Career Coach</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="article-prose">
+        <p>The honest answer is: most days, the work is for me. To process. To metabolise. To find a thread back to the part of myself that started this practice in the first place.</p>
+        <p>Other days the work is for an audience I can't quite picture — someone, somewhere, who needs the same problem framed in the way I'm trying to frame it. I write to them. They never write back.</p>
+        <p>And occasionally, the work is for the future of the discipline. Those are the rarest and longest entries.</p>
+      </div>
+
+      <aside class="article-author-bio">
+        <div class="article-author-bio-avatar">AC</div>
+        <p class="article-author-bio-extended">Alex is a design director and career coach based in Toronto. He's spent twelve years shipping consumer and enterprise software, and now writes about what design leadership looks like when AI dissolves the easy excuses.</p>
+      </aside>
+
+      <footer class="article-tags">
+        <div class="article-tags-list">
+          <span class="article-tag">Audience</span>
+          <span class="article-tag">Practice</span>
+          <span class="article-tag">Solitude</span>
+        </div>
+      </footer>
+    </article>
+
+  </section>
+
+
+  <!-- ══════════ LIVE SESSION ══════════ -->
+  <section class="type-variant" data-type="live-session" hidden>
+
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <a class="article-breadcrumb-root" href="#">Live Sessions</a>
+      <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
+      <span class="article-breadcrumb-current">Talk</span>
+    </nav>
+
+    <article class="article" data-category="amber">
+
+      <!-- Top split bar (no series for live sessions) -->
+      <div class="article-topstrip">
+        <span class="article-category">Talk</span>
+      </div>
+
+      <h1 class="article-title is-serif">Designing in the Age of Abundance</h1>
+
+      <p class="article-summary">
+        A 60-minute talk on what changes when designers no longer compete on artefact production.
+      </p>
+
+      <div class="article-dates">
+        <span class="article-pub-date">Posted Apr 12, 2026</span>
+      </div>
+
+      <!-- Event card — sits between the posted date and the byline row.
+           Combined When/Where + format tags in a single white card with
+           the same surface treatment as the author bio block. -->
+      <aside class="event-card">
+        <div>
+          <div class="event-meta-block-label">When</div>
+          <div class="event-date">Jun 12, 2026</div>
+          <div class="event-time">7:00 PM ET · doors at 6:30</div>
+        </div>
+        <div>
+          <div class="event-meta-block-label">Where</div>
+          <div class="event-location">Toronto Public Library</div>
+          <div class="event-cost-detail">Bram &amp; Bluma Appel Salon</div>
+        </div>
+        <div class="event-card-tags">
+          <span class="event-format-tag is-free">Free</span>
+          <span class="event-format-tag is-in-person">In-person</span>
+          <span class="event-format-tag">Talk · 60 min</span>
+        </div>
+      </aside>
+
+      <div class="article-byline-row">
+        <div class="article-author">
+          <div class="article-author-avatar">AC</div>
+          <div class="article-author-info">
+            <span class="article-author-name">Alex M. Chong</span>
+            <span class="article-author-tagline">UX Design Director &amp; Career Coach</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="article-prose">
+        <p>The post-AI design conversation has been preoccupied with the wrong question. We keep asking: which tools survive? The interesting question is: which skills become valuable when the tools no longer differentiate?</p>
+        <p>This talk frames three shifts already underway in serious teams: editorial judgement over execution velocity, intent over interface, and strategic clarity treated as a deliverable.</p>
+      </div>
+
+      <aside class="article-author-bio">
+        <div class="article-author-bio-avatar">AC</div>
+        <p class="article-author-bio-extended">Alex is a design director and career coach based in Toronto. He's spent twelve years shipping consumer and enterprise software, and now writes about what design leadership looks like when AI dissolves the easy excuses.</p>
+      </aside>
+
+      <footer class="article-tags">
+        <div class="article-tags-list">
+          <span class="article-tag">Post-AI</span>
+          <span class="article-tag">Design Leadership</span>
+          <span class="article-tag">Practice</span>
+        </div>
+      </footer>
+    </article>
+
+  </section>
+
+
+  <!-- ══════════ EXPERIMENT ══════════ -->
+  <section class="type-variant" data-type="experiment" hidden>
+
+    <nav class="article-breadcrumb" aria-label="Breadcrumb">
+      <a class="article-breadcrumb-root" href="#">Experiments</a>
+      <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
+      <span class="article-breadcrumb-current">Prototype</span>
+    </nav>
+
+    <article class="article" data-category="violet">
+
+      <div class="article-topstrip">
+        <span class="article-category">Prototype</span>
+      </div>
+
+      <h1 class="article-title is-serif">Design-Native Spec Workflow</h1>
+
+      <p class="article-summary">
+        A designer-first methodology for directing AI implementation. Spec before code. Prototype before build.
+      </p>
+
+      <div class="article-dates">
+        <span class="article-pub-date">Apr 1, 2026</span>
+      </div>
+
+      <div class="article-byline-row">
+        <div class="article-author">
+          <div class="article-author-avatar">AC</div>
+          <div class="article-author-info">
+            <span class="article-author-name">Alex M. Chong</span>
+            <span class="article-author-tagline">UX Design Director &amp; Career Coach</span>
+          </div>
+        </div>
+        <span class="article-read-time">8 min</span>
+      </div>
+
+      <div class="experiment-placeholder">
+        <div class="experiment-placeholder-path">/content/experiments/design-native-spec/index.html</div>
+        <div class="experiment-placeholder-title">Custom HTML rendered here</div>
+        <div class="experiment-placeholder-note">In production, the experiment template uses PHP <code>readfile()</code> — no nav, no template wrapper, no body styling.</div>
+      </div>
+
+      <aside class="article-author-bio">
+        <div class="article-author-bio-avatar">AC</div>
+        <p class="article-author-bio-extended">Alex is a design director and career coach based in Toronto. He's spent twelve years shipping consumer and enterprise software, and now writes about what design leadership looks like when AI dissolves the easy excuses.</p>
+      </aside>
+
+      <footer class="article-tags">
+        <div class="article-tags-list">
+          <span class="article-tag">Spec</span>
+          <span class="article-tag">Workflow</span>
+          <span class="article-tag">AI</span>
+        </div>
+      </footer>
+    </article>
+
+  </section>
+
+
+  <script>
+    let activeType = 'article';
+    function update() {
+      document.querySelectorAll('.type-variant').forEach(t => {
+        t.hidden = t.dataset.type !== activeType;
+      });
+      document.querySelectorAll('[data-type-btn]').forEach(b => {
+        b.setAttribute('aria-pressed', b.dataset.typeBtn === activeType ? 'true' : 'false');
+      });
+    }
+    document.querySelectorAll('[data-type-btn]').forEach(b => {
+      b.addEventListener('click', () => { activeType = b.dataset.typeBtn; update(); });
+    });
+  </script>
+
+</body>
+</html>

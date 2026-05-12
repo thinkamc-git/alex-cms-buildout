@@ -1,0 +1,1448 @@
+/* ============================================================
+   Alex M. Chong — Page styles
+   Universal primitives for the static narrative pages in /_pages/.
+
+   Conventions:
+     - Components are named generically (.numbered-list, .ledger,
+       .point-grid). Page-scoped names like .coaching-points are
+       forbidden — every primitive must be reusable across pages.
+     - Reach for tokens, never hex literals.
+     - Modifiers use .is-* (e.g., .statement.is-h0, .two-col.is-end).
+     - Spacing utilities (.has-rule, .has-rule-faint, .has-rule-left)
+       compose with any block.
+   ------------------------------------------------------------
+   Sections:
+      1. Reset
+      2. Tokens
+      3. Base shell
+      4. Layout chrome (.layout-nav, .layout-footer)
+      5. Inline emphasis (.m, .ac, .serif)
+      6. Eyebrows (.eyebrow, .serif-eyebrow)
+      7. Display & headings (.statement, .page-header-title, .page-header-sub)
+      8. Body type (.lead, .serif-intro, .pull-quote)
+      9. Buttons & tags (.btn-*, .btn-row, .btn-stack, .tag)
+     9a. Profile circle (.profile-circle + .is-sm/.is-md/.is-lg + initials fallback)
+     9b. Forms (.form, .form-field, .form-input, .form-actions, .form-fineprint)
+     10. Page primitives (.page, .page-section, .page-header, .two-col, .detail-card)
+     11. Components (.hero, .narrative, .numbered-list, .point-grid, .ledger, .section-outro)
+     11a. Section heading (.section-heading)
+     11b. Hero byline (.hero-byline)
+     11c. Bio split (.bio-split, .bio-stack, .bio-quote)
+     11d. Pillars (.pillars, .pillar, .pillar-label, .pillar-text)
+     11e. Journey (.journey, .journey-col, .journey-arrow, .chip-list)
+     11f. Bars (.bars, .bar-row, .bar-track, .bar-fill + variants, .legend)
+     11g. Loop (.loop, .loop-node, .loop-circle, .loop-label, .loop-arrow, .loop-note)
+     11h. Callout (.callout)
+     11i. Situations (.situation-grid, .situation-card, .situation-quote, .situation-focus, .situation-what)
+     11j. Testimonials (.testimonial-grid, .testimonial-card)
+     11k. FAQ (.faq-list, .faq-column, .faq-item, .faq-answer)
+     12. Utilities (.has-rule, .has-rule-faint, .has-rule-left)
+     13. Responsive (mobile-portrait collapse @ 720px)
+   ============================================================ */
+
+
+/* ── 1. Reset ───────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+
+
+/* ── 2. Tokens ──────────────────────────────────────────── */
+
+:root {
+  /* Foundation colors */
+  --primary:   #191715;
+  --secondary: #494846;
+  --muted:     #818080;
+  --neutral:   #E8E8E8;
+  --surface:   #F8F8F8;
+  --canvas-bg: #F3F2F1;
+  --accent:    #6B7F6E;
+  --white:     #FFFFFF;
+
+  /* Primary tints — derived from --primary */
+  --ink-08: rgba(25,23,21,0.08);
+  --ink-12: rgba(25,23,21,0.12);
+  --ink-18: rgba(25,23,21,0.18);
+  --ink-30: rgba(25,23,21,0.30);
+
+  /* Rule weights */
+  --rule:       1px solid var(--primary);
+  --rule-30:    1px solid var(--ink-30);
+  --rule-faint: 1px solid var(--ink-18);
+
+  /* Type families */
+  --font:       'Barlow', sans-serif;
+  --font-cond:  'Barlow Condensed', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --font-mono:  'JetBrains Mono', monospace;
+
+  /* Type scale */
+  --text-display:  54px;
+  --text-h0:       48px;
+  --text-h1:       40px;
+  --text-h2:       32px;
+  --text-h3:       28px;
+  --text-h4:       24px;
+  --text-h5:       22px;
+  --text-body-lg:  20px;
+  --text-body:     18px;
+  --text-md:       16px;
+  --text-sm:       15px;
+  --text-base:     14px;
+  --text-meta:     13px;
+  --text-pill:     12px;
+  --text-label:    11px;
+  --text-tiny:     10px;
+
+  /* Spacing scale */
+  --space-4:   4px;
+  --space-8:   8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-56: 56px;
+  --space-64: 64px;
+  --space-80: 80px;
+  --space-96: 96px;
+
+  /* Radii */
+  --r-card: 4px;
+  --r-pill: 4px;
+  --r-tag:  3px;
+
+  /* Paper texture — default for every page.
+     Hand-authored 400×400 PNG in /_layout/, rendered at 200×200
+     for 2× density. To override on a single page, swap the
+     `background-image` value in the body rule below.
+
+     Reference fallback (the original inline SVG dot-grid, zero
+     asset dependency) — kept here commented so we can revert
+     without re-deriving the data URI:
+
+     --dot-grid-svg: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23e8e8e8%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221.5%22%20fill%3D%22%23b8b6b2%22%20opacity%3D%220.15%22/%3E%3C/svg%3E");
+  */
+  --dot-grid: url("background.png");
+}
+
+
+/* ── 3. Base shell ──────────────────────────────────────── */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-weight: 500;
+  color: var(--primary);
+  background-color: var(--neutral);
+  background-image: var(--dot-grid);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+
+/* ── 4. Layout chrome ───────────────────────────────────── */
+
+.layout-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 var(--space-48);
+  /* Match the alexmchong.super.site nav treatment exactly:
+     - background-color at 50% as the translucent "frosted" base
+     - backdrop-filter blurs whatever scrolls behind
+     - isolation: isolate keeps the blend modes below contained
+       to this stacking context
+     The dot-grid texture is layered in via the ::before below
+     using mix-blend-mode: multiply, so the texture reacts to
+     (rather than sits flatly on top of) the scrolled content. */
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  isolation: isolate;
+  border-bottom: var(--rule-30);
+}
+.layout-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--dot-grid);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.layout-nav > * {
+  position: relative;
+  z-index: 1;
+}
+.layout-nav-logo {
+  display: inline-flex;
+  align-items: center;
+  min-width: 100px;
+  height: 100%;
+  /* Text fallback if no image child is present */
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-body-lg);
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-nav-logo img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+.layout-nav-links { display: flex; gap: var(--space-4); }
+.layout-nav-links a {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--canvas-bg);
+  border: var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--text-pill);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.layout-nav-links a:hover,
+.layout-nav-links a.is-active { background: var(--primary); color: var(--surface); }
+
+/* Footer — single flat row. Copyright on the left, utility
+   nav on the right. The "Subscribe" entry in the nav row is
+   the only newsletter entry point from the chrome — there is
+   no separate footer signup block. */
+
+.layout-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding: var(--space-24) var(--space-48);
+  background: transparent;
+  border-top: var(--rule-30);
+}
+.layout-footer-left,
+.layout-footer-right a {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-footer-right { display: flex; gap: var(--space-16); flex-wrap: wrap; }
+
+
+/* ── 5. Inline emphasis ─────────────────────────────────────
+   Used inside .statement and any display copy. .m carries the
+   muted-word technique; .ac is the sage chromatic note; .serif
+   inlines a single Instrument Serif italic word.
+   ──────────────────────────────────────────────────────── */
+
+.m  { color: var(--muted); }
+.ac { color: var(--accent); }
+
+.serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.08em;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+
+/* ── 6. Eyebrows ────────────────────────────────────────────
+   Small uppercase labels that introduce a section. .eyebrow is
+   the Barlow Condensed primary form. .serif-eyebrow is the
+   Instrument Serif italic form used above hero statements.
+   ──────────────────────────────────────────────────────── */
+
+.eyebrow {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: var(--space-16);
+}
+
+.serif-eyebrow {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h3);
+  font-weight: 400;
+  color: var(--primary);
+  margin-bottom: var(--space-24);
+}
+
+
+/* ── 7. Display & headings ──────────────────────────────────
+   .statement is the system's hero voice (Barlow weight 500,
+   muted-word allowed inside). .page-header-title is the
+   document-style page title (Barlow weight 600, or .is-serif
+   for the lowercase Instrument Serif italic mark).
+   ──────────────────────────────────────────────────────── */
+
+.statement {
+  font-size: var(--text-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.18;
+  color: var(--primary);
+}
+.statement.is-h0 { font-size: var(--text-h0); line-height: 1.1; }
+.statement.is-h1 { font-size: var(--text-h1); line-height: 1.1; }
+
+.page-header-title {
+  font-family: var(--font);
+  font-size: var(--text-h0);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--primary);
+}
+.page-header-title.is-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.page-header-sub {
+  margin-top: var(--space-12);
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  color: var(--secondary);
+}
+
+
+/* ── 8. Body type ───────────────────────────────────────────
+   Three body-copy primitives. .lead is the deck below a hero
+   or page header. .serif-intro is the quiet 24px italic that
+   introduces a section in secondary colour. .pull-quote is the
+   structural callout — primary colour, left rule, 28px italic.
+   ──────────────────────────────────────────────────────── */
+
+.lead {
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--secondary);
+}
+.lead.is-sm { font-size: var(--text-body); line-height: 1.65; }
+
+.serif-intro {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h4);
+  line-height: 1.5;
+  color: var(--secondary);
+}
+
+.pull-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h3);
+  line-height: 1.4;
+  color: var(--primary);
+  border-left: 2px solid var(--c-current, var(--primary));
+  padding-left: 28px;
+  margin-bottom: var(--space-32);
+}
+
+
+/* ── 9. Buttons & tags ──────────────────────────────────────
+   Three button tiers (dark, light, underline), two layout
+   helpers (.btn-row horizontal, .btn-stack vertical), and the
+   generic Condensed pill .tag.
+   ──────────────────────────────────────────────────────── */
+
+.btn-dark,
+.btn-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 22px;
+  border-radius: var(--r-pill);
+  border: var(--rule);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.btn-dark  { background: var(--primary); color: var(--surface); }
+.btn-dark:hover  { background: #333333; }
+.btn-light { background: var(--surface); color: var(--primary); }
+.btn-light:hover { background: var(--primary); color: var(--surface); }
+
+.btn-ul {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 0 2px 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid var(--primary);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.btn-ul:hover { color: var(--accent); border-color: var(--accent); }
+
+.btn-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+}
+
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  align-items: stretch;
+}
+
+.tag {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-tag);
+  border: var(--rule-faint);
+  color: var(--secondary);
+  background: transparent;
+  display: inline-block;
+}
+
+
+/* ── 9a. Profile circle ─────────────────────────────────────
+   Small humanizing portrait used sparingly across pages
+   (currently: landing hero + about detail-card). The image
+   lives at `profile.jpg` in this folder; if it's missing or
+   404s, the initials "AC" render as a graceful fallback via
+   the onerror swap. Same pattern as CMS-STRUCTURE.md §11.
+   ──────────────────────────────────────────────────────── */
+
+.profile-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--ink-08);
+  flex-shrink: 0;
+  position: relative;
+  display: inline-block;
+}
+.profile-circle.is-sm { width: 56px;  height: 56px; }
+.profile-circle.is-md { width: 96px;  height: 96px; }
+.profile-circle.is-lg { width: 128px; height: 128px; }
+
+.profile-circle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-circle-initials {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--secondary);
+}
+.profile-circle.is-sm .profile-circle-initials { font-size: 18px; }
+.profile-circle.is-md .profile-circle-initials { font-size: 28px; }
+.profile-circle.is-lg .profile-circle-initials { font-size: 36px; }
+
+/* Contextual placement — the only two spots the profile circle
+   lives today. Adding more spots is a deliberate decision; see
+   the §9a header comment before introducing additional uses.
+
+   1. Hero: above the eyebrow, with bottom margin.
+   2. Page-header (about): right column of a .two-col.is-center
+      layout, right-aligned within the column. */
+.hero > .profile-circle {
+  margin-bottom: var(--space-24);
+}
+.page-header.two-col > .profile-circle {
+  justify-self: end;
+}
+
+
+/* ── 9b. Forms ──────────────────────────────────────────────
+   Minimal form primitives for static _pages/ forms (newsletter
+   signup today; future contact forms, etc.).
+
+   Composition: a .form wraps a stack of .form-field rows. Each
+   .form-field is a label + input + optional help/error. Actions
+   live in a .form-actions row at the bottom. Inputs use the same
+   near-square 4px radius as buttons and cards; focus uses the
+   primary ink as a 1.5px outline.
+
+   When the CMS is built and these forms eventually live inside
+   admin views, the same primitives will be lifted into the design
+   system proper. Until then, this is their home.
+   ──────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+  margin-top: var(--space-32);
+  max-width: 480px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.form-label {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.01em;
+}
+
+.form-label-optional {
+  font-weight: 500;
+  color: var(--muted);
+  margin-left: var(--space-4);
+}
+
+.form-input {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--ink-30);
+  border-radius: 4px;
+  padding: 11px 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.form-input::placeholder { color: var(--muted); }
+.form-input:hover { border-color: var(--primary); }
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1.5px var(--primary);
+}
+
+.form-input[aria-invalid="true"] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1.5px var(--primary);
+}
+
+.form-help {
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.form-error {
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  color: var(--primary);
+  line-height: 1.5;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  align-items: flex-start;
+  margin-top: var(--space-8);
+}
+
+.form-fineprint {
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.5;
+  max-width: 42ch;
+}
+
+
+/* ── 10. Page primitives ────────────────────────────────────
+   .page is the centred content container. .page-section gives
+   logical grouping. .page-header is the lead block at the top
+   of any page. .two-col is the editorial split. .detail-card
+   is the boxed sidebar info panel.
+   ──────────────────────────────────────────────────────── */
+
+.page {
+  padding: 72px var(--space-48) var(--space-96);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.page.is-narrow { max-width: 960px; }
+
+/* .page-section — logical block inside a .page. Gives consistent
+   vertical rhythm between major sections without manual margin
+   on each child. First child sits flush with the page-header. */
+.page-section { margin-top: var(--space-96); }
+.page-section:first-of-type { margin-top: var(--space-48); }
+
+/* Vertical rhythm between any direct children of .page. .has-rule
+   already supplies its own bottom margin, so suppress the top
+   margin on whatever follows it. */
+.page > * + * { margin-top: var(--space-80); }
+.page > .has-rule + * { margin-top: 0; }
+
+.page-header { margin-bottom: var(--space-32); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-64);
+  align-items: start;
+}
+.two-col.is-balanced { grid-template-columns: 1fr 1fr; }
+.two-col.is-end      { align-items: end; }
+.two-col.is-center   { align-items: center; }
+
+.detail-card {
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+  padding: var(--space-24);
+}
+.detail-card-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.detail-list { display: flex; flex-direction: column; gap: var(--space-12); }
+.detail-row-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-tiny);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.detail-row-value {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--primary);
+}
+
+
+/* ── 11. Components ─────────────────────────────────────────
+   Reusable content blocks. Every primitive here can drop into
+   any page — none are scoped to a specific layout.
+   ──────────────────────────────────────────────────────── */
+
+/* Hero — full-bleed opener used on a landing-style page. */
+.hero {
+  padding: var(--space-64) var(--space-48) var(--space-96);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.hero .statement { max-width: 900px; margin-bottom: var(--space-32); }
+.hero .lead      { max-width: 560px; margin-bottom: 36px; }
+
+/* Narrative — long-form prose wrapper. Default paragraph styling
+   uses :where() to keep specificity at zero so primitives
+   (.serif-intro, .pull-quote) override naturally. */
+:where(.narrative) p + p { margin-top: var(--space-20); }
+:where(.narrative) p {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--secondary);
+  line-height: 1.75;
+}
+.narrative .serif-intro { margin-bottom: 28px; }
+.narrative .btn-row     { margin-top: var(--space-32); }
+
+/* Numbered list — ledger of offerings with ghost serif numerals.
+   Used on services pages; reusable for any "01/02/03" enumeration
+   where each item has a title, description, and tag row. */
+.numbered-list { display: grid; grid-template-columns: 1fr; }
+.numbered-row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: start;
+  padding: 40px 0;
+  border-bottom: var(--rule-faint);
+}
+.numbered-row-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h0);
+  font-weight: 400;
+  color: var(--ink-12);
+  line-height: 1;
+  padding-top: var(--space-4);
+}
+.numbered-row-body { padding: 0 var(--space-48) 0 var(--space-32); }
+.numbered-row-title {
+  font-size: var(--text-h5);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-12);
+}
+.numbered-row-desc {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--secondary);
+  max-width: 560px;
+}
+.numbered-row-tags {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  margin-top: var(--space-20);
+}
+
+/* Point grid — three-up feature strip. Each point combines a
+   small serif numeral with a Barlow title and a short description.
+   Used for "what we'll work on", value propositions, principles. */
+.point-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-32);
+}
+.point-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h3);
+  font-weight: 400;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: var(--space-12);
+}
+.point-title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  margin-bottom: var(--space-8);
+}
+.point-desc {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+
+/* Ledger — date × content grid. Each row is two grid children:
+   a Condensed date label on the left and a content block on the
+   right. Used for resume entries, but reusable for any timeline
+   (talks, publications, milestones). */
+.ledger {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: var(--space-12) var(--space-32);
+}
+.ledger-date {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: var(--space-12) 0;
+  border-bottom: var(--rule-faint);
+}
+.ledger-entry {
+  padding: var(--space-12) 0;
+  border-bottom: var(--rule-faint);
+}
+.ledger > .ledger-date:last-of-type,
+.ledger > .ledger-entry:last-of-type { border-bottom: 0; }
+.ledger-role {
+  font-size: var(--text-h5);
+  font-weight: 600;
+  color: var(--primary);
+}
+.ledger-org {
+  font-size: var(--text-meta);
+  color: var(--secondary);
+  margin-top: 2px;
+}
+
+/* Section outro — bottom-of-page CTA strip. Body text on the
+   left, action on the right. Used at the end of a services
+   listing or any flat scroll that closes on a CTA. */
+.section-outro {
+  padding-top: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-32);
+  flex-wrap: wrap;
+}
+.section-outro p {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--muted);
+  max-width: 480px;
+}
+.section-outro p strong { font-weight: 500; color: var(--primary); }
+
+
+/* ── 11a. Section heading ───────────────────────────────────
+   Standard h2 for top-of-section labelling. Distinct from
+   .page-header-title (the page-level H1) and .eyebrow (small
+   condensed tag). Use anywhere a new section begins. */
+
+.section-heading {
+  font-family: var(--font);
+  font-size: var(--text-h2);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--primary);
+  margin-bottom: var(--space-32);
+}
+
+
+/* ── 11b. Hero byline ───────────────────────────────────────
+   Small avatar + lede pairing under a page-header-title.
+   Humanizes a hero by surfacing the speaker right next to
+   their introductory sentence. */
+
+.hero-byline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-top: var(--space-32);
+}
+.hero-byline > .profile-circle { flex-shrink: 0; }
+.hero-byline .serif-intro {
+  margin: 0;
+  max-width: 56ch;
+}
+
+
+/* ── 11c. Bio split ─────────────────────────────────────────
+   Two-column bio: narrative paragraphs on the left, a
+   companion italic quote/statement on the right. Quote uses
+   a left-rule the same weight as journal quotes. */
+
+.bio-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-48);
+  align-items: start;
+  margin-bottom: var(--space-48);
+}
+.bio-stack p + p { margin-top: var(--space-16); }
+.bio-stack p {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--secondary);
+  line-height: 1.75;
+}
+.bio-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h4);
+  line-height: 1.4;
+  color: var(--primary);
+  padding-left: var(--space-24);
+  border-left: 2px solid var(--ink-30);
+  margin: 0;
+}
+
+
+/* ── 11d. Pillars ───────────────────────────────────────────
+   3-up credential / stat row. Each pillar = condensed label
+   + body paragraph. Top-rule separator gives a ledger feel
+   distinct from the boxed surface of .point-grid. */
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-32);
+  list-style: none;
+}
+.pillar {
+  padding-top: var(--space-24);
+  border-top: var(--rule);
+}
+.pillar-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: var(--space-12);
+}
+.pillar-text {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+.pillar-text strong { font-weight: 600; color: var(--primary); }
+
+
+/* ── 11e. Journey ───────────────────────────────────────────
+   Multi-step horizontal flow: stage cards separated by
+   italic-serif arrows. Reusable for any "before → middle →
+   after" process diagram. */
+
+.journey {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: var(--space-16);
+  align-items: stretch;
+}
+.journey-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.journey-col .col-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.journey-col p {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+.journey-arrow {
+  align-self: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h2);
+  color: var(--ink-30);
+  line-height: 1;
+}
+.chip-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-top: auto;
+}
+
+
+/* ── 11f. Bars ──────────────────────────────────────────────
+   Capacity / drain bar visualization. Each bar = label above
+   a 1-line track with absolute-positioned fills. Position
+   data is passed via inline custom properties
+   (--bar-start, --bar-end) — the only inline-style exception
+   for this component, treated the same as category tinting. */
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  margin-top: auto;
+}
+.bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.bar-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.bar-track {
+  position: relative;
+  height: 10px;
+  background: var(--ink-08);
+  border-radius: var(--r-tag);
+}
+.bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--bar-start, 0);
+  right: calc(100% - var(--bar-end, 100%));
+  border-radius: var(--r-tag);
+}
+.bar-fill--drain          { background: var(--c-terracotta); }
+.bar-fill--capacity       { background: var(--c-sage); }
+.bar-fill--capacity-strong{ background: var(--c-forest); }
+.bar-fill--removed        { background: var(--ink-18); }
+.bars-divider {
+  border: 0;
+  border-top: var(--rule-faint);
+  margin: var(--space-8) 0;
+}
+.legend {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-12);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--text-sm);
+  color: var(--secondary);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.legend-dot--drain    { background: var(--c-terracotta); }
+.legend-dot--capacity { background: var(--c-sage); }
+
+
+/* ── 11g. Loop ──────────────────────────────────────────────
+   Cyclical 4-node process diagram. Each node = circle + label.
+   Reusable for any feedback-loop / iterative-process visual. */
+
+.loop {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-24);
+  align-items: start;
+  position: relative;
+}
+.loop-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-12);
+  position: relative;
+}
+.loop-node:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 38px;
+  right: calc(-1 * var(--space-24));
+  transform: translateX(50%) translateY(-50%);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h3);
+  color: var(--ink-30);
+  line-height: 1;
+}
+.loop-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1.5px solid var(--primary);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--primary);
+  text-align: center;
+}
+.loop-label {
+  font-size: var(--text-sm);
+  color: var(--secondary);
+  line-height: 1.5;
+  text-align: center;
+  max-width: 22ch;
+}
+.loop-note {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h5);
+  color: var(--muted);
+  margin-top: var(--space-32);
+}
+
+
+/* ── 11h. Callout ───────────────────────────────────────────
+   Subtle aside-style note for supplementary info inside a
+   section. Surface bg, faint border, light italic intro. */
+
+.callout {
+  margin-top: var(--space-32);
+  padding: var(--space-24);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.callout p {
+  font-size: var(--text-md);
+  font-weight: 500;
+  color: var(--secondary);
+  line-height: 1.65;
+}
+.callout p strong { color: var(--primary); font-weight: 600; }
+
+
+/* ── 11i. Situation grid ────────────────────────────────────
+   3-up card grid of client scenarios. Each card = italic
+   serif quote + condensed focus label + plain body. */
+
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-24);
+  list-style: none;
+}
+.situation-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-24);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.situation-quote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h5);
+  line-height: 1.4;
+  color: var(--primary);
+}
+.situation-focus {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  padding-top: var(--space-12);
+  border-top: var(--rule-faint);
+}
+.situation-what {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+
+
+/* ── 11j. Testimonials ──────────────────────────────────────
+   2-up testimonial cards. Blockquote in italic serif, cite
+   in condensed uppercase. No author avatars in this variant. */
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-24);
+  list-style: none;
+}
+.testimonial-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: var(--space-32);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.testimonial-card blockquote {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h5);
+  line-height: 1.5;
+  color: var(--primary);
+  margin: 0;
+}
+.testimonial-card cite {
+  font-style: normal;
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+
+/* ── 11k. FAQ ───────────────────────────────────────────────
+   Two-column native <details> accordion. The +/− indicator
+   is rendered via the ::after pseudo-element on summary so
+   the markup stays semantic. */
+
+.faq-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-32);
+}
+.faq-column {
+  display: flex;
+  flex-direction: column;
+}
+.faq-item {
+  border-bottom: var(--rule-faint);
+}
+.faq-item summary {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  font-weight: 600;
+  color: var(--primary);
+  padding: var(--space-16) var(--space-32) var(--space-16) 0;
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font);
+  font-size: var(--text-h4);
+  font-weight: 400;
+  color: var(--muted);
+  line-height: 1;
+}
+.faq-item[open] summary::after {
+  content: "−";
+  color: var(--primary);
+}
+.faq-answer {
+  padding: 0 0 var(--space-20);
+}
+.faq-answer p {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.65;
+  color: var(--secondary);
+}
+
+
+/* ── 12. Utilities ──────────────────────────────────────────
+   Spacing utilities that compose with any block. Use sparingly;
+   if you find yourself using the same composition repeatedly,
+   promote it to a named primitive in §11.
+   ──────────────────────────────────────────────────────── */
+
+.has-rule {
+  padding-bottom: var(--space-48);
+  border-bottom: var(--rule);
+  margin-bottom: var(--space-48);
+}
+.has-rule-faint {
+  padding-bottom: var(--space-32);
+  border-bottom: var(--rule-faint);
+  margin-bottom: var(--space-32);
+}
+.has-rule-left {
+  padding-left: var(--space-32);
+  border-left: var(--rule-faint);
+}
+
+
+/* ── 13. Responsive ─────────────────────────────────────────
+   Single-step collapse at 720px. Below this width every multi-
+   column layout drops to one column, the nav stacks (logo on
+   top, links wrap below), the largest display type sizes step
+   down, and edge padding tightens. There is no tablet treatment
+   — the desktop layout holds down to 720px, then the mobile
+   layout takes over.
+   ──────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+
+  /* Nav — stack logo on top of a wrapping row of links */
+  .layout-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    gap: var(--space-12);
+    padding: var(--space-12) var(--space-20);
+  }
+  .layout-nav-links {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+  .layout-nav-links a {
+    padding: 5px 10px;
+    font-size: var(--text-tiny);
+  }
+
+  /* Page padding — much tighter on mobile */
+  .page {
+    padding: var(--space-32) var(--space-20) var(--space-48);
+  }
+  .page.is-narrow {
+    padding-left: var(--space-20);
+    padding-right: var(--space-20);
+  }
+
+  /* Hero — tighter padding, smaller display type */
+  .hero {
+    padding: var(--space-48) var(--space-20);
+  }
+
+  /* Two-column layouts collapse to a single column */
+  .two-col,
+  .two-col.is-balanced,
+  .two-col.is-end {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+    align-items: start;
+  }
+
+  /* Button rows stack and stretch */
+  .btn-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-8);
+  }
+  .btn-row > a,
+  .btn-row > button {
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Numbered list — number above the body */
+  .numbered-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    padding: var(--space-24) 0;
+  }
+  .numbered-row-body { padding: 0; }
+  .numbered-row-num { font-size: var(--text-h3); padding-top: 0; }
+
+  /* Point grid — single column */
+  .point-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-24);
+  }
+
+  /* Ledger — tighter date column, same shape */
+  .ledger {
+    grid-template-columns: 96px 1fr;
+    gap: var(--space-8) var(--space-16);
+  }
+  .ledger-role { font-size: var(--text-body); }
+
+  /* Type-scale step down on display sizes only */
+  .statement {
+    font-size: 34px;
+    line-height: 1.15;
+    margin-bottom: var(--space-20);
+  }
+  .page-header-title { font-size: 32px; }
+  .page-header-title.is-serif { font-size: 38px; }
+  .serif-intro { font-size: 22px; }
+
+  /* Section outro — stack */
+  .section-outro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-20);
+  }
+
+  /* Footer — stack copyright above nav links */
+  .layout-footer {
+    padding: var(--space-20);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-12);
+  }
+  .layout-footer-right { gap: var(--space-12); }
+
+  /* Profile circles step down a touch so they don't dominate */
+  .profile-circle.is-lg { width: 96px;  height: 96px; }
+  .profile-circle.is-md { width: 80px;  height: 80px; }
+
+  /* Coaching-page components — collapse to single column,
+     stack flow arrows, drop horizontal separators. */
+  .section-heading { font-size: var(--text-h3); margin-bottom: var(--space-20); }
+  .page-section { margin-top: var(--space-48); }
+  .hero-byline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-12);
+  }
+  .bio-split {
+    grid-template-columns: 1fr;
+    gap: var(--space-32);
+    margin-bottom: var(--space-32);
+  }
+  .pillars { grid-template-columns: 1fr; gap: var(--space-20); }
+  .journey {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+  .journey-arrow {
+    transform: rotate(90deg);
+    justify-self: center;
+  }
+  .loop { grid-template-columns: 1fr; gap: var(--space-24); }
+  .loop-node:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: 50%;
+    bottom: calc(-1 * var(--space-12));
+    transform: translateX(50%);
+  }
+  .situation-grid { grid-template-columns: 1fr; }
+  .testimonial-grid { grid-template-columns: 1fr; }
+  .faq-list { grid-template-columns: 1fr; gap: 0; }
+}

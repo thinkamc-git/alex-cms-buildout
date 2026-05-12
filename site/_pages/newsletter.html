@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subscribe — Alex M. Chong</title>
+  <meta name="description" content="Occasional writing on design leadership, coaching, and the craft of design practice. Subscribe for new pieces, live sessions, and the rare experiment." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_layout/style-pages.css" />
+  <link rel="icon" type="image/png" href="_layout/favicon.png" />
+</head>
+<body>
+
+  <nav class="layout-nav">
+    <a href="landing.html" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+      <img src="_layout/logo.png" alt="Alex M. Chong" />
+    </a>
+    <div class="layout-nav-links">
+      <a href="about.html">About</a>
+      <a href="coaching.html">Coaching</a>
+      <a href="work-with-me.html">Work with me</a>
+      <a href="resume.html">Resume</a>
+    </div>
+  </nav>
+
+  <main class="page is-narrow">
+
+    <header class="page-header has-rule">
+      <div class="eyebrow">Subscribe</div>
+      <h1 class="page-header-title is-serif">stay in the loop.</h1>
+      <div class="page-header-sub">Occasional writing on design leadership, coaching, and the craft of practice.</div>
+    </header>
+
+    <section class="narrative">
+      <p class="serif-intro">
+        If you'd like to hear from me when something new lands — drop your
+        email below.
+      </p>
+
+      <p>
+        I'm <strong>Alex M. Chong</strong> — a Director of UX, design coach,
+        and educator based in Toronto. I've spent the past twelve years
+        shipping product across agencies, startups, and large product
+        companies, and the past few teaching, coaching, and writing about
+        what I've learned in the seam between strategy and craft.
+      </p>
+
+      <p>
+        Subscribing gets you the occasional <em class="serif">essay</em>, an
+        invitation to live sessions and workshops when they happen, and the
+        rare experiment I think is worth your attention. Nothing automated,
+        nothing weekly — just the work, when it's ready.
+      </p>
+
+      <!--
+        Form posts to the confirmation page as a static preview.
+        When this is wired into the CMS, the action becomes
+        `/newsletter/subscribe` and the method becomes `POST`. See
+        CMS-STRUCTURE.md §21 and BUILD-PLAN.md Phase 10.
+      -->
+      <form class="form" action="newsletter-confirmed.html" method="get" novalidate>
+
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input
+            class="form-input"
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="name">First name <span class="form-label-optional">(optional)</span></label>
+          <input
+            class="form-input"
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Alex"
+            autocomplete="given-name"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-dark" type="submit">Subscribe →</button>
+          <p class="form-fineprint">
+            One email, when there's something worth your time. Unsubscribe in one click.
+          </p>
+        </div>
+
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="layout-footer">
+    <span class="layout-footer-left">© 2026 alex m. chong</span>
+    <div class="layout-footer-right">
+      <a href="about.html">About</a>
+      <a href="coaching.html">Coaching</a>
+      <a href="work-with-me.html">Services</a>
+      <a href="resume.html">Resume</a>
+    </div>
+  </footer>
+
+</body>
+</html>

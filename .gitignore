@@ -1,0 +1,23 @@
+# macOS noise
+.DS_Store
+
+# VS Code workspace files
+.vscode/
+
+# Editor swap files
+*.swp
+*.swo
+
+# Local config — never commit (each environment has its own copy on the server only)
+site/config/config.local.php
+site/config/config.staging.php
+site/config/config.production.php
+
+# Runtime folders — only exist on the server, never in Git
+site/uploads/
+site/content/
+site/logs/
+site/backups/
+
+# Node toolchain (in case we ever add one)
+node_modules/

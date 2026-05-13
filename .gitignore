@@ -4,6 +4,9 @@
 # VS Code workspace files
 .vscode/
 
+# Claude Code project-local settings (per-machine, never share)
+.claude/
+
 # Editor swap files
 *.swp
 *.swo

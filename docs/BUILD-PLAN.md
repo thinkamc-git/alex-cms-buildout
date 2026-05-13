@@ -90,7 +90,7 @@ The CMS login form is at `/cms/login`. The path `/admin/` is a convenience redir
 
 Each row shows the phase, autonomy tier, hour estimate, and (where applicable) what ships publicly when it's complete.
 
-- [ ] **Phase 0** — Setup & onboarding · *Manual* · 3–5h
+- [x] **Phase 0** — Setup & onboarding · *Manual* · 3–5h
 - [ ] **Phase 1** — Static site deployment · *Manual* · 2–3h · **Ships:** new alexmchong.ca live publicly
 - [ ] **Phase 2** — CSS module split + dynamic `/_ds/` · *Auto* · 3–4h
 - [ ] **Phase 3** — Deployment plumbing (PHP + DB + router) · *Semi-auto* · 4–5h

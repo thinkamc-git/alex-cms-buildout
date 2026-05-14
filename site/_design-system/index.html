@@ -5,7 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>alex m. chong — Design System</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="system.css?v=3">
+<!-- Design system modules — loaded in cascade order (tokens first, view-specific last) -->
+<link rel="stylesheet" href="css/tokens.css?v=4">
+<link rel="stylesheet" href="css/base.css?v=4">
+<link rel="stylesheet" href="css/typography.css?v=4">
+<link rel="stylesheet" href="css/shell.css?v=4">
+<link rel="stylesheet" href="css/components.css?v=4">
+<link rel="stylesheet" href="css/tables.css?v=4">
+<link rel="stylesheet" href="css/status.css?v=4">
+<link rel="stylesheet" href="css/views.css?v=4">
 </head>
 <body>
 <div class="topbar">
@@ -2952,6 +2960,6 @@
   </div>
 </section>
 
-<script src="system.js?v=3"></script>
+<script src="js/showcase.js?v=4"></script>
 </body>
 </html>

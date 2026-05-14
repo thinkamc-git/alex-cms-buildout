@@ -7,6 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Canonical design system modules — loaded first; the inline <style>
+     block below provides CMS-specific overrides (bumped type scale,
+     --canvas-raised / --live-green / --stage-* tokens, and the
+     CMS-admin view styles that aren't yet promoted to the canonical DS).
+     Path is relative because this file lives outside the deployed tree. -->
+<link rel="stylesheet" href="../../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../../site/_design-system/css/tables.css">
+<link rel="stylesheet" href="../../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../../site/_design-system/css/views.css">
 <style>
 /* ============================================================
    alexmchong.ca CMS — Hi-Fi v2

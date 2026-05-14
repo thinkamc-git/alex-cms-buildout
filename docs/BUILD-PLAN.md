@@ -92,7 +92,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 - [x] **Phase 0** — Setup & onboarding · *Manual* · 3–5h
 - [x] **Phase 1** — Static site deployment · *Manual* · 2–3h · **Ships:** new alexmchong.ca live publicly
-- [ ] **Phase 2** — CSS module split + dynamic `/_ds/` · *Auto* · 3–4h
+- [x] **Phase 2** — CSS module split + dynamic `/_ds/` · *Auto* · 3–4h
 - [ ] **Phase 3** — Deployment plumbing (PHP + DB + router) · *Semi-auto* · 4–5h
 - [ ] **Phase 4** — Auth (minimal v1) · *Semi-auto* · 4–5h
 - [ ] **Phase 5** — Admin shell port · *Auto* · 4–5h

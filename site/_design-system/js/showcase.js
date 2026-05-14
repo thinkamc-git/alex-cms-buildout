@@ -1,13 +1,16 @@
 /* ============================================================
-   Alex M. Chong — Design System
-   Shared script for index.html
-
-   - Tab switching (top tabs bar) with URL hash routing
-   - Per-panel sidebar scroll spy
-   - Filter pill toggle behaviour
+   Alex M. Chong — Design System · Showcase script
+   ------------------------------------------------------------
+   1. Tab switching (top tabs bar) with URL hash routing
+   2. Per-panel sidebar scroll spy + click-to-scroll
+   3. Filter pill toggle behaviour
+   4. Runtime token reader — every .chip's swatch + token name
+      drive the .chex value live, so editing a token in tokens.css
+      and refreshing updates the rendered hex (or computed value).
    ============================================================ */
 
 (function () {
+
   // ── Tab switching ─────────────────────────────────────────
   function activateTab(name, push) {
     var tabs = document.querySelectorAll('.topbar .topbar-tabsbar-tab');
@@ -45,7 +48,6 @@
     var el = panelEl.querySelector('#' + CSS.escape(sectionId));
     if (!el) return;
     var content = panelEl.querySelector('.canvas');
-    // Anchor ~56px above the section so the eyebrow (.section-num) is comfortably visible
     if (content) content.scrollTo({ top: el.offsetTop - 56, behavior: 'smooth' });
     var nav = panelEl.querySelector('.sidebar');
     if (nav) {
@@ -93,7 +95,35 @@
     }
   }
 
-  // ── Init on DOMContentLoaded ─────────────────────────────
+  // ── Runtime token reader ─────────────────────────────────
+  // Converts a fully-opaque rgb(r,g,b) string to #RRGGBB.
+  // Returns null for rgba() with alpha < 1, so transparent tokens
+  // (ink-08/12/18/30/72, white-06/15/45/85) keep their hand-authored
+  // "primary 8%" / "white 45%" labels.
+  function rgbToHex(s) {
+    if (!s) return null;
+    var m = s.match(/^rgb\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)$/i);
+    if (!m) return null;
+    function pad(n) { var x = parseInt(n, 10).toString(16); return x.length === 1 ? '0' + x : x; }
+    return '#' + (pad(m[1]) + pad(m[2]) + pad(m[3])).toUpperCase();
+  }
+
+  function hydrateTokens() {
+    // Every .chip with a swatch + chex pair: read the swatch's resolved
+    // background-color and write it back to the chex element. Opaque
+    // tokens become "#RRGGBB"; transparent washes are left untouched
+    // (their chex is hand-authored as "primary 8%" / "white 45%" etc.).
+    document.querySelectorAll('.chip').forEach(function (chip) {
+      var swatch = chip.querySelector('.swatch');
+      var chex = chip.querySelector('.chex');
+      if (!swatch || !chex) return;
+      var bg = getComputedStyle(swatch).backgroundColor;
+      var hex = rgbToHex(bg);
+      if (hex) chex.textContent = hex;
+    });
+  }
+
+  // ── Init ─────────────────────────────────────────────────
   function init() {
     document.querySelectorAll('.topbar .topbar-tabsbar-tab').forEach(function (t) {
       t.addEventListener('click', function (e) {
@@ -112,6 +142,8 @@
     document.querySelectorAll('.fp').forEach(function (btn) {
       btn.addEventListener('click', function () { toggleFilter(btn); });
     });
+
+    hydrateTokens();
 
     var first = initialTab();
     if (first) activateTab(first, false);

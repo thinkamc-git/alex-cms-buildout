@@ -1,0 +1,48 @@
+/* ============================================================
+   Layer 7: Status + Stage system
+   Category pills, filter pills, content-status badges, and the
+   unified category-label typography used across all card types.
+   ============================================================ */
+
+/* ── Category pill (rectangle, white text on coloured fill) ── */
+.cat-pill {
+  display: inline-flex; padding: var(--space-4) 11px; border-radius: 3px;
+  font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--surface);
+}
+
+/* Cards-tab toggleable category pill (controller variant) */
+.cat-pill.active {
+  background: var(--pill-active-bg, var(--primary));
+  border-color: var(--pill-active-bg, var(--primary));
+  color: var(--white);
+}
+
+/* ── Filter pills ── */
+.fp {
+  display: inline-flex; padding: 6px 14px; border-radius: 3px;
+  font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--surface); border: 1px solid var(--primary);
+  color: var(--primary); cursor: pointer; transition: all 0.15s;
+}
+.fp:hover                              { border-color: var(--primary); color: var(--primary); }
+.fp[data-cat="ux-industry"]:hover     { border-color: var(--c-terracotta); color: var(--c-terracotta); }
+.fp[data-cat="leading-design"]:hover  { border-color: var(--c-forest); color: var(--c-forest); }
+.fp[data-cat="for-designers"]:hover   { border-color: var(--c-denim); color: var(--c-denim); }
+.fp[data-cat="talk"]:hover            { border-color: var(--c-amber); color: var(--c-amber); }
+.fp[data-cat="workshop"]:hover        { border-color: var(--c-mauve); color: var(--c-mauve); }
+.fp[data-cat="masterclass"]:hover     { border-color: var(--c-purple); color: var(--c-purple); }
+.fp.on                                { background: var(--primary); border-color: var(--primary); color: var(--white); }
+.fp[data-cat="ux-industry"].on        { background: var(--c-terracotta); border-color: var(--c-terracotta); color: var(--white); }
+.fp[data-cat="leading-design"].on     { background: var(--c-forest); border-color: var(--c-forest); color: var(--white); }
+.fp[data-cat="for-designers"].on      { background: var(--c-denim); border-color: var(--c-denim); color: var(--white); }
+.fp[data-cat="talk"].on               { background: var(--c-amber); border-color: var(--c-amber); color: var(--white); }
+.fp[data-cat="workshop"].on           { background: var(--c-mauve); border-color: var(--c-mauve); color: var(--white); }
+.fp[data-cat="masterclass"].on        { background: var(--c-purple); border-color: var(--c-purple); color: var(--white); }
+
+/* ── Content status badges (.st-pub, .st-dft, .st-sch) ── */
+.st { display: inline-block; padding: 2px var(--space-8); border-radius: 2px; font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+.st-pub { background: rgba(107,127,110,0.12); color: var(--c-forest); border: 1px solid rgba(107,127,110,0.3); }
+.st-dft { background: var(--ink-08); color: var(--muted); border: 1px solid var(--ink-12); }
+.st-sch { background: color-mix(in srgb, var(--c-denim) 8%, transparent); color: var(--c-denim); border: 1px solid color-mix(in srgb, var(--c-denim) 25%, transparent); }

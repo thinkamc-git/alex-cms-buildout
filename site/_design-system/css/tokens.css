@@ -1,0 +1,118 @@
+/* ============================================================
+   Alex M. Chong — Design System · Layer 1: Tokens
+   Single source of truth. Every other module reads from here.
+   No raw colour/spacing/typography values outside this file.
+   ============================================================ */
+
+:root {
+  /* ── Foundation ── */
+  --primary:    #191715;   /* tuned slightly more neutral (was #1A1714) */
+  --secondary:  #494846;   /* was #4A4845 */
+  --muted:      #818080;   /* was #81807F */
+  --neutral:    #E8E8E8;   /* body / page background */
+  --surface:    #F8F8F8;
+  --canvas-bg:  #F3F2F1;   /* mid-gutter surface in canvas */
+  --accent:     #6B7F6E;
+
+  /* Primary tints — derived from --primary RGB (25,23,21) */
+  --ink-08: rgba(25,23,21,0.08);   /* subtle hover, zebra-stripe */
+  --ink-12: rgba(25,23,21,0.12);   /* faint divider */
+  --ink-18: rgba(25,23,21,0.18);   /* visible border (= rule-faint colour) */
+  --ink-30: rgba(25,23,21,0.30);   /* stronger divider (= rule-30 colour) */
+  --ink-72: rgba(25,23,21,0.72);   /* past-card overlay */
+
+  /* White tints — on dark surfaces (event headers, experiment cards) */
+  --white-06: rgba(255,255,255,0.06);   /* ghostly faint outline / background */
+  --white-15: rgba(255,255,255,0.15);   /* subtle border on dark */
+  --white-45: rgba(255,255,255,0.45);   /* muted text on dark */
+  --white-85: rgba(255,255,255,0.85);   /* primary text on dark */
+
+  /* Rule weights — borders that resolve to the ink tints above */
+  --rule:       1px solid var(--primary);
+  --rule-30:    1px solid var(--ink-30);
+  --rule-faint: 1px solid var(--ink-18);
+
+  /* Type families */
+  --font:       'Barlow', sans-serif;
+  --font-cond:  'Barlow Condensed', sans-serif;
+  --font-serif: 'Instrument Serif', serif;
+  --font-mono:  'JetBrains Mono', monospace;
+
+  /* ── Type scale ── */
+  /* Token name describes the role (display/h1/body/meta/label).
+     Use these inside font-size; the rest of the system keeps px. */
+  --text-display: 54px;   /* hero display */
+  --text-h0:      48px;   /* large display under hero */
+  --text-h1:      40px;   /* h1 */
+  --text-h2:      32px;   /* h2 */
+  --text-h3:      28px;   /* serif section intro / event title */
+  --text-h4:      24px;   /* h3-equivalent */
+  --text-h5:      22px;   /* card title / pull quote */
+  --text-body-lg: 20px;   /* body-lg */
+  --text-body:    18px;   /* body — moderate */
+  --text-md:      16px;   /* default body / md */
+  --text-sm:      15px;   /* body-sm */
+  --text-base:    14px;   /* button / nav / base UI */
+  --text-meta:    13px;   /* metadata / table cell */
+  --text-pill:    12px;   /* pill / micro body */
+  --text-label:   11px;   /* eyebrow / mono / uppercase label */
+  --text-tiny:    10px;   /* status badge */
+  --text-micro:    9px;   /* extreme micro */
+
+  /* ── Spacing scale ── */
+  /* Numeric suffix = px value. Use these inside padding/margin/gap; the rest
+     of the system (border widths, font sizes, blur radii) keeps its own units. */
+  --space-4:   4px;
+  --space-8:   8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;   /* default card padding */
+  --space-32: 32px;
+  --space-48: 48px;   /* page gutter / outer canvas padding */
+  --space-64: 64px;
+  --space-96: 96px;   /* major section spacing */
+
+  /* Layout */
+  --max:        1400px;
+  --shadow:     0 1px 8px rgba(0,0,0,0.07), 0 0 0 1px var(--ink-08);
+  --shadow-h:   0 4px 20px rgba(0,0,0,0.11), 0 0 0 1px var(--ink-12);
+  --r-card:     4px;
+  --r-pill:     4px;
+
+  /* ── Category colour pool — 18 hues at consistent saturation/darkness.
+     Names describe the colour, not the category. Categories pick from this
+     pool via the .card[data-category=…] mapping below; format pills and
+     other accents pick directly. Reach for any of these for any
+     content-identity colour role. ── */
+  --c-rust:       #765150;   /* hue 5°  · warm red-grey */
+  --c-terracotta: #7d4631;   /* hue 15° · earthy red-brown */
+  --c-clay:       #765e44;   /* hue 35° · warm tan */
+  --c-amber:      #81642a;   /* hue 38° · warm gold */
+  --c-ochre:      #786e4a;   /* hue 50° · pale gold */
+  --c-olive:      #6e7448;   /* hue 75° · yellow-green */
+  --c-moss:       #607549;   /* hue 100° · warm green */
+  --c-forest:     #49634b;   /* hue 125° · muted forest */
+  --c-sage:       #4d705a;   /* hue 145° · grey-green */
+  --c-teal:       #4a716e;   /* hue 175° · muted teal */
+  --c-ocean:      #4a6677;   /* hue 200° · deep grey-blue */
+  --c-denim:      #46556a;   /* hue 213° · slate blue */
+  --c-indigo:     #4d567a;   /* hue 235° · cool indigo */
+  --c-purple:     #5d5376;   /* hue 257° · dusty purple */
+  --c-violet:     #6c4d7a;   /* hue 280° · deeper violet */
+  --c-plum:       #785071;   /* hue 305° · warm plum */
+  --c-mauve:      #6f4b61;   /* hue 320° · dusty mauve */
+  --c-rose:       #7a5160;   /* hue 345° · muted rose */
+
+  /* Experiment card backgrounds (deep tonal solids behind dark previews) */
+  --c-experiment-prototype: #1c1028;
+  --c-experiment-concept:   #0a1f1a;
+
+  /* Mid-grey ramp (between secondary and muted) */
+  --ink-mid:   #646361;   /* was #656360 */
+  --ink-faint: #716F6E;   /* was #726E6C */
+
+  /* Utility */
+  --white:         #ffffff;
+  --primary-hover: #333333;
+}

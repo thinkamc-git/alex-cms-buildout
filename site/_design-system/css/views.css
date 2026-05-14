@@ -1,0 +1,164 @@
+/* ============================================================
+   Layer 8: View-specific
+   The cards system (#tab-cards scope), card variants (article,
+   journal, event, masterclass, experiment), and past-card
+   overlays. This is where category-aware composition lives.
+   ============================================================ */
+
+/* ── Card category colour: single --c-current per data-category ── */
+.card[data-category="ux-industry"]    { --c-current: var(--c-terracotta); }
+.card[data-category="leading-design"] { --c-current: var(--c-forest); }
+.card[data-category="for-designers"]  { --c-current: var(--c-denim); }
+.card[data-category="introspection"]  { --c-current: var(--c-purple); }
+.card[data-category="contemplation"]  { --c-current: var(--c-denim); }
+.card[data-category="insight"]        { --c-current: var(--c-amber); }
+.card[data-category="talk"]           { --c-current: var(--c-amber); }
+.card[data-category="workshop"]       { --c-current: var(--c-mauve); }
+.card[data-category="masterclass"]    { --c-current: var(--c-purple); }
+.card[data-category="prototype"]      { --c-current: var(--c-experiment-prototype); }
+.card[data-category="concept"]        { --c-current: var(--c-experiment-concept); }
+
+/* ── Unified card category label — shared font/size/positioning across
+   articles, journal, events, and experiments. Variants only override colour. ── */
+.card .cat,
+.card .ev-type,
+.card .ev-type-past,
+.od-type {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  display: inline-block;
+  background: none;
+  padding: 0;
+  line-height: 1.4;
+}
+.card .cat            { color: var(--c-current, inherit); }
+.card .ev-type        { color: var(--c-current, inherit); }
+.od-type              { color: var(--white-45); }
+.card[data-category="masterclass"] .ev-type { color: var(--white); }
+.card .series-pill    { border: 1px solid color-mix(in srgb, var(--c-current) 35%, transparent); color: var(--c-current); }
+.card .fw-badge       { border: 1px solid color-mix(in srgb, var(--c-current) 40%, transparent); color: var(--c-current); }
+.card .sdot           { background: color-mix(in srgb, var(--c-current) 20%, transparent); }
+.card .sdot.on        { background: var(--c-current); }
+.card .j-ruled        { --j-rule-color: var(--c-current); }
+.card.past[data-category="talk"]     .ev-type-past { color: var(--c-amber); }
+.card.past[data-category="workshop"] .ev-type-past { color: var(--c-moss); }
+
+/* ── Cards-grid layout ── */
+.cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
+.card-body { padding: 14px var(--space-20) 18px; flex: 1; display: flex; flex-direction: column; }
+
+/* ── #tab-cards scope: cards have their own internal padding token ── */
+#tab-cards {
+  --pad: 30px;
+  --c-free-bg:     color-mix(in srgb, var(--c-forest) 8%, transparent);
+  --c-free-border: color-mix(in srgb, var(--c-forest) 24%, transparent);
+  --c-inperson-bg:     color-mix(in srgb, var(--c-clay) 7%, transparent);
+  --c-inperson-border: color-mix(in srgb, var(--c-clay) 20%, transparent);
+}
+
+.card {
+  background: var(--surface); border-radius: 4px;
+  border: 1px solid var(--ink-18);
+  box-shadow: none;
+  overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s;
+  display: flex; flex-direction: column;
+  --pad: 24px;
+}
+.card:hover { border-color: var(--primary); }
+.card .card-header { display: flex; align-items: center; justify-content: space-between; padding: var(--pad) var(--pad) 0; flex-shrink: 0; }
+.card--event .card-header { background: var(--primary); padding-bottom: var(--space-4); }
+.card .card-body { padding: var(--space-16) var(--pad) var(--space-20); display: flex; flex-direction: column; flex: 1; }
+.card .bm svg { width: 17px; height: 17px; stroke: var(--muted); stroke-width: 1.3; fill: none; }
+.card .title { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: 30px; line-height: 1.15; letter-spacing: -0.01em; color: var(--primary); margin-bottom: var(--space-12); }
+.card .excerpt { font-size: var(--text-sm); font-weight: 400; line-height: 1.65; color: var(--ink-mid); margin-bottom: var(--space-24); }
+.card .push-divider { height: 0; background: none; margin: auto 0 18px; }
+.card .arrow { font-size: var(--text-h5); font-weight: 300; color: var(--primary); line-height: 1; }
+.card .tag { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-pill); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--ink-18); color: var(--muted); background: transparent; white-space: nowrap; }
+.card .tag-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.card .meta-strip { display: flex; align-items: center; justify-content: space-between; padding: 11px var(--pad); border-top: 1px solid var(--ink-18); }
+.card .meta-strip span { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.card .series-row { display: flex; align-items: center; gap: var(--space-8); margin-bottom: 18px; flex-wrap: wrap; }
+.card .series-pill { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; background: transparent; white-space: nowrap; }
+.card .series-pos { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.card .sdot { width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--c-terracotta) 20%, transparent); }
+.card .series-dots { display: flex; align-items: center; gap: 3px; }
+.card .fw-badge { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; background: transparent; white-space: nowrap; display: inline-flex; align-self: flex-start; margin-bottom: 18px; }
+
+/* ── Journal variant ── */
+.card .j-ruled { border-left: 2px solid var(--j-rule-color, var(--ink-18)); padding-left: var(--space-16); font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: 21px; line-height: 1.5; letter-spacing: -0.005em; color: var(--primary); margin-bottom: 14px; align-self: flex-start; width: 100%; }
+.card--journal .card-body { justify-content: flex-start; }
+.card--journal .j-footer-push { flex: 1; }
+.card .j-num { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.06em; opacity: 0.45; }
+.card .j-date { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+/* ── Event variant ── */
+.card .ev-countdown-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white); border-radius: 3px; padding: 3px 9px; background: var(--c-indigo); white-space: nowrap; margin-left: auto; flex-shrink: 0; line-height: 1.4; display: inline-flex; align-items: center; }
+.card .ev-past-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); border-radius: 3px; padding: 3px 9px; background: var(--ink-30); border: 1px solid var(--white-15); white-space: nowrap; margin-left: auto; flex-shrink: 0; line-height: 1.4; display: inline-flex; align-items: center; }
+.card .loc-zone { padding: var(--space-4) var(--pad) 22px; position: relative; overflow: hidden; display: flex; align-items: flex-start; background: var(--primary); }
+.card .remote-zone { padding: var(--space-4) var(--pad) 22px; position: relative; overflow: hidden; display: flex; align-items: flex-start; background: var(--primary); }
+.card .loc-ghost { font-family: 'Barlow Condensed', sans-serif; font-size: 68px; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: var(--white-06); position: absolute; right: -6px; top: 50%; transform: translateY(-50%); line-height: 1; user-select: none; pointer-events: none; white-space: nowrap; }
+.card .remote-ghost { font-family: 'Barlow Condensed', sans-serif; font-size: 68px; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: var(--white-06); position: absolute; right: -6px; top: 50%; transform: translateY(-50%); line-height: 1; user-select: none; pointer-events: none; white-space: nowrap; }
+.card .loc-city { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white); position: relative; margin-bottom: 2px; }
+.card .loc-venue { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-45); position: relative; }
+.card .remote-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--white); position: relative; margin-bottom: 2px; }
+.card .remote-sub { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-45); position: relative; }
+.card .ev-body { padding: var(--space-24) var(--pad) var(--space-24); flex: 1; display: flex; flex-direction: column; }
+.card .ev-date-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.card .ev-date { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); line-height: 1.1; flex-shrink: 0; }
+.card .ev-date-past { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); line-height: 1.1; flex-shrink: 0; opacity: 0.7; }
+.card .ev-time { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+.card .ev-title { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--primary); margin-bottom: var(--space-12); }
+.card .ev-title-past { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--primary); opacity: 0.7; margin-bottom: var(--space-12); }
+.card .ev-desc { font-size: var(--text-sm); font-weight: 400; line-height: 1.65; color: var(--ink-mid); margin-bottom: var(--space-24); }
+.card .ev-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card .fmt-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.card .fmt { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; white-space: nowrap; line-height: 1.4; display: inline-flex; align-items: center; }
+.card .fmt-free     { color: var(--c-forest); background: color-mix(in srgb, var(--c-forest) 8%, transparent); border: 1px solid color-mix(in srgb, var(--c-forest) 24%, transparent); }
+.card .fmt-paid     { color: var(--primary); background: var(--ink-08); border: 1px solid var(--ink-18); }
+.card .fmt-inperson { color: var(--c-clay); background: color-mix(in srgb, var(--c-clay) 7%, transparent); border: 1px solid color-mix(in srgb, var(--c-clay) 20%, transparent); }
+.card .fmt-remote   { color: var(--ink-mid); background: var(--ink-08); border: 1px solid var(--ink-12); }
+
+/* ── Masterclass variant — dark gradient header with concentric ellipses ── */
+.card[data-category="masterclass"] .card-header { background: linear-gradient(136deg, #000000 0%, #5b1377 54%, #a1480c 100%); padding-top: 28px; padding-bottom: 26px !important; position: relative; overflow: hidden; }
+.card[data-category="masterclass"] .card-header::before { content: ''; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 380 100' preserveAspectRatio='none'%3E%3Cellipse cx='296' cy='102' rx='50' ry='33' stroke='var(--white-06)' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='296' cy='102' rx='150' ry='98' stroke='var(--white-06)' stroke-width='0.8' fill='none'/%3E%3Cellipse cx='296' cy='102' rx='300' ry='195' stroke='var(--white-06)' stroke-width='0.8' fill='none'/%3E%3C/svg%3E"); background-size: 100% 100%; pointer-events: none; z-index: 0; }
+.card[data-category="masterclass"] .card-header > * { position: relative; z-index: 1; }
+.mc-body { padding: var(--space-24) var(--pad) var(--space-20); flex: 1; display: flex; flex-direction: column; }
+.mc-logistics { display: flex; flex-direction: column; gap: 6px; padding-top: 14px; border-top: 1px solid var(--ink-12); }
+.mc-logistic { display: flex; align-items: center; gap: var(--space-8); font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.mc-logistic-icon { color: var(--ink-faint); font-size: var(--text-pill); width: 14px; text-align: center; flex-shrink: 0; }
+.mc-cta-zone { display: flex; align-items: center; justify-content: space-between; padding: var(--space-16) var(--pad); background: var(--primary); border-top: 1px solid var(--ink-12); }
+.mc-cta-left { display: flex; flex-direction: column; gap: 3px; }
+.mc-cta-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--white); }
+.mc-cta-sub { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white-45); }
+.mc-cta-right { display: flex; align-items: center; gap: 14px; }
+.mc-price { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 26px; line-height: 1; color: var(--white-85); }
+.mc-arrow { font-size: var(--text-h5); font-weight: 300; color: var(--white); line-height: 1; }
+
+/* ── Experiment variant — dark prototype/concept backgrounds ── */
+.od-status-dot { display: flex; align-items: center; gap: 5px; font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--white-45); }
+.od-title { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--white); }
+.od-excerpt { font-size: var(--text-sm); font-weight: 400; line-height: 1.65; color: var(--white-45); }
+.od-tag { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 9px; border-radius: 3px; border: 1px solid var(--white-15); color: var(--white-45); white-space: nowrap; }
+.od-meta { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-45); }
+.scrim-proto { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(28,16,40,0) 0%, rgba(28,16,40,0.08) 38%, rgba(28,16,40,0.97) 100%); }
+.scrim-concept { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(10,31,26,0) 0%, rgba(10,31,26,0.2) 42%, rgba(10,31,26,0.98) 100%); }
+.exp-content { position: relative; z-index: 2; display: flex; flex-direction: column; flex: 1; }
+.cta-launch { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--pad); background: rgba(0,0,0,0.4); border-top: 1px solid var(--white-06); }
+.cta-launch .label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--white); }
+.cta-launch .arrow { font-size: var(--text-body-lg); font-weight: 300; color: var(--white); }
+.cta-read { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--pad); border-top: 1px solid var(--white-06); }
+.cta-read .label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white-45); }
+.cta-read .arrow { font-size: var(--text-body); font-weight: 300; color: var(--white-45); }
+
+/* ── Past card overlays ── */
+.card.past { background: rgba(250,250,248,0.7); }
+.card.past.card--event .card-header { background: var(--ink-72) !important; padding-bottom: 14px !important; }
+.card.past .loc-zone,
+.card.past .remote-zone { background: var(--ink-72) !important; padding-top: 0 !important; }
+
+/* Show all cards regardless of .hidden — JS controls visibility */
+.card { display: flex !important; }

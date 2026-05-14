@@ -621,7 +621,7 @@ These remain unresolved or deferred and will need decisions during the build. No
 
 - **Tiptap toolbar config** — what blocks/marks does the rich text editor allow? Image insertion flow? Embed/iframe support? Decide before the editor is wired up.
 - **Scheduled-post auto-publish** — cron job vs check-on-load. Decide before Phase 8 (automation).
-- **CMS auth approach** — single-user `users` table with email-as-username and bcrypt password hash. Sessions via PHP native handler on httpOnly+secure+samesite-strict cookies. Login throttling (5 fails → 15 min lock). CSRF on every POST. Password-reset by email **deferred to Phase 11** of `BUILD-PLAN.md`; v1 ships with in-CMS change-password only. Full spec in `AUTH-SECURITY.md` (drafted at the start of Phase 4).
+- **CMS auth approach** — single-user `users` table with email-as-username and an Argon2id password hash (`PASSWORD_DEFAULT` on PHP 8.2). Sessions via PHP native handler on httpOnly+secure+samesite-strict cookies, sliding 14-day idle timeout. Login throttling (5 fails → 15 min lock, counter resets on success). Per-session CSRF token, regenerated on login. Password-reset by email **deferred to Phase 17 (transactional email)** of `BUILD-PLAN.md`; v1 ships with in-CMS change-password only. Full spec in `AUTH-SECURITY.md` (drafted at the start of Phase 4, now canonical).
 - **CMS-token promotion** — should `--canvas-raised` and `--live-green` be moved into `site/_design-system/system.css` for public-site reuse? Currently CMS-scoped. Revisit if the public site grows a "live now" indicator or similar.
 - **Multi-author** — out of scope. Future change: add `author_id` FK on `content`, drop single-row constraint on `author`.
 - **Mobile/responsive CMS** — explicitly out of scope. Desktop only for v1.

@@ -29,6 +29,10 @@ RewriteRule ^community/?$ / [R=302,L]
 RewriteRule ^consulting/?$ / [R=302,L]
 RewriteRule ^landing\.html$ / [R=302,L]
 
+# === /admin → /cms (301, permanent — AUTH-SECURITY.md §9) ===================
+RewriteRule ^admin/?$       /cms/    [R=301,L]
+RewriteRule ^admin/(.*)$    /cms/$1  [R=301,L]
+
 # === .html → canonical bare-path (visible 302) ==============================
 RewriteRule ^about\.html$ /about/ [R=302,L]
 RewriteRule ^coaching\.html$ /coaching/ [R=302,L]

@@ -10,7 +10,8 @@ This document covers:
 4. Running a deploy
 5. Rollback
 6. Database deploys (Phase 3)
-7. What still changes in later phases
+7. Auth bootstrap (Phase 4 — setup.php and lockouts)
+8. What still changes in later phases
 
 ---
 
@@ -40,6 +41,10 @@ site/config/{config,config.example}.php
 site/config/.htaccess        → webroot/config/.htaccess  (Phase 3: deny direct web access)
 site/db/migrate.php          → webroot/db/migrate.php    (Phase 3: CLI migration runner)
 site/db/migrations/*.sql     → webroot/db/migrations/    (Phase 3: schema migrations)
+site/lib/auth.php            → webroot/lib/auth.php      (Phase 4: session + login + lockout)
+site/lib/csrf.php            → webroot/lib/csrf.php      (Phase 4: per-session CSRF tokens)
+site/setup.php               → webroot/setup.php         (Phase 4: one-shot bootstrap — see §7)
+site/cms/*.php               → webroot/cms/              (Phase 4: login.php, logout.php, account.php, index.php placeholder)
 site/.htaccess               → webroot/.htaccess         (PRODUCTION ONLY)
 deploy/staging.htaccess      → webroot/.htaccess         (STAGING ONLY — adds Basic Auth gate)
 ```
@@ -273,12 +278,61 @@ The schema source of truth is `docs/CMS-STRUCTURE.md` §9 — any schema change 
 
 ---
 
-## 7. What still changes in later phases
+## 7. Auth bootstrap (Phase 4)
 
-Phase 4 adds:
+Phase 4 added authentication: the `users` table (migration `0002_users_table.sql`), the auth library (`lib/auth.php` + `lib/csrf.php`), the CMS gate at `/cms/*`, and a one-shot `setup.php` that creates the first admin password. The contract is `docs/AUTH-SECURITY.md`.
 
-- **`users` table** alongside `docs/AUTH-SECURITY.md`. Ships as `0002_users.sql`.
-- **`setup.php`** one-shot bootstrap for the first admin password; self-deletes after use.
+### 7.1 First-time auth bootstrap (one-time, per environment)
+
+After the first Phase 4 deploy on a fresh database, the `users` table is empty and there's no way to log in. Bootstrap the admin user once per environment:
+
+```bash
+# 1. Apply the 0002 migration (creates the users table).
+ssh alexmchong-ca 'cd ~/alexmchong.ca && php db/migrate.php'
+
+# 2. Visit /setup.php in a browser. It generates a 16-char temp password,
+#    inserts the user row (email login@alexmchong.ca), and prints the password
+#    on the page in plain text. Save it.
+#
+#    Production: https://alexmchong.ca/setup.php
+#    Staging:    https://staging.alexmchong.ca/setup.php  (behind Basic Auth)
+
+# 3. Go to /cms/login, sign in with login@alexmchong.ca + the temp password.
+
+# 4. Visit /cms/account and change the password (min 12 chars, must include
+#    upper, lower, and a digit).
+#
+#    The successful password change triggers setup.php to delete itself.
+#    Next time you visit /setup.php it 404s.
+```
+
+If you missed step 4 and walked away with setup.php still on the server, the next visit to /setup.php detects the completed state (password_changed_at IS NOT NULL) and self-deletes anyway.
+
+### 7.2 What happens to setup.php on every redeploy
+
+`setup.php` is NOT excluded from rsync — every deploy re-uploads it from source. After first install it self-deletes again on first access (because the users table already has a row with `password_changed_at` set), so the resurrection window is the time between deploy completing and first HTTP request to the file. Net effect: harmless noise.
+
+If you ever wipe the `users` table for a clean reinstall, setup.php is already in place — visit it once to seed a new password.
+
+### 7.3 Recovering from a real lockout
+
+If wrong passwords lock you out for real (5 failed attempts → 15 min lockout), wait it out or unlock by hand:
+
+```bash
+ssh alexmchong-ca
+mysql -u cms_prod -p alexmchong_cms_production -e \
+  "UPDATE users SET locked_until = NULL, failed_attempts = 0 WHERE email = 'login@alexmchong.ca';"
+```
+
+(Substitute `cms_staging` + `alexmchong_cms_staging` for staging.)
+
+### 7.4 The /admin/ → /cms/ 301 redirect
+
+The legacy `/admin/` path 301-redirects to `/cms/` (and `/admin/foo` to `/cms/foo`). Configured in both `site/.htaccess` and `deploy/staging.htaccess` above the front-controller fallback. 301 not 302 because `/admin/` is permanently retired — we want search engines and browsers to forget it.
+
+---
+
+## 8. What still changes in later phases
 
 Phase 13 adds:
 

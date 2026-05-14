@@ -97,6 +97,20 @@ cp site/lib/router.php             "$STAGE/lib/"
 cp site/db/migrate.php             "$STAGE/db/"
 cp site/db/migrations/*.sql        "$STAGE/db/migrations/"
 
+# Phase 4: auth library, /cms/* pages, one-shot setup.
+# setup.php self-deletes on the server after first password change. Once
+# that's happened, rsync's --delete will NOT recreate it because the local
+# source still has it and the server-side delete is final until next deploy
+# — which is fine; setup.php is harmless when no user row exists.
+cp site/lib/auth.php               "$STAGE/lib/"
+cp site/lib/csrf.php               "$STAGE/lib/"
+cp site/setup.php                  "$STAGE/"
+mkdir -p "$STAGE/cms"
+cp site/cms/index.php              "$STAGE/cms/"
+cp site/cms/login.php              "$STAGE/cms/"
+cp site/cms/logout.php             "$STAGE/cms/"
+cp site/cms/account.php            "$STAGE/cms/"
+
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
 

@@ -1,8 +1,10 @@
 # macOS noise
 .DS_Store
 
-# VS Code workspace files
-.vscode/
+# VS Code workspace files — ignored by default, but project-essential
+# config files (e.g., the preview-server root mapping) are tracked.
+.vscode/*
+!.vscode/settings.json
 
 # Claude Code project-local settings (per-machine, never share)
 .claude/

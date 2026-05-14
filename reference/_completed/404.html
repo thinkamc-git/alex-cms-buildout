@@ -1,0 +1,129 @@
+<html>
+<head>
+    <title>alex m. chong // </title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width,user-scalable=no">
+    <link rel="shortcut icon" href="http://alexmchong.ca/_layout/favicon2.ico" type="image/x-icon" />
+    <style type="text/css">
+        <!--
+
+        @import url('https://fonts.googleapis.com/css?family=Barlow:500,600|Covered+By+Your+Grace');
+
+        body {  background: #e8e8e8 url('https://alexmchong.ca/_layout/background.png');
+            }
+
+        p.arrow_box {
+            position: relative;
+            background: rgba(240, 240, 240, 0.5);
+            border: 3px solid #c1c1c1;
+            border-radius: 14px;
+            padding:24px;
+            padding-top: 18px;
+            font-family: Barlow, Helvetica, Arial, sans-serif; 
+            font-weight: 300;
+            color: #222;
+            font-size: 20pt;
+            text-align: center;
+        }
+        p.arrow_box:after, p.arrow_box:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        p.arrow_box:after {
+            border-color: rgba(255, 255, 255, 0);
+            border-top-color: #eee;
+            border-width: 20px;
+            left: 50%;
+            margin-left: -20px;
+        }
+        p.arrow_box:before {
+            border-color: rgba(177, 106, 162, 0);
+            border-top-color: #c1c1c1;
+            border-width: 25px;
+            left: 50%;
+            margin-left: -25px;
+        }
+
+        p.back {
+            font-family: "Covered By Your Grace", Helvetica, Arial, sans-serif; 
+            font-weight: 300;
+            color: #000;
+            font-size: 18pt;
+            text-align: center;
+        }
+
+        a:link      {text-decoration: none; color: #aaa}
+        a:visited   {text-decoration: none; color: #aaa}
+        a:active    {text-decoration: none; color: #222}
+        a:hover     {text-decoration: none; color: #222}
+
+        .spin {
+		-webkit-animation: rotation 1.5s infinite linear;
+        animation-delay: 2.5s;
+        /* animation-direction: reverse; */
+        }
+
+        @-webkit-keyframes rotation {
+                from {
+                        -webkit-transform: rotate(0deg);
+                }
+                to {
+                        -webkit-transform: rotate(359deg);
+                }
+        }
+
+        -->
+    </style>
+</head>
+<body>
+    <table border="0" width="100%" cellspacing="0" cellpadding="0" height="100%">
+        <tr>
+            <td align="center">
+            <table border="0" cellspacing="7" cellpadding="0">
+                <tr>
+                    <td rowspan="2" align="center">
+                        <p class="arrow_box" id="randomizer">
+                        <script type="text/javascript">
+                            var quotes = [
+                                "I saw that my life was a<br>vast glowing empty page<br>and I could do anything<br>I wanted.", /* Jack Kerouac */
+                                "You don't have to stay anywhere forever.", /* Neil Gaiman */
+                                "Try again. Fail again. Fail better.", /* Samuel Beckett */
+                                "You are free and that<br>is why you are lost.", /* Franz Kafka */
+                                "In the middle of nowhere lies<br>the road to everywhere.",
+                                "Lost in thought,<br>I found endless possibilities.",
+                                "To be lost is to begin anew.",
+                                "Lost, I discovered parts of myself<br>I never knew existed.",
+                                "To be lost is to open<br>yourself to new directions.",
+                                "The wrong destination often<br>brings the right lessons."
+                            ];
+                            var index = Math.floor((Math.random() * quotes.length)); 
+                            document.getElementById('randomizer').innerHTML = quotes[index];   
+                        </script>
+                        </p>
+                        <img src="http://alexmchong.ca/_layout/profile.png" border="0" height="113" width="113" class="spin">
+                        <p class="back"><a href="http://alexmchong.ca">visit alexmchong.ca</a></p>
+                    </td>
+                </tr>
+            </table>
+            </td>   
+        </tr>
+    </table>
+    <script type="text/javascript" src="http://www.alexmchong.ca/_layout/retina.js"></script>
+    <script type="text/javascript">
+        var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+        document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+        try {
+        var pageTracker = _gat._getTracker("UA-4811336-3");
+        pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
+</body>
+</html>

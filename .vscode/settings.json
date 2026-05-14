@@ -1,0 +1,11 @@
+{
+  // Microsoft "Live Preview" (extension id ms-vscode.live-server). Maps
+  // the local server's "/" to site/_pages/, mirroring how production
+  // serves the marketing pages — so /_layout/style-pages.css, the
+  // favicon, profile images, etc. all resolve correctly in preview.
+  "livePreview.serverRoot": "site/_pages",
+
+  // Same idea for "Five Server" (yandeu.five-server). VS Code ignores
+  // unknown settings, so it's safe to leave both keys here.
+  "fiveServer.root": "site/_pages"
+}

@@ -11,6 +11,8 @@ AuthName "alexmchong.ca staging"
 AuthUserFile "/home/alexmchong/staging.alexmchong.ca/.htpasswd"
 Require valid-user
 
+ErrorDocument 404 /404.html
+
 RewriteEngine On
 
 # === External redirects (302) — see docs/LEGACY-ROUTES.md §2 =================

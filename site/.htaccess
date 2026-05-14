@@ -2,6 +2,10 @@
 # Phase 1: static deployment only. No PHP, no front controller yet.
 # The PHP front controller arrives in Phase 3; see docs/BUILD-PLAN.md.
 
+# Custom 404 page (rendered by Apache when no rule below matches and no
+# file exists at the requested path). The file ships from site/_pages/404.html.
+ErrorDocument 404 /404.html
+
 RewriteEngine On
 
 # === External redirects (302) — see docs/LEGACY-ROUTES.md §2 =================

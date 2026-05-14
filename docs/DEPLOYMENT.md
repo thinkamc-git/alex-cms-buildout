@@ -1,164 +1,196 @@
 # Deployment — alexmchong.ca
 
-**Status:** First draft (Phase 1). This document evolves over the build:
-- **Phase 1** — manual CloudMounter workflow for the static marketing site (this document).
-- **Phase 3** — extends with PHP + database plumbing and an `rsync` script that replaces the manual workflow.
-- **Phase 13** — adds the backup cron and 404 hook.
+**Status:** SSH-key-based rsync deploy via [bin/deploy.sh](../bin/deploy.sh). Replaces the manual CloudMounter workflow used during Phase 1's first ship. The deploy script was pulled forward from Phase 3 once Phase 2 (Auto-tier) was about to start, because manual CloudMounter every CSS tweak would have broken the auto-tier promise.
 
-The current document covers **Phase 1 only**.
+This document covers:
+
+1. Environments
+2. What ships
+3. One-time SSH setup (skip if already done)
+4. Running a deploy
+5. Rollback
+6. What still changes in Phase 3 and beyond
 
 ---
 
 ## 1. Environments
 
-| Environment | URL | Webroot (DreamHost) | Notes |
+| Environment | URL | Server path | Auth |
 |---|---|---|---|
-| Staging | `https://staging.alexmchong.ca` | `~/staging.alexmchong.ca/` | Basic-Auth gated. Subdomain configured in DreamHost panel. |
-| Production | `https://alexmchong.ca` | `~/alexmchong.ca/` | Public. Final destination after staging passes. |
+| Staging | `https://staging.alexmchong.ca` | `/home/alexmchong/staging.alexmchong.ca/` | Basic Auth (`alex` + 1Password "alexmchong.ca staging") |
+| Production | `https://alexmchong.ca` | `/home/alexmchong/alexmchong.ca/` | Public |
 
-**Promotion rule:** Nothing reaches production until it has been verified on staging. Phase 1 enforces this by hand; Phase 3 enforces it via the deploy script's `--target` flag.
+Both live on DreamHost shared hosting at `iad1-shared-b7-12.dreamhost.com` (Apache 2.4 + PHP 8.3 as of 2026-05-13).
 
----
-
-## 2. What ships in Phase 1
-
-```
-site/_pages/*.html              → webroot /                  (landing.html → index.html on upload)
-site/_pages/_layout/*           → webroot /_layout/          (verbatim)
-site/_design-system/*           → webroot /_ds/              (verbatim)
-site/.htaccess                  → webroot /.htaccess         (production)
-deploy/staging.htaccess         → webroot /.htaccess         (STAGING ONLY)
-<generated> .htpasswd           → path referenced in staging .htaccess
-```
-
-**Not deployed in Phase 1:** `site/_templates/` (PHP renderers, Phase 3+), `docs/` (private), `landing-postcms.html` (design canvas, never deployed).
+**Promotion rule:** never ship to production without first verifying on staging. The deploy script reads two different `.htaccess` files (`deploy/staging.htaccess` adds Basic Auth on top of the production rules) — same content + same redirects, different gate.
 
 ---
 
-## 3. CloudMounter workflow
-
-CloudMounter mounts the DreamHost SFTP target as a Finder volume. Drag-and-drop is the operative verb.
-
-### 3.1 One-time setup
-
-1. Install CloudMounter (App Store or [eltima.com/cloudmounter](https://www.eltima.com/cloudmounter/)).
-2. Add a connection for each environment:
-   - **Staging** — `staging.alexmchong.ca` over SFTP, user from DreamHost panel, port 22.
-   - **Production** — `alexmchong.ca` over SFTP, same credentials.
-3. Save both in CloudMounter so they appear in Finder.
-
-### 3.2 First-time deploy (Phase 1)
-
-Order: staging → verify → production → verify → cleanup → verify.
-
-**Step 1. Stage the upload locally.**
-Open a Finder window at the repo's `site/` folder.
-
-**Step 2. Upload to staging.**
-1. Mount the staging volume in Finder.
-2. Copy contents of `site/_pages/` to the staging webroot:
-   - Drag every `*.html` file from `site/_pages/` into the staging webroot root.
-   - Drag the `_layout/` folder into the staging webroot root.
-3. **Rename** `landing.html` → `index.html` on the staging server (in-place).
-4. Copy `site/_design-system/` to the staging webroot as `_ds/`:
-   - Create a folder `_ds` at the staging webroot root.
-   - Drag the contents of `site/_design-system/` (`index.html`, `system.css`, `system.js`) into `_ds/`.
-5. Copy `deploy/staging.htaccess` to the staging webroot, renaming to `.htaccess`.
-6. Generate `.htpasswd`:
-   - Use one of the methods in `deploy/staging.htpasswd.example`.
-   - Username: `alex`.
-   - Password: stored in 1Password under "alexmchong.ca staging".
-   - Place the generated `.htpasswd` somewhere readable by Apache. Recommended: `~/staging.alexmchong.ca/.htpasswd` (inside the webroot — Apache refuses to serve dotfiles by default, so it is not web-exposed). If your shell access allows, `~/staging.alexmchong.ca.htpasswd` (one level above webroot) is safer.
-7. Open `deploy/staging.htaccess` on the server in a text editor and replace `REPLACE_WITH_ABSOLUTE_PATH_TO/.htpasswd` with the absolute server path you used in step 6 (e.g., `/home/<user>/staging.alexmchong.ca/.htpasswd`).
-
-**Step 3. Verify staging.**
-
-Visit each of these in a browser and confirm:
-
-- `https://staging.alexmchong.ca/` — prompts for username/password (Basic Auth), then renders the new landing.
-- `https://staging.alexmchong.ca/about/` — renders the About page.
-  (Trailing-slash variants depend on DreamHost; try both `/about` and `/about.html` if needed.)
-- `https://staging.alexmchong.ca/coaching.html`, `/work-with-me.html`, `/resume.html`, `/newsletter.html`, `/newsletter-confirmed.html` — all render.
-- `https://staging.alexmchong.ca/_ds/` — design system showcase renders.
-- `https://staging.alexmchong.ca/landing.html` — 302-redirects to `/`.
-
-From your terminal (the `-u` flag passes Basic Auth credentials):
+## 2. What ships
 
 ```
-curl -I -L -u alex:<password> https://staging.alexmchong.ca/portfolioforhire/
-curl -I -L -u alex:<password> https://staging.alexmchong.ca/research/
-curl -I -L -u alex:<password> https://staging.alexmchong.ca/talks/
-curl -I -L -u alex:<password> https://staging.alexmchong.ca/meet/
-curl -I -L -u alex:<password> https://staging.alexmchong.ca/linkedin/
+site/_pages/*.html       → webroot/             (landing.html renamed to index.html during deploy)
+site/_pages/_layout/*    → webroot/_layout/     (CSS, fonts, images)
+site/_design-system/*    → webroot/_ds/         (design system showcase)
+site/.htaccess           → webroot/.htaccess    (PRODUCTION ONLY)
+deploy/staging.htaccess  → webroot/.htaccess    (STAGING ONLY — adds Basic Auth gate)
 ```
 
-Each should show a `302 Found` with the correct `Location:` from `docs/LEGACY-ROUTES.md` §2 before following the redirect.
+**Never deployed:** `docs/`, `reference/`, `bin/`, `deploy/staging.htpasswd.example`, anything under `landing-postcms.html`.
 
-**Step 4. Upload to production.**
-1. Mount the production volume in Finder.
-2. Repeat steps 2.1–2.4 above, **but use `site/.htaccess`** (not `deploy/staging.htaccess`) and do **not** create `.htpasswd`. Production is public.
+**Preserved on the server, never overwritten** (the rsync exclude list in [bin/deploy.sh](../bin/deploy.sh)):
 
-**Step 5. Verify production.**
-
-```
-curl -I -L https://alexmchong.ca/portfolioforhire/
-curl -I -L https://alexmchong.ca/research/
-curl -I -L https://alexmchong.ca/talks/
-curl -I -L https://alexmchong.ca/meet/
-curl -I -L https://alexmchong.ca/linkedin/
-```
-
-Each should show `302 Found` followed by the expected destination.
-
-Visit `https://alexmchong.ca/`, `https://alexmchong.ca/about/`, `https://alexmchong.ca/_ds/`, etc. Confirm every marketing page renders and every internal link works.
-
-**Step 6. Cleanup (legacy folder deletion).**
-
-**Only after step 5 passes**, delete the old production folders that previously served the legacy URLs. Per `docs/LEGACY-ROUTES.md` §3 the Phase 0 walkthrough found **only the five redirect subfolders** to remove:
-
-```
-~/alexmchong.ca/portfolioforhire/
-~/alexmchong.ca/research/
-~/alexmchong.ca/talks/
-~/alexmchong.ca/meet/
-~/alexmchong.ca/linkedin/
-```
-
-Delete each folder via CloudMounter. **Then re-run the five production `curl` checks from step 5 — they must still pass** (the `.htaccess` redirects, not the folders, are what makes them work now).
-
-If any unexpected folder is found that was not in the inventory, **stop and add a row to `docs/LEGACY-ROUTES.md` §3 before deleting**. Do not delete anything that is not catalogued.
+- `.dh-diag`, `.dh-diag.txt`, `.ftpquota` — DreamHost system files
+- `.well-known/` — Let's Encrypt SSL renewal challenges. Touching this breaks HTTPS auto-renewal.
+- `.htpasswd` — staging Basic Auth credentials. Generated on the server, never in source.
+- `_archive/`, `_labs/`, `_files/` — your live experimental folders, kept as-is per Phase 1 decisions.
 
 ---
 
-## 4. Rollback
+## 3. One-time SSH setup
 
-If a production deploy breaks something during Phase 1:
+If you're setting up a new machine or revoking and reissuing keys, do this once. Skip if `ssh alexmchong-ca` already works.
 
-- **Single page broken** — re-upload the previous version from your local git working copy. Each marketing page is independent.
-- **`.htaccess` broken** (e.g., 500 across the site) — rename `.htaccess` to `.htaccess.broken` via CloudMounter; the site reverts to no-rewrites Apache defaults, then re-upload `site/.htaccess`.
-- **Whole-site catastrophe** — re-upload from your local `site/` folder. There is no database to restore in Phase 1.
+### 3.1 Generate a dedicated deploy key
 
-Phase 3 introduces the deploy script with automatic backup-on-deploy.
+```bash
+ssh-keygen -t ed25519 \
+  -f ~/.ssh/id_ed25519_alexmchong_ca_deploy \
+  -N "" \
+  -C "alexmchong.ca deploy ($(date +%Y-%m-%d) from $(hostname -s))"
+```
+
+(Ed25519, no passphrase so automated runs don't prompt. The on-disk private key is mode 600 by default; FileVault on the Mac is the second layer.)
+
+### 3.2 Add the SSH host alias
+
+Append to `~/.ssh/config` (create the file if it doesn't exist; chmod 600):
+
+```
+Host alexmchong-ca
+  HostName alexmchong.ca
+  User alexmchong
+  IdentityFile ~/.ssh/id_ed25519_alexmchong_ca_deploy
+  IdentitiesOnly yes
+  ServerAliveInterval 30
+```
+
+This lets you `ssh alexmchong-ca` and `rsync … alexmchong-ca:…` without typing the username, host, or key path every time.
+
+### 3.3 Authorize the public key on DreamHost
+
+The DreamHost panel doesn't expose a per-user "SSH Keys" page in the current redesign. Two paths that work:
+
+**A. File Manager (web UI).** Panel → click the SFTP user `alexmchong` → File Manager → navigate to `/home/alexmchong/`. Show hidden files. Create or open `~/.ssh/authorized_keys` and paste the contents of `~/.ssh/id_ed25519_alexmchong_ca_deploy.pub` on its own line.
+
+**B. CloudMounter.** Mount the SFTP volume, navigate to `/home/alexmchong/`, show hidden files, drag the prepared `.ssh/` bundle into the home directory. Permissions must end up at `700` on `.ssh/` and `600` on `authorized_keys` (use Get Info → Permissions if they land wrong).
+
+### 3.4 Verify
+
+```bash
+ssh alexmchong-ca 'whoami && pwd && hostname'
+```
+
+Expected: `alexmchong`, `/home/alexmchong`, `iad1-shared-b7-12`. No password prompt.
+
+### 3.5 Revoking access
+
+If a machine is compromised or you stop using one, delete the corresponding line from `~/.ssh/authorized_keys` on the server. Takes ~10 seconds via SSH or File Manager. The key on disk on the old machine then becomes useless.
 
 ---
 
-## 5. Decisions captured (Phase 1)
+## 4. Running a deploy
 
-From `docs/BUILD-PLAN.md` §5:
+```bash
+bin/deploy.sh staging              # → https://staging.alexmchong.ca
+bin/deploy.sh prod                 # → https://alexmchong.ca
 
-- **Landing page approach:** rename `landing.html` → `index.html` on upload (with `.htaccess` rewrite from `/landing.html` to `/` to keep internal links resolving).
-- **Legacy redirect status code:** `302` until Phase 13.
-- **Staging gate username:** `alex`.
-- **Staging gate password:** stored in 1Password under "alexmchong.ca staging".
-- **Deletion order:** deploy redirects first, verify, **then** delete legacy folders.
+bin/deploy.sh staging --dry-run    # preview every file rsync would touch
+bin/deploy.sh prod --no-delete     # upsert only; do not remove server-side orphans
+```
+
+### 4.1 What the script does
+
+1. **Assembles** a per-target deploy directory in `/tmp/alexmchong-deploy-XXXX/`. Marketing pages, the layout assets, the design system, and the right `.htaccess` for the target are copied in. `landing.html` is renamed to `index.html` during this step.
+2. **Normalizes permissions** on the local stage (`644` for files, `755` for directories). Rsync `-a` preserves these on the server.
+3. **Rsyncs** to the SSH host alias `alexmchong-ca`, with:
+   - `--delete` (default): orphan files on the server that aren't in source are removed. The exclude list (§2 above) protects DreamHost system files, Let's Encrypt, and your experiments.
+   - `--no-delete` (flag): skip the orphan cleanup. Use this if you're worried something on the server is going to be flagged that shouldn't be.
+   - `--dry-run` (flag): show the transfer plan without writing anything to the server.
+
+### 4.2 Typical session
+
+```bash
+# Confirm what's about to happen
+bin/deploy.sh staging --dry-run
+
+# Looks right → really deploy
+bin/deploy.sh staging
+
+# Visit https://staging.alexmchong.ca, verify in browser
+
+# Ship to prod
+bin/deploy.sh prod
+```
+
+### 4.3 Smoke check after deploy
+
+```bash
+for p in / /about/ /coaching/ /_layout/style-pages.css /_ds/ /nope-404; do
+  curl -sS -o /dev/null -w "HTTP %{http_code}  %{url_effective}\n" -I -L "https://alexmchong.ca$p"
+done
+```
+
+The first five should return `HTTP 200`. The last should return `HTTP 404` (and serve the themed 404 page from [site/_pages/404.html](../site/_pages/404.html)).
 
 ---
 
-## 6. What changes in Phase 3
+## 5. Rollback
 
-Phase 3 introduces:
-- A real deploy script (`deploy/deploy.sh` or similar) that `rsync`s `site/` to the target with the right exclusions, replacing manual CloudMounter steps.
-- A PHP front controller and `index.php` at the webroot — both `.htaccess` files gain the `RewriteCond !-f / !-d / RewriteRule . /index.php [L]` block at the bottom.
-- A separate writable `data/` directory above the webroot for uploads, the SQLite/MySQL connection config, and cron-managed state.
+Phase 1's only state is files. Rollback is a redeploy.
 
-This document is updated at that time to reflect the new workflow. Until then, the CloudMounter dance above is canonical.
+### 5.1 Single-file mistake (most common)
+
+```bash
+git revert <bad-commit>      # or fix the file directly in site/_pages/
+bin/deploy.sh prod
+```
+
+Done. No database state to restore.
+
+### 5.2 `.htaccess` 500ing the whole site
+
+Two options:
+
+```bash
+# Option A — fix locally and redeploy
+git revert <bad-commit>
+bin/deploy.sh prod
+
+# Option B — emergency: rename .htaccess on the server, redeploy
+ssh alexmchong-ca 'mv ~/alexmchong.ca/.htaccess ~/alexmchong.ca/.htaccess.broken'
+# Site reverts to no-rewrites Apache defaults. Static files still serve.
+# Then fix locally and redeploy.
+bin/deploy.sh prod
+```
+
+### 5.3 Whole-site catastrophe
+
+If everything is broken, your latest snapshot lives at `/home/alexmchong/_backups/alexmchong.ca-2026-05-13/` (the Phase 1 pre-deploy backup you made via CloudMounter). New automated backups land in Phase 13.
+
+---
+
+## 6. What still changes in later phases
+
+Phase 3 (Deployment plumbing) was originally going to ship the deploy script — that landed early. Phase 3's remaining scope:
+
+- **Database deploys.** `db/migrate.php` runs migrations on the server, hooked into `bin/deploy.sh` so a deploy that includes new migrations applies them too.
+- **`config/config.php` rotation.** Per-environment config files (currently empty placeholders; the `.gitignore` already excludes `config.local.php`, `config.staging.php`, `config.production.php`).
+- **PHP front controller.** `index.php` lands at the webroot; both `.htaccess` files extend with the `RewriteCond !-f / !-d / RewriteRule . /index.php [L]` block at the bottom.
+
+Phase 13 adds:
+
+- **Automated backups** via a cron job, replacing the manual CloudMounter snapshots.
+- **`status_code` column** on the redirects table — once redirects move from `.htaccess` into the DB.
+
+This document gets extended at each of those points. Until then, the workflow above is canonical.

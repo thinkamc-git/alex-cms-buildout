@@ -111,6 +111,14 @@ cp site/cms/login.php              "$STAGE/cms/"
 cp site/cms/logout.php             "$STAGE/cms/"
 cp site/cms/account.php            "$STAGE/cms/"
 
+# Phase 5: admin shell partials + CMS-specific stylesheet.
+# The 5 partials (sidebar/topbar/view-header/filter-bar/table) compose every
+# admin view from Phase 6a onward. style-cms.css layers CMS-only overrides
+# on top of /_ds/css/* (which is already deployed by the design-system step).
+mkdir -p "$STAGE/cms/partials" "$STAGE/cms/_assets"
+cp site/cms/partials/*.php         "$STAGE/cms/partials/"
+cp site/cms/_assets/style-cms.css  "$STAGE/cms/_assets/"
+
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
 

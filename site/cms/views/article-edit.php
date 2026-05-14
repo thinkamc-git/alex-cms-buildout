@@ -1,18 +1,25 @@
 <?php
 /**
- * cms/views/article-edit.php — edit an existing Article (Draft stage).
+ * cms/views/article-edit.php — edit an existing Article at any pipeline stage.
  *
  * Routed from site/index.php:
- *   GET  /cms/articles/edit?id=N — render the form
- *   POST /cms/articles/edit?id=N — validate, sanitize body, save
+ *   GET  /cms/articles/edit?id=N — render the form (stage-aware variant)
+ *   POST /cms/articles/edit?id=N — save fields and/or transition stage
  *
- * Full editor surface for Phase 6a:
- *   - title, slug (editable with warning), body (Tiptap), summary
- *   - hero image (upload), hero caption, hero size
- *   - special_tag (none / principle / framework), tags, read_time
+ * Stage variants:
+ *   - Idea  → minimal form (title + notes [stored as concept_text]).
+ *   - Concept/Outline/Draft/Published → full editor inherited from Phase 6a.
  *
- * Stage transitions (Draft → Published) land in Phase 7. For now the
- * Save button keeps status = 'draft' regardless.
+ * Actions (POST body `action`):
+ *   - save        — write fields, keep stage.
+ *   - advance     — write fields, transition to next stage.
+ *   - step-back   — write fields, transition to previous stage.
+ *   - publish     — alias of advance, used when stage = draft.
+ *   - unpublish   — write fields, transition Published → Draft (UI requires
+ *                   a JS confirm, server allows it unconditionally).
+ *
+ * Forward skipping is rejected by lib/content.php::transition_stage; the UI
+ * already hides off-neighbor buttons, but the server is the source of truth.
  */
 
 declare(strict_types=1);
@@ -46,131 +53,197 @@ if ($article === null) {
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+/**
+ * Map an action to a destination stage (or null = no transition). Returns
+ * a tuple [stage|null, defaultFlashMessage].
+ */
+$actionToStage = static function (string $action, string $current) {
+    $idx = stage_index($current);
+    switch ($action) {
+        case 'advance':
+            if ($idx < 0 || $idx >= count(ARTICLE_STAGES) - 1) return [null, ''];
+            $next = ARTICLE_STAGES[$idx + 1];
+            return [$next, 'Advanced to ' . ucfirst($next) . '.'];
+        case 'step-back':
+            if ($idx <= 0) return [null, ''];
+            $prev = ARTICLE_STAGES[$idx - 1];
+            return [$prev, 'Stepped back to ' . ucfirst($prev) . '.'];
+        case 'publish':
+            return ['published', 'Published — live now.'];
+        case 'unpublish':
+            return ['draft', 'Moved back to draft — no longer publicly visible.'];
+    }
+    return [null, ''];
+};
+
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
     } else {
-        $action = (string)($_POST['action'] ?? 'save');
-        $post = [
-            'title'         => trim((string)($_POST['title']         ?? '')),
-            'slug'          => trim((string)($_POST['slug']          ?? '')),
-            'summary'       => trim((string)($_POST['summary']       ?? '')),
-            'body_raw'      =>      (string)($_POST['body']          ?? ''),
-            'tags'          => trim((string)($_POST['tags']          ?? '')),
-            'read_time'     => trim((string)($_POST['read_time']     ?? '')),
-            'special_tag'   => trim((string)($_POST['special_tag']   ?? '')),
-            'hero_caption'  => trim((string)($_POST['hero_caption']  ?? '')),
-            'hero_size'     => trim((string)($_POST['hero_size']     ?? 'default')),
-            'remove_hero'   => isset($_POST['remove_hero']),
-        ];
+        $action       = (string)($_POST['action'] ?? 'save');
+        $currentStage = (string)($article['status'] ?? 'idea');
 
-        // Title is required even at Draft (slug derives from it on create).
-        if ($post['title'] === '') {
-            $errors[] = 'Title is required.';
-        }
+        if ($currentStage === 'idea') {
+            // ── Idea-stage form: title + notes (→ concept_text) ─────────
+            $titleIn = trim((string)($_POST['title'] ?? ''));
+            $notesIn = trim((string)($_POST['notes'] ?? ''));
 
-        // Slug — required, must be a valid slug, must be unique (excluding self).
-        $slug = $post['slug'] !== '' ? slugify($post['slug']) : slugify($post['title']);
-        if ($slug === '') {
-            $errors[] = 'Slug is required.';
-        } else {
-            $slug = unique_slug($slug, $id);
-        }
-
-        // Special tag — empty or one of the enum values.
-        $specialTag = $post['special_tag'];
-        if (!in_array($specialTag, ['', 'principle', 'framework'], true)) {
-            $errors[] = 'Special tag must be empty, principle, or framework.';
-            $specialTag = '';
-        }
-        $specialTagDb = $specialTag === '' ? null : $specialTag;
-
-        // Hero size — must be one of the enum values.
-        $heroSize = in_array($post['hero_size'], ['default', 'wide', 'full'], true)
-            ? $post['hero_size']
-            : 'default';
-
-        // Read time — empty or positive integer.
-        $readTime = null;
-        if ($post['read_time'] !== '') {
-            if (!ctype_digit($post['read_time'])) {
-                $errors[] = 'Read time must be a whole number of minutes.';
-            } else {
-                $readTime = (int)$post['read_time'];
+            if ($titleIn === '') {
+                $errors[] = 'Title is required.';
             }
-        }
 
-        // Body — sanitize through allowlist.
-        $bodyClean = sanitize_html($post['body_raw']);
-
-        // Hero image upload (optional).
-        $heroPath = (string)($article['hero_image'] ?? '');
-        if ($post['remove_hero']) {
-            $heroPath = '';
-        }
-        if (isset($_FILES['hero']) && is_array($_FILES['hero']) && (int)$_FILES['hero']['error'] !== UPLOAD_ERR_NO_FILE) {
-            $up = accept_upload($_FILES['hero'], 'content/article/' . $slug);
-            if (!$up['ok']) {
-                $errors[] = 'Hero image: ' . $up['error'];
-            } else {
-                $heroPath = $up['url'];
+            // Re-derive slug from title if title changed; ideas are pre-publish
+            // so the slug churning here is harmless and keeps URLs in sync.
+            $slug = (string)($article['slug'] ?? '');
+            $currentTitle = (string)($article['title'] ?? '');
+            if ($titleIn !== '' && $titleIn !== $currentTitle) {
+                $candidate = slugify($titleIn);
+                if ($candidate !== '') $slug = unique_slug($candidate, $id);
             }
-        }
 
-        if (count($errors) === 0) {
-            $saveData = [
-                'id'           => $id,
-                'template'     => 'article-standard',
-                'title'        => $post['title'],
+            if (count($errors) === 0) {
+                $saveData = [
+                    'id'           => $id,
+                    'title'        => $titleIn,
+                    'slug'         => $slug,
+                    'concept_text' => $notesIn !== '' ? $notesIn : null,
+                ];
+                $flashMsg = 'Saved.';
+
+                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
+                if ($targetStage !== null) {
+                    save_article($saveData);
+                    $res = transition_stage($id, $targetStage);
+                    if (!$res['ok']) {
+                        header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
+                        exit;
+                    }
+                    header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($stageMsg));
+                    exit;
+                }
+
+                save_article($saveData);
+                header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
+                exit;
+            }
+
+            $article = array_merge($article, [
+                'title'        => $titleIn,
                 'slug'         => $slug,
-                'summary'      => $post['summary'] !== '' ? $post['summary'] : null,
-                'body'         => $bodyClean,
-                'hero_image'   => $heroPath !== '' ? $heroPath : null,
-                'hero_caption' => $post['hero_caption'] !== '' ? $post['hero_caption'] : null,
-                'hero_size'    => $heroSize,
-                'special_tag'  => $specialTagDb,
-                'tags'         => $post['tags'] !== '' ? $post['tags'] : null,
-                'read_time'    => $readTime,
+                'concept_text' => $notesIn,
+            ]);
+        } else {
+            // ── Concept / Outline / Draft / Published — full editor ─────
+            $post = [
+                'title'         => trim((string)($_POST['title']         ?? '')),
+                'slug'          => trim((string)($_POST['slug']          ?? '')),
+                'summary'       => trim((string)($_POST['summary']       ?? '')),
+                'body_raw'      =>      (string)($_POST['body']          ?? ''),
+                'tags'          => trim((string)($_POST['tags']          ?? '')),
+                'read_time'     => trim((string)($_POST['read_time']     ?? '')),
+                'special_tag'   => trim((string)($_POST['special_tag']   ?? '')),
+                'hero_caption'  => trim((string)($_POST['hero_caption']  ?? '')),
+                'hero_size'     => trim((string)($_POST['hero_size']     ?? 'default')),
+                'remove_hero'   => isset($_POST['remove_hero']),
             ];
 
-            // Stage transition. Phase 7 replaces this minimal toggle with the
-            // full Pipeline flow; until then a Publish / Move-to-draft pair
-            // gives Phase 6b verification a way to flip the public gate.
-            $currentStatus = (string)($article['status'] ?? 'draft');
-            $flashMsg = 'Saved.';
-            if ($action === 'publish' && $currentStatus !== 'published') {
-                $saveData['status']           = 'published';
-                $saveData['published_status'] = 'live';
-                if (empty($article['published_at'])) {
-                    $saveData['published_at'] = date('Y-m-d H:i:s');
-                }
-                $flashMsg = 'Published — live at /writing/' . $slug;
-            } elseif ($action === 'unpublish' && $currentStatus === 'published') {
-                $saveData['status']           = 'draft';
-                $saveData['published_status'] = null;
-                $flashMsg = 'Moved back to draft — no longer publicly visible.';
+            if ($post['title'] === '') {
+                $errors[] = 'Title is required.';
             }
 
-            save_article($saveData);
+            $slug = $post['slug'] !== '' ? slugify($post['slug']) : slugify($post['title']);
+            if ($slug === '') {
+                $errors[] = 'Slug is required.';
+            } else {
+                $slug = unique_slug($slug, $id);
+            }
 
-            header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
-            exit;
+            $specialTag = $post['special_tag'];
+            if (!in_array($specialTag, ['', 'principle', 'framework'], true)) {
+                $errors[] = 'Special tag must be empty, principle, or framework.';
+                $specialTag = '';
+            }
+            $specialTagDb = $specialTag === '' ? null : $specialTag;
+
+            $heroSize = in_array($post['hero_size'], ['default', 'wide', 'full'], true)
+                ? $post['hero_size']
+                : 'default';
+
+            $readTime = null;
+            if ($post['read_time'] !== '') {
+                if (!ctype_digit($post['read_time'])) {
+                    $errors[] = 'Read time must be a whole number of minutes.';
+                } else {
+                    $readTime = (int)$post['read_time'];
+                }
+            }
+
+            $bodyClean = sanitize_html($post['body_raw']);
+
+            $heroPath = (string)($article['hero_image'] ?? '');
+            if ($post['remove_hero']) {
+                $heroPath = '';
+            }
+            if (isset($_FILES['hero']) && is_array($_FILES['hero']) && (int)$_FILES['hero']['error'] !== UPLOAD_ERR_NO_FILE) {
+                $up = accept_upload($_FILES['hero'], 'content/article/' . $slug);
+                if (!$up['ok']) {
+                    $errors[] = 'Hero image: ' . $up['error'];
+                } else {
+                    $heroPath = $up['url'];
+                }
+            }
+
+            if (count($errors) === 0) {
+                $saveData = [
+                    'id'           => $id,
+                    'template'     => 'article-standard',
+                    'title'        => $post['title'],
+                    'slug'         => $slug,
+                    'summary'      => $post['summary'] !== '' ? $post['summary'] : null,
+                    'body'         => $bodyClean,
+                    'hero_image'   => $heroPath !== '' ? $heroPath : null,
+                    'hero_caption' => $post['hero_caption'] !== '' ? $post['hero_caption'] : null,
+                    'hero_size'    => $heroSize,
+                    'special_tag'  => $specialTagDb,
+                    'tags'         => $post['tags'] !== '' ? $post['tags'] : null,
+                    'read_time'    => $readTime,
+                ];
+
+                $flashMsg = 'Saved.';
+                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
+
+                if ($targetStage !== null) {
+                    save_article($saveData);
+                    $res = transition_stage($id, $targetStage);
+                    if (!$res['ok']) {
+                        header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
+                        exit;
+                    }
+                    if ($targetStage === 'published') {
+                        $stageMsg = 'Published — live at /writing/' . $slug;
+                    }
+                    header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($stageMsg));
+                    exit;
+                }
+
+                save_article($saveData);
+                header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
+                exit;
+            }
+
+            $article = array_merge($article, [
+                'title'        => $post['title'],
+                'slug'         => $slug !== '' ? $slug : $post['slug'],
+                'summary'      => $post['summary'],
+                'body'         => $bodyClean,
+                'hero_image'   => $heroPath,
+                'hero_caption' => $post['hero_caption'],
+                'hero_size'    => $heroSize,
+                'special_tag'  => $specialTagDb,
+                'tags'         => $post['tags'],
+                'read_time'    => $readTime,
+            ]);
         }
-
-        // Errors path — reflect submitted values back into $article so the
-        // form re-renders what the author just typed.
-        $article = array_merge($article, [
-            'title'        => $post['title'],
-            'slug'         => $slug !== '' ? $slug : $post['slug'],
-            'summary'      => $post['summary'],
-            'body'         => $bodyClean,
-            'hero_image'   => $heroPath,
-            'hero_caption' => $post['hero_caption'],
-            'hero_size'    => $heroSize,
-            'special_tag'  => $specialTagDb,
-            'tags'         => $post['tags'],
-            'read_time'    => $readTime,
-        ]);
     }
 }
 
@@ -178,11 +251,21 @@ define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-$status = (string)($article['status'] ?? 'draft');
+$status        = (string)($article['status'] ?? 'idea');
+$statusIdx     = stage_index($status);
+$isIdea        = $status === 'idea';
 $slugPublished = $status === 'published';
+$bodyInitial   = (string)($article['body'] ?? '');
 
-// For Tiptap initialization we hand JS the raw body via a hidden input.
-$bodyInitial = (string)($article['body'] ?? '');
+$prevStage  = $statusIdx > 0                              ? ARTICLE_STAGES[$statusIdx - 1] : null;
+$nextStage  = $statusIdx >= 0 && $statusIdx < count(ARTICLE_STAGES) - 1
+            ? ARTICLE_STAGES[$statusIdx + 1] : null;
+
+// Stage-aware Save label. Published reads "Save changes" since it's a
+// post-publish edit; every other stage names the stage you're saving in.
+$saveLabel = $status === 'published'
+    ? 'Save changes'
+    : 'Save ' . ucfirst($status);
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -202,7 +285,9 @@ $bodyInitial = (string)($article['body'] ?? '');
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<?php if (!$isIdea): ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<?php endif; ?>
 </head>
 <body>
 
@@ -221,12 +306,23 @@ require __DIR__ . '/../partials/topbar.php';
   <main class="main">
     <div class="view active" id="view-article-edit">
       <?php
-      $title    = (string)($article['title'] ?? 'Untitled');
-      if ($title === '') $title = 'Untitled';
-      $subtitle = 'Draft · last saved ' . $e((string)($article['updated_at'] ?? ''));
+      $titleHdr = (string)($article['title'] ?? 'Untitled');
+      if ($titleHdr === '') $titleHdr = 'Untitled';
+      $title    = $titleHdr;
+      $subtitle = 'Article · ' . ucfirst($status) . ' · last saved ' . $e((string)($article['updated_at'] ?? ''));
       $actions  = '<a href="/cms/articles" class="btn-ghost">Back to list</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
+
+      <div class="stage-bar">
+        <?php foreach (ARTICLE_STAGES as $i => $s):
+          $cls = '';
+          if ($i < $statusIdx)      $cls = ' done';
+          elseif ($i === $statusIdx) $cls = ' current';
+        ?>
+          <div class="stage-bar-step<?= $cls ?>"><?= ucfirst($s) ?></div>
+        <?php endforeach; ?>
+      </div>
 
       <div class="content-area">
         <?php if ($flash !== ''): ?>
@@ -243,6 +339,46 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
         <?php endif; ?>
 
+      <?php if ($isIdea): ?>
+        <form method="post"
+              action="/cms/articles/edit?id=<?= (int)$id ?>"
+              class="cms-form">
+          <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+
+          <div class="info-box"><strong>Idea stage</strong> — capture the title and any early notes. Slug and full editor unlock once you advance to Concept.</div>
+
+          <div class="field-group">
+            <label class="field-label" for="article-title">Title <span class="field-req">required</span></label>
+            <input
+              type="text"
+              class="field-input large"
+              id="article-title"
+              name="title"
+              value="<?= $e((string)($article['title'] ?? '')) ?>"
+              maxlength="500"
+              required>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="article-notes">Notes <span class="field-hint-inline">optional</span></label>
+            <textarea
+              class="field-input"
+              id="article-notes"
+              name="notes"
+              rows="6"
+              maxlength="5000"
+              placeholder="Jot down what this idea is about, possible angles, references, anything you'd lose otherwise…"><?= $e((string)($article['concept_text'] ?? '')) ?></textarea>
+            <p class="field-hint">Notes carry forward to Concept as starting material. Nothing here is published.</p>
+          </div>
+
+          <div class="form-actions form-actions-sticky">
+            <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
+            <a href="/cms" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto">Advance to Concept →</button>
+          </div>
+        </form>
+
+      <?php else: ?>
         <form method="post"
               action="/cms/articles/edit?id=<?= (int)$id ?>"
               class="cms-form cms-form-wide"
@@ -404,23 +540,39 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-pri">
-              <?= $slugPublished ? 'Save changes' : 'Save draft' ?>
-            </button>
-            <?php if ($slugPublished): ?>
-              <button type="submit" name="action" value="unpublish" class="btn-ghost">Move to draft</button>
-            <?php else: ?>
-              <button type="submit" name="action" value="publish" class="btn-pri">Publish</button>
-            <?php endif; ?>
+            <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms/articles" class="btn-ghost">Cancel</a>
+
+            <?php if ($nextStage !== null && $status !== 'draft' && $status !== 'published'): ?>
+              <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto">Advance to <?= $e(ucfirst($nextStage)) ?> →</button>
+            <?php endif; ?>
+
+            <?php if ($status === 'draft'): ?>
+              <button type="submit" name="action" value="publish" class="btn-pri" style="margin-left:auto">Publish →</button>
+            <?php endif; ?>
+
+            <?php if ($status === 'published'): ?>
+              <button
+                type="submit"
+                name="action"
+                value="unpublish"
+                class="btn-ghost"
+                style="margin-left:auto"
+                data-confirm-unpublish="1">Move to draft</button>
+            <?php endif; ?>
           </div>
         </form>
+      <?php endif; ?>
 
         <form method="post"
               action="/cms/articles/delete?id=<?= (int)$id ?>"
               class="inline-delete danger-zone"
-              data-confirm="Delete this article? This cannot be undone.">
+              data-stage="<?= $e($status) ?>"
+              data-slug="<?= $e((string)($article['slug'] ?? '')) ?>">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+          <?php if ($slugPublished): ?>
+            <input type="hidden" name="typed_slug" value="">
+          <?php endif; ?>
           <button type="submit" class="btn-ghost btn-danger">Delete article</button>
         </form>
       </div>
@@ -428,6 +580,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<?php if (!$isIdea): ?>
 <script type="module">
   import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
   setupTiptap({
@@ -438,12 +591,40 @@ require __DIR__ . '/../partials/topbar.php';
     csrfToken:    <?= json_encode($csrf_token, JSON_UNESCAPED_SLASHES) ?>,
   });
 </script>
+<?php endif; ?>
 
 <script>
+  // Move-to-draft (Published → Draft) needs explicit confirmation.
+  for (const btn of document.querySelectorAll('[data-confirm-unpublish]')) {
+    btn.addEventListener('click', (e) => {
+      const ok = window.confirm("Move this article back to draft? It will be removed from the public site immediately.");
+      if (!ok) e.preventDefault();
+    });
+  }
+
+  // Delete confirmation: typed-slug for Published, simple OK otherwise.
   for (const form of document.querySelectorAll('form.inline-delete')) {
     form.addEventListener('submit', (e) => {
-      const msg = form.getAttribute('data-confirm') || 'Delete?';
-      if (!window.confirm(msg)) e.preventDefault();
+      const stage = form.getAttribute('data-stage') || '';
+      const slug  = form.getAttribute('data-slug')  || '';
+      if (stage === 'published') {
+        const typed = window.prompt(
+          'Deleting a published article is permanent.\n\n' +
+          'Type the slug to confirm:\n\n  ' + slug
+        );
+        if (typed === null) { e.preventDefault(); return; }
+        if (typed.trim() !== slug) {
+          e.preventDefault();
+          window.alert('Slug did not match — nothing deleted.');
+          return;
+        }
+        const inp = form.querySelector('input[name="typed_slug"]');
+        if (inp) inp.value = typed.trim();
+      } else {
+        if (!window.confirm('Delete this article? This cannot be undone.')) {
+          e.preventDefault();
+        }
+      }
     });
   }
 </script>

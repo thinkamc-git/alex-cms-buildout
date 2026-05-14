@@ -49,13 +49,15 @@ $cms = static function (string $file): callable {
     };
 };
 
-$router->get ('/cms',         $cms('index.php'));
-$router->get ('/cms/login',   $cms('login.php'));
-$router->post('/cms/login',   $cms('login.php'));
-$router->get ('/cms/logout',  $cms('logout.php'));   // returns 405 internally
-$router->post('/cms/logout',  $cms('logout.php'));
-$router->get ('/cms/account', $cms('account.php'));
-$router->post('/cms/account', $cms('account.php'));
+$router->get ('/cms',          $cms('views/pipeline.php'));
+$router->get ('/cms/login',    $cms('login.php'));
+$router->post('/cms/login',    $cms('login.php'));
+$router->get ('/cms/logout',   $cms('logout.php'));   // returns 405 internally
+$router->post('/cms/logout',   $cms('logout.php'));
+$router->get ('/cms/account',  $cms('account.php'));
+$router->post('/cms/account',  $cms('account.php'));
+$router->get ('/cms/ideation', $cms('views/ideation.php'));
+$router->post('/cms/ideation', $cms('views/ideation.php'));
 
 // Staging-only self-serve unlock. The handler is host-gated to staging,
 // so a POST on prod 404s. See cms/unlock-account.php for the rationale
@@ -70,6 +72,7 @@ $router->post('/cms/unlock-account', $cms('unlock-account.php'));
 $router->get ('/cms/articles',              $cms('views/articles.php'));
 $router->get ('/cms/articles/new',          $cms('views/article-new.php'));
 $router->post('/cms/articles/new',          $cms('views/article-new.php'));
+$router->post('/cms/articles/new-idea',     $cms('views/article-new-idea.php'));
 $router->get ('/cms/articles/edit',         $cms('views/article-edit.php'));
 $router->post('/cms/articles/edit',         $cms('views/article-edit.php'));
 $router->post('/cms/articles/delete',       $cms('views/article-delete.php'));

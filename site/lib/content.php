@@ -15,6 +15,41 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 
 /**
+ * Canonical pipeline order. Forward transitions are limited to the next
+ * neighbor; backward transitions can skip across (e.g. Published → Draft)
+ * because the author sometimes wants to retract a live post without
+ * stepping through Outline/Concept on the way.
+ */
+const ARTICLE_STAGES = ['idea', 'concept', 'outline', 'draft', 'published'];
+
+/**
+ * Index of a stage in ARTICLE_STAGES, or -1 if not a known stage.
+ */
+function stage_index(string $stage): int
+{
+    $i = array_search($stage, ARTICLE_STAGES, true);
+    return $i === false ? -1 : (int)$i;
+}
+
+/**
+ * Short relative-time string for pipeline kanban cards. Falls back to
+ * "Mon DD" once the gap is more than a week — past that, exact-ish dates
+ * are easier to scan than "37d ago".
+ */
+function relative_time(string $datetime): string
+{
+    if ($datetime === '') return '';
+    $ts = strtotime($datetime);
+    if ($ts === false) return '';
+    $diff = time() - $ts;
+    if ($diff < 60)     return 'just now';
+    if ($diff < 3600)   return (int)floor($diff / 60) . 'm ago';
+    if ($diff < 86400)  return (int)floor($diff / 3600) . 'h ago';
+    if ($diff < 604800) return (int)floor($diff / 86400) . 'd ago';
+    return date('M j', $ts);
+}
+
+/**
  * Fetch a single article by id. Returns null if not found.
  *
  * Lookups are by id (auto-increment PK) for CMS edit URLs. The public
@@ -132,6 +167,93 @@ function delete_article(int $id): void
         "DELETE FROM content WHERE id = :id AND type = 'article'"
     );
     $stmt->execute([':id' => $id]);
+}
+
+/**
+ * Move an article between pipeline stages.
+ *
+ * Forward transitions are limited to the immediate next stage. Backward
+ * transitions are unrestricted — the author can pull a Published row
+ * straight back to Draft without stepping through Outline.
+ *
+ * Returns ['ok' => bool, 'error' => string]. The caller is responsible
+ * for any UI confirmation (Published → Draft requires a modal per
+ * Phase 7 Decisions; this layer just performs the write).
+ *
+ * Side-effects:
+ *   - Entering 'published' stamps `published_at` (if NULL) and sets
+ *     `published_status` = 'live'.
+ *   - Leaving 'published' clears `published_status` back to NULL.
+ *     `published_at` is intentionally preserved so re-publishing later
+ *     keeps the original go-live timestamp.
+ */
+function transition_stage(int $id, string $to): array
+{
+    $row = get_article($id);
+    if ($row === null) {
+        return ['ok' => false, 'error' => 'Article not found.'];
+    }
+    $toIdx = stage_index($to);
+    if ($toIdx < 0) {
+        return ['ok' => false, 'error' => 'Unknown stage: ' . $to];
+    }
+    $from    = (string)($row['status'] ?? 'idea');
+    $fromIdx = stage_index($from);
+    if ($fromIdx < 0) {
+        // Defensive — schema enum should prevent this.
+        return ['ok' => false, 'error' => 'Article is in an unknown stage.'];
+    }
+    if ($toIdx === $fromIdx) {
+        return ['ok' => true, 'error' => ''];
+    }
+    if ($toIdx > $fromIdx + 1) {
+        return [
+            'ok'    => false,
+            'error' => 'Cannot skip stages — advance one at a time (currently ' . ucfirst($from) . ').',
+        ];
+    }
+
+    $patch = ['status' => $to];
+    if ($to === 'published') {
+        $patch['published_status'] = 'live';
+        if (empty($row['published_at'])) {
+            $patch['published_at'] = date('Y-m-d H:i:s');
+        }
+    } elseif ($from === 'published') {
+        $patch['published_status'] = null;
+    }
+
+    $set = [];
+    $params = [':id' => $id];
+    foreach ($patch as $k => $v) {
+        $set[] = $k . ' = :' . $k;
+        $params[':' . $k] = $v;
+    }
+    $sql = "UPDATE content SET " . implode(', ', $set)
+         . " WHERE id = :id AND type = 'article'";
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Stage histogram for the pipeline header. Returns an assoc map keyed
+ * by every stage in ARTICLE_STAGES, with zero defaults so the caller
+ * doesn't have to null-coalesce.
+ */
+function count_articles_by_stage(): array
+{
+    $out = array_fill_keys(ARTICLE_STAGES, 0);
+    $rows = db()->query(
+        "SELECT status, COUNT(*) AS n FROM content
+         WHERE type = 'article'
+         GROUP BY status"
+    )->fetchAll();
+    foreach ($rows as $r) {
+        $s = (string)($r['status'] ?? '');
+        if (isset($out[$s])) $out[$s] = (int)$r['n'];
+    }
+    return $out;
 }
 
 /**

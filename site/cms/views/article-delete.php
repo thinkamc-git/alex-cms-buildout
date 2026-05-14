@@ -39,6 +39,21 @@ if ($article === null) {
     exit;
 }
 
+// Phase 7: deleting a Published article requires the author to type the
+// slug into a JS prompt; the typed value is round-tripped via the form's
+// `typed_slug` hidden input. The JS gate is the primary UX, but checking
+// server-side too means a missing JS layer can't bypass the safety.
+$status = (string)($article['status'] ?? '');
+$slug   = (string)($article['slug']   ?? '');
+if ($status === 'published') {
+    $typed = trim((string)($_POST['typed_slug'] ?? ''));
+    if ($typed === '' || $typed !== $slug) {
+        header('Location: /cms/articles/edit?id=' . (int)$id
+            . '&flash=' . rawurlencode('Slug confirmation did not match — nothing deleted.'));
+        exit;
+    }
+}
+
 delete_article($id);
 
 header('Location: /cms/articles?flash=' . rawurlencode('Article deleted.'));

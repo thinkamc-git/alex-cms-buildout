@@ -98,7 +98,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 5** — Admin shell port · *Auto* · 4–5h
 - [x] **Phase 6a** — Articles in CMS (CRUD + Tiptap) · *Semi-auto* · 5–7h
 - [x] **Phase 6b** — Articles public · *Manual* · 4–6h · **Ships:** first Article live at `/writing/[slug]`
-- [ ] **Phase 7** — Articles full workflow (Pipeline + transitions) · *Semi-auto* · 3–4h
+- [x] **Phase 7** — Articles full workflow (Pipeline + transitions) · *Semi-auto* · 3–4h
 - [ ] **Phase 8** — Journals end-to-end · *Semi-auto* · 4–5h · **Ships:** Journals live at `/journal/[slug]`
 - [ ] **Phase 9** — Live Sessions end-to-end · *Semi-auto* · 4–5h · **Ships:** Live Sessions live
 - [ ] **Phase 10** — Experiments end-to-end (both variants) · *Semi-auto* · 4–6h · **Ships:** Experiments live

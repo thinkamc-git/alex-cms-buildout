@@ -372,7 +372,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .idea-card:hover { border-color:var(--primary); box-shadow:0 2px 6px var(--ink-12); }
 .idea-card:active { cursor:grabbing; }
 .idea-card-title { font-family:var(--font); font-size:var(--text-meta); font-weight:600; color:var(--primary); line-height:1.4; }
-.idea-card-desc { font-family:var(--font); font-size:var(--text-tiny); font-weight:400; color:var(--muted); line-height:1.55; }
+.idea-card-desc { font-family:var(--font); font-size:var(--text-tiny); font-weight:400; color:var(--muted); line-height:1.55; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .idea-card-foot { display:flex; align-items:center; justify-content:space-between; gap:var(--space-8); margin-top:4px; padding-top:var(--space-8); border-top:var(--rule-faint); }
 .idea-card-meta { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
 .idea-build { padding:4px 12px; font-size:var(--text-micro); background:var(--surface); }

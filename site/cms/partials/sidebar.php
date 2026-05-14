@@ -44,7 +44,7 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="2.5" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="3" width="2.5" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="2.5" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
       Pipeline
     </a>
-    <a class="nav-item<?= $activeClass('ideation') ?>" href="#" data-nav-id="ideation">
+    <a class="nav-item<?= $activeClass('ideation') ?>" href="/cms/ideation" data-nav-id="ideation">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="6" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 10.5h3M6.5 12.5h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       Ideation<?= $count('ideation') ?>
     </a>

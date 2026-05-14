@@ -1,0 +1,12 @@
+# templates/.htaccess — deny direct HTTP access to every PHP file under /templates/.
+#
+# Public-site rendering goes through the front controller at index.php →
+# Router → render_content() → require __DIR__ . '/../templates/...'. The
+# TEMPLATE_OK constant gate inside each template is the primary defence;
+# this Apache rule is belt-and-braces against an Apache config that
+# stops honouring `?` constants somehow (or a hosting move that bypasses
+# the gate). No PHP file in this directory should ever be served raw.
+
+<FilesMatch "\.php$">
+  Require all denied
+</FilesMatch>

@@ -110,6 +110,7 @@ cp site/cms/index.php              "$STAGE/cms/"
 cp site/cms/login.php              "$STAGE/cms/"
 cp site/cms/logout.php             "$STAGE/cms/"
 cp site/cms/account.php            "$STAGE/cms/"
+cp site/cms/unlock-account.php     "$STAGE/cms/"
 
 # Phase 5: admin shell partials + CMS-specific stylesheet.
 # The 5 partials (sidebar/topbar/view-header/filter-bar/table) compose every
@@ -129,6 +130,21 @@ mkdir -p "$STAGE/cms/views"
 cp site/cms/views/*.php            "$STAGE/cms/views/"
 cp site/cms/_assets/tiptap.css     "$STAGE/cms/_assets/"
 cp site/cms/_assets/tiptap-setup.js "$STAGE/cms/_assets/"
+
+# Phase 6b: public Article rendering. Templates live under /templates/
+# (PHP wrappers + per-block partials). lib/render.php is the entry point
+# called from index.php's /writing/:slug route. lib/author.php hydrates
+# the single-row author config. The article stylesheet rides along at
+# /_templates/style-articles.css (only style-articles.css is shipped —
+# article.html and layouts.html are design references, never deployed).
+cp site/lib/author.php             "$STAGE/lib/"
+cp site/lib/render.php             "$STAGE/lib/"
+mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
+cp site/templates/.htaccess           "$STAGE/templates/"
+cp site/templates/master-layout.php   "$STAGE/templates/"
+cp site/templates/article-standard.php "$STAGE/templates/"
+cp site/templates/partials/*.php   "$STAGE/templates/partials/"
+cp site/_templates/style-articles.css "$STAGE/_templates/"
 
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"

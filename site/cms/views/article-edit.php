@@ -50,6 +50,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
     } else {
+        $action = (string)($_POST['action'] ?? 'save');
         $post = [
             'title'         => trim((string)($_POST['title']         ?? '')),
             'slug'          => trim((string)($_POST['slug']          ?? '')),
@@ -117,8 +118,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         }
 
         if (count($errors) === 0) {
-            save_article([
+            $saveData = [
                 'id'           => $id,
+                'template'     => 'article-standard',
                 'title'        => $post['title'],
                 'slug'         => $slug,
                 'summary'      => $post['summary'] !== '' ? $post['summary'] : null,
@@ -129,9 +131,29 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'special_tag'  => $specialTagDb,
                 'tags'         => $post['tags'] !== '' ? $post['tags'] : null,
                 'read_time'    => $readTime,
-            ]);
+            ];
 
-            header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode('Saved.'));
+            // Stage transition. Phase 7 replaces this minimal toggle with the
+            // full Pipeline flow; until then a Publish / Move-to-draft pair
+            // gives Phase 6b verification a way to flip the public gate.
+            $currentStatus = (string)($article['status'] ?? 'draft');
+            $flashMsg = 'Saved.';
+            if ($action === 'publish' && $currentStatus !== 'published') {
+                $saveData['status']           = 'published';
+                $saveData['published_status'] = 'live';
+                if (empty($article['published_at'])) {
+                    $saveData['published_at'] = date('Y-m-d H:i:s');
+                }
+                $flashMsg = 'Published — live at /writing/' . $slug;
+            } elseif ($action === 'unpublish' && $currentStatus === 'published') {
+                $saveData['status']           = 'draft';
+                $saveData['published_status'] = null;
+                $flashMsg = 'Moved back to draft — no longer publicly visible.';
+            }
+
+            save_article($saveData);
+
+            header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
             exit;
         }
 
@@ -382,7 +404,14 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" class="btn-pri">Save draft</button>
+            <button type="submit" name="action" value="save" class="btn-pri">
+              <?= $slugPublished ? 'Save changes' : 'Save draft' ?>
+            </button>
+            <?php if ($slugPublished): ?>
+              <button type="submit" name="action" value="unpublish" class="btn-ghost">Move to draft</button>
+            <?php else: ?>
+              <button type="submit" name="action" value="publish" class="btn-pri">Publish</button>
+            <?php endif; ?>
             <a href="/cms/articles" class="btn-ghost">Cancel</a>
           </div>
         </form>

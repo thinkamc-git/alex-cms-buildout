@@ -740,3 +740,253 @@ body {
   color: var(--muted);
   background: transparent;
 }
+
+
+/* ============================================================
+   6. Editorial layout (Phase 6b)
+   Promoted from site/_templates/article.html's inline <style>.
+   Overrides earlier rules where necessary via cascade order.
+   The article-standard PHP template renders blocks in this
+   shape: split topstrip → title → summary → tag row → date row
+   → byline-row-with-rules → hero → body → author bio → tags.
+   ============================================================ */
+
+/* Top split bar — category (left) · series row (right) */
+.article-topstrip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+  margin-bottom: var(--space-40);
+}
+.article-topstrip .article-category {
+  font-family: var(--font-cond);
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-current, var(--primary));
+}
+.article-topstrip-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Title — bumped to 56px in the editorial layout */
+.article-title.is-serif {
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-32);
+}
+
+/* Summary — restated so the new spacing token applies */
+.article-summary {
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+  color: var(--secondary);
+  margin-bottom: var(--space-32);
+}
+
+/* Special Tag — own row */
+.article-tag-row {
+  margin-bottom: var(--space-32);
+}
+
+/* Date row — publish + updated, condensed uppercase */
+.article-dates {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+  flex-wrap: wrap;
+}
+.article-pub-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.article-updated-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Byline row with rules above and below — wraps the author block
+   and the read-time slot. The .article-author overrides strip the
+   legacy standalone border/padding so the row owns the framing. */
+.article-byline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding: var(--space-20) 0;
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+  margin-bottom: var(--space-40);
+}
+.article-byline-row .article-author {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* Stack name + tagline in the byline (inline "Name – Tagline" form
+   only applies when .article-author is rendered standalone). */
+.article-byline-row .article-author-info {
+  display: block;
+  line-height: 1.3;
+}
+.article-byline-row .article-author-name {
+  display: block;
+  font-weight: 700;
+  font-size: var(--text-md);
+}
+.article-byline-row .article-author-separator { display: none; }
+.article-byline-row .article-author-tagline {
+  display: block;
+  font-size: var(--text-base);
+  color: var(--secondary);
+  margin-top: 2px;
+}
+.article-read-time {
+  font-family: var(--font);
+  font-size: var(--text-base);
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+/* Author Bio — dark footer block (replaces the legacy light card).
+   Smaller, less prominent than the §5 default; reads as a sign-off. */
+.article-author-bio {
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-20) var(--space-24);
+  background: var(--primary);
+  border: 0;
+  margin-top: var(--space-48);
+}
+.article-author-bio-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: var(--text-md);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
+}
+.article-author-bio-extended {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: rgba(255,255,255,0.72);
+}
+
+
+/* ── Responsive ─────────────────────────────────────────────
+   Tablet (≤768px) and small mobile (≤480px) — keeps the
+   editorial layout breathing on narrow screens.
+   ──────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .article {
+    padding: var(--space-32) var(--space-20) var(--space-48);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-20);
+  }
+  .article-topstrip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+    margin-bottom: var(--space-32);
+  }
+  .article-topstrip-right {
+    max-width: 100%;
+  }
+  .article-title.is-serif {
+    font-size: 40px;
+    line-height: 1.1;
+    margin-bottom: var(--space-24);
+  }
+  .article-summary {
+    font-size: 17px;
+    margin-bottom: var(--space-24);
+  }
+  .article-dates {
+    margin-bottom: var(--space-20);
+  }
+  .article-byline-row {
+    padding: var(--space-16) 0;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+  }
+  .article-byline-row .article-author {
+    gap: var(--space-12);
+  }
+  .article-hero[data-size="wide"] {
+    width: 100%;
+    position: static;
+    left: auto;
+    transform: none;
+    max-width: 100%;
+  }
+  .article-hero[data-size="wide"] figcaption {
+    max-width: 100%;
+  }
+  .article-prose h2 {
+    font-size: 22px;
+    margin-top: var(--space-32);
+  }
+  .article-prose h3 {
+    font-size: 18px;
+  }
+  .article-prose blockquote {
+    font-size: 18px;
+    padding-left: var(--space-20);
+    margin: var(--space-32) 0;
+  }
+  .article-series-nav {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+  .article-series-nav-link.is-next {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .article-author-bio {
+    padding: var(--space-16) var(--space-20);
+    gap: var(--space-12);
+  }
+  .article-author-bio-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: var(--text-base);
+  }
+  .article-author-bio-extended {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .article-tags { margin-top: var(--space-32); }
+}
+
+@media (max-width: 480px) {
+  .article {
+    padding: var(--space-24) var(--space-16) var(--space-40);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-16);
+  }
+  .article-title.is-serif {
+    font-size: 32px;
+  }
+  .article-summary {
+    font-size: 16px;
+  }
+}

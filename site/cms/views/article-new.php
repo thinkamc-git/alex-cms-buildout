@@ -52,9 +52,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         if (count($errors) === 0) {
             $slug = unique_slug($slug);
             $id   = save_article([
-                'title'  => $form['title'],
-                'slug'   => $slug,
-                'status' => 'draft',
+                'title'    => $form['title'],
+                'slug'     => $slug,
+                'status'   => 'draft',
+                'template' => 'article-standard',
             ]);
 
             // POST-then-redirect.

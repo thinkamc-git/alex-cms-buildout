@@ -2,13 +2,15 @@
 /**
  * lib/router.php — minimal front-controller router.
  *
- * Exact-match routes only. No path parameters yet — added when a phase
- * actually needs them (Phase 6b's article slugs, etc.). Keep this file
- * small and predictable until then.
+ * Supports exact-match routes plus single-segment `:name` parameters
+ * (e.g. `/writing/:slug`). Extracted segments are passed to the handler
+ * as a single associative array. Multi-segment captures (`*`) are not
+ * supported yet — add when a phase actually needs them.
  *
  * Usage:
  *   $r = new Router();
  *   $r->get('/hello', function () { echo 'hi'; });
+ *   $r->get('/writing/:slug', function (array $p) { echo $p['slug']; });
  *   $r->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
  */
 
@@ -36,6 +38,36 @@ class Router
         $this->add('POST', $path, $handler);
     }
 
+    /**
+     * Try to match a route pattern against the request path. Returns the
+     * captured parameters as an assoc array on match, or null on miss.
+     * Static segments must match literally; `:name` captures one segment
+     * (no slashes). Pure exact-match patterns (no `:`) short-circuit to
+     * a string compare to keep the hot path cheap.
+     */
+    private function matchRoute(string $pattern, string $path): ?array
+    {
+        if (strpos($pattern, ':') === false) {
+            return $pattern === $path ? [] : null;
+        }
+        $pp = explode('/', $pattern);
+        $sp = explode('/', $path);
+        if (count($pp) !== count($sp)) return null;
+        $params = [];
+        $n = count($pp);
+        for ($i = 0; $i < $n; $i++) {
+            $segP = $pp[$i];
+            $segR = $sp[$i];
+            if ($segP !== '' && $segP[0] === ':') {
+                if ($segR === '') return null;
+                $params[substr($segP, 1)] = $segR;
+            } elseif ($segP !== $segR) {
+                return null;
+            }
+        }
+        return $params;
+    }
+
     public function dispatch(string $method, string $uri): void
     {
         $path = parse_url($uri, PHP_URL_PATH) ?? '/';
@@ -47,8 +79,10 @@ class Router
         $method = strtoupper($method);
 
         foreach ($this->routes as $r) {
-            if ($r['method'] === $method && $r['path'] === $path) {
-                ($r['handler'])();
+            if ($r['method'] !== $method) continue;
+            $params = $this->matchRoute($r['path'], $path);
+            if ($params !== null) {
+                ($r['handler'])($params);
                 return;
             }
         }

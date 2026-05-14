@@ -73,12 +73,13 @@ function save_article(array $data): int
     // fields; later phases extend the column list (hero_image, special_tag
     // values like 'principle'/'framework', etc. are already accepted).
     $cols = [
-        'slug', 'status', 'title', 'summary', 'body',
+        'slug', 'status', 'template', 'title', 'summary', 'body',
         'hero_image', 'hero_caption', 'hero_size',
         'show_author', 'show_author_bio',
         'special_tag', 'series_id', 'series_order',
         'read_time', 'tags',
         'concept_text', 'outline_text',
+        'published_at', 'published_status',
     ];
 
     if ($id === 0) {

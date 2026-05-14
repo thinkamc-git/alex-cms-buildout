@@ -15,6 +15,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/router.php';
+require_once __DIR__ . '/lib/render.php';
 
 $router = new Router();
 
@@ -56,6 +57,11 @@ $router->post('/cms/logout',  $cms('logout.php'));
 $router->get ('/cms/account', $cms('account.php'));
 $router->post('/cms/account', $cms('account.php'));
 
+// Staging-only self-serve unlock. The handler is host-gated to staging,
+// so a POST on prod 404s. See cms/unlock-account.php for the rationale
+// (temporary crutch — revisit during Phase 12 Author/Settings work).
+$router->post('/cms/unlock-account', $cms('unlock-account.php'));
+
 // ── Articles (Phase 6a) ──────────────────────────────────────────────
 // Edit / new / delete / upload — admin-only, gated by Auth::require_login()
 // inside each view. URLs use query strings for record ids because the
@@ -68,6 +74,16 @@ $router->get ('/cms/articles/edit',         $cms('views/article-edit.php'));
 $router->post('/cms/articles/edit',         $cms('views/article-edit.php'));
 $router->post('/cms/articles/delete',       $cms('views/article-delete.php'));
 $router->post('/cms/articles/upload-image', $cms('views/article-upload-image.php'));
+
+// ── Public articles (Phase 6b) ───────────────────────────────────────
+// First dynamic-segment route. The :slug param is single-segment so
+// /writing/foo/bar won't match — that's intentional (no nested article
+// paths in v1). Other content types extend the public route table from
+// Phase 8 (/journal/:slug), Phase 9 (/live-sessions/:slug), Phase 10
+// (/experiments/:slug) — each with its own render_<type>($slug) call.
+$router->get('/writing/:slug', static function (array $p): void {
+    render_content((string)($p['slug'] ?? ''));
+});
 
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

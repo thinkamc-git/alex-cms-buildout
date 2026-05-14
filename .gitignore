@@ -11,6 +11,9 @@
 *.swp
 *.swo
 
+# VS Code HTML Preview extension artifact
+.php-preview-router.php
+
 # Local config — never commit (each environment has its own copy on the server only)
 site/config/config.local.php
 site/config/config.staging.php

@@ -1,0 +1,43 @@
+# alexmchong.ca — production webroot .htaccess
+# Phase 1: static deployment only. No PHP, no front controller yet.
+# The PHP front controller arrives in Phase 3; see docs/BUILD-PLAN.md.
+
+RewriteEngine On
+
+# === External redirects (302) — see docs/LEGACY-ROUTES.md §2 =================
+RewriteRule ^portfolioforhire/?$ https://alexmchong-portfolio.webflow.io/ [R=302,L]
+RewriteRule ^portfolio/?$ https://alexmchong-portfolio.webflow.io/ [R=302,L]
+RewriteRule ^research/?$ https://alexmchong.notion.site/alexmchong/Alex-s-Master-s-Thesis-NTUT-3ef25dfbb1e145bb8ed9176171828f73 [R=302,L]
+RewriteRule ^talks/?$ https://alexmchong.notion.site/alexmchong/Alex-M-Chong-Design-Talks-455f32067df04918a18875321c3cc9fa [R=302,L]
+RewriteRule ^meet/?$ https://calendly.com/alexmchong/meet [R=302,L]
+RewriteRule ^linkedin/?$ https://linkedin.com/in/alexmchong/ [R=302,L]
+
+# === Legacy renames and discontinued pages (visible 302 to a canonical URL) ==
+RewriteRule ^cv/?$ /resume/ [R=302,L]
+RewriteRule ^community/?$ / [R=302,L]
+RewriteRule ^consulting/?$ / [R=302,L]
+RewriteRule ^landing\.html$ / [R=302,L]
+
+# === .html → canonical bare-path (visible 302) ==============================
+# Anyone hitting /foo.html gets bounced to the canonical /foo/ form so SEO and
+# bookmarks converge on one URL per page.
+RewriteRule ^about\.html$ /about/ [R=302,L]
+RewriteRule ^coaching\.html$ /coaching/ [R=302,L]
+RewriteRule ^work-with-me\.html$ /work-with-me/ [R=302,L]
+RewriteRule ^resume\.html$ /resume/ [R=302,L]
+RewriteRule ^newsletter\.html$ /newsletter/ [R=302,L]
+RewriteRule ^newsletter-confirmed\.html$ /newsletter-confirmed/ [R=302,L]
+
+# === Canonical bare-path → silent internal rewrite to .html =================
+# URL bar stays at /foo/. [END] terminates the rewrite engine so the engine
+# doesn't restart and re-trigger the .html→bare 302 rules above (would loop).
+RewriteRule ^about/?$ /about.html [END]
+RewriteRule ^coaching/?$ /coaching.html [END]
+RewriteRule ^work-with-me/?$ /work-with-me.html [END]
+RewriteRule ^resume/?$ /resume.html [END]
+RewriteRule ^newsletter/?$ /newsletter.html [END]
+RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.html [END]
+
+# === Direct-file serving ====================================================
+# Everything else falls through to Apache's default behavior: serve the file
+# at the requested path, or 404. No front controller this phase.

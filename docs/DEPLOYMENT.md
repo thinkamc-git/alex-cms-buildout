@@ -9,7 +9,8 @@ This document covers:
 3. One-time SSH setup (skip if already done)
 4. Running a deploy
 5. Rollback
-6. What still changes in Phase 3 and beyond
+6. Database deploys (Phase 3)
+7. What still changes in later phases
 
 ---
 
@@ -29,14 +30,23 @@ Both live on DreamHost shared hosting at `iad1-shared-b7-12.dreamhost.com` (Apac
 ## 2. What ships
 
 ```
-site/_pages/*.html       → webroot/             (landing.html renamed to index.html during deploy)
-site/_pages/_layout/*    → webroot/_layout/     (CSS, fonts, images)
-site/_design-system/*    → webroot/_ds/         (design system showcase)
-site/.htaccess           → webroot/.htaccess    (PRODUCTION ONLY)
-deploy/staging.htaccess  → webroot/.htaccess    (STAGING ONLY — adds Basic Auth gate)
+site/_pages/*.html           → webroot/                  (landing.html renamed to index.html during deploy)
+site/_pages/_layout/*        → webroot/_layout/          (CSS, fonts, images)
+site/_design-system/*        → webroot/_ds/              (design system showcase)
+site/index.php               → webroot/index.php         (Phase 3: front controller)
+site/lib/*.php               → webroot/lib/              (Phase 3: db.php, router.php)
+site/config/{config,config.example}.php
+                             → webroot/config/           (Phase 3: env resolver + template)
+site/config/.htaccess        → webroot/config/.htaccess  (Phase 3: deny direct web access)
+site/db/migrate.php          → webroot/db/migrate.php    (Phase 3: CLI migration runner)
+site/db/migrations/*.sql     → webroot/db/migrations/    (Phase 3: schema migrations)
+site/.htaccess               → webroot/.htaccess         (PRODUCTION ONLY)
+deploy/staging.htaccess      → webroot/.htaccess         (STAGING ONLY — adds Basic Auth gate)
 ```
 
-**Never deployed:** `docs/`, `reference/`, `bin/`, `deploy/staging.htpasswd.example`, anything under `landing-postcms.html`.
+Phase 3 added one fallback rule to both `.htaccess` files: any URL that isn't a real file or directory rewrites to `/index.php` for routing. Static marketing pages still serve directly.
+
+**Never deployed:** `docs/`, `reference/`, `bin/`, `deploy/staging.htpasswd.example`, anything under `landing-postcms.html`, and the per-environment config files `site/config/config.{local,staging,production}.php` (each lives on its own server only — see §6.2).
 
 **Preserved on the server, never overwritten** (the rsync exclude list in [bin/deploy.sh](../bin/deploy.sh)):
 
@@ -44,6 +54,8 @@ deploy/staging.htaccess  → webroot/.htaccess    (STAGING ONLY — adds Basic A
 - `.well-known/` — Let's Encrypt SSL renewal challenges. Touching this breaks HTTPS auto-renewal.
 - `.htpasswd` — staging Basic Auth credentials. Generated on the server, never in source.
 - `_archive/`, `_labs/`, `_files/` — your live experimental folders, kept as-is per Phase 1 decisions.
+- `config/config.{local,staging,production}.php` — per-environment DB credentials, hand-placed on each server. Without these excludes, a redeploy with `--delete` wipes them and the next request 500s with "Missing config file: …". (Bug discovered and fixed mid-Phase 3.)
+- `uploads/`, `content/`, `logs/`, `backups/` — server-only runtime folders that the app writes to (per-content uploads, custom-HTML experiments, request logs, backup snapshots). The source-side `.gitignore` excludes them too.
 
 ---
 
@@ -180,17 +192,101 @@ If everything is broken, your latest snapshot lives at `/home/alexmchong/_backup
 
 ---
 
-## 6. What still changes in later phases
+## 6. Database deploys (Phase 3)
 
-Phase 3 (Deployment plumbing) was originally going to ship the deploy script — that landed early. Phase 3's remaining scope:
+Phase 3 added the PHP runtime: front controller, env-aware config resolver, PDO helper, minimal router, and a migration tracker. The schema lives in `site/db/migrations/*.sql`; the runner is `site/db/migrate.php`.
 
-- **Database deploys.** `db/migrate.php` runs migrations on the server, hooked into `bin/deploy.sh` so a deploy that includes new migrations applies them too.
-- **`config/config.php` rotation.** Per-environment config files (currently empty placeholders; the `.gitignore` already excludes `config.local.php`, `config.staging.php`, `config.production.php`).
-- **PHP front controller.** `index.php` lands at the webroot; both `.htaccess` files extend with the `RewriteCond !-f / !-d / RewriteRule . /index.php [L]` block at the bottom.
+### 6.1 First-time DB setup (one-time, per environment)
+
+Create the MySQL database + user in the DreamHost panel, once per environment. Note the host, db name, username, and password — those go into `config/config.<env>.php` in §6.2.
+
+### 6.2 Per-environment config files
+
+Three files, never committed (all in `.gitignore`):
+
+| Where | File | Created by |
+|---|---|---|
+| Local dev machine | `site/config/config.local.php` | You — `cp config.example.php config.local.php`, edit credentials |
+| Staging server | `~/staging.alexmchong.ca/config/config.staging.php` | SSH in, copy + edit (see §6.3) |
+| Production server | `~/alexmchong.ca/config/config.production.php` | SSH in, copy + edit (see §6.3) |
+
+The resolver `config/config.php` picks the right file by `HTTP_HOST` for web requests, by the `APP_ENV` environment variable for CLI. Missing config file → the request 500s with a clear "Missing config file: …" message.
+
+### 6.3 Placing config on a server (one-time)
+
+```bash
+# After the first `bin/deploy.sh staging`, the config folder exists but
+# config.staging.php does not — it's gitignored. Place it now:
+ssh alexmchong-ca
+cd ~/staging.alexmchong.ca/config
+cp config.example.php config.staging.php
+nano config.staging.php   # fill in real DB credentials
+exit
+```
+
+Repeat for production. The same `config.example.php` ships to both — only the per-env file differs.
+
+### 6.4 Applying migrations
+
+The deploy script ships migration files to the server but does **not** auto-apply them — the operator runs `migrate.php` manually so a botched schema change doesn't take the site down silently:
+
+```bash
+# Apply any pending migrations on staging
+ssh alexmchong-ca 'cd ~/staging.alexmchong.ca && php db/migrate.php'
+
+# Check what's been applied vs pending
+ssh alexmchong-ca 'cd ~/staging.alexmchong.ca && php db/migrate.php --status'
+
+# Then production
+ssh alexmchong-ca 'cd ~/alexmchong.ca && php db/migrate.php'
+```
+
+Behaviour (per Phase 3 Decisions):
+- Tracker table: `_migrations` (one row per applied filename).
+- Error policy: **roll back on first error.** The runner stops as soon as one migration fails. Successful migrations stay applied; the failing one is the first thing that needs fixing.
+- MySQL DDL is non-transactional, so a partial failure mid-file leaves partial state. The runner reports this in stderr.
+
+### 6.5 Smoke check after deploy + migrate
+
+```bash
+# Static pages + design system + 404 still work (Phase 1 smoke check)
+for p in / /about/ /coaching/ /_layout/style-pages.css /_ds/ /nope-404; do
+  curl -sS -o /dev/null -w "HTTP %{http_code}  %{url_effective}\n" -I -L "https://alexmchong.ca$p"
+done
+
+# Phase 3 PHP+DB smoke check
+curl -sS "https://alexmchong.ca/hello"   # should print "Database connected. Current time: …"
+```
+
+Staging adds Basic Auth, so wrap the curl with `-u alex:<password>` or test in a browser.
+
+### 6.6 Adding a new migration
+
+1. Create `site/db/migrations/0002_<short_name>.sql`. Numeric prefix enforces order.
+2. Commit and push.
+3. `bin/deploy.sh staging` ships the new SQL file.
+4. `ssh alexmchong-ca 'cd ~/staging.alexmchong.ca && php db/migrate.php'` applies it on staging.
+5. Verify on staging in the browser.
+6. Repeat for production.
+
+The schema source of truth is `docs/CMS-STRUCTURE.md` §9 — any schema change updates the doc first, then the migration.
+
+---
+
+## 7. What still changes in later phases
+
+Phase 4 adds:
+
+- **`users` table** alongside `docs/AUTH-SECURITY.md`. Ships as `0002_users.sql`.
+- **`setup.php`** one-shot bootstrap for the first admin password; self-deletes after use.
 
 Phase 13 adds:
 
 - **Automated backups** via a cron job, replacing the manual CloudMounter snapshots.
 - **`status_code` column** on the redirects table — once redirects move from `.htaccess` into the DB.
+
+Phase 14 adds:
+
+- **`subscribers` table** for the newsletter signup flow.
 
 This document gets extended at each of those points. Until then, the workflow above is canonical.

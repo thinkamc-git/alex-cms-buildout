@@ -1,6 +1,7 @@
 # alexmchong.ca — production webroot .htaccess
-# Phase 1: static deployment only. No PHP, no front controller yet.
-# The PHP front controller arrives in Phase 3; see docs/BUILD-PLAN.md.
+# Phase 3: legacy redirects + front controller fallback.
+# Static marketing pages serve directly; anything that isn't a real file
+# or directory drops through to index.php for routing.
 
 # Custom 404 page (rendered by Apache when no rule below matches and no
 # file exists at the requested path). The file ships from site/_pages/404.html.
@@ -42,6 +43,15 @@ RewriteRule ^resume/?$ /resume.html [END]
 RewriteRule ^newsletter/?$ /newsletter.html [END]
 RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.html [END]
 
+# === Front controller fallback (Phase 3) ====================================
+# For any URL that isn't a real file or directory, hand off to index.php.
+# Static marketing pages (about.html, _layout/*, _ds/*) still serve directly
+# because RewriteCond !-f / !-d skips them. Legacy [END]-terminated rules
+# above also short-circuit this fallback — those rewrites stop the engine.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
 # === Direct-file serving ====================================================
-# Everything else falls through to Apache's default behavior: serve the file
-# at the requested path, or 404. No front controller this phase.
+# Anything that didn't match a rule above and IS a real file/dir on disk
+# falls through to Apache's default behavior: serve the file directly.

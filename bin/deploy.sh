@@ -82,6 +82,21 @@ cp -R site/_pages/_layout/. "$STAGE/_layout/"
 mkdir -p "$STAGE/_ds"
 cp -R site/_design-system/. "$STAGE/_ds/"
 
+# Phase 3: PHP front controller + libraries + config + migrations.
+# Config files config.{local,staging,production}.php live on each server
+# (one per env, hand-placed, never committed — see .gitignore). They are
+# NOT shipped from source; only config.php (the resolver) and
+# config.example.php (the template) ship.
+cp site/index.php "$STAGE/"
+mkdir -p "$STAGE/config" "$STAGE/lib" "$STAGE/db/migrations"
+cp site/config/config.php          "$STAGE/config/"
+cp site/config/config.example.php  "$STAGE/config/"
+cp site/config/.htaccess           "$STAGE/config/"
+cp site/lib/db.php                 "$STAGE/lib/"
+cp site/lib/router.php             "$STAGE/lib/"
+cp site/db/migrate.php             "$STAGE/db/"
+cp site/db/migrations/*.sql        "$STAGE/db/migrations/"
+
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
 
@@ -111,6 +126,22 @@ EXCLUDES=(
   --exclude='_labs/**'
   --exclude='_files/'
   --exclude='_files/**'
+  # Per-environment DB config — each is hand-placed on its own server.
+  # Never in source. Without these excludes, --delete wipes them on every
+  # deploy and the next request 500s with "Missing config file: …".
+  --exclude='config/config.local.php'
+  --exclude='config/config.staging.php'
+  --exclude='config/config.production.php'
+  # Server-only runtime folders (created by app, never shipped from source).
+  # See .gitignore for the source-side counterpart.
+  --exclude='uploads/'
+  --exclude='uploads/**'
+  --exclude='content/'
+  --exclude='content/**'
+  --exclude='logs/'
+  --exclude='logs/**'
+  --exclude='backups/'
+  --exclude='backups/**'
 )
 
 echo

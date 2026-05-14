@@ -1,0 +1,5 @@
+# config/.htaccess — deny all direct web access to this folder.
+# PHP `require` of files in here from the front controller still works;
+# this only blocks browsers from fetching config files over HTTP.
+
+Require all denied

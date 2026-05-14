@@ -45,5 +45,12 @@ RewriteRule ^resume/?$ /resume.html [END]
 RewriteRule ^newsletter/?$ /newsletter.html [END]
 RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.html [END]
 
+# === Front controller fallback (Phase 3) ====================================
+# Mirrors site/.htaccess. For any URL that isn't a real file or directory,
+# hand off to index.php. Static marketing pages still serve directly.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
 # === Direct-file serving ====================================================
-# Apache's default behavior serves files directly; no front controller yet.
+# Anything matching a real file/dir falls through to Apache's default.

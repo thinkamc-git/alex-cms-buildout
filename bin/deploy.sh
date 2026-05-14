@@ -119,6 +119,17 @@ mkdir -p "$STAGE/cms/partials" "$STAGE/cms/_assets"
 cp site/cms/partials/*.php         "$STAGE/cms/partials/"
 cp site/cms/_assets/style-cms.css  "$STAGE/cms/_assets/"
 
+# Phase 6a: cms/.htaccess (deny direct HTTP access to PHP under /cms/),
+# Articles CRUD lib + views + Tiptap editor assets.
+cp site/cms/.htaccess              "$STAGE/cms/"
+cp site/lib/content.php            "$STAGE/lib/"
+cp site/lib/sanitize.php           "$STAGE/lib/"
+cp site/lib/uploads.php            "$STAGE/lib/"
+mkdir -p "$STAGE/cms/views"
+cp site/cms/views/*.php            "$STAGE/cms/views/"
+cp site/cms/_assets/tiptap.css     "$STAGE/cms/_assets/"
+cp site/cms/_assets/tiptap-setup.js "$STAGE/cms/_assets/"
+
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
 

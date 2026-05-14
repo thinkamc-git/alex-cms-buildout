@@ -1,0 +1,13 @@
+# cms/.htaccess — deny direct HTTP access to every PHP file under /cms/.
+#
+# All CMS PHP entry points must go through the front controller at
+# /site/index.php → Router → require __DIR__ . '/cms/...'. The router runs
+# Auth::require_login() before including the view, so direct fetches of
+# /cms/views/article-edit.php would otherwise bypass auth entirely.
+#
+# Static assets under /cms/_assets/ (CSS, JS) remain reachable because
+# this only filters *.php.
+
+<FilesMatch "\.php$">
+  Require all denied
+</FilesMatch>

@@ -55,7 +55,7 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
   </div>
   <div class="nav-section">
     <span class="nav-label">Content</span>
-    <a class="nav-item<?= $activeClass('articles') ?>" href="#" data-nav-id="articles">
+    <a class="nav-item<?= $activeClass('articles') ?>" href="/cms/articles" data-nav-id="articles">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       Articles<?= $count('articles') ?>
     </a>

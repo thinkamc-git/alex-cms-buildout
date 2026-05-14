@@ -56,6 +56,19 @@ $router->post('/cms/logout',  $cms('logout.php'));
 $router->get ('/cms/account', $cms('account.php'));
 $router->post('/cms/account', $cms('account.php'));
 
+// ── Articles (Phase 6a) ──────────────────────────────────────────────
+// Edit / new / delete / upload — admin-only, gated by Auth::require_login()
+// inside each view. URLs use query strings for record ids because the
+// router is exact-match only; pretty paths land alongside the public
+// /writing/[slug] route in Phase 6b.
+$router->get ('/cms/articles',              $cms('views/articles.php'));
+$router->get ('/cms/articles/new',          $cms('views/article-new.php'));
+$router->post('/cms/articles/new',          $cms('views/article-new.php'));
+$router->get ('/cms/articles/edit',         $cms('views/article-edit.php'));
+$router->post('/cms/articles/edit',         $cms('views/article-edit.php'));
+$router->post('/cms/articles/delete',       $cms('views/article-delete.php'));
+$router->post('/cms/articles/upload-image', $cms('views/article-upload-image.php'));
+
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',
     $_SERVER['REQUEST_URI']    ?? '/'

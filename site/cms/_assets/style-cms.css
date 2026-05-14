@@ -606,3 +606,67 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .empty-state { padding:var(--space-24); text-align:center; font-size:var(--text-meta); color:var(--muted); border:1px dashed var(--ink-18); border-radius:var(--r-card); }
 .simple-note { font-size:var(--text-meta); color:var(--muted); line-height:1.6; padding:var(--space-12) var(--space-16); background:var(--canvas-raised); border:var(--rule-faint); border-radius:var(--r-card); margin-bottom:var(--space-20); }
 .simple-config { padding:var(--space-20) var(--space-24); max-width:620px; overflow-y:auto; }
+
+/* ── Phase 6a — Articles forms + list ──────────────────────────────────
+   These rules complement the existing .field-group / .field-label /
+   .field-input system. Names introduced here:
+     .cms-form / .cms-form-wide         — form root
+     .form-grid / .form-main / .form-side — two-column edit layout
+     .form-actions-sticky               — sticky save bar at the bottom of edit
+     .form-errors / .flash-success      — feedback banners
+     .field-hint / .field-hint-inline   — small help text under a label
+     .field-file                        — file input adjustments
+     .hero-preview / .hero-remove       — current hero image card
+     .row-title / .row-slug             — list-row title cell
+     .row-actions / .cell-actions       — list-row action cluster
+     .btn-tiny                          — compact list-row buttons
+     .danger-zone                       — out-of-form delete button row
+     .inline-delete                     — wrapper for one-button delete forms
+     .pill-published                    — completes the .pill-{stage} set
+     .pill.special-principle / .special-framework — special-tag pills
+*/
+.cms-form { max-width:720px; padding:var(--space-24); }
+.cms-form-wide { max-width:1080px; }
+
+.form-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-32); }
+.form-main { min-width:0; }
+.form-side { display:flex; flex-direction:column; gap:var(--space-16); }
+
+.form-actions-sticky { position:sticky; bottom:0; background:var(--surface); padding-bottom:var(--space-12); }
+
+.form-errors { padding:var(--space-12) var(--space-16); margin-bottom:var(--space-20); background:color-mix(in srgb,var(--c-terracotta) 8%,transparent); border:1px solid color-mix(in srgb,var(--c-terracotta) 28%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--c-terracotta); }
+.form-errors strong { display:block; margin-bottom:var(--space-4); }
+.form-errors ul { margin:0; padding-left:var(--space-20); }
+
+.flash-success { padding:var(--space-8) var(--space-16); margin-bottom:var(--space-16); background:color-mix(in srgb,var(--stage-published) 8%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 25%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--stage-published); }
+
+.field-hint { font-size:var(--text-tiny); color:var(--muted); line-height:1.5; margin-top:var(--space-6); }
+.field-hint code { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--secondary); }
+.field-hint-inline { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); font-weight:500; letter-spacing:0.04em; text-transform:none; margin-left:var(--space-6); }
+
+.field-file { padding:var(--space-6) var(--space-12); font-family:var(--font-mono); font-size:var(--text-micro); color:var(--secondary); }
+
+.hero-preview { display:flex; align-items:flex-start; gap:var(--space-12); padding:var(--space-8); background:var(--canvas-raised); border:1px solid var(--ink-12); border-radius:var(--r-card); margin-bottom:var(--space-8); }
+.hero-preview img { max-width:140px; max-height:88px; object-fit:cover; border-radius:var(--r-card); border:1px solid var(--ink-12); }
+.hero-remove { display:inline-flex; align-items:center; gap:var(--space-6); font-size:var(--text-tiny); color:var(--muted); cursor:pointer; }
+
+.row-title { color:var(--primary); text-decoration:none; font-weight:600; }
+.row-title:hover { color:var(--primary-hover); text-decoration:underline; }
+.row-slug { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); margin-left:var(--space-6); }
+.row-actions { display:inline-flex; align-items:center; gap:var(--space-6); justify-content:flex-end; }
+.cell-actions { text-align:right; }
+
+.btn-tiny { padding:3px var(--space-8); font-size:var(--text-micro); }
+
+.muted { color:var(--muted); }
+
+.danger-zone { margin-top:var(--space-32); padding-top:var(--space-20); border-top:var(--rule-faint); }
+
+/* Completes the .pill-{stage} family for the 'published' status. The
+   '--stage-published' token is defined in tokens.css. */
+.pill-published { color:var(--stage-published); background:color-mix(in srgb,var(--stage-published) 10%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent); }
+
+/* Special-tag pills. Articles can be tagged 'principle' or 'framework';
+   colours match the design system's c-amber / c-denim families. */
+.pill.special-principle { color:var(--c-amber); background:color-mix(in srgb,var(--c-amber) 10%,transparent); border:1px solid color-mix(in srgb,var(--c-amber) 28%,transparent); }
+.pill.special-framework { color:var(--c-denim); background:color-mix(in srgb,var(--c-denim) 10%,transparent); border:1px solid color-mix(in srgb,var(--c-denim) 28%,transparent); }

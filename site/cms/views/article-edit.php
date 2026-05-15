@@ -54,6 +54,16 @@ $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 /**
+ * `from_stage` suffix for the post-transition redirect. Only forward
+ * transitions surface the Undo button; backward/move-to-draft don't.
+ */
+$undoSuffix = static function (string $action, string $current): string {
+    return in_array($action, ['advance', 'publish'], true)
+        ? '&from_stage=' . urlencode($current)
+        : '';
+};
+
+/**
  * Map an action to a destination stage (or null = no transition). Returns
  * a tuple [stage|null, defaultFlashMessage].
  */
@@ -83,8 +93,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $action       = (string)($_POST['action'] ?? 'save');
         $currentStage = (string)($article['status'] ?? 'idea');
 
+        // Undo just-advanced — revert one stage without saving form. The
+        // "Undo" button only renders while ?from_stage is in the URL, which
+        // any save call drops, enforcing "once saved, no going back."
+        if ($action === 'undo') {
+            $idx = stage_index($currentStage);
+            if ($idx > 0) {
+                $prev = ARTICLE_STAGES[$idx - 1];
+                $res  = transition_stage($id, $prev);
+                if ($res['ok']) {
+                    header('Location: /cms/articles/edit?id=' . $id
+                        . '&flash=' . rawurlencode('Reverted to ' . ucfirst($prev) . '.'));
+                    exit;
+                }
+            }
+            header('Location: /cms/articles/edit?id=' . $id);
+            exit;
+        }
+
         if ($currentStage === 'idea') {
-            // ── Idea-stage form: title + notes (→ concept_text) ─────────
+            // ── Idea-stage form: title + notes (→ notes column) ─────────
             $titleIn = trim((string)($_POST['title'] ?? ''));
             $notesIn = trim((string)($_POST['notes'] ?? ''));
 
@@ -103,10 +131,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             if (count($errors) === 0) {
                 $saveData = [
-                    'id'           => $id,
-                    'title'        => $titleIn,
-                    'slug'         => $slug,
-                    'concept_text' => $notesIn !== '' ? $notesIn : null,
+                    'id'    => $id,
+                    'title' => $titleIn,
+                    'slug'  => $slug,
+                    'notes' => $notesIn !== '' ? $notesIn : null,
                 ];
                 $flashMsg = 'Saved.';
 
@@ -118,7 +146,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
                         exit;
                     }
-                    header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($stageMsg));
+                    header('Location: /cms/articles/edit?id=' . $id
+                        . '&flash=' . rawurlencode($stageMsg)
+                        . $undoSuffix($action, $currentStage));
                     exit;
                 }
 
@@ -128,15 +158,30 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
 
             $article = array_merge($article, [
-                'title'        => $titleIn,
-                'slug'         => $slug,
-                'concept_text' => $notesIn,
+                'title' => $titleIn,
+                'slug'  => $slug,
+                'notes' => $notesIn,
             ]);
         } else {
-            // ── Concept / Outline / Draft / Published — full editor ─────
+            // ── Concept / Outline / Draft / Published — stage-aware ─────
+            // Which fields are editable at this stage. Other fields are
+            // either hidden or shown read-only; we only patch the editable
+            // ones so saving at Concept doesn't blank out Body, etc.
+            //
+            // Notes are intentionally absent: they're frozen the moment the
+            // row leaves Idea — see the Idea branch above for the only write.
+            $editConcept  = $currentStage === 'concept';
+            $editOutline  = $currentStage === 'outline' || $currentStage === 'draft';
+            $editSummary  = $currentStage === 'draft' || $currentStage === 'published';
+            $editBody     = $currentStage === 'draft' || $currentStage === 'published';
+            $editHero     = $currentStage === 'draft' || $currentStage === 'published';
+            $editReadTime = $currentStage === 'draft' || $currentStage === 'published';
+
             $post = [
                 'title'         => trim((string)($_POST['title']         ?? '')),
                 'slug'          => trim((string)($_POST['slug']          ?? '')),
+                'concept_text'  => trim((string)($_POST['concept_text']  ?? '')),
+                'outline_text'  => trim((string)($_POST['outline_text']  ?? '')),
                 'summary'       => trim((string)($_POST['summary']       ?? '')),
                 'body_raw'      =>      (string)($_POST['body']          ?? ''),
                 'tags'          => trim((string)($_POST['tags']          ?? '')),
@@ -170,7 +215,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 : 'default';
 
             $readTime = null;
-            if ($post['read_time'] !== '') {
+            if ($editReadTime && $post['read_time'] !== '') {
                 if (!ctype_digit($post['read_time'])) {
                     $errors[] = 'Read time must be a whole number of minutes.';
                 } else {
@@ -178,36 +223,56 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 }
             }
 
-            $bodyClean = sanitize_html($post['body_raw']);
+            $bodyClean = $editBody ? sanitize_html($post['body_raw']) : (string)($article['body'] ?? '');
 
             $heroPath = (string)($article['hero_image'] ?? '');
-            if ($post['remove_hero']) {
-                $heroPath = '';
-            }
-            if (isset($_FILES['hero']) && is_array($_FILES['hero']) && (int)$_FILES['hero']['error'] !== UPLOAD_ERR_NO_FILE) {
-                $up = accept_upload($_FILES['hero'], 'content/article/' . $slug);
-                if (!$up['ok']) {
-                    $errors[] = 'Hero image: ' . $up['error'];
-                } else {
-                    $heroPath = $up['url'];
+            if ($editHero) {
+                if ($post['remove_hero']) {
+                    $heroPath = '';
+                }
+                if (isset($_FILES['hero']) && is_array($_FILES['hero']) && (int)$_FILES['hero']['error'] !== UPLOAD_ERR_NO_FILE) {
+                    $up = accept_upload($_FILES['hero'], 'content/article/' . $slug);
+                    if (!$up['ok']) {
+                        $errors[] = 'Hero image: ' . $up['error'];
+                    } else {
+                        $heroPath = $up['url'];
+                    }
                 }
             }
 
             if (count($errors) === 0) {
+                // Build the patch with only the fields editable at this stage.
+                // save_article() ignores absent keys, so untouched fields stay
+                // in the row exactly as they were. (notes stays frozen — only
+                // the Idea-stage handler ever writes it.)
                 $saveData = [
-                    'id'           => $id,
-                    'template'     => 'article-standard',
-                    'title'        => $post['title'],
-                    'slug'         => $slug,
-                    'summary'      => $post['summary'] !== '' ? $post['summary'] : null,
-                    'body'         => $bodyClean,
-                    'hero_image'   => $heroPath !== '' ? $heroPath : null,
-                    'hero_caption' => $post['hero_caption'] !== '' ? $post['hero_caption'] : null,
-                    'hero_size'    => $heroSize,
-                    'special_tag'  => $specialTagDb,
-                    'tags'         => $post['tags'] !== '' ? $post['tags'] : null,
-                    'read_time'    => $readTime,
+                    'id'          => $id,
+                    'template'    => 'article-standard',
+                    'title'       => $post['title'],
+                    'slug'        => $slug,
+                    'special_tag' => $specialTagDb,
+                    'tags'        => $post['tags'] !== '' ? $post['tags'] : null,
                 ];
+                if ($editConcept) {
+                    $saveData['concept_text'] = $post['concept_text'] !== '' ? $post['concept_text'] : null;
+                }
+                if ($editOutline) {
+                    $saveData['outline_text'] = $post['outline_text'] !== '' ? $post['outline_text'] : null;
+                }
+                if ($editSummary) {
+                    $saveData['summary'] = $post['summary'] !== '' ? $post['summary'] : null;
+                }
+                if ($editBody) {
+                    $saveData['body'] = $bodyClean;
+                }
+                if ($editHero) {
+                    $saveData['hero_image']   = $heroPath !== '' ? $heroPath : null;
+                    $saveData['hero_caption'] = $post['hero_caption'] !== '' ? $post['hero_caption'] : null;
+                    $saveData['hero_size']    = $heroSize;
+                }
+                if ($editReadTime) {
+                    $saveData['read_time'] = $readTime;
+                }
 
                 $flashMsg = 'Saved.';
                 [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
@@ -222,7 +287,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     if ($targetStage === 'published') {
                         $stageMsg = 'Published — live at /writing/' . $slug;
                     }
-                    header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($stageMsg));
+                    header('Location: /cms/articles/edit?id=' . $id
+                        . '&flash=' . rawurlencode($stageMsg)
+                        . $undoSuffix($action, $currentStage));
                     exit;
                 }
 
@@ -234,14 +301,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $article = array_merge($article, [
                 'title'        => $post['title'],
                 'slug'         => $slug !== '' ? $slug : $post['slug'],
-                'summary'      => $post['summary'],
+                'concept_text' => $editConcept ? $post['concept_text'] : ($article['concept_text'] ?? null),
+                'outline_text' => $editOutline ? $post['outline_text'] : ($article['outline_text'] ?? null),
+                'summary'      => $editSummary ? $post['summary']      : ($article['summary']      ?? null),
                 'body'         => $bodyClean,
                 'hero_image'   => $heroPath,
-                'hero_caption' => $post['hero_caption'],
+                'hero_caption' => $editHero ? $post['hero_caption'] : ($article['hero_caption'] ?? null),
                 'hero_size'    => $heroSize,
                 'special_tag'  => $specialTagDb,
                 'tags'         => $post['tags'],
-                'read_time'    => $readTime,
+                'read_time'    => $editReadTime ? $readTime : ($article['read_time'] ?? null),
             ]);
         }
     }
@@ -266,6 +335,30 @@ $nextStage  = $statusIdx >= 0 && $statusIdx < count(ARTICLE_STAGES) - 1
 $saveLabel = $status === 'published'
     ? 'Save changes'
     : 'Save ' . ucfirst($status);
+
+// Per-stage field visibility. These drive both the form render and the
+// POST handler's $saveData patch — keep them in sync.
+//
+// Carry-forwards (read-only at the next stage, gone after):
+//   - Idea Notes: written at Idea, shown read-only at Concept, then archived.
+//   - Concept:    written at Concept, shown read-only at Outline, then archived.
+//
+// Outline is editable at both Outline and Draft; gone at Published.
+// Hero and Read time only live at Draft and Published.
+$showIdeaNotesReadOnly = $status === 'concept';
+$showConceptInput      = $status === 'concept';
+$showConceptReadOnly   = $status === 'outline';
+$showOutlineInput      = $status === 'outline' || $status === 'draft';
+$showSummary           = $status === 'draft' || $status === 'published';
+$showBody              = $status === 'draft' || $status === 'published';
+$showHero              = $status === 'draft' || $status === 'published';
+$showReadTime          = $status === 'draft' || $status === 'published';
+
+// Undo-after-advance: shown only when the URL carries ?from_stage from
+// a forward transition. The first save_article drops the query param,
+// enforcing "once saved, no going back."
+$fromStage = (string)($_GET['from_stage'] ?? '');
+$canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $statusIdx > 0;
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -285,7 +378,7 @@ $saveLabel = $status === 'published'
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
-<?php if (!$isIdea): ?>
+<?php if ($showBody): ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
 <?php endif; ?>
 </head>
@@ -326,7 +419,18 @@ require __DIR__ . '/../partials/topbar.php';
 
       <div class="content-area">
         <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status"><?= $e($flash) ?></div>
+          <div class="flash-success" role="status">
+            <?= $e($flash) ?>
+            <?php if ($canUndo): ?>
+              <form method="post" action="/cms/articles/edit?id=<?= (int)$id ?>" class="flash-undo">
+                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                <button type="submit" name="action" value="undo" class="btn-link" formnovalidate
+                  title="Reverts the last advance. Unsaved changes at this stage are lost.">
+                  ↶ Undo
+                </button>
+              </form>
+            <?php endif; ?>
+          </div>
         <?php endif; ?>
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
@@ -360,15 +464,15 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="field-group">
-            <label class="field-label" for="article-notes">Notes <span class="field-hint-inline">optional</span></label>
+            <label class="field-label" for="article-notes">Idea Notes <span class="field-hint-inline">optional</span></label>
             <textarea
               class="field-input"
               id="article-notes"
               name="notes"
               rows="6"
               maxlength="5000"
-              placeholder="Jot down what this idea is about, possible angles, references, anything you'd lose otherwise…"><?= $e((string)($article['concept_text'] ?? '')) ?></textarea>
-            <p class="field-hint">Notes carry forward to Concept as starting material. Nothing here is published.</p>
+              placeholder="Jot down what this idea is about, possible angles, references, anything you'd lose otherwise…"><?= $e((string)($article['notes'] ?? '')) ?></textarea>
+            <p class="field-hint">Private scratchpad — viewable as reference at Concept, then archived. Never appears on the public site.</p>
           </div>
 
           <div class="form-actions form-actions-sticky">
@@ -420,87 +524,133 @@ require __DIR__ . '/../partials/topbar.php';
                 </p>
               </div>
 
-              <div class="field-group">
-                <label class="field-label" for="article-summary">Summary</label>
-                <textarea
-                  id="article-summary"
-                  class="field-input"
-                  name="summary"
-                  rows="3"
-                  maxlength="500"
-                  placeholder="One- to two-sentence summary for cards and meta description."><?= $e((string)($article['summary'] ?? '')) ?></textarea>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label">Body</label>
-                <div class="tiptap-wrap">
-                  <div class="tiptap-toolbar" id="tiptap-toolbar">
-                    <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
-                    <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>
-                    <button type="button" data-cmd="h2"          title="Heading 2"       class="tt-btn">H2</button>
-                    <button type="button" data-cmd="h3"          title="Heading 3"       class="tt-btn">H3</button>
-                    <button type="button" data-cmd="ul"          title="Bullet list"     class="tt-btn">• List</button>
-                    <button type="button" data-cmd="ol"          title="Numbered list"   class="tt-btn">1. List</button>
-                    <button type="button" data-cmd="link"        title="Link"            class="tt-btn">Link</button>
-                    <button type="button" data-cmd="blockquote"  title="Blockquote"      class="tt-btn">“ Quote</button>
-                    <button type="button" data-cmd="code"        title="Inline code"     class="tt-btn">Code</button>
-                    <button type="button" data-cmd="muted"       title="Muted word (m)"  class="tt-btn">m</button>
-                    <button type="button" data-cmd="image"       title="Insert image"    class="tt-btn">Image</button>
-                  </div>
-                  <div id="tiptap-editor" class="tiptap-editor"></div>
+              <?php if ($showSummary): ?>
+                <div class="field-group">
+                  <label class="field-label" for="article-summary">Summary</label>
                   <textarea
-                    id="article-body"
-                    name="body"
-                    rows="20"
-                    class="tiptap-fallback"
-                    aria-label="Article body (HTML)"><?= $e($bodyInitial) ?></textarea>
+                    id="article-summary"
+                    class="field-input"
+                    name="summary"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="One- to two-sentence summary for cards and meta description."><?= $e((string)($article['summary'] ?? '')) ?></textarea>
                 </div>
-                <p class="field-hint">
-                  The editor strips any HTML outside the toolbar allowlist on save.
-                </p>
-              </div>
+              <?php endif; ?>
+
+              <?php if ($showIdeaNotesReadOnly): ?>
+                <div class="field-group">
+                  <label class="field-label">Idea Notes</label>
+                  <div class="readonly-block"><?= nl2br($e((string)($article['notes'] ?? '')), false) ?></div>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($showConceptReadOnly): ?>
+                <div class="field-group">
+                  <label class="field-label">Concept</label>
+                  <div class="readonly-block"><?= nl2br($e((string)($article['concept_text'] ?? '')), false) ?></div>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($showConceptInput): ?>
+                <div class="field-group">
+                  <label class="field-label" for="article-concept">Concept</label>
+                  <textarea
+                    id="article-concept"
+                    class="field-input"
+                    name="concept_text"
+                    rows="8"
+                    maxlength="10000"
+                    placeholder="What is this piece about? What's the angle? Write enough to know whether it's worth developing further."><?= $e((string)($article['concept_text'] ?? '')) ?></textarea>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($showOutlineInput): ?>
+                <div class="field-group">
+                  <label class="field-label" for="article-outline">Outline</label>
+                  <textarea
+                    id="article-outline"
+                    class="field-input"
+                    name="outline_text"
+                    rows="10"
+                    maxlength="20000"
+                    placeholder="Structure the piece — section headers, key points, supporting examples."><?= $e((string)($article['outline_text'] ?? '')) ?></textarea>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($showBody): ?>
+                <div class="field-group">
+                  <label class="field-label">Body</label>
+                  <div class="tiptap-wrap">
+                    <div class="tiptap-toolbar" id="tiptap-toolbar">
+                      <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
+                      <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>
+                      <button type="button" data-cmd="h2"          title="Heading 2"       class="tt-btn">H2</button>
+                      <button type="button" data-cmd="h3"          title="Heading 3"       class="tt-btn">H3</button>
+                      <button type="button" data-cmd="ul"          title="Bullet list"     class="tt-btn">• List</button>
+                      <button type="button" data-cmd="ol"          title="Numbered list"   class="tt-btn">1. List</button>
+                      <button type="button" data-cmd="link"        title="Link"            class="tt-btn">Link</button>
+                      <button type="button" data-cmd="blockquote"  title="Blockquote"      class="tt-btn">“ Quote</button>
+                      <button type="button" data-cmd="code"        title="Inline code"     class="tt-btn">Code</button>
+                      <button type="button" data-cmd="muted"       title="Muted word (m)"  class="tt-btn">m</button>
+                      <button type="button" data-cmd="image"       title="Insert image"    class="tt-btn">Image</button>
+                    </div>
+                    <div id="tiptap-editor" class="tiptap-editor"></div>
+                    <textarea
+                      id="article-body"
+                      name="body"
+                      rows="20"
+                      class="tiptap-fallback"
+                      aria-label="Article body (HTML)"><?= $e($bodyInitial) ?></textarea>
+                  </div>
+                  <p class="field-hint">
+                    The editor strips any HTML outside the toolbar allowlist on save.
+                  </p>
+                </div>
+              <?php endif; ?>
             </div>
 
             <aside class="form-side">
-              <div class="field-group">
-                <label class="field-label">Hero image</label>
-                <?php $hero = (string)($article['hero_image'] ?? ''); if ($hero !== ''): ?>
-                  <div class="hero-preview">
-                    <img src="<?= $e($hero) ?>" alt="" loading="lazy">
-                    <label class="hero-remove">
-                      <input type="checkbox" name="remove_hero" value="1"> Remove
-                    </label>
-                  </div>
-                <?php endif; ?>
-                <input type="file" class="field-input field-file" name="hero" accept="image/jpeg,image/png,image/webp,image/gif">
-                <p class="field-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
-              </div>
+              <?php if ($showHero): ?>
+                <div class="field-group">
+                  <label class="field-label">Hero image <span class="field-hint-inline">optional</span></label>
+                  <?php $hero = (string)($article['hero_image'] ?? ''); if ($hero !== ''): ?>
+                    <div class="hero-preview">
+                      <img src="<?= $e($hero) ?>" alt="" loading="lazy">
+                      <label class="hero-remove">
+                        <input type="checkbox" name="remove_hero" value="1"> Remove
+                      </label>
+                    </div>
+                  <?php endif; ?>
+                  <input type="file" class="field-input field-file" name="hero" accept="image/jpeg,image/png,image/webp,image/gif">
+                  <p class="field-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="article-hero-caption">Hero caption</label>
+                  <input
+                    type="text"
+                    class="field-input"
+                    id="article-hero-caption"
+                    name="hero_caption"
+                    value="<?= $e((string)($article['hero_caption'] ?? '')) ?>"
+                    maxlength="500">
+                </div>
+
+                <div class="field-group">
+                  <label class="field-label" for="article-hero-size">Hero size</label>
+                  <select class="field-select" id="article-hero-size" name="hero_size">
+                    <?php
+                    $heroSizeCurrent = (string)($article['hero_size'] ?? 'default');
+                    foreach (['default','wide','full'] as $sz):
+                    ?>
+                      <option value="<?= $sz ?>" <?= $heroSizeCurrent === $sz ? 'selected' : '' ?>><?= ucfirst($sz) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+              <?php endif; ?>
 
               <div class="field-group">
-                <label class="field-label" for="article-hero-caption">Hero caption</label>
-                <input
-                  type="text"
-                  class="field-input"
-                  id="article-hero-caption"
-                  name="hero_caption"
-                  value="<?= $e((string)($article['hero_caption'] ?? '')) ?>"
-                  maxlength="500">
-              </div>
-
-              <div class="field-group">
-                <label class="field-label" for="article-hero-size">Hero size</label>
-                <select class="field-select" id="article-hero-size" name="hero_size">
-                  <?php
-                  $heroSizeCurrent = (string)($article['hero_size'] ?? 'default');
-                  foreach (['default','wide','full'] as $sz):
-                  ?>
-                    <option value="<?= $sz ?>" <?= $heroSizeCurrent === $sz ? 'selected' : '' ?>><?= ucfirst($sz) ?></option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-
-              <div class="field-group">
-                <label class="field-label" for="article-special-tag">Special tag</label>
+                <label class="field-label" for="article-special-tag">Special tag <span class="field-hint-inline">optional</span></label>
                 <select class="field-select" id="article-special-tag" name="special_tag">
                   <?php
                   $stCurrent = (string)($article['special_tag'] ?? '');
@@ -513,7 +663,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
               <div class="field-group">
-                <label class="field-label" for="article-tags">Tags</label>
+                <label class="field-label" for="article-tags">Tags <span class="field-hint-inline">optional</span></label>
                 <input
                   type="text"
                   class="field-input"
@@ -525,17 +675,22 @@ require __DIR__ . '/../partials/topbar.php';
                 <p class="field-hint">Display only — not used for filtering yet.</p>
               </div>
 
-              <div class="field-group">
-                <label class="field-label" for="article-read-time">Read time <span class="field-hint-inline">minutes</span></label>
-                <input
-                  type="number"
-                  class="field-input"
-                  id="article-read-time"
-                  name="read_time"
-                  value="<?= $e((string)($article['read_time'] ?? '')) ?>"
-                  min="0"
-                  max="120">
-              </div>
+              <?php if ($showReadTime): ?>
+                <div class="field-group">
+                  <label class="field-label" for="article-read-time">
+                    Read time <span class="field-hint-inline">minutes<?= $readTimeDisabled ? ' · set at Draft' : '' ?></span>
+                  </label>
+                  <input
+                    type="number"
+                    class="field-input"
+                    id="article-read-time"
+                    name="read_time"
+                    value="<?= $e((string)($article['read_time'] ?? '')) ?>"
+                    min="0"
+                    max="120"
+                    <?= $readTimeDisabled ? 'disabled' : '' ?>>
+                </div>
+              <?php endif; ?>
             </aside>
           </div>
 
@@ -580,7 +735,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<?php if (!$isIdea): ?>
+<?php if ($showBody): ?>
 <script type="module">
   import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
   setupTiptap({

@@ -55,7 +55,7 @@ $save = [
     'status'   => 'idea',
     'template' => 'article-standard',
 ];
-if ($notes !== '') $save['concept_text'] = $notes;
+if ($notes !== '') $save['notes'] = $notes;
 
 save_article($save);
 

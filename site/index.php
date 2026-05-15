@@ -57,7 +57,6 @@ $router->post('/cms/logout',   $cms('logout.php'));
 $router->get ('/cms/account',  $cms('account.php'));
 $router->post('/cms/account',  $cms('account.php'));
 $router->get ('/cms/ideation', $cms('views/ideation.php'));
-$router->post('/cms/ideation', $cms('views/ideation.php'));
 
 // Staging-only self-serve unlock. The handler is host-gated to staging,
 // so a POST on prod 404s. See cms/unlock-account.php for the rationale

@@ -113,7 +113,7 @@ function save_article(array $data): int
         'show_author', 'show_author_bio',
         'special_tag', 'series_id', 'series_order',
         'read_time', 'tags',
-        'concept_text', 'outline_text',
+        'notes', 'concept_text', 'outline_text',
         'published_at', 'published_status',
     ];
 

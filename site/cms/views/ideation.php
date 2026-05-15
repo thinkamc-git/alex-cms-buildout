@@ -2,14 +2,12 @@
 /**
  * cms/views/ideation.php — Articles ideation board.
  *
- * Routed from site/index.php:
- *   GET  /cms/ideation       — render board
- *   POST /cms/ideation       — handle Build → (advance Idea to Concept)
+ * Routed from site/index.php as GET /cms/ideation.
  *
  * A holding space for raw Article ideas. Quick-capture posts to
- * /cms/articles/new-idea (same endpoint as Pipeline). Each card shows
- * the title, optional notes (from concept_text), and a "Build →" button
- * that advances Idea → Concept and drops the author into the editor.
+ * /cms/articles/new-idea (same endpoint as Pipeline). Each card is
+ * itself a link into the Idea-stage editor; advancing to Concept
+ * happens via the editor's Advance button, not a list-view shortcut.
  *
  * Phase 7 is Articles-only; the type-lane layout from the mockup will
  * grow Journals/Sessions/Experiments lanes as those types ship.
@@ -26,26 +24,6 @@ Auth::require_login();
 $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
-
-// ── POST: Build → (advance Idea → Concept) ──────────────────────────
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
-        header('Location: /cms/ideation?flash=' . rawurlencode('Session expired — try again.'));
-        exit;
-    }
-    $id = (int)($_POST['id'] ?? 0);
-    if ($id <= 0) {
-        header('Location: /cms/ideation');
-        exit;
-    }
-    $res = transition_stage($id, 'concept');
-    if (!$res['ok']) {
-        header('Location: /cms/ideation?flash=' . rawurlencode($res['error']));
-        exit;
-    }
-    header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode('Advanced to Concept — keep developing.'));
-    exit;
-}
 
 $ideas = list_articles(['status' => 'idea']);
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
@@ -123,29 +101,22 @@ require __DIR__ . '/../partials/topbar.php';
               $id      = (int)($a['id'] ?? 0);
               $title2  = (string)($a['title'] ?? '');
               if ($title2 === '') $title2 = '(untitled)';
-              // list_articles() doesn't currently pull concept_text — fetch
-              // per-card. This is fine in single-author volumes; if the
-              // Idea backlog ever grows huge we'd extend the select list.
+              // list_articles() doesn't currently pull notes — fetch per
+              // card. Fine at single-author volumes; if the Idea backlog
+              // ever grows huge we'd extend the SELECT list.
               $full    = get_article($id);
-              $notes   = (string)($full['concept_text'] ?? '');
+              $notes   = (string)($full['notes'] ?? '');
               $updated = relative_time((string)($a['updated_at'] ?? ''));
             ?>
-              <div class="idea-card">
-                <div class="idea-card-title">
-                  <a href="/cms/articles/edit?id=<?= (int)$id ?>" style="color:inherit;text-decoration:none"><?= $e($title2) ?></a>
-                </div>
+              <a href="/cms/articles/edit?id=<?= (int)$id ?>" class="idea-card">
+                <div class="idea-card-title"><?= $e($title2) ?></div>
                 <?php if ($notes !== ''): ?>
                   <div class="idea-card-desc"><?= $e($notes) ?></div>
                 <?php endif; ?>
                 <div class="idea-card-foot">
                   <span class="idea-card-meta"><?= $e($updated) ?></span>
-                  <form method="post" action="/cms/ideation" style="display:inline">
-                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                    <input type="hidden" name="id" value="<?= (int)$id ?>">
-                    <button type="submit" class="btn-sec idea-build">Build →</button>
-                  </form>
                 </div>
-              </div>
+              </a>
             <?php endforeach; endif; ?>
           </div>
         </div>

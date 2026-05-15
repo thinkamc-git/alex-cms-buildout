@@ -1,11 +1,10 @@
 <?php
 /**
- * cms/views/articles.php — Articles list.
+ * cms/views/journals.php — Journals list (Phase 8).
  *
- * Routed from site/index.php as GET /cms/articles. Auth gate + chrome
- * (topbar / sidebar / view-header / filter-bar / table) reuse the
- * Phase 5 partials. The filter bar is rendered but its pills are
- * placeholder-only until Phase 7 wires real filtering.
+ * Mirrors cms/views/articles.php in structure. The display title comes
+ * from key_statement when set (Draft/Published), else falls back to the
+ * working title used during Idea/Concept/Outline stages.
  */
 
 declare(strict_types=1);
@@ -19,20 +18,14 @@ Auth::require_login();
 $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
-$articles   = list_articles();
-
-// Drained from the URL after a destructive action.
-$flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
+$journals   = list_journals();
+$flash      = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-/**
- * Render a stage pill (status). Uses the design system's .pill / .stage-{x}
- * classes from status.css.
- */
 $stagePill = static function (string $status) use ($e): string {
     $status = strtolower($status);
     $label  = ucfirst($status);
@@ -44,7 +37,7 @@ $stagePill = static function (string $status) use ($e): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>Articles — alexmchong.ca CMS</title>
+<title>Journals — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -61,48 +54,24 @@ $stagePill = static function (string $status) use ($e): string {
 <body>
 
 <?php
-$breadcrumb = 'Articles';
+$breadcrumb = 'Journals';
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'articles';
-  $nav_counts    = ['articles' => count($articles)];
+  $active_nav_id = 'journals';
+  $nav_counts    = ['journals' => count($journals)];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
   <main class="main">
-    <div class="view active" id="view-articles">
+    <div class="view active" id="view-journals">
       <?php
-      $title    = 'Articles';
-      $subtitle = 'Long-form writing. Create, edit, and ship drafts. Pipeline + transitions land in Phase 7.';
-      $actions  = '<a href="/cms/articles/new" class="btn-pri">+ New Article</a>';
+      $title    = 'Journals';
+      $subtitle = 'Short, declarative entries. Each gets a per-category Entry number when published.';
+      $actions  = '<a href="/cms/journals/new" class="btn-pri">+ New Journal</a>';
       require __DIR__ . '/../partials/view-header.php';
-      ?>
-
-      <?php
-      $groups = [
-          [
-              'label' => 'Stage',
-              'mode'  => 'or',
-              'pills' => [
-                  ['label' => 'All',       'active' => true, 'all' => true],
-                  ['label' => 'Draft'],
-                  ['label' => 'Published'],
-              ],
-          ],
-          [
-              'label' => 'Special Tag',
-              'mode'  => 'or',
-              'pills' => [
-                  ['label' => 'All',       'active' => true, 'all' => true],
-                  ['label' => 'Framework'],
-                  ['label' => 'Principle'],
-              ],
-          ],
-      ];
-      require __DIR__ . '/../partials/filter-bar.php';
       ?>
 
       <div class="content-area">
@@ -113,60 +82,64 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">All articles</span>
-              <span class="content-block-sublabel">Draft + Published</span>
+              <span class="content-block-label">All journals</span>
+              <span class="content-block-sublabel">Idea · Concept · Outline · Draft · Published</span>
             </div>
-            <span class="content-block-count"><?= (int)count($articles) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($journals) ?> entries</span>
           </div>
 
           <?php
           $columns = [
-              ['label' => 'Title',       'width' => '40%'],
-              ['label' => 'Stage',       'width' => '12%'],
-              ['label' => 'Special tag', 'width' => '14%'],
-              ['label' => 'Updated',     'width' => '18%'],
-              ['label' => 'Actions',     'width' => '16%'],
+              ['label' => 'Key Statement', 'width' => '52%'],
+              ['label' => 'Stage',         'width' => '12%'],
+              ['label' => 'Entry #',       'width' => '10%'],
+              ['label' => 'Updated',       'width' => '14%'],
+              ['label' => 'Actions',       'width' => '12%'],
           ];
 
           $rows = [];
-          foreach ($articles as $a) {
-              $id      = (int)($a['id'] ?? 0);
-              $slug    = (string)($a['slug'] ?? '');
-              $title2  = (string)($a['title'] ?? '');
-              $special = (string)($a['special_tag'] ?? '');
-              $updated = (string)($a['updated_at'] ?? '');
+          foreach ($journals as $j) {
+              $id           = (int)($j['id'] ?? 0);
+              $slug         = (string)($j['slug'] ?? '');
+              $keyStatement = (string)($j['key_statement'] ?? '');
+              $workingTitle = (string)($j['title'] ?? '');
+              $display      = $keyStatement !== '' ? $keyStatement : ($workingTitle !== '' ? $workingTitle : '(untitled)');
+              $entryNum     = $j['journal_number'] !== null
+                  ? str_pad((string)(int)$j['journal_number'], 3, '0', STR_PAD_LEFT)
+                  : null;
+              $updated      = (string)($j['updated_at'] ?? '');
               $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
 
-              $titleHtml = '<a href="/cms/articles/edit?id=' . $id . '" class="row-title">'
-                         . $e($title2 !== '' ? $title2 : '(untitled)')
+              $titleHtml = '<a href="/cms/journals/edit?id=' . $id . '" class="row-title">'
+                         . $e($display)
                          . '</a>'
                          . ' <span class="row-slug">/' . $e($slug) . '</span>';
 
-              $specialHtml = $special !== ''
-                  ? '<span class="pill special-' . $e($special) . '">' . $e(ucfirst($special)) . '</span>'
+              $entryHtml = $entryNum !== null
+                  ? '<span class="pill">Entry ' . $e($entryNum) . '</span>'
                   : '<span class="muted">—</span>';
 
               $actionsHtml = '<div class="row-actions">'
-                  . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                  . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
+                  . '<a href="/cms/journals/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
+                  . '<form method="post" action="/cms/journals/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this journal? This cannot be undone.">'
                   .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
                   .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
                   . '</form>'
                   . '</div>';
 
               $rows[] = [
-                  'href'  => '/cms/articles/edit?id=' . $id,
+                  'href'  => '/cms/journals/edit?id=' . $id,
                   'cells' => [
                       ['html' => $titleHtml],
-                      ['html' => $stagePill((string)($a['status'] ?? 'draft'))],
-                      ['html' => $specialHtml],
+                      ['html' => $stagePill((string)($j['status'] ?? 'idea'))],
+                      ['html' => $entryHtml],
                       ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
                       ['html' => $actionsHtml, 'class' => 'cell-actions'],
                   ],
               ];
           }
 
-          $empty_text = 'No articles yet. Click + New Article to start.';
+          $empty_text = 'No journals yet. Click + New Journal to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -176,9 +149,6 @@ require __DIR__ . '/../partials/topbar.php';
 </div>
 
 <script>
-  // Whole-row navigation: click anywhere on a .row-clickable row to open
-  // the edit view. Clicks inside .cell-actions (Edit/Delete buttons) are
-  // ignored so those keep their own behavior.
   for (const tr of document.querySelectorAll('tr.row-clickable')) {
     tr.addEventListener('click', (e) => {
       if (e.target.closest('.cell-actions, a, button, form, input, label, select')) return;
@@ -187,8 +157,6 @@ require __DIR__ . '/../partials/topbar.php';
     });
   }
 
-  // Wire delete confirmations. Each delete form has data-confirm="…"; if
-  // the user cancels, the submit is suppressed.
   for (const form of document.querySelectorAll('form.inline-delete')) {
     form.addEventListener('submit', (e) => {
       const msg = form.getAttribute('data-confirm') || 'Delete?';

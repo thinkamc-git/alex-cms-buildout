@@ -615,6 +615,53 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    real types so all Ideation column headers line up visually. */
 .tb-none { color:var(--muted); background:color-mix(in srgb,var(--muted) 8%,transparent); border:1px solid color-mix(in srgb,var(--muted) 20%,transparent); }
 
+/* Clickable rows — added in Phase 8 so the whole row navigates to the
+   edit view, matching the existing Edit button. JS hook lives in the
+   list views; CSS only handles the affordance. */
+tr.row-clickable { cursor: pointer; }
+tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, transparent); }
+
+/* Body editor visual container — Phase 8. Matches the other .field-input
+   chrome (soft ink-18 border, surface background, same 4px radius) so the
+   body field reads as one of the form's input controls rather than a
+   floating page region.
+
+   Specificity bumped to .tiptap-wrap.body-box (020) because tiptap.css
+   loads AFTER style-cms.css and would otherwise win same-specificity
+   battles on `border`, `border-radius`, `background`. */
+.tiptap-wrap.body-box { background:var(--surface); border:1px solid var(--ink-18); border-radius:var(--r-card); overflow:hidden; }
+.tiptap-wrap.body-box:focus-within { border-color:var(--primary); }
+.tiptap-wrap.body-box .tiptap-editor { min-height:280px; padding:var(--space-16) var(--space-20); background:var(--surface); }
+.tiptap-wrap.body-box .tiptap-toolbar { background:var(--canvas-raised); border-bottom:var(--rule-faint); }
+
+/* Toolbar buttons — modelled on .btn-ghost / .filter-pill from above so
+   the same design-system tokens (ink-18 → ink-30 border, r-pill radius,
+   primary hover colour) carry through.
+   Selector specificity is .tiptap-wrap.body-box .tt-btn (030) which
+   beats tiptap.css's `.tiptap-toolbar .tt-btn` (020) — that file loads
+   AFTER style-cms.css and would otherwise win the cascade. */
+.tiptap-wrap.body-box .tt-btn {
+  padding: var(--space-4) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--ink-18);
+  border-radius: var(--r-pill);
+  color: var(--primary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.tiptap-wrap.body-box .tt-btn:hover {
+  border-color: var(--ink-30);
+  background: var(--canvas-raised);
+}
+.tiptap-wrap.body-box .tt-btn:active {
+  background: var(--ink-08);
+}
+.tiptap-wrap.body-box .tt-btn.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+
 /* ─── Drag-and-drop (Phase 7.6) ─── */
 .kanban-board[data-dnd-mode] .kcard,
 .kanban-board[data-dnd-mode] .idea-card { cursor:grab; }

@@ -52,10 +52,11 @@ if (!is_array($idsRaw)) {
 }
 $ids = array_values(array_map('intval', $idsRaw));
 
-// Pipeline lane = (type='article', status=<stage>). Other types don't
-// surface in Pipeline today, so reorder operates against the Articles
-// view of Pipeline.
-$res = reorder_lane(['type' => 'article', 'status' => $stage], $ids);
+// Phase 8: Pipeline mixes articles + journals, so the lane is just
+// status=<stage> (across types). pipeline_order is a single global
+// ordinal per stage. Within /cms/articles and /cms/journals, the same
+// column sorts the per-type subset locally.
+$res = reorder_lane(['status' => $stage], $ids);
 if (!$res['ok']) {
     http_response_code(400);
     echo json_encode(['ok' => false, 'error' => $res['error']]);

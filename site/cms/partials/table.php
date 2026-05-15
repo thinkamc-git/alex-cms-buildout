@@ -50,9 +50,25 @@ $colCount   = max(count($columns), 1);
           </td>
         </tr>
       <?php else: ?>
-        <?php foreach ($rows as $row): ?>
-          <tr>
-            <?php foreach ((array)$row as $cell):
+        <?php foreach ($rows as $row):
+            // A row may be either a flat list of cells (back-compat) or
+            // an object { cells: [...], href: "/path" } to make the whole
+            // <tr> clickable. The href is propagated via data-row-href;
+            // a small JS hook downstream listens for clicks anywhere on
+            // the row except inside .cell-actions (Edit/Delete buttons).
+            if (isset($row['cells']) && is_array($row['cells'])) {
+                $cells   = $row['cells'];
+                $rowHref = (string)($row['href'] ?? '');
+            } else {
+                $cells   = (array)$row;
+                $rowHref = '';
+            }
+            $trAttr = $rowHref !== ''
+                ? ' class="row-clickable" data-row-href="' . htmlspecialchars($rowHref, ENT_QUOTES, 'UTF-8') . '"'
+                : '';
+        ?>
+          <tr<?= $trAttr ?>>
+            <?php foreach ($cells as $cell):
                 if (is_array($cell)) {
                     $cellClass = isset($cell['class']) ? ' class="' . htmlspecialchars((string)$cell['class'], ENT_QUOTES, 'UTF-8') . '"' : '';
                     if (isset($cell['html'])) {

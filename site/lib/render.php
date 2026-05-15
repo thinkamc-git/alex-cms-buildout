@@ -106,13 +106,17 @@ function render_content(string $slug): void
     $template = (string)($row['template'] ?? '');
     $known = [
         'article-standard' => 'article-standard.php',
+        'journal-entry'    => 'journal-entry.php',
     ];
     if (!isset($known[$template])) {
         render_404();
         return;
     }
 
-    $page_title       = (string)($row['title'] ?? 'Untitled');
+    // Journals don't render a Title block publicly — key_statement is the
+    // visible "headline". Use it for the <title> when present.
+    $page_title = (string)($row['key_statement'] ?? '');
+    if ($page_title === '') $page_title = (string)($row['title'] ?? 'Untitled');
     $page_description = (string)($row['summary'] ?? '');
 
     if (!defined('TEMPLATE_OK')) define('TEMPLATE_OK', true);

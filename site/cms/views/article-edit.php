@@ -46,7 +46,8 @@ $article = get_article($id);
 if ($article === null) {
     // get_article() filters type='article'. Idea-stage rows may be untyped
     // (captured but not yet typed by a column-drag in Ideation), and other
-    // types live in this editor temporarily while their phase isn't built.
+    // types pass through this editor only while at Idea — beyond that
+    // they route to their type-specific editor.
     $stmt = db()->prepare("SELECT * FROM content WHERE id = :id LIMIT 1");
     $stmt->execute([':id' => $id]);
     $article = $stmt->fetch() ?: null;
@@ -55,6 +56,15 @@ if ($article === null) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');
     echo "Article not found.\n";
+    exit;
+}
+
+// Route non-article types past Idea to their dedicated editor. Idea stage
+// stays here so the shared minimal editor handles all types uniformly.
+$_routeStage = (string)($article['status'] ?? '');
+$_routeType  = (string)($article['type']   ?? '');
+if ($_routeStage !== 'idea' && $_routeType === 'journal') {
+    header('Location: /cms/journals/edit?id=' . $id);
     exit;
 }
 
@@ -73,18 +83,20 @@ $undoSuffix = static function (string $action, string $current): string {
 
 /**
  * Map an action to a destination stage (or null = no transition). Returns
- * a tuple [stage|null, defaultFlashMessage].
+ * a tuple [stage|null, defaultFlashMessage]. Stages depend on the type
+ * (journals skip Concept/Outline) so the destination of "advance" varies.
  */
-$actionToStage = static function (string $action, string $current) {
-    $idx = stage_index($current);
+$actionToStage = static function (string $action, string $current, ?string $type) {
+    $stages = stages_for_type($type);
+    $idx = array_search($current, $stages, true);
     switch ($action) {
         case 'advance':
-            if ($idx < 0 || $idx >= count(ARTICLE_STAGES) - 1) return [null, ''];
-            $next = ARTICLE_STAGES[$idx + 1];
+            if ($idx === false || $idx >= count($stages) - 1) return [null, ''];
+            $next = $stages[$idx + 1];
             return [$next, 'Advanced to ' . ucfirst($next) . '.'];
         case 'step-back':
-            if ($idx <= 0) return [null, ''];
-            $prev = ARTICLE_STAGES[$idx - 1];
+            if ($idx === false || $idx <= 0) return [null, ''];
+            $prev = $stages[$idx - 1];
             return [$prev, 'Stepped back to ' . ucfirst($prev) . '.'];
         case 'publish':
             return ['published', 'Published — live now.'];
@@ -154,7 +166,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 ];
                 $flashMsg = 'Saved.';
 
-                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
+                // Idea-stage advance uses the type the user just picked
+                // (which may have just changed from null).
+                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage, $typeDb);
                 if ($targetStage !== null) {
                     save_article($saveData);
                     $res = transition_stage($id, $targetStage);
@@ -162,7 +176,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
                         exit;
                     }
-                    header('Location: /cms/articles/edit?id=' . $id
+                    // Per-type routing: a journal past Idea lives in
+                    // /cms/journals/edit.
+                    $editPath = ($typeDb === 'journal' && $targetStage !== 'idea')
+                        ? '/cms/journals/edit'
+                        : '/cms/articles/edit';
+                    header('Location: ' . $editPath . '?id=' . $id
                         . '&flash=' . rawurlencode($stageMsg)
                         . $undoSuffix($action, $currentStage));
                     exit;
@@ -292,7 +311,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 }
 
                 $flashMsg = 'Saved.';
-                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
+                $rowTypeForAction = (string)($article['type'] ?? '') !== '' ? (string)$article['type'] : null;
+                [$targetStage, $stageMsg] = $actionToStage($action, $currentStage, $rowTypeForAction);
 
                 if ($targetStage !== null) {
                     save_article($saveData);
@@ -338,14 +358,19 @@ header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 $status        = (string)($article['status'] ?? 'idea');
-$statusIdx     = stage_index($status);
+$rowType       = $article['type'] ?? null;
+if (is_string($rowType) && $rowType === '') $rowType = null;
+$myStages      = stages_for_type($rowType);
+$statusIdx     = stage_index($status);                       // index in ARTICLE_STAGES (for ?: classes etc.)
+$myStatusIdx   = array_search($status, $myStages, true);     // index in the type-specific list
+if ($myStatusIdx === false) $myStatusIdx = -1;
 $isIdea        = $status === 'idea';
 $slugPublished = $status === 'published';
 $bodyInitial   = (string)($article['body'] ?? '');
 
-$prevStage  = $statusIdx > 0                              ? ARTICLE_STAGES[$statusIdx - 1] : null;
-$nextStage  = $statusIdx >= 0 && $statusIdx < count(ARTICLE_STAGES) - 1
-            ? ARTICLE_STAGES[$statusIdx + 1] : null;
+$prevStage = $myStatusIdx > 0 ? $myStages[$myStatusIdx - 1] : null;
+$nextStage = $myStatusIdx >= 0 && $myStatusIdx < count($myStages) - 1
+    ? $myStages[$myStatusIdx + 1] : null;
 
 // Stage-aware Save label. Published reads "Save changes" since it's a
 // post-publish edit; every other stage names the stage you're saving in.
@@ -375,7 +400,7 @@ $showReadTime          = $status === 'draft' || $status === 'published';
 // a forward transition. The first save_article drops the query param,
 // enforcing "once saved, no going back."
 $fromStage = (string)($_GET['from_stage'] ?? '');
-$canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $statusIdx > 0;
+$canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $myStatusIdx > 0;
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -425,10 +450,10 @@ require __DIR__ . '/../partials/topbar.php';
       ?>
 
       <div class="stage-bar">
-        <?php foreach (ARTICLE_STAGES as $i => $s):
+        <?php foreach ($myStages as $i => $s):
           $cls = '';
-          if ($i < $statusIdx)      $cls = ' done';
-          elseif ($i === $statusIdx) $cls = ' current';
+          if ($i < $myStatusIdx)         $cls = ' done';
+          elseif ($i === $myStatusIdx)   $cls = ' current';
         ?>
           <div class="stage-bar-step<?= $cls ?>"><?= ucfirst($s) ?></div>
         <?php endforeach; ?>
@@ -515,9 +540,29 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="form-actions form-actions-sticky">
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms" class="btn-ghost">Cancel</a>
-            <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto">Advance to Concept →</button>
+            <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto" data-advance-button>
+              Advance to <span data-advance-target><?= $e(ucfirst($nextStage ?? 'Concept')) ?></span> →
+            </button>
           </div>
         </form>
+
+        <script>
+          // Type-aware advance label. Journals skip Concept/Outline, so the
+          // Advance button's destination depends on whichever type is picked
+          // in the dropdown at submit time. Update the label live as the
+          // user changes the Type select so the button never lies.
+          (function () {
+            const typeSel = document.getElementById('article-type');
+            const tgt     = document.querySelector('[data-advance-target]');
+            if (!typeSel || !tgt) return;
+            const journalLike = new Set(['journal', 'live-session', 'experiment']);
+            function update() {
+              tgt.textContent = journalLike.has(typeSel.value) ? 'Draft' : 'Concept';
+            }
+            typeSel.addEventListener('change', update);
+            update();
+          })();
+        </script>
 
       <?php else: ?>
         <form method="post"
@@ -617,7 +662,7 @@ require __DIR__ . '/../partials/topbar.php';
               <?php if ($showBody): ?>
                 <div class="field-group">
                   <label class="field-label">Body</label>
-                  <div class="tiptap-wrap">
+                  <div class="tiptap-wrap body-box">
                     <div class="tiptap-toolbar" id="tiptap-toolbar">
                       <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
                       <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>

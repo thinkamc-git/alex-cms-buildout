@@ -29,16 +29,39 @@ $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
 $articles = list_articles();
-$counts   = count_articles_by_stage();
+$journals = list_journals();
+
+// Tag each row with its display type so the kanban card render picks the
+// right badge. (list_articles / list_journals don't ship a `type` column
+// because each query is filtered to one type — synthesize it here.)
+foreach ($articles as &$a) { $a['type'] = 'article'; } unset($a);
+foreach ($journals as &$j) { $j['type'] = 'journal'; } unset($j);
+
+// Merge then re-sort by pipeline_order ASC, updated_at DESC. Both lists
+// already arrive in their lane-local order; the merge needs a stable
+// global sort so journals and articles share lane positions cleanly.
+$rows = array_merge($articles, $journals);
+usort($rows, static function (array $a, array $b): int {
+    $po = (int)($a['pipeline_order'] ?? 0) <=> (int)($b['pipeline_order'] ?? 0);
+    if ($po !== 0) return $po;
+    return strcmp((string)($b['updated_at'] ?? ''), (string)($a['updated_at'] ?? ''));
+});
+
+// Per-stage counts across both types.
+$counts = ['idea' => 0, 'concept' => 0, 'outline' => 0, 'draft' => 0, 'published' => 0];
+foreach ($rows as $r) {
+    $s = (string)($r['status'] ?? '');
+    if (isset($counts[$s])) $counts[$s]++;
+}
 $inFlight = $counts['idea'] + $counts['concept'] + $counts['outline'] + $counts['draft'];
 
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
-// Group articles by stage for kanban rendering.
+// Group rows by stage for kanban rendering.
 $byStage = array_fill_keys(ARTICLE_STAGES, []);
-foreach ($articles as $a) {
-    $s = (string)($a['status'] ?? 'idea');
-    if (isset($byStage[$s])) $byStage[$s][] = $a;
+foreach ($rows as $r) {
+    $s = (string)($r['status'] ?? 'idea');
+    if (isset($byStage[$s])) $byStage[$s][] = $r;
 }
 
 define('CMS_PARTIAL_OK', true);
@@ -47,22 +70,37 @@ header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 /**
- * Render one kanban card. $stage drives the per-stage display variant
- * (idea = title only; concept onward = title + slug + foot).
+ * Render one kanban card. Pipeline now mixes types (articles + journals);
+ * the badge and edit URL switch on the row's `type`. Journals past Idea
+ * live at /cms/journals/edit and prefer key_statement as the display name.
  */
 $renderCard = static function (array $a, string $stage) use ($e): string {
     $id      = (int)($a['id'] ?? 0);
-    $title   = (string)($a['title'] ?? '');
-    if ($title === '') $title = '(untitled)';
+    $type    = (string)($a['type'] ?? 'article');
     $slug    = (string)($a['slug'] ?? '');
     $updated = relative_time((string)($a['updated_at'] ?? ''));
 
+    $display = $type === 'journal'
+        ? (string)($a['key_statement'] ?? '') ?: (string)($a['title'] ?? '')
+        : (string)($a['title'] ?? '');
+    if ($display === '') $display = '(untitled)';
+
     $variant = $stage === 'idea' ? ' idea' : ($stage === 'concept' ? ' concept' : '');
-    $editUrl = '/cms/articles/edit?id=' . $id;
+
+    // Idea stage stays in the shared editor for every type; past Idea each
+    // type lives in its own editor.
+    if ($stage === 'idea') {
+        $editUrl = '/cms/articles/edit?id=' . $id;
+    } else {
+        $editUrl = ($type === 'journal' ? '/cms/journals/edit' : '/cms/articles/edit') . '?id=' . $id;
+    }
+
+    $badgeClass = $type === 'journal' ? 'tb-journal' : 'tb-article';
+    $badgeLabel = $type === 'journal' ? 'Journal'    : 'Article';
 
     $head = '<div class="kcard-head">'
-          . '<div class="kcard-title">' . $e($title) . '</div>'
-          . '<span class="type-badge tb-article">Article</span>'
+          . '<div class="kcard-title">' . $e($display) . '</div>'
+          . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
           . '</div>';
 
     $foot = '';

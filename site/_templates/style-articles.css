@@ -990,3 +990,52 @@ body {
     font-size: 16px;
   }
 }
+
+/* ─── Journal — Phase 8 ─────────────────────────────────────────────── */
+/* Key Statement replaces the title block: Instrument Serif italic with
+   a left rule in the category colour. Falls back to muted ink when no
+   category is set (Phase 8 ships before Categories admin, so this is
+   the common path until categories land). */
+.article-key-statement {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  padding-left: var(--space-24);
+  border-left: 4px solid var(--ink-30);
+  margin: var(--space-16) 0 var(--space-32);
+}
+.article[data-category="terracotta"] .article-key-statement { border-left-color: var(--c-terracotta); }
+.article[data-category="forest"]     .article-key-statement { border-left-color: var(--c-forest); }
+.article[data-category="denim"]      .article-key-statement { border-left-color: var(--c-denim); }
+.article[data-category="purple"]     .article-key-statement { border-left-color: var(--c-purple); }
+.article[data-category="mauve"]      .article-key-statement { border-left-color: var(--c-mauve); }
+.article[data-category="amber"]      .article-key-statement { border-left-color: var(--c-amber); }
+.article[data-category="teal"]       .article-key-statement { border-left-color: var(--c-teal); }
+
+/* Entry Number — small monospace label in the topstrip right slot. */
+.article-entry-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Journal byline row — only the author appears (no read-time slot), so
+   the row collapses to a single-column layout. */
+.article-byline-row--journal { grid-template-columns: 1fr; }
+.article-byline-row--journal .article-author { justify-content: flex-start; }
+
+@media (max-width: 768px) {
+  .article-key-statement {
+    font-size: 28px;
+    padding-left: var(--space-16);
+  }
+}
+@media (max-width: 480px) {
+  .article-key-statement {
+    font-size: 22px;
+  }
+}

@@ -15,19 +15,51 @@ declare(strict_types=1);
 require_once __DIR__ . '/db.php';
 
 /**
- * Canonical pipeline order. Forward transitions are limited to the next
- * neighbor; backward transitions can skip across (e.g. Published → Draft)
- * because the author sometimes wants to retract a live post without
- * stepping through Outline/Concept on the way.
+ * Canonical (article) pipeline order. Forward transitions are limited to
+ * the next neighbor; backward transitions can skip across (e.g. Published
+ * → Draft) because the author sometimes wants to retract a live post
+ * without stepping through Outline/Concept on the way.
+ *
+ * Per CMS-STRUCTURE.md §15 (Pipeline Stage Matrix), some content types
+ * skip the Concept/Outline middle stages — see stages_for_type() below.
  */
 const ARTICLE_STAGES = ['idea', 'concept', 'outline', 'draft', 'published'];
 
 /**
- * Index of a stage in ARTICLE_STAGES, or -1 if not a known stage.
+ * Returns the stage progression valid for $type. Used by transition_stage
+ * to allow "Idea → Draft" for types that skip Concept/Outline, and by the
+ * editor views to render the right stage bar.
+ *
+ * NULL type uses the article progression — Idea-stage rows are untyped
+ * by default; we keep the full bar visible while they're still untyped
+ * so the author sees where the row could end up. Once typed, the bar
+ * narrows.
+ */
+function stages_for_type(?string $type): array
+{
+    if ($type === 'journal' || $type === 'live-session' || $type === 'experiment') {
+        return ['idea', 'draft', 'published'];
+    }
+    return ARTICLE_STAGES;
+}
+
+/**
+ * Index of a stage in ARTICLE_STAGES (the article progression). Returns
+ * -1 if not a known stage. Used by the article editor.
  */
 function stage_index(string $stage): int
 {
     $i = array_search($stage, ARTICLE_STAGES, true);
+    return $i === false ? -1 : (int)$i;
+}
+
+/**
+ * Index of a stage in the per-type progression.
+ */
+function stage_index_for_type(?string $type, string $stage): int
+{
+    $stages = stages_for_type($type);
+    $i = array_search($stage, $stages, true);
     return $i === false ? -1 : (int)$i;
 }
 
@@ -196,6 +228,138 @@ function delete_article(int $id): void
     $stmt->execute([':id' => $id]);
 }
 
+// ═════════════════════════════════════════════════════════════════════
+// Journals (Phase 8)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch a single journal row by id. Returns null if not found or not
+ * of type='journal'. Idea-stage rows captured as journals only reach
+ * type='journal' after the author types them — until then they live
+ * in the type-agnostic Idea editor.
+ */
+function get_journal(int $id): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content WHERE id = :id AND type = 'journal' LIMIT 1"
+    );
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * Fetch a published journal by slug for the public render path.
+ */
+function get_journal_by_slug(string $slug): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content
+          WHERE slug = :slug
+            AND type = 'journal'
+            AND status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')
+          LIMIT 1"
+    );
+    $stmt->execute([':slug' => $slug]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * List journals. Mirrors list_articles' filter shape.
+ */
+function list_journals(array $filters = []): array
+{
+    $sql = "SELECT id, slug, key_statement, title, status, updated_at, published_at,
+                   journal_number, pipeline_order
+              FROM content
+             WHERE type = 'journal'";
+    $params = [];
+
+    if (isset($filters['status']) && $filters['status'] !== '') {
+        $sql .= " AND status = :status";
+        $params[':status'] = (string)$filters['status'];
+    }
+
+    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Upsert a journal. Delegates to save_article with type forced to
+ * 'journal' — the column whitelist and writeback logic are shared.
+ */
+function save_journal(array $data): int
+{
+    $data['type'] = 'journal';
+    return save_article($data);
+}
+
+/**
+ * Hard-delete a journal. delete_article is already type-agnostic;
+ * named separately for callsite clarity.
+ */
+function delete_journal(int $id): void
+{
+    delete_article($id);
+}
+
+/**
+ * Assign the per-category Journal entry number. Called once when a
+ * journal transitions Draft → Published; subsequent re-publishes do
+ * not reassign (the number is an archival identity, never reclaimed).
+ *
+ * Returns the assigned number, or null if the row isn't a journal.
+ *
+ * Counter logic per CMS-STRUCTURE.md §17:
+ *   max(journal_number) WHERE type='journal' AND <same primary category>
+ *
+ * Categories admin hasn't shipped, so journals currently share a single
+ * "uncategorized" bucket; the LEFT JOIN below handles that case. Once
+ * categories land, the JOIN naturally partitions counters per category.
+ */
+function assign_journal_number(int $id): ?int
+{
+    $row = get_journal($id);
+    if ($row === null) return null;
+
+    $catStmt = db()->prepare(
+        "SELECT category FROM content_categories
+          WHERE content_id = :id AND is_primary = 1 LIMIT 1"
+    );
+    $catStmt->execute([':id' => $id]);
+    $catRow   = $catStmt->fetch();
+    $category = ($catRow === false || ($catRow['category'] ?? '') === '')
+        ? null
+        : (string)$catRow['category'];
+
+    if ($category === null) {
+        $q = db()->query(
+            "SELECT COALESCE(MAX(c.journal_number), 0) + 1 AS n
+               FROM content c
+          LEFT JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1
+              WHERE c.type = 'journal' AND cc.category IS NULL"
+        );
+    } else {
+        $q = db()->prepare(
+            "SELECT COALESCE(MAX(c.journal_number), 0) + 1 AS n
+               FROM content c
+               JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1
+              WHERE c.type = 'journal' AND cc.category = :cat"
+        );
+        $q->execute([':cat' => $category]);
+    }
+    $next = (int)(($q->fetch()['n'] ?? 1));
+
+    $upd = db()->prepare("UPDATE content SET journal_number = :n WHERE id = :id");
+    $upd->execute([':n' => $next, ':id' => $id]);
+    return $next;
+}
+
 /**
  * Move an article between pipeline stages.
  *
@@ -224,15 +388,20 @@ function transition_stage(int $id, string $to): array
     if ($row === false) {
         return ['ok' => false, 'error' => 'Article not found.'];
     }
-    $toIdx = stage_index($to);
-    if ($toIdx < 0) {
-        return ['ok' => false, 'error' => 'Unknown stage: ' . $to];
+    $type = $row['type'] ?? null;
+    if (is_string($type) && $type === '') $type = null;
+
+    // Use the type-specific progression so journals (and other
+    // shortened-pipeline types) can step Idea → Draft directly.
+    $stages  = stages_for_type($type);
+    $toIdx   = array_search($to, $stages, true);
+    if ($toIdx === false) {
+        return ['ok' => false, 'error' => 'Unknown stage for this type: ' . $to];
     }
     $from    = (string)($row['status'] ?? 'idea');
-    $fromIdx = stage_index($from);
-    if ($fromIdx < 0) {
-        // Defensive — schema enum should prevent this.
-        return ['ok' => false, 'error' => 'Article is in an unknown stage.'];
+    $fromIdx = array_search($from, $stages, true);
+    if ($fromIdx === false) {
+        return ['ok' => false, 'error' => 'Row is in a stage invalid for its type.'];
     }
     if ($toIdx === $fromIdx) {
         return ['ok' => true, 'error' => ''];
@@ -245,18 +414,16 @@ function transition_stage(int $id, string $to): array
     }
 
     // Type guard: leaving Idea requires a type. Quick-capture creates rows
-    // untyped; the author types them by dragging into a column in Ideation.
-    $type = $row['type'] ?? null;
+    // untyped; the author types them by dragging into a column in Ideation
+    // or via the Type dropdown in the Idea editor.
     if ($from === 'idea' && $toIdx > $fromIdx) {
-        if ($type === null || $type === '') {
+        if ($type === null) {
             return [
                 'ok'    => false,
-                'error' => 'Drag this idea into a type column in Ideation before advancing.',
+                'error' => 'Set a type before advancing — drag into a column in Ideation or pick one in the Type dropdown.',
             ];
         }
-        // Phase 7.6 ships the Article workflow only. Other types stay at
-        // Idea until their phase lands (Journals: 8, Sessions: 9, Experiments: 10).
-        if ($type !== 'article') {
+        if (!in_array($type, ['article', 'journal'], true)) {
             return [
                 'ok'    => false,
                 'error' => ucfirst((string)$type) . ' editor isn\'t available yet — that lands in a later phase.',
@@ -287,6 +454,13 @@ function transition_stage(int $id, string $to): array
          . " WHERE id = :id";
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
+
+    // Side-effect: first publish of a journal earns it a per-category
+    // entry number. Never reassigned on re-publish (numbers are archival).
+    if ($to === 'published' && $type === 'journal' && empty($row['journal_number'])) {
+        assign_journal_number($id);
+    }
+
     return ['ok' => true, 'error' => ''];
 }
 

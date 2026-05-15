@@ -73,7 +73,7 @@ $renderCard = static function (array $a, string $stage) use ($e): string {
               . '</div>';
     }
 
-    return '<a href="' . $e($editUrl) . '" class="kcard' . $variant . '" style="text-decoration:none;display:block;color:inherit">'
+    return '<a href="' . $e($editUrl) . '" class="kcard' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
          . $head . $foot
          . '</a>';
 };
@@ -148,12 +148,15 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="flash-success" role="status" style="margin-top:var(--space-12)"><?= $e($flash) ?></div>
         <?php endif; ?>
       </div>
-      <div class="kanban-board">
+      <div class="kanban-board"
+           data-dnd-mode="pipeline"
+           data-dnd-endpoint="/cms/articles/reorder-pipeline"
+           data-csrf-token="<?= $e($csrf_token) ?>">
         <?php foreach ($lanes as $lane):
           $stage = $lane['stage'];
           $cards = $byStage[$stage];
         ?>
-          <div class="kanban-lane">
+          <div class="kanban-lane" data-key="<?= $e($stage) ?>">
             <div class="lane-header">
               <div class="lane-dot" style="background:var(--stage-<?= $e($lane['token']) ?>)"></div>
               <div class="lane-title" style="color:var(--stage-<?= $e($lane['token']) ?>)"><?= $e($lane['label']) ?></div>
@@ -173,5 +176,6 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<script src="/cms/_assets/dragdrop.js"></script>
 </body>
 </html>

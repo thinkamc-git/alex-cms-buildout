@@ -1,16 +1,19 @@
 <?php
 /**
- * cms/views/ideation.php — Articles ideation board.
+ * cms/views/ideation.php — Ideation board, grouped by content type.
  *
  * Routed from site/index.php as GET /cms/ideation.
  *
- * A holding space for raw Article ideas. Quick-capture posts to
- * /cms/articles/new-idea (same endpoint as Pipeline). Each card is
- * itself a link into the Idea-stage editor; advancing to Concept
- * happens via the editor's Advance button, not a list-view shortcut.
+ * Layout: five lanes — No type | Article | Journal | Live Session | Experiment.
+ * Quick-capture lands in "No type"; the author types an idea by dragging
+ * the card into the matching column. Cross-column drag persists the new
+ * type; same-column drag reorders. Click any card to open the Idea-stage
+ * editor.
  *
- * Phase 7 is Articles-only; the type-lane layout from the mockup will
- * grow Journals/Sessions/Experiments lanes as those types ship.
+ * Phase 7.6 ships the kanban + drag layer. The Article-typed editor is
+ * the only one wired today; journal/session/experiment editors land in
+ * Phases 8/9/10 (until then, advancing those types is blocked by
+ * transition_stage).
  */
 
 declare(strict_types=1);
@@ -25,13 +28,29 @@ $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
-$ideas = list_articles(['status' => 'idea']);
+$rows  = list_ideation_rows();
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
+
+// Bucket rows by type. "none" key holds untyped (NULL) rows.
+$byType = ['none' => [], 'article' => [], 'journal' => [], 'live-session' => [], 'experiment' => []];
+foreach ($rows as $r) {
+    $t = $r['type'] === null ? 'none' : (string)$r['type'];
+    if (!isset($byType[$t])) $byType[$t] = [];
+    $byType[$t][] = $r;
+}
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+
+$lanes = [
+    ['key' => 'none',         'label' => 'No type',       'badge' => 'tb-none'],
+    ['key' => 'article',      'label' => 'Article',       'badge' => 'tb-article'],
+    ['key' => 'journal',      'label' => 'Journal',       'badge' => 'tb-journal'],
+    ['key' => 'live-session', 'label' => 'Live Session',  'badge' => 'tb-live-session'],
+    ['key' => 'experiment',   'label' => 'Experiment',    'badge' => 'tb-experiment'],
+];
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -62,7 +81,7 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'ideation';
-  $nav_counts    = ['ideation' => count($ideas)];
+  $nav_counts    = ['ideation' => count($rows)];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
@@ -70,7 +89,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-ideation">
       <?php
       $title    = 'Ideation';
-      $subtitle = 'A holding space for raw ideas. Capture quickly; build an idea to advance it to Concept and continue developing it.';
+      $subtitle = 'Capture raw ideas. Drag a card into a type column to assign it; drag within a column to reorder.';
       $actions  = '';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -80,7 +99,6 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <input type="hidden" name="from" value="ideation">
           <input class="qc-input" type="text" name="title" placeholder="What's the idea?" maxlength="500" required>
-          <select class="qc-select" name="type" disabled title="Articles only in Phase 7"><option>Article</option></select>
           <button class="qc-btn" type="submit">+ Add</button>
         </form>
         <?php if ($flash !== ''): ?>
@@ -88,42 +106,47 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
       </div>
 
-      <div class="kanban-board">
-        <div class="kanban-lane">
-          <div class="lane-header">
-            <span class="type-badge tb-article">Article</span>
-            <div class="lane-count"><?= (int)count($ideas) ?></div>
+      <div class="kanban-board"
+           data-dnd-mode="ideation"
+           data-dnd-endpoint="/cms/articles/reorder-ideation"
+           data-csrf-token="<?= $e($csrf_token) ?>">
+        <?php foreach ($lanes as $lane):
+          $key   = $lane['key'];
+          $cards = $byType[$key] ?? [];
+        ?>
+          <div class="kanban-lane" data-key="<?= $e($key) ?>">
+            <div class="lane-header">
+              <span class="type-badge <?= $e($lane['badge']) ?>"><?= $e($lane['label']) ?></span>
+              <div class="lane-count"><?= (int)count($cards) ?></div>
+            </div>
+            <div class="lane-cards">
+              <?php if (count($cards) === 0): ?>
+                <div class="idea-lane-empty">Drop here</div>
+              <?php else: foreach ($cards as $card):
+                $cid     = (int)($card['id'] ?? 0);
+                $ctitle  = (string)($card['title'] ?? '');
+                if ($ctitle === '') $ctitle = '(untitled)';
+                $cnotes  = (string)($card['notes'] ?? '');
+                $cupd    = relative_time((string)($card['updated_at'] ?? ''));
+              ?>
+                <a href="/cms/articles/edit?id=<?= $cid ?>" class="idea-card kcard" data-id="<?= $cid ?>" draggable="true">
+                  <div class="idea-card-title"><?= $e($ctitle) ?></div>
+                  <?php if ($cnotes !== ''): ?>
+                    <div class="idea-card-desc"><?= $e($cnotes) ?></div>
+                  <?php endif; ?>
+                  <div class="idea-card-foot">
+                    <span class="idea-card-meta"><?= $e($cupd) ?></span>
+                  </div>
+                </a>
+              <?php endforeach; endif; ?>
+            </div>
           </div>
-          <div class="lane-cards">
-            <?php if (count($ideas) === 0): ?>
-              <div class="idea-lane-empty">No ideas yet — capture one above</div>
-            <?php else: foreach ($ideas as $a):
-              $id      = (int)($a['id'] ?? 0);
-              $title2  = (string)($a['title'] ?? '');
-              if ($title2 === '') $title2 = '(untitled)';
-              // list_articles() doesn't currently pull notes — fetch per
-              // card. Fine at single-author volumes; if the Idea backlog
-              // ever grows huge we'd extend the SELECT list.
-              $full    = get_article($id);
-              $notes   = (string)($full['notes'] ?? '');
-              $updated = relative_time((string)($a['updated_at'] ?? ''));
-            ?>
-              <a href="/cms/articles/edit?id=<?= (int)$id ?>" class="idea-card">
-                <div class="idea-card-title"><?= $e($title2) ?></div>
-                <?php if ($notes !== ''): ?>
-                  <div class="idea-card-desc"><?= $e($notes) ?></div>
-                <?php endif; ?>
-                <div class="idea-card-foot">
-                  <span class="idea-card-meta"><?= $e($updated) ?></span>
-                </div>
-              </a>
-            <?php endforeach; endif; ?>
-          </div>
-        </div>
+        <?php endforeach; ?>
       </div>
     </div>
   </main>
 </div>
 
+<script src="/cms/_assets/dragdrop.js"></script>
 </body>
 </html>

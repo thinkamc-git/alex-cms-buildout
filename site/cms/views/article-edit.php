@@ -44,6 +44,14 @@ if ($id <= 0) {
 
 $article = get_article($id);
 if ($article === null) {
+    // get_article() filters type='article'. Idea-stage rows may be untyped
+    // (captured but not yet typed by a column-drag in Ideation), and other
+    // types live in this editor temporarily while their phase isn't built.
+    $stmt = db()->prepare("SELECT * FROM content WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $article = $stmt->fetch() ?: null;
+}
+if ($article === null) {
     http_response_code(404);
     header('Content-Type: text/plain; charset=utf-8');
     echo "Article not found.\n";
@@ -112,12 +120,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         }
 
         if ($currentStage === 'idea') {
-            // ── Idea-stage form: title + notes (→ notes column) ─────────
+            // ── Idea-stage form: title + notes + type ───────────────────
             $titleIn = trim((string)($_POST['title'] ?? ''));
             $notesIn = trim((string)($_POST['notes'] ?? ''));
+            $typeIn  = trim((string)($_POST['type']  ?? ''));
 
             if ($titleIn === '') {
                 $errors[] = 'Title is required.';
+            }
+
+            $typeDb = ($typeIn === '' || $typeIn === 'none') ? null : $typeIn;
+            if ($typeDb !== null && !in_array($typeDb, CONTENT_TYPES, true)) {
+                $errors[] = 'Invalid type.';
+                $typeDb = null;
             }
 
             // Re-derive slug from title if title changed; ideas are pre-publish
@@ -135,6 +150,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     'title' => $titleIn,
                     'slug'  => $slug,
                     'notes' => $notesIn !== '' ? $notesIn : null,
+                    'type'  => $typeDb,
                 ];
                 $flashMsg = 'Saved.';
 
@@ -161,6 +177,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'title' => $titleIn,
                 'slug'  => $slug,
                 'notes' => $notesIn,
+                'type'  => $typeDb,
             ]);
         } else {
             // ── Concept / Outline / Draft / Published — stage-aware ─────
@@ -473,6 +490,26 @@ require __DIR__ . '/../partials/topbar.php';
               maxlength="5000"
               placeholder="Jot down what this idea is about, possible angles, references, anything you'd lose otherwise…"><?= $e((string)($article['notes'] ?? '')) ?></textarea>
             <p class="field-hint">Private scratchpad — viewable as reference at Concept, then archived. Never appears on the public site.</p>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="article-type">Type</label>
+            <?php
+            $typeCur = (string)($article['type'] ?? '');
+            $typeOptions = [
+                ''             => '— No type —',
+                'article'      => 'Article',
+                'journal'      => 'Journal',
+                'live-session' => 'Live Session',
+                'experiment'   => 'Experiment',
+            ];
+            ?>
+            <select class="field-select" id="article-type" name="type" style="max-width:240px">
+              <?php foreach ($typeOptions as $val => $lbl): ?>
+                <option value="<?= $e((string)$val) ?>" <?= $typeCur === $val ? 'selected' : '' ?>><?= $e($lbl) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <p class="field-hint">Required before advancing. You can also drag the card into a type column in Ideation.</p>
           </div>
 
           <div class="form-actions form-actions-sticky">

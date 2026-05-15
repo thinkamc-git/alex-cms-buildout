@@ -77,6 +77,10 @@ $router->post('/cms/articles/edit',         $cms('views/article-edit.php'));
 $router->post('/cms/articles/delete',       $cms('views/article-delete.php'));
 $router->post('/cms/articles/upload-image', $cms('views/article-upload-image.php'));
 
+// Phase 7.6: AJAX endpoints for drag-drop reordering.
+$router->post('/cms/articles/reorder-pipeline', $cms('views/article-reorder-pipeline.php'));
+$router->post('/cms/articles/reorder-ideation', $cms('views/article-reorder-ideation.php'));
+
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so
 // /writing/foo/bar won't match — that's intentional (no nested article

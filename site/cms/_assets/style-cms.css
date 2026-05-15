@@ -611,6 +611,20 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .readonly-block { padding:var(--space-12) var(--space-16); background:var(--canvas-raised); border:var(--rule-faint); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--secondary); line-height:1.6; white-space:pre-wrap; word-wrap:break-word; max-height:280px; overflow-y:auto; }
 .readonly-block:empty::before { content:"— nothing here yet —"; color:var(--muted); font-style:italic; }
 
+/* Type badge variants — "No type" stays in the same pill shape as the
+   real types so all Ideation column headers line up visually. */
+.tb-none { color:var(--muted); background:color-mix(in srgb,var(--muted) 8%,transparent); border:1px solid color-mix(in srgb,var(--muted) 20%,transparent); }
+
+/* ─── Drag-and-drop (Phase 7.6) ─── */
+.kanban-board[data-dnd-mode] .kcard,
+.kanban-board[data-dnd-mode] .idea-card { cursor:grab; }
+.kanban-board[data-dnd-mode] .kcard:active,
+.kanban-board[data-dnd-mode] .idea-card:active { cursor:grabbing; }
+.kcard.dragging,
+.idea-card.dragging { opacity:0.4; }
+.kanban-lane.drag-over { background:color-mix(in srgb,var(--primary) 4%,transparent); }
+.kanban-lane.drag-over .lane-header { background:color-mix(in srgb,var(--primary) 8%,var(--canvas-raised)); }
+
 /* ── Phase 6a — Articles forms + list ──────────────────────────────────
    These rules complement the existing .field-group / .field-label /
    .field-input system. Names introduced here:

@@ -75,7 +75,7 @@ function get_article(int $id): ?array
  */
 function list_articles(array $filters = []): array
 {
-    $sql = "SELECT id, slug, title, status, updated_at, published_at, special_tag
+    $sql = "SELECT id, slug, title, status, updated_at, published_at, special_tag, pipeline_order
             FROM content
             WHERE type = 'article'";
     $params = [];
@@ -85,11 +85,27 @@ function list_articles(array $filters = []): array
         $params[':status'] = (string)$filters['status'];
     }
 
-    $sql .= " ORDER BY updated_at DESC";
+    // Sort: pipeline_order ASC (0 first → unordered new captures at top,
+    // dragged items get 1..N below), then recency as tiebreaker.
+    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();
+}
+
+/**
+ * Fetch all Idea-stage rows across every type (and untyped). Used by the
+ * Ideation board. list_articles() can't return untyped rows because it
+ * filters to type='article'.
+ */
+function list_ideation_rows(): array
+{
+    $sql = "SELECT id, slug, title, type, notes, updated_at, pipeline_order
+              FROM content
+             WHERE status = 'idea'
+             ORDER BY pipeline_order ASC, updated_at DESC";
+    return db()->query($sql)->fetchAll();
 }
 
 /**
@@ -114,15 +130,22 @@ function save_article(array $data): int
         'special_tag', 'series_id', 'series_order',
         'read_time', 'tags',
         'notes', 'concept_text', 'outline_text',
+        'type',
         'published_at', 'published_status',
     ];
 
     if ($id === 0) {
-        // INSERT — type is hardcoded; status defaults to draft if not given.
+        // INSERT — type defaults to 'article' if not explicitly passed
+        // (preserves Phase 6a behaviour for /cms/articles/new "Draft from
+        // scratch"). Quick-capture from Ideation passes type=null to land
+        // in the "No type" lane.
         $data['status'] = (string)($data['status'] ?? 'draft');
-        $fields = ['type'];
-        $place  = [':type'];
-        $params = [':type' => 'article'];
+        if (!array_key_exists('type', $data)) {
+            $data['type'] = 'article';
+        }
+        $fields = [];
+        $place  = [];
+        $params = [];
         foreach ($cols as $c) {
             if (array_key_exists($c, $data)) {
                 $fields[] = $c;
@@ -149,8 +172,12 @@ function save_article(array $data): int
     if (count($set) === 0) {
         return $id;
     }
+    // No type filter: rows at Idea stage may be untyped (Phase 7.6 Ideation
+    // captures) or of any future type. The caller is responsible for not
+    // routing non-article writes through this function once the journal/
+    // session/experiment editors land in later phases.
     $sql = "UPDATE content SET " . implode(', ', $set)
-         . " WHERE id = :id AND type = 'article'";
+         . " WHERE id = :id";
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
     return $id;
@@ -163,9 +190,9 @@ function save_article(array $data): int
  */
 function delete_article(int $id): void
 {
-    $stmt = db()->prepare(
-        "DELETE FROM content WHERE id = :id AND type = 'article'"
-    );
+    // Type-agnostic for the same reason save_article is: Idea-stage rows may
+    // be untyped or of types whose dedicated editors aren't built yet.
+    $stmt = db()->prepare("DELETE FROM content WHERE id = :id");
     $stmt->execute([':id' => $id]);
 }
 
@@ -189,8 +216,12 @@ function delete_article(int $id): void
  */
 function transition_stage(int $id, string $to): array
 {
-    $row = get_article($id);
-    if ($row === null) {
+    // get_article() filters to type='article'. At Idea stage the row may
+    // be untyped, so we use a raw fetch here to retrieve regardless of type.
+    $stmt = db()->prepare("SELECT * FROM content WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    if ($row === false) {
         return ['ok' => false, 'error' => 'Article not found.'];
     }
     $toIdx = stage_index($to);
@@ -213,6 +244,26 @@ function transition_stage(int $id, string $to): array
         ];
     }
 
+    // Type guard: leaving Idea requires a type. Quick-capture creates rows
+    // untyped; the author types them by dragging into a column in Ideation.
+    $type = $row['type'] ?? null;
+    if ($from === 'idea' && $toIdx > $fromIdx) {
+        if ($type === null || $type === '') {
+            return [
+                'ok'    => false,
+                'error' => 'Drag this idea into a type column in Ideation before advancing.',
+            ];
+        }
+        // Phase 7.6 ships the Article workflow only. Other types stay at
+        // Idea until their phase lands (Journals: 8, Sessions: 9, Experiments: 10).
+        if ($type !== 'article') {
+            return [
+                'ok'    => false,
+                'error' => ucfirst((string)$type) . ' editor isn\'t available yet — that lands in a later phase.',
+            ];
+        }
+    }
+
     $patch = ['status' => $to];
     if ($to === 'published') {
         $patch['published_status'] = 'live';
@@ -229,10 +280,109 @@ function transition_stage(int $id, string $to): array
         $set[] = $k . ' = :' . $k;
         $params[':' . $k] = $v;
     }
+    // No type filter: rows leaving Idea may have been untyped before the
+    // type-guard above accepted them (i.e. they have a type now). Rows
+    // moving backward have a type by definition.
     $sql = "UPDATE content SET " . implode(', ', $set)
-         . " WHERE id = :id AND type = 'article'";
+         . " WHERE id = :id";
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Whitelist of content types. Mirrors the schema enum. NULL = untyped
+ * (Idea stage only).
+ */
+const CONTENT_TYPES = ['article', 'journal', 'live-session', 'experiment'];
+
+/**
+ * Assign a type to an Idea-stage row. Returns ['ok' => bool, 'error' => string].
+ *
+ * Constrained to status='idea' rows — once advanced past Idea the type is
+ * locked. (Type changes after Idea would invalidate slug semantics, public
+ * routes, and any indexes that have already adopted the row.)
+ *
+ * Accepts null to clear the type (back to "No type" lane in Ideation).
+ */
+function set_article_type(int $id, ?string $type): array
+{
+    if ($type !== null && !in_array($type, CONTENT_TYPES, true)) {
+        return ['ok' => false, 'error' => 'Unknown type: ' . $type];
+    }
+    $stmt = db()->prepare("SELECT status FROM content WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    if ($row === false) {
+        return ['ok' => false, 'error' => 'Row not found.'];
+    }
+    if ((string)($row['status'] ?? '') !== 'idea') {
+        return ['ok' => false, 'error' => 'Type is locked once an idea advances past Idea.'];
+    }
+    $upd = db()->prepare("UPDATE content SET type = :type WHERE id = :id");
+    $upd->execute([':type' => $type, ':id' => $id]);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Rewrite pipeline_order for every row matching $criteria, in the order
+ * given by $ids. Returns ['ok' => bool, 'error' => string].
+ *
+ * $criteria is a column => value map, e.g.
+ *   ['type' => 'article', 'status' => 'idea']    (Pipeline lane)
+ *   ['status' => 'idea', 'type' => 'article']    (Ideation lane)
+ *   ['status' => 'idea', 'type' => null]         (Ideation "No type")
+ *
+ * Ids not matching the criteria are rejected — that's the safety net
+ * against tampered POSTs trying to reorder rows in other lanes.
+ *
+ * Position 0 in $ids becomes pipeline_order = 1 (top of lane).
+ */
+function reorder_lane(array $criteria, array $ids): array
+{
+    if (count($ids) === 0) {
+        return ['ok' => true, 'error' => ''];
+    }
+    // Build a WHERE that matches the lane. NULL values use IS NULL.
+    $where  = [];
+    $params = [];
+    foreach ($criteria as $col => $val) {
+        if (!preg_match('/^[a-z_]+$/', (string)$col)) {
+            return ['ok' => false, 'error' => 'Invalid criteria key.'];
+        }
+        if ($val === null) {
+            $where[] = "$col IS NULL";
+        } else {
+            $where[] = "$col = :crit_$col";
+            $params[":crit_$col"] = $val;
+        }
+    }
+    $whereSql = implode(' AND ', $where);
+
+    // Fetch all current ids in the lane to validate membership.
+    $stmt = db()->prepare("SELECT id FROM content WHERE $whereSql");
+    $stmt->execute($params);
+    $valid = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $valid[(int)$r['id']] = true;
+    }
+    foreach ($ids as $id) {
+        if (!isset($valid[(int)$id])) {
+            return [
+                'ok'    => false,
+                'error' => 'Row #' . (int)$id . ' is not in this lane.',
+            ];
+        }
+    }
+
+    // Apply 1..N in the supplied order. Other rows in the lane that weren't
+    // submitted (e.g. created concurrently) keep their existing values.
+    $pos = 0;
+    $upd = db()->prepare("UPDATE content SET pipeline_order = :pos WHERE id = :id");
+    foreach ($ids as $id) {
+        $pos++;
+        $upd->execute([':pos' => $pos, ':id' => (int)$id]);
+    }
     return ['ok' => true, 'error' => ''];
 }
 

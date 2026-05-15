@@ -49,11 +49,16 @@ if ($slug === '') {
 }
 $slug = unique_slug($slug);
 
+// Phase 7.6: quick-capture no longer forces type='article'. Captured rows
+// land untyped (type NULL) in the "No type" column of Ideation; the author
+// assigns type by dragging the card into the matching column. Template is
+// nulled here too — it's chosen when type is assigned (today: article-standard
+// on first article-type save; later: per-type defaults).
 $save = [
-    'title'    => $title,
-    'slug'     => $slug,
-    'status'   => 'idea',
-    'template' => 'article-standard',
+    'title'  => $title,
+    'slug'   => $slug,
+    'status' => 'idea',
+    'type'   => null,
 ];
 if ($notes !== '') $save['notes'] = $notes;
 

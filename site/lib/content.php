@@ -162,6 +162,12 @@ function save_article(array $data): int
         'special_tag', 'series_id', 'series_order',
         'read_time', 'tags',
         'notes', 'concept_text', 'outline_text',
+        'key_statement',
+        // Live-session fields (Phase 9). NULL each to hide the matching pill.
+        // event_date is required at save-time; event_time + event_end_time
+        // are independently optional (see live-session-edit.php).
+        'event_date', 'event_time', 'event_end_time',
+        'location', 'cost_pill', 'attendance', 'custom_pill',
         'type',
         'published_at', 'published_status',
     ];
@@ -423,7 +429,7 @@ function transition_stage(int $id, string $to): array
                 'error' => 'Set a type before advancing — drag into a column in Ideation or pick one in the Type dropdown.',
             ];
         }
-        if (!in_array($type, ['article', 'journal'], true)) {
+        if (!in_array($type, ['article', 'journal', 'live-session'], true)) {
             return [
                 'ok'    => false,
                 'error' => ucfirst((string)$type) . ' editor isn\'t available yet — that lands in a later phase.',
@@ -578,6 +584,88 @@ function count_articles_by_stage(): array
         if (isset($out[$s])) $out[$s] = (int)$r['n'];
     }
     return $out;
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Live Sessions (Phase 9)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch a single live-session row by id. Returns null when not of
+ * type='live-session'. Idea-stage rows captured as live-sessions only
+ * earn type='live-session' once typed in Ideation or via the editor's
+ * Type dropdown — until then they live in the type-agnostic Idea editor.
+ */
+function get_live_session(int $id): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content WHERE id = :id AND type = 'live-session' LIMIT 1"
+    );
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * Fetch a published live-session by slug for the public render path.
+ */
+function get_live_session_by_slug(string $slug): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content
+          WHERE slug = :slug
+            AND type = 'live-session'
+            AND status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')
+          LIMIT 1"
+    );
+    $stmt->execute([':slug' => $slug]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * List live-sessions. Mirrors list_articles' filter shape.
+ */
+function list_live_sessions(array $filters = []): array
+{
+    $sql = "SELECT id, slug, title, status, updated_at, published_at,
+                   event_date, event_time, event_end_time,
+                   location, cost_pill, attendance, custom_pill,
+                   pipeline_order
+              FROM content
+             WHERE type = 'live-session'";
+    $params = [];
+
+    if (isset($filters['status']) && $filters['status'] !== '') {
+        $sql .= " AND status = :status";
+        $params[':status'] = (string)$filters['status'];
+    }
+
+    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Upsert a live-session. Delegates to save_article with type forced to
+ * 'live-session'.
+ */
+function save_live_session(array $data): int
+{
+    $data['type'] = 'live-session';
+    return save_article($data);
+}
+
+/**
+ * Hard-delete a live-session. delete_article is already type-agnostic;
+ * named separately for callsite clarity.
+ */
+function delete_live_session(int $id): void
+{
+    delete_article($id);
 }
 
 /**

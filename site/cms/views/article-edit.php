@@ -67,6 +67,10 @@ if ($_routeStage !== 'idea' && $_routeType === 'journal') {
     header('Location: /cms/journals/edit?id=' . $id);
     exit;
 }
+if ($_routeStage !== 'idea' && $_routeType === 'live-session') {
+    header('Location: /cms/live-sessions/edit?id=' . $id);
+    exit;
+}
 
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
@@ -176,11 +180,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
                         exit;
                     }
-                    // Per-type routing: a journal past Idea lives in
-                    // /cms/journals/edit.
-                    $editPath = ($typeDb === 'journal' && $targetStage !== 'idea')
-                        ? '/cms/journals/edit'
-                        : '/cms/articles/edit';
+                    // Per-type routing: rows past Idea live in their own
+                    // editor (journal / live-session). Articles + untyped
+                    // rows stay here.
+                    if ($targetStage !== 'idea' && $typeDb === 'journal') {
+                        $editPath = '/cms/journals/edit';
+                    } elseif ($targetStage !== 'idea' && $typeDb === 'live-session') {
+                        $editPath = '/cms/live-sessions/edit';
+                    } else {
+                        $editPath = '/cms/articles/edit';
+                    }
                     header('Location: ' . $editPath . '?id=' . $id
                         . '&flash=' . rawurlencode($stageMsg)
                         . $undoSuffix($action, $currentStage));

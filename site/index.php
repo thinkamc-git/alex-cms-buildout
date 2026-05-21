@@ -89,6 +89,14 @@ $router->get ('/cms/journals/edit',   $cms('views/journal-edit.php'));
 $router->post('/cms/journals/edit',   $cms('views/journal-edit.php'));
 $router->post('/cms/journals/delete', $cms('views/journal-delete.php'));
 
+// Phase 9: Live Sessions — admin CRUD.
+$router->get ('/cms/live-sessions',        $cms('views/live-sessions.php'));
+$router->get ('/cms/live-sessions/new',    $cms('views/live-session-new.php'));
+$router->post('/cms/live-sessions/new',    $cms('views/live-session-new.php'));
+$router->get ('/cms/live-sessions/edit',   $cms('views/live-session-edit.php'));
+$router->post('/cms/live-sessions/edit',   $cms('views/live-session-edit.php'));
+$router->post('/cms/live-sessions/delete', $cms('views/live-session-delete.php'));
+
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so
 // /writing/foo/bar won't match — that's intentional (no nested article
@@ -102,6 +110,12 @@ $router->get('/writing/:slug', static function (array $p): void {
 // Phase 8: Journals public route. render_content() is type-agnostic;
 // the template enum on the row routes to templates/journal-entry.php.
 $router->get('/journal/:slug', static function (array $p): void {
+    render_content((string)($p['slug'] ?? ''));
+});
+
+// Phase 9: Live Sessions public route. Same dispatch — the row's
+// template='live-session' picks templates/live-session.php.
+$router->get('/live-sessions/:slug', static function (array $p): void {
     render_content((string)($p['slug'] ?? ''));
 });
 

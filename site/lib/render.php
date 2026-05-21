@@ -107,6 +107,7 @@ function render_content(string $slug): void
     $known = [
         'article-standard' => 'article-standard.php',
         'journal-entry'    => 'journal-entry.php',
+        'live-session'     => 'live-session.php',
     ];
     if (!isset($known[$template])) {
         render_404();

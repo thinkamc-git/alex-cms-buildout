@@ -30,17 +30,20 @@ $csrf_token = Csrf::token();
 
 $articles = list_articles();
 $journals = list_journals();
+$sessions = list_live_sessions();
 
 // Tag each row with its display type so the kanban card render picks the
-// right badge. (list_articles / list_journals don't ship a `type` column
-// because each query is filtered to one type — synthesize it here.)
-foreach ($articles as &$a) { $a['type'] = 'article'; } unset($a);
-foreach ($journals as &$j) { $j['type'] = 'journal'; } unset($j);
+// right badge. (list_articles / list_journals / list_live_sessions don't
+// ship a `type` column because each query is filtered to one type —
+// synthesize it here.)
+foreach ($articles as &$a) { $a['type'] = 'article'; }       unset($a);
+foreach ($journals as &$j) { $j['type'] = 'journal'; }       unset($j);
+foreach ($sessions as &$s) { $s['type'] = 'live-session'; }  unset($s);
 
-// Merge then re-sort by pipeline_order ASC, updated_at DESC. Both lists
-// already arrive in their lane-local order; the merge needs a stable
-// global sort so journals and articles share lane positions cleanly.
-$rows = array_merge($articles, $journals);
+// Merge then re-sort by pipeline_order ASC, updated_at DESC. Each list
+// already arrives in its lane-local order; the merge needs a stable
+// global sort so the three types share lane positions cleanly.
+$rows = array_merge($articles, $journals, $sessions);
 usort($rows, static function (array $a, array $b): int {
     $po = (int)($a['pipeline_order'] ?? 0) <=> (int)($b['pipeline_order'] ?? 0);
     if ($po !== 0) return $po;
@@ -91,12 +94,19 @@ $renderCard = static function (array $a, string $stage) use ($e): string {
     // type lives in its own editor.
     if ($stage === 'idea') {
         $editUrl = '/cms/articles/edit?id=' . $id;
+    } elseif ($type === 'journal') {
+        $editUrl = '/cms/journals/edit?id=' . $id;
+    } elseif ($type === 'live-session') {
+        $editUrl = '/cms/live-sessions/edit?id=' . $id;
     } else {
-        $editUrl = ($type === 'journal' ? '/cms/journals/edit' : '/cms/articles/edit') . '?id=' . $id;
+        $editUrl = '/cms/articles/edit?id=' . $id;
     }
 
-    $badgeClass = $type === 'journal' ? 'tb-journal' : 'tb-article';
-    $badgeLabel = $type === 'journal' ? 'Journal'    : 'Article';
+    [$badgeClass, $badgeLabel] = match ($type) {
+        'journal'      => ['tb-journal',      'Journal'],
+        'live-session' => ['tb-live-session', 'Session'],
+        default        => ['tb-article',      'Article'],
+    };
 
     $head = '<div class="kcard-head">'
           . '<div class="kcard-title">' . $e($display) . '</div>'
@@ -175,13 +185,6 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$counts['published'] ?></span><span class="lbl">Live</span></div>
         </div>
-        <form method="post" action="/cms/articles/new-idea" class="quick-capture">
-          <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-          <input type="hidden" name="from" value="pipeline">
-          <input class="qc-input" type="text" name="title" placeholder="Capture a new idea — type and press Add…" maxlength="500" required>
-          <select class="qc-select" name="type" disabled title="Articles only in Phase 7"><option>Article</option></select>
-          <button class="qc-btn" type="submit">+ Add</button>
-        </form>
         <?php if ($flash !== ''): ?>
           <div class="flash-success" role="status" style="margin-top:var(--space-12)"><?= $e($flash) ?></div>
         <?php endif; ?>

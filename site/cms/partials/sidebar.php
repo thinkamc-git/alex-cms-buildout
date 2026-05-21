@@ -63,7 +63,7 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       Journals<?= $count('journals') ?>
     </a>
-    <a class="nav-item<?= $activeClass('live-sessions') ?>" href="#" data-nav-id="live-sessions">
+    <a class="nav-item<?= $activeClass('live-sessions') ?>" href="/cms/live-sessions" data-nav-id="live-sessions">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg>
       Live Sessions<?= $count('live-sessions') ?>
     </a>

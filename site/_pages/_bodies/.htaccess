@@ -1,0 +1,5 @@
+# Deny direct HTTP access to the body fragments. They're included server-side
+# by the page assemblers in /_pages/*.php — never served directly. This
+# prevents Google (or anyone) from indexing /_bodies/about.html as a
+# standalone page without nav/footer/chrome.
+Require all denied

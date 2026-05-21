@@ -1,0 +1,904 @@
+/* ============================================================
+   style-custom.css
+   Custom overrides + scrollytelling-specific styles for the
+   "We Are Becoming Everything We Wanted" article page.
+
+   Loads AFTER _archive/_templates/style-articles.css so it can
+   override template rules where the interactive article needs
+   to diverge (sticky chart, beat layout, progress rail, mobile
+   chart sizing, etc.).
+   ------------------------------------------------------------
+   Sections:
+     1. Tokens & overrides
+     2. Editorial layout (promoted from _templates/article.html)
+     3. Chart frame & caption       ← chart.html + index.html
+     4. Article chart figures (placeholders + spectrum diagram)
+     5. Scrollytelling section (chart-side + beats)   ← TODO
+     6. Progress rail                                  ← TODO
+     7. Responsive
+   ============================================================ */
+
+
+/* ── 1. Tokens & overrides ─────────────────────────────── */
+
+:root {
+  /* Chart-specific tokens. Kept here so chart.html and index.html
+     pull from the same source of truth — adjust here and both
+     surfaces update. */
+  --chart-bg:          var(--canvas-bg);
+  --chart-dim-fill:    #F3F2F1;
+  --chart-rule:        var(--ink-18);
+  --chart-ink:         var(--primary);
+  --chart-ink-quiet:   var(--muted);
+
+  /* Spectrum band colors — match the chart's stacked bands so the
+     spectrum diagram visually rhymes with the chart that follows. */
+  --band-intuition:       #B4B2A9;
+  --band-inquiry:         #AFA9EC;
+  --band-technical:       #5DCAA5;
+  --band-conceptualizing: #85B7EB;
+  --band-ui:              #F0997B;
+}
+
+
+/* ── 2. Editorial layout ────────────────────────────────
+   Promoted from the scaffold styles inside _templates/article.html.
+   When the production templates land, this section moves into the
+   shared stylesheet; for now it lives here so index.html can pull
+   from it without reaching into _archive/.
+   ───────────────────────────────────────────────────────── */
+
+.article-topstrip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+  margin-bottom: var(--space-40);
+}
+.article-topstrip .article-category {
+  font-family: var(--font-cond);
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-current, var(--primary));
+}
+.article-topstrip-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.article-title.is-serif {
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-32);
+}
+
+.article-summary {
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+  color: var(--secondary);
+  margin-bottom: var(--space-32);
+}
+
+.article-tag-row { margin-bottom: var(--space-32); }
+
+.article-dates {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+  flex-wrap: wrap;
+}
+.article-pub-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.article-updated-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.article-byline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding: var(--space-20) 0;
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+  margin-bottom: var(--space-40);
+}
+.article-byline-row .article-author {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.article-byline-row .article-author-info {
+  display: block;
+  line-height: 1.3;
+}
+.article-byline-row .article-author-name {
+  display: block;
+  font-weight: 700;
+  font-size: var(--text-md);
+}
+.article-byline-row .article-author-separator { display: none; }
+.article-byline-row .article-author-tagline {
+  display: block;
+  font-size: var(--text-base);
+  color: var(--secondary);
+  margin-top: 2px;
+}
+.article-read-time {
+  font-family: var(--font);
+  font-size: var(--text-base);
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+/* Article-body headings — widen the H2/H3 size gap.
+   Template default has H2 = --text-h4 and H3 = --text-body-lg, which
+   read as too similar. Override with explicit sizes that give H2
+   real presence as a section break and let H3 sit closer to body
+   weight. Tracked in CONTEXT-design-system.md (entry 1). */
+.article-prose h2 {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-top: var(--space-56);
+  margin-bottom: var(--space-16);
+}
+.article-prose h3 {
+  font-size: 20px;
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin-top: var(--space-32);
+  margin-bottom: var(--space-8);
+  color: var(--secondary);
+}
+
+/* Author bio — small dark footer block. Less prominent than the
+   default style-articles.css surface card. */
+.article-author-bio {
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-20) var(--space-24);
+  background: var(--primary);
+  border: 0;
+  margin-top: var(--space-48);
+}
+.article-author-bio-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: var(--text-md);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
+}
+.article-author-bio-extended {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: rgba(255,255,255,0.72);
+}
+
+
+/* ── 3. Chart frame & caption ──────────────────────────── */
+
+.chart-frame {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chart-caption {
+  margin-bottom: var(--space-8);
+  flex: 0 0 auto;
+}
+
+.chart-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--primary);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  margin-bottom: 2px;
+}
+
+.chart-subtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 17px;
+  color: var(--secondary);
+  line-height: 1.35;
+  transition: opacity 0.35s ease;
+}
+
+.chart-subtitle.fading { opacity: 0; }
+
+.chart-source {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--space-8);
+  flex: 0 0 auto;
+}
+
+.chart-frame svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+/* ── 5. Scrollytelling section ─────────────────────────────
+   Wraps the chart-driven span of the article (History Walk
+   through "Where it's going"). Inside: one sticky chart at
+   the top, prose beats scroll up underneath. Each beat is
+   an <article class="beat" data-beat="N"> whose data-beat
+   attribute matches the beatStates index in the JS below.
+
+   The chart pins for the full scrolly section and unpins
+   when the reader scrolls into "The cold nights." Used by
+   index-interactive.html only — index-static.html keeps
+   the inline chart-figure pattern from §4.
+   ──────────────────────────────────────────────────── */
+
+.scrolly {
+  position: relative;
+  margin-top: var(--space-32);
+  /* Desktop default: side-by-side grid. Chart pins in the left
+     column, prose beats scroll in the right column. Break out
+     of the article reading column so both sides have breathing
+     room without the chart eating vertical real estate. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-48);
+  align-items: start;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(95vw, 1180px);
+}
+
+/* The sticky chart wrapper. In side-by-side mode it pins to the
+   top of the viewport at full viewport height, with the chart
+   itself vertically centered inside that window. Transparent
+   background so the chart integrates with the page surface
+   instead of sitting inside a tinted card.
+   The right column (.scrolly-beats) compensates for the centering
+   offset via its own top padding, so per-beat heights stay uniform
+   and beat-heading-to-chart-title alignment is preserved at every
+   inter-beat scroll step (not just the first). */
+.scrolly-chart {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 100vh;
+  background: transparent;
+  padding: var(--space-24) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.scrolly-chart .chart-frame {
+  width: 100%;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+
+/* Beat navigation — prev/next chevrons under the sticky chart,
+   left-aligned against the chart-frame's left edge so they read
+   as anchored to the chart rather than floating in the column.
+   Each sits inside a thin ink-18 circle matching the down-chevron
+   treatment. */
+.scrolly-chart .beat-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-12);
+  margin-top: var(--space-20);
+  flex: 0 0 auto;
+}
+
+.beat-nav-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ink-18);
+  background: transparent;
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, opacity 150ms ease;
+}
+.beat-nav-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+.beat-nav-btn[disabled] {
+  opacity: 0.22;
+  cursor: default;
+  pointer-events: none;
+}
+.beat-nav-btn svg {
+  display: block;
+}
+
+/* Down-chevron at the end of each beat — sits inside a thin
+   ink-18 circle so it reads as a deliberate affordance rather
+   than a floating glyph. Fades in only while the beat is the
+   currently-active one; fades out once the reader scrolls past.
+   The last beat carries no link — the reader scrolls naturally
+   past the scrolly into the next article section. */
+.beat-next-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: var(--space-32) auto 0;
+  border: 1px solid var(--ink-18);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 320ms ease, color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.beat.is-active .beat-next-link {
+  opacity: 1;
+  pointer-events: auto;
+}
+.beat-next-link:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+.beat-next-link svg {
+  display: block;
+}
+
+/* SVG width-fills the chart-frame column and keeps its viewBox
+   aspect ratio — height auto so the chart never grows past its
+   natural shape in the side-by-side layout. */
+.scrolly-chart .chart-frame svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prose beats scroll in their column. Each beat still needs
+   enough vertical space to trigger its state change distinctly
+   from neighbours — min-height keeps them readable.
+   The column's own top-padding does the work of pushing beat 0's
+   heading down to the chart-title's y. Doing the offset at the
+   column level (rather than as a first-beat padding-top) keeps
+   every beat at the same height, so successive headings reach
+   the chart-title at uniform 60vh scroll intervals. The 22vh
+   here is the rough fallback; the JS measures the chart-title's
+   actual offset inside .scrolly-chart and writes a precise
+   padding-top inline that overrides this. JS re-measures on
+   resize and after font-load. */
+.scrolly-beats {
+  padding-top: 22vh;
+}
+
+.article-prose .beat {
+  /* The .beat is an <article> — override the default
+     article-prose > * + * margin if needed */
+  min-height: 60vh;
+  padding: var(--space-24) 0 var(--space-32);
+  margin-top: 0;
+}
+
+/* Beat-internal spacing — paragraphs, headings, blockquotes
+   inside beats follow normal article-prose rhythm */
+.article-prose .beat > * + * {
+  margin-top: var(--space-20);
+}
+
+/* The h2 that introduces the scrolly section sits ABOVE
+   the section, so it stays in normal article flow */
+.article-prose > .scrolly + h2,
+.article-prose .scrolly + p {
+  margin-top: var(--space-48);
+}
+
+/* Debug indicator (small, bottom-left) — shows active beat
+   during development. Remove for production. */
+.scrolly-debug {
+  position: fixed;
+  bottom: var(--space-16);
+  left: var(--space-16);
+  z-index: 100;
+  padding: 4px 10px;
+  background: rgba(25, 23, 21, 0.88);
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: var(--r-card);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.04em;
+}
+
+/* Mobile / narrow viewports: collapse the side-by-side grid back
+   to the original stacked layout — chart pins to the top of the
+   viewport as a horizontal band, prose beats scroll underneath. */
+@media (max-width: 900px) {
+  .scrolly {
+    display: block;
+    left: auto;
+    transform: none;
+    width: 100%;
+  }
+  .scrolly-chart {
+    position: sticky;
+    top: 0;
+    height: 480px;
+    min-height: 0;
+    /* Stacked mode: chart pins above prose, so it needs an opaque
+       background to mask prose scrolling underneath. Mirror the
+       body's full background stack (neutral fill + dot-grid pattern)
+       so any future body-bg change cascades here automatically. */
+    background-color: var(--neutral);
+    background-image: var(--dot-grid);
+    background-size: 4px 4px;
+    background-repeat: repeat;
+    border-bottom: var(--rule-faint);
+    padding: var(--space-16) 0 var(--space-12);
+    align-items: stretch;
+    flex-direction: row;
+  }
+  .scrolly-chart .chart-frame svg {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  /* Mobile reverts the column anchor — chart sits on top in
+     stacked mode, so the beats column doesn't need an offset to
+     align with a side-by-side chart-title. JS clears the inline
+     padding-top set in side-by-side mode; this rule provides the
+     mobile default. */
+  .scrolly-beats {
+    padding-top: var(--space-24);
+  }
+  .article-prose .beat {
+    min-height: 75vh;
+  }
+}
+
+@media (max-width: 700px) {
+  .scrolly-chart {
+    height: auto;
+    max-height: 54vh;
+    align-items: flex-start;
+  }
+  .scrolly-chart .chart-frame {
+    display: block;
+  }
+  .scrolly-chart .chart-frame svg {
+    flex: none;
+    width: 100%;
+    height: auto;
+    max-height: 48vh;
+  }
+  .article-prose .beat {
+    min-height: 60vh;
+  }
+}
+
+
+/* ── 4. Article chart figures ──────────────────────────────
+   These are the inline chart positions inside .article-prose.
+   For now they hold static placeholders. Once the interactive
+   chart is wired in, the .article-chart-placeholder element
+   will be replaced by the live D3 chart container.
+   ──────────────────────────────────────────────────────── */
+
+/* Figure resets — override the default .article-prose figure
+   styling so the chart frame can paint its own background and
+   border without a doubled-up image border. */
+.article-prose .article-chart-figure {
+  margin: var(--space-40) 0;
+}
+.article-prose h3 + .article-chart-figure {
+  margin-top: 10px;
+}
+/* Chart frame is now transparent — no card background, no border, no
+   ring of internal padding. The chart sits on the article surface as
+   continuous content rather than as an inserted figure. Tracked in
+   CONTEXT-design-system.md (entry 2). */
+.article-prose .article-chart-figure > .chart-frame {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: var(--space-8) 0 var(--space-16) 0;
+}
+
+/* The chart renders into this container. D3 appends an <svg> with
+   a viewBox; the SVG's width:100% + auto height handles sizing. */
+.article-chart {
+  width: 100%;
+  display: block;
+}
+.article-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Small badge in the chart caption row showing which beat this is.
+   Useful for the verification pass — comparing prose to chart state. */
+.article-chart-beat-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--ink-18);
+  background: var(--surface);
+  color: var(--muted);
+  margin-bottom: var(--space-8);
+}
+
+/* Spectrum diagram — sibling of the chart figure, lives in the
+   Spectrum Interlude. Two diagrams: equal-band original, then
+   UI-dominant collapsed. */
+.article-spectrum {
+  margin: var(--space-32) 0;
+}
+.article-spectrum-label {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-md);
+  color: var(--secondary);
+  margin-bottom: var(--space-12);
+}
+.article-spectrum-bar {
+  display: flex;
+  width: 100%;
+  height: 56px;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  border: var(--rule-faint);
+}
+.article-spectrum-band {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(25,23,21,0.78);
+  padding: 0 var(--space-8);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.article-spectrum-band[data-band="intuition"]       { background: var(--band-intuition); }
+.article-spectrum-band[data-band="inquiry"]         { background: var(--band-inquiry); }
+.article-spectrum-band[data-band="technical"]       { background: var(--band-technical); }
+.article-spectrum-band[data-band="conceptualizing"] { background: var(--band-conceptualizing); }
+.article-spectrum-band[data-band="ui"]              { background: var(--band-ui); }
+
+/* Collapsed variant — UI dominant (all bands visible at full opacity) */
+
+
+/* ── 5. Editorial review highlights ────────────────────────
+   TEMPORARY: 3 critique categories for the second-pass
+   editing — each names a different kind of work the passage
+   needs. Apply one class to <p>, <h2>, <h3>, <blockquote>,
+   or inline <span> based on the critique. Strip the classes
+   (and this section) once the rewrites are in.
+
+     .hl-voice     — register slips (workshop-speak, business
+                     cadence, fragments-for-impact)
+     .hl-specific  — abstract claim needs a grounding detail
+                     (a name, a moment, a sensory anchor)
+     .hl-sentiment — emotional register thin where the
+                     narrative could carry more
+   ──────────────────────────────────────────────────── */
+
+.hl-voice,
+.hl-specific,
+.hl-sentiment {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  border-radius: 2px;
+}
+
+/* Inline spans (mid-paragraph highlights) */
+span.hl-voice,
+span.hl-specific,
+span.hl-sentiment {
+  padding: 1px 4px;
+}
+
+/* Block-level — full paragraph or header tint */
+p.hl-voice,
+p.hl-specific,
+p.hl-sentiment {
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--r-card);
+}
+h2.hl-voice, h2.hl-specific, h2.hl-sentiment,
+h3.hl-voice, h3.hl-specific, h3.hl-sentiment {
+  display: inline-block;
+  padding: 4px 12px;
+}
+blockquote.hl-voice,
+blockquote.hl-specific,
+blockquote.hl-sentiment {
+  padding-right: var(--space-16);
+}
+
+.hl-voice     { background: rgba(207, 153, 50, 0.24); }
+.hl-specific  { background: rgba(60, 140, 145, 0.24); }
+.hl-sentiment { background: rgba(140, 90, 155, 0.24); }
+
+
+/* ── Review notes ─────────────────────────────────────
+   Editorial annotations on the article's narrative.
+   Each note flags a structural moment — what the section
+   is doing, where it's misfiring, and what to change.
+   Focused on overall narrative effect, not sentence
+   critique. Strip these (and this section) once rewrites
+   are in.
+   ──────────────────────────────────────────────────── */
+
+.article-prose .review-note {
+  margin: var(--space-32) 0;
+  padding: var(--space-16) var(--space-20);
+  background: #FFF8E8;
+  border-left: 3px solid #D9A55E;
+  border-radius: 0 var(--r-card) var(--r-card) 0;
+}
+
+.article-prose .review-note .review-note-label {
+  display: block;
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A6B3E;
+  margin-bottom: var(--space-8);
+}
+
+.article-prose .review-note .review-note-body {
+  font-family: var(--font);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #3A3631;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.article-prose .review-note .review-note-body + .review-note-body {
+  margin-top: var(--space-8);
+}
+.article-prose .review-note .review-note-body strong {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* Variant tints by kind. Labels carry the meaning; the
+   border accent gives a quick visual category. */
+.article-prose .review-note.is-cut {
+  background: #FBEEEE;
+  border-left-color: #C8625C;
+}
+.article-prose .review-note.is-cut .review-note-label {
+  color: #934643;
+}
+
+.article-prose .review-note.is-works {
+  background: #EDF4ED;
+  border-left-color: #6B9E72;
+}
+.article-prose .review-note.is-works .review-note-label {
+  color: #2F5E37;
+}
+
+.article-prose .review-note.is-pattern {
+  background: #EEF0F8;
+  border-left-color: #6E80B5;
+}
+.article-prose .review-note.is-pattern .review-note-label {
+  color: #3D4E7E;
+}
+
+/* Sidebar positioning at wide viewports — asides float into the
+   left and right margins so the reading column stays clean. Below
+   this breakpoint, asides fall back to inline blocks between
+   paragraphs (the default behavior above). */
+@media (min-width: 1280px) {
+  .article-prose {
+    position: relative;
+  }
+
+  .article-prose .review-note {
+    position: absolute;
+    width: 240px;
+    margin: 0;
+    padding: var(--space-12) var(--space-16);
+  }
+
+  /* Right-side notes anchor to the article column's right edge.
+     `left: calc(100% + gap)` puts the note in the right margin.
+     `top` is intentionally unset — the browser uses the aside's
+     static y-position (where it would have rendered in flow),
+     so the note stays vertically aligned with the prose it's
+     commenting on. */
+  .article-prose .review-note.is-right {
+    left: calc(100% + var(--space-24));
+    border-left-width: 3px;
+    border-right: 0;
+  }
+
+  /* Left-side notes mirror — anchored to the column's left edge. */
+  .article-prose .review-note.is-left {
+    right: calc(100% + var(--space-24));
+    border-left: 0;
+    border-right: 3px solid #D9A55E;
+    border-radius: var(--r-card) 0 0 var(--r-card);
+    text-align: right;
+  }
+  .article-prose .review-note.is-left.is-cut    { border-right-color: #C8625C; }
+  .article-prose .review-note.is-left.is-works  { border-right-color: #6B9E72; }
+  .article-prose .review-note.is-left.is-pattern{ border-right-color: #6E80B5; }
+
+  /* Compact type for the sidebar size */
+  .article-prose .review-note .review-note-body {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .article-prose .review-note .review-note-label {
+    font-size: 10px;
+    margin-bottom: 6px;
+  }
+}
+
+/* Floating legend so the meaning of each color is visible at all times. */
+.hl-legend {
+  position: fixed;
+  top: var(--space-16);
+  right: var(--space-16);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: var(--space-12) var(--space-16);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--secondary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  max-width: 280px;
+}
+.hl-legend-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+.hl-legend-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  line-height: 1.4;
+}
+.hl-legend span.hl-voice,
+.hl-legend span.hl-specific,
+.hl-legend span.hl-sentiment {
+  padding: 2px 10px;
+  color: var(--primary);
+  flex-shrink: 0;
+  min-width: 64px;
+  text-align: center;
+  font-weight: 500;
+}
+.hl-legend .hl-row-note {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+
+/* ── 7. Responsive ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .article {
+    padding: var(--space-32) var(--space-20) var(--space-48);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-20);
+  }
+  .article-topstrip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+    margin-bottom: var(--space-32);
+  }
+  .article-title.is-serif {
+    font-size: 40px;
+    line-height: 1.1;
+    margin-bottom: var(--space-24);
+  }
+  .article-summary {
+    font-size: 17px;
+    margin-bottom: var(--space-24);
+  }
+  .article-dates { margin-bottom: var(--space-20); }
+  .article-byline-row {
+    padding: var(--space-16) 0;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+  }
+  .article-prose .article-chart-figure > .chart-frame {
+    padding: var(--space-16) var(--space-16) var(--space-20);
+  }
+  .article-spectrum-bar { height: 48px; }
+  .article-spectrum-band { font-size: 10px; letter-spacing: 0.06em; }
+  .article-author-bio {
+    padding: var(--space-16) var(--space-20);
+    gap: var(--space-12);
+  }
+  .article-author-bio-avatar { width: 40px; height: 40px; font-size: var(--text-base); }
+  .article-author-bio-extended { font-size: 13px; line-height: 1.5; }
+}
+
+@media (max-width: 480px) {
+  .article {
+    padding: var(--space-24) var(--space-16) var(--space-40);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-16);
+  }
+  .article-title.is-serif { font-size: 32px; }
+  .article-summary { font-size: 16px; }
+  .article-spectrum-band[data-band="ui"] {
+    /* Keep "UI Specifications" label readable when the band is wide */
+    font-size: 10px;
+  }
+}

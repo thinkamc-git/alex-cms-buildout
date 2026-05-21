@@ -64,19 +64,29 @@ trap 'rm -rf "$STAGE"' EXIT
 
 echo "==> Assembling $TARGET deploy in $STAGE"
 
-# Marketing pages (landing → index on upload)
-cp site/_pages/about.html              "$STAGE/"
-cp site/_pages/coaching.html           "$STAGE/"
-cp site/_pages/landing.html            "$STAGE/index.html"
-cp site/_pages/newsletter-confirmed.html "$STAGE/"
-cp site/_pages/newsletter.html         "$STAGE/"
-cp site/_pages/resume.html             "$STAGE/"
-cp site/_pages/work-with-me.html       "$STAGE/"
-cp site/_pages/404.html                "$STAGE/"
+# Marketing pages — PHP assemblers that include the shared header.html,
+# the matching body from _bodies/, and footer.html at request time.
+# landing.php stays named landing.php (NOT renamed to index.php — that
+# slot belongs to the CMS front controller). The .htaccess rewrites /
+# to /landing.php so the homepage still hits the marketing template.
+cp site/_pages/about.php                 "$STAGE/"
+cp site/_pages/coaching.php              "$STAGE/"
+cp site/_pages/landing.php               "$STAGE/"
+cp site/_pages/newsletter-confirmed.php  "$STAGE/"
+cp site/_pages/newsletter.php            "$STAGE/"
+cp site/_pages/resume.php                "$STAGE/"
+cp site/_pages/work-with-me.php          "$STAGE/"
+cp site/_pages/404.html                  "$STAGE/"
 
-# Asset folder for marketing pages
+# Asset folder for marketing pages — picks up header.html, footer.html,
+# _page-shell.php, analytics.js, style-pages.css, images, etc.
 mkdir -p "$STAGE/_layout"
 cp -R site/_pages/_layout/. "$STAGE/_layout/"
+
+# Body fragments included by the assemblers. The folder ships with its
+# own .htaccess that denies direct HTTP access.
+mkdir -p "$STAGE/_bodies"
+cp -R site/_pages/_bodies/. "$STAGE/_bodies/"
 
 # Design system showcase
 mkdir -p "$STAGE/_ds"
@@ -144,6 +154,7 @@ cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
 cp site/templates/article-standard.php "$STAGE/templates/"
 cp site/templates/journal-entry.php    "$STAGE/templates/"
+cp site/templates/live-session.php     "$STAGE/templates/"
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
 
@@ -176,6 +187,11 @@ EXCLUDES=(
   --exclude='_labs/**'
   --exclude='_files/'
   --exclude='_files/**'
+  # Manually-shipped pre-CMS static articles. Each lives under /ux2.0/<slug>/.
+  # Rsync'd by hand (see plan in /Users/alexmchong/.claude/plans/) and not
+  # mirrored from source/ — exclude so --delete doesn't wipe them.
+  --exclude='ux2.0/'
+  --exclude='ux2.0/**'
   # Per-environment DB config — each is hand-placed on its own server.
   # Never in source. Without these excludes, --delete wipes them on every
   # deploy and the next request 500s with "Missing config file: …".

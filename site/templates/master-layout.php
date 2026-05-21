@@ -36,6 +36,7 @@ $bs = (string)($body_slot ?? '');
   <link rel="stylesheet" href="/_ds/css/base.css">
   <link rel="stylesheet" href="/_ds/css/typography.css">
   <link rel="stylesheet" href="/_templates/style-articles.css">
+  <script src="/_layout/analytics.js" async></script>
 </head>
 <body>
   <?php require __DIR__ . '/partials/nav.php'; ?>

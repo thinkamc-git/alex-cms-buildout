@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UX 1.0 → UX 2.0 (Post-AI): How We Got Here, Where We're Going — alex m. chong</title>
+  <meta name="description" content="Sixteen years of watching the UX industry shift from every angle — and what's unmistakably coming next.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-articles.css">
+  <link rel="stylesheet" href="style-custom.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+
+<nav class="article-breadcrumb" aria-label="Breadcrumb">
+    <a class="article-breadcrumb-root" href="#">Writing</a>
+    <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
+    <span class="article-breadcrumb-current">UX Industry</span>
+  </nav>
+
+  <article class="article" data-category="terracotta">
+
+    <!-- Topstrip -->
+    <div class="article-topstrip">
+      <span class="article-category">UX Industry</span>
+    </div>
+
+    <!-- Title -->
+    <h1 class="article-title is-serif">UX 1.0 → UX 2.0 (Post-AI): How We Got Here, Where We're Going</h1>
+
+    <!-- Summary -->
+    <p class="article-summary">
+      Sixteen years of watching the UX industry shift from every angle — and what's unmistakably coming next.
+    </p>
+
+    <!-- Special tag -->
+    <div class="article-tag-row">
+      <span class="article-special-tag">Essay</span>
+    </div>
+
+    <!-- Date row -->
+    <div class="article-dates">
+      <span class="article-pub-date">May 12, 2026</span>
+    </div>
+
+    <!-- Byline row -->
+    <div class="article-byline-row">
+      <div class="article-author">
+        <div class="article-author-avatar">AC</div>
+        <div class="article-author-info">
+          <span class="article-author-name">Alex M. Chong</span>
+          <span class="article-author-tagline">UX Design Director &amp; Career Coach</span>
+        </div>
+      </div>
+      <span class="article-read-time">18 min read</span>
+    </div>
+
+    <!-- Body -->
+    <div class="article-prose">
+
+      <!-- ═══════════════════════════════════════════════════
+           OPENING — VOICE (personal anchor)
+           ═══════════════════════════════════════════════════ -->
+
+      <p>Back in 2023, I first stepped into my role as Director of UX. I was pretty excited to navigate a new territory in ways I hadn't quite anticipated.</p>
+
+      <p>I've spent many years across this industry: agency-side during the mobile revolution, inside product orgs, building curriculum, coaching designers. But the director chair was different. It surfaced a question almost immediately that I hadn't anticipated: <em>What does it actually mean to be qualified for this role?</em></p>
+
+      <blockquote>What does it actually mean to be qualified for this role?</blockquote>
+
+      <p>Rather than coming from self-doubt, it came from observing the changes of our profession that fascinated me. Prior to my role, I've only seen rare handful of UX Director roles, but now suddenly they're appearing everywhere. And the people filling them — myself included — were visibly just vibing their way through: craft leaders unsure how to position design's value in business terms, managers finding their footing at executive tables, a whole generation of design leadership arriving at seats that nobody had quite defined yet.</p>
+
+      <blockquote>A whole generation of design leadership arriving at seats that nobody had quite defined yet.</blockquote>
+
+      <p>The shifts were equally fascinating as they were perplexing. The designers I found myself working with weren't the designers I'd known earlier in my career — I had known designers who led product strategy conversations, were fascinated by technological interactions, would obsessively debate about the latest iOS release; who brought strategy, conceptualization, and a deep obsession with tech stacks to the table. What I found instead were designers waiting to execute what a product owner had already defined — hyper-specialized in UI specifications, saying yes to whatever landed in their queue. The design leaders I spoke with kept saying the same thing: they couldn't find anyone who could imagine or could think past the screen. And underneath all of it, AI was arriving not as excitement but as dread — which struck me as strange, for a discipline built on imagining things that don't exist yet.</p>
+
+      <blockquote>The profession itself was being practiced differently than I remembered.</blockquote>
+
+      <!-- ═══════════════════════════════════════════════════
+           OPENING — SPECTRUM (visual diagnosis)
+           ═══════════════════════════════════════════════════ -->
+
+      <h2>Design was never a single skill</h2>
+
+      <p>Before we get into how we got here, it helps to remember what design actually was, and what it was always supposed to be.</p>
+
+      <p>The discipline was never a single skill. It was a spectrum of connected capabilities: the intuition to sense what a product needs before a brief exists, the research to ground decisions in real human behavior, the technical fluency to understand the medium you're designing for, the conceptual range to imagine what doesn't exist yet, and the craft to specify it clearly enough to be built. These weren't separate jobs — they were a single designer's range, applied differently depending on the problem.</p>
+
+      <!-- CHART_SPECTRUM_1 — Two diagrams: full spectrum evenly distributed, then UI Specifications dominant -->
+
+      <div class="article-spectrum">
+        <div class="article-spectrum-label">The design discipline — as originally practiced</div>
+        <div class="article-spectrum-bar" role="img" aria-label="Five evenly-sized bands: Intuition, Research, Technical, Conceptualizing, UI Specifications">
+          <div class="article-spectrum-band" data-band="intuition"       style="flex:1 1 0">Intuition</div>
+          <div class="article-spectrum-band" data-band="inquiry"         style="flex:1 1 0">Research</div>
+          <div class="article-spectrum-band" data-band="technical"       style="flex:1 1 0">Technical</div>
+          <div class="article-spectrum-band" data-band="conceptualizing" style="flex:1 1 0">Conceptualizing</div>
+          <div class="article-spectrum-band" data-band="ui"              style="flex:1 1 0">UI Specs</div>
+        </div>
+      </div>
+
+      <p>The range collapsed — gradually, then quickly — until one capability came to represent the entire profession in the eyes of the organizations hiring for it.</p>
+
+      <div class="article-spectrum article-spectrum--collapsed">
+        <div class="article-spectrum-label">The design discipline — as it is practiced today</div>
+        <div class="article-spectrum-bar" role="img" aria-label="UI Specifications dominates, occupying most of the bar; the other four capabilities compressed to thin slivers">
+          <div class="article-spectrum-band" data-band="intuition"       style="flex:1 1 0">Int.</div>
+          <div class="article-spectrum-band" data-band="inquiry"         style="flex:1 1 0">Res.</div>
+          <div class="article-spectrum-band" data-band="technical"       style="flex:1 1 0">Tech.</div>
+          <div class="article-spectrum-band" data-band="conceptualizing" style="flex:1 1 0">Conc.</div>
+          <div class="article-spectrum-band" data-band="ui"              style="flex:16 1 0">UI Specifications</div>
+        </div>
+      </div>
+
+      <p>So how did we get here?</p>
+
+
+      <!-- ═══════════════════════════════════════════════════
+           HISTORY WALK
+           ═══════════════════════════════════════════════════ -->
+
+      <h2>Sixteen years, in seven beats</h2>
+
+      <p>To understand where we are, it helps to go back to where this all began — the mobile revolution, the moment the industry started modernizing from its roots in traditional UX and information architecture into what we'd come to call product design. That's where my career started, and it's where the shape of this discipline was last fully intact.</p>
+
+      <!-- CHART_OVERVIEW: Full view, all years, 2010–2028 -->
+      <figure class="article-chart-figure" data-beat="6">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2010–2028: the full picture</div>
+        </div>
+      </figure>
+
+      <h3>2010–2014 · Enter the Mobile Revolution</h3>
+
+      <!-- Beat 0: 2010–2015.5 -->
+      <figure class="article-chart-figure" data-beat="0">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2010–2014: when intuition and technical work led</div>
+        </div>
+      </figure>
+
+      <p>Apple released the first iPhone in 2007; the App Store followed in 2008. Once it did, every company wanted in on what was being called the Mobile Revolution.</p>
+
+      <p>There were no design systems at the time — Figma didn't even emerge until a decade later in 2017. Only loose Human Interface Guidelines existed, as general guidance. Xcode didn't have the ability to visualize anything — instead you wrote pure code, compiled, and only after could you see what the app looked like. That constraint meant designers needed to understand how software was constructed, sitting alongside engineers and constructing in tandem — no prototype, no spec sheets.</p>
+
+
+      <h3>2014–2015 · The "Product" Designer Emerges</h3>
+
+      <!-- Beat 1: 2012–2018 -->
+      <figure class="article-chart-figure" data-beat="1">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2012–2018, the strategic-designer wave arrives</div>
+        </div>
+      </figure>
+
+      <p>Around 2014, the first wave of dev shops appeared — focused heavily on engineering, with design slapped on at the end of a project after everything was already built. For a moment it looked like design might get pushed to the margins entirely, a finishing coat applied after the real decisions had already been made.</p>
+
+      <p>Then a counter-wave arrived. The "Product Designer" emerged as a distinct function — someone involved before the product was defined, asking what should be built and why, not just how it should look. Where a UI/UX Designer executed within a scope handed down from product management, the Product Designer helped define that scope — drawing from human factors, systems thinking, and contextual research to shape the concept itself. It meant a seat earlier in the process, with real agency over what was being built. From the inside, it felt like the discipline was gaining ground. It was. But something else was also beginning, quietly, underneath it.</p>
+
+
+      <h3>2017–2019 · Bootcamps Fill A Gap & Saturate The Talent Market</h3>
+
+      <!-- Beat 2: 2016.5–2021.5 -->
+      <figure class="article-chart-figure" data-beat="2">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2016–2020: bootcamps are the hottest thing, hiring booms, Figma takes over</div>
+        </div>
+      </figure>
+
+      <p>The profession had been fighting for legitimacy for years, and suddenly everyone wanted it. UX bootcamp courses exploded around 2017 — companies were hiring at scale, and bootcamps trained cohort after cohort to feed the demand. What felt like democratization was also, quietly, a narrowing — because what the industry needed from all those new designers wasn't the full spectrum. It was Figma fluency, handoff, and spec production. The bootcamps read that correctly and trained accordingly.</p>
+
+
+      <h3>2019–2021 · The Job Opportunity Peak, Then The Correction</h3>
+
+      <!-- Beat 3: 2019–2025.5 -->
+      <figure class="article-chart-figure" data-beat="3">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2019–2025: Focus on UI Specifications takes over</div>
+        </div>
+      </figure>
+
+      <p>COVID hit, tech valuations skyrocketed, and companies were spending like the capital was unlimited. Hiring surged — and UX rode that wave. Bootcamp grads were perfectly positioned to fill the demand; Figma fluency and UI spec production were exactly what organizations were hiring for. For the first time, being a UX designer felt stable.</p>
+
+      <p>Then in 2021, the markets corrected. Valuations shrank, layoffs began — and the correction changed the discipline's focus entirely: removed the strategic layer, narrowed the function down to UI technicians.</p>
+
+
+      <h3>2021–2022 · The Seat Appeared, Unearned</h3>
+
+      <p>The boomer generation of design leaders had spent years fighting for design's seat at the leadership table — and by 2017–2019, in many cases, that seat was genuinely earned. When the tech bubble burst in 2022, it became a natural exit point — and the C-suite that replaced them didn't inherit their understanding of what UX was or what it was supposed to do. They restructured, reorganized, and created Director of UX roles in the process. The seat appeared everywhere at once — but not because design had earned it again.</p>
+
+      <p>The people who filled those seats weren't ready for them. Senior designers with eight years of experience stepped up — their expertise was in craft, not leadership. Design managers took the role too — trained to protect their teams from organizational politics, not to lead the discipline. The seat was filled. But the muscle the role actually required hadn't been built by either path.</p>
+
+
+
+      <!-- ═══════════════════════════════════════════════════
+           THIS IS UX 1.0
+           ═══════════════════════════════════════════════════ -->
+
+      <h2>This is UX 1.0</h2>
+      <figure class="article-chart-figure" data-beat="4">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2015-2025: the ui technician takes over design strategy</div>
+        </div>
+      </figure>
+
+      <p>UX 1.0 is the term I use for the full arc of pre-AI design work — from the early manual workflows through the Product Designer era. That transition brought genuine strategic and conceptual thinking into the discipline. But it got lost in favour of scale — the demand for volume meant the strategic substance got traded away quietly, and bootcamp culture filled that demand efficiently. The title stayed. The thinking didn't.</p>
+
+      <p>What remained were the creature comforts of UI technician work: moving components around a design system, saying yes to whatever the PM asked. A well-defined role with a clear deliverable that paid well — and even designers who had been trained to think strategically largely set those skills aside, because the role stopped requiring them. At some point, the work became closer to maintaining a design system than to the experiential and interactive innovation the discipline was built on.</p>
+
+      <blockquote>The strategic capability the discipline had built didn't disappear. It just stopped being asked for.</blockquote>
+
+      <h3>What a 2018 Grad Has Only Ever Known</h3>
+
+      <figure class="article-chart-figure" data-beat="5">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2019–2025: working in "ux" is just specifying UI</div>
+        </div>
+      </figure>
+
+      <p>If you entered the industry between 2017 and 2020, your entire understanding of design is the UI technician era — it's all you've seen, and it's easy to accept that this is simply how the industry works. That's not a failure of those people, but it does create a short-sightedness about the full scope of design — because without having seen the fuller shape of the discipline, it's difficult to know what's been lost.</p>
+
+      <p>That narrowed perception reinforces itself: when everyone around you is doing the same technician work, it validates the idea that UX is the job of the UI technician. And those who started during this time are now the most anxious — because UI technician work is the single biggest target for AI automation, and all of the tooling being built today is aimed directly at it. But the anxiety isn't translating into adaptation. Without the broader context of what design actually is, there's nothing to pivot toward — so instead, many are holding on.</p>
+
+      <blockquote>It's an indictment of an industry that gave them a narrow set of tools, called it a complete education, and is now changing the locks without warning them in time.</blockquote>
+
+      <p>I hear from too many bootcamp grads doing exactly that — closing their eyes, staying in Figma, and hoping the pressure passes. It won't. But that's not an indictment of the people. It's an indictment of an industry that gave them a narrow set of tools, called it a complete education, and is now changing the locks without warning them in time.</p>
+
+
+      <!-- ═══════════════════════════════════════════════════
+           WHERE IT'S GOING
+           ═══════════════════════════════════════════════════ -->
+
+      <h2>Where We're Going</h2>
+
+      <figure class="article-chart-figure" data-beat="8">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2026 Onward: A Post-AI Workflow</div>
+        </div>
+      </figure>
+
+      <p>What's coming rhymes with where we were before the UI Technician era began — technological competency, building in the actual medium, designing with real agency over what gets made. But the transition won't be gradual. Something big is going to switch overnight.</p>
+
+      <p>The UI Technician role is going to disappear, and when it does, it won't go quietly. Design leaders are failing to make the discipline's value legible in business terms — and without that rigor, the credibility gap continues to accumulate. As AI proves it can replace technician work, organizations will conclude that "UX" was overhead all along — because their perception of it never extended beyond UI technician work. That's the over-correction. It will be wrong. But it will happen anyway.</p>
+
+      <blockquote>... organizations will conclude that "UX" was overhead all along...</blockquote>
+      
+      <p>What comes after is the re-correction. As the quality of software declines without design thinking in the room, organizations will feel it in ways they can measure — and strategic design re-enters. The designer that's needed for that moment hasn't fully emerged yet. But the shape of what's coming is already visible to anyone who's seen a post-AI workflow in play.</p>
+
+
+      <!-- ═══════════════════════════════════════════════════
+           CLOSING
+           ═══════════════════════════════════════════════════ -->
+
+      <p>The industry is self-correcting. We're returning to the true value of what designers do. The UI Technician era opened a lot of opportunities, but when an industry focuses on employing technicians, their roles get threatened dramatically by shifts in technology. If you were a radio technician, it didn't matter how booming that era was — because the world moved to televisions. Radio and record player technicians still exist today; but you can hold on, or you can adapt to new mediums. The UI Technician era is ending, and it's ending quickly.</p>
+
+      <blockquote>we're returning to the value of what designers do</blockquote>
+
+      <p>But this is actually a good thing. So many designers have been boxed in by UI Technician roles, not able to exercise the incredible beautiful human relating that comes from the design profession. Anyone saying "UX designers are cooked" doesn't actually understand what design is or what designers do. UI specifications is a sliver — the area companies found valuable for a stretch of years — but that's gone. And that doesn't mean the value of a designer can ever be replaced through simple automation.</p>
+
+      <p>What comes next is a return to what the discipline already was at its best: technical fluency, conceptual range, real agency over what gets built. The Product Designer comes back. The UI Technician role narrows further, down into exactly the territory that gets automated.</p>
+
+      <figure class="article-chart-figure" data-beat="9">
+        <div class="chart-frame">
+          <div class="article-chart"></div>
+          <div class="chart-source">2014–2016 and 2026–2028: the shape that's returning</div>
+        </div>
+      </figure>
+
+      <p>Design is a very humanistic profession that requires understanding interactions within complex context that is intertwined and interlaid within culture. We like to think that AI can replace research, but the people who think that can only perceive quantitative research in number analysis. Just because an interview subject's transcript says the word "confused" twenty times, and someone else says "clear" twice, doesn't mean they are ten times more confused than they are clear. Human context is not data — human context is intuitive nuance that forms culture. We're not ready to automate that yet. That's a conversation worth its own piece entirely.</p>
+
+      <p>While everyone is feeling the anxiety and the threat, this is an incredibly exciting time. Like an overvalued stock price, our discipline is just being corrected. We are returning to design, not losing it. And we are becoming everything we wanted.</p>
+
+      <p>Make sure to keep following along — the next piece gets into what UX 2.0 actually looks like. Hint: it's definitely not just UX 1.0 using generative AI tooling.</p>
+
+    </div>
+    <!-- /article-prose -->
+
+
+    <!-- Author bio -->
+    <aside class="article-author-bio">
+      <div class="article-author-bio-avatar">AC</div>
+      <p class="article-author-bio-extended">Alex M. Chong is a UX design director, career coach, and curriculum architect. Sixteen years across agencies, in-house teams, and education — most recently as Director of UX at Hudson's Bay and Fractional Director of Design at Outwitly. Writes about design leadership, the discipline's transition through AI, and what the next era asks of designers.</p>
+    </aside>
+
+    <!-- Tags -->
+    <footer class="article-tags">
+      <div class="article-tags-list">
+        <span class="article-tag">UX 2.0</span>
+        <span class="article-tag">Discipline History</span>
+        <span class="article-tag">Design Leadership</span>
+        <span class="article-tag">AI</span>
+      </div>
+    </footer>
+
+  </article>
+
+
+  <script>
+  /* ══════════════════════════════════════════════════════════
+     Static beat snapshots
+     ──────────────────────────────────────────────────────────
+     Renders the D3 chart inline at each .article-chart-figure
+     with the corresponding beat state baked in. No transitions,
+     no scroll listeners — these are static reference renders
+     so the prose-to-chart match can be verified visually.
+
+     The chart code (data, configs, buildChart) is duplicated
+     from chart.html. When the live interactive chart is wired
+     in, this block will be replaced with the scrolly version.
+     ══════════════════════════════════════════════════════════ */
+  (function(){
+
+  const data=[
+    {"year":2010,"intuition":75.923,"inquiry":0,"technical":21.387,"conceptualizing":0,"ui":2.69},
+    {"year":2012,"intuition":65.612,"inquiry":0,"technical":30.098,"conceptualizing":0,"ui":4.29},
+    {"year":2014,"intuition":37.945,"inquiry":0,"technical":52.016,"conceptualizing":0.75,"ui":9.29},
+    {"year":2015,"intuition":27.148,"inquiry":0,"technical":49.398,"conceptualizing":10.214,"ui":13.24},
+    {"year":2016,"intuition":18.349,"inquiry":0,"technical":18.849,"conceptualizing":44.603,"ui":18.189},
+    {"year":2017,"intuition":11.85,"inquiry":2.249,"technical":7.85,"conceptualizing":51.9,"ui":26.15},
+    {"year":2018,"intuition":7.151,"inquiry":5.299,"technical":2.15,"conceptualizing":44.9,"ui":40.5},
+    {"year":2019,"intuition":4.601,"inquiry":6.999,"technical":0,"conceptualizing":22.7,"ui":65.7},
+    {"year":2020,"intuition":2.85,"inquiry":7.75,"technical":0,"conceptualizing":9.7,"ui":79.7},
+    {"year":2021,"intuition":2.45,"inquiry":7.65,"technical":0,"conceptualizing":4.5,"ui":85.5},
+    {"year":2022,"intuition":2.1,"inquiry":7.35,"technical":0,"conceptualizing":2.35,"ui":88.1},
+    {"year":2023,"intuition":2,"inquiry":7,"technical":0,"conceptualizing":1.3,"ui":89.7},
+    {"year":2024,"intuition":2,"inquiry":6.8,"technical":0,"conceptualizing":1,"ui":90.2},
+    {"year":2025,"intuition":2,"inquiry":7,"technical":0,"conceptualizing":0.9,"ui":90.2},
+    {"year":2025.5,"intuition":1.99,"inquiry":7.05,"technical":0,"conceptualizing":0.93,"ui":90.02},
+    {"year":2026,"intuition":4.63,"inquiry":7.21,"technical":0.9,"conceptualizing":1.05,"ui":86.21},
+    {"year":2026.5,"intuition":30.201,"inquiry":0.751,"technical":49.101,"conceptualizing":0,"ui":19.948},
+    {"year":2027,"intuition":45.319,"inquiry":0,"technical":48.779,"conceptualizing":1.652,"ui":4.25},
+    {"year":2027.5,"intuition":48.64,"inquiry":0,"technical":46.128,"conceptualizing":4.222,"ui":0},
+    {"year":2028,"intuition":44.325,"inquiry":5.938,"technical":41.8,"conceptualizing":7.937,"ui":0},
+  ];
+  const keys=['intuition','inquiry','technical','conceptualizing','ui'];
+  const colors={intuition:'#B4B2A9',inquiry:'#AFA9EC',technical:'#5DCAA5',conceptualizing:'#85B7EB',ui:'#F0997B'};
+  const bandLabels={intuition:'Intuition-Driven',inquiry:'Research-Driven',technical:'Technical Builder',conceptualizing:'Conceptualizing',ui:'UI Specifications'};
+
+  const CHART_CONFIGS = {
+    landscape: {
+      W: 640, H: 410,
+      margin: {top:42, right:20, bottom:84, left:56},
+      tickValues: [2010,2012,2014,2016,2018,2020,2022,2024,2026,2028],
+      tickRotate: 0, tickFontSize: 12, tickDy: '1.2em', tickOffsetY: 8,
+      yAxisFontSize: 14, yAxisOffsetX: 23,
+      eraTitleFontSize: 16, eraSubFontSize: 11, eraTitleY: -28, eraSubY: -12,
+      inlineFontSize: 11, aiOpFontSize: 11,
+      toolingFontSize: 10, toolingBaseOffset: 34, toolingSpacing: 20, bootcampOffset: 32,
+      toolingHeight: 15,
+      showSecondaryEras: true,
+    },
+    tall: {
+      W: 480, H: 540,
+      margin: {top:78, right:18, bottom:130, left:50},
+      tickValues: [2010,2014,2018,2022,2026,2028],
+      tickRotate: -45, tickFontSize: 16, tickDy: '0.35em',
+      yAxisFontSize: 16, yAxisOffsetX: 22,
+      eraTitleFontSize: 18, eraSubFontSize: 12, eraTitleY: -50, eraSubY: -35,
+      inlineFontSize: 14, aiOpFontSize: 14,
+      toolingFontSize: 13, toolingBaseOffset: 70, toolingSpacing: 22, bootcampOffset: 48,
+      showSecondaryEras: false,
+    },
+  };
+
+  function pickChartMode(){
+    return window.innerWidth <= 500 ? 'tall' : 'landscape';
+  }
+
+  function buildChart(container, cfg){
+    const sel = d3.select(container);
+    sel.selectAll('*').remove();
+
+    const {W, H, margin, tickValues, tickRotate, tickFontSize, tickDy, tickOffsetY,
+           yAxisFontSize, yAxisOffsetX, eraTitleFontSize, eraSubFontSize,
+           eraTitleY, eraSubY, inlineFontSize, aiOpFontSize, toolingFontSize,
+           toolingBaseOffset, toolingSpacing, bootcampOffset, toolingHeight,
+           showSecondaryEras} = cfg;
+    const markerH = toolingHeight ?? 18;
+    const w = W - margin.left - margin.right;
+    const h = H - margin.top - margin.bottom;
+
+    const svgRoot = sel.append('svg')
+      .attr('viewBox', `0 0 ${W} ${H}`)
+      .attr('preserveAspectRatio','xMidYMid meet');
+    const svg = svgRoot.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const x = d3.scaleLinear().domain([2010,2028]).range([0,w]);
+    const y = d3.scaleLinear().domain([0,1]).range([h,0]);
+    const series = d3.stack().keys(keys).offset(d3.stackOffsetExpand)(data);
+    const area = d3.area().x(d=>x(d.data.year)).y0(d=>y(d[0])).y1(d=>y(d[1])).curve(d3.curveMonotoneX);
+
+    [0.2,0.4,0.6,0.8].forEach(pct=>{
+      svg.append('line').attr('x1',0).attr('x2',w).attr('y1',y(pct)).attr('y2',y(pct))
+        .attr('stroke','#aaa').attr('stroke-width',0.75).attr('opacity',0.3);
+      svg.append('text').attr('x',-6).attr('y',y(pct)).attr('text-anchor','end').attr('dominant-baseline','central')
+        .attr('fill','#999').attr('font-size','9px').text((pct*100)+'%');
+    });
+
+    const paths = svg.selectAll('.ap').data(series).enter().append('path')
+      .attr('class', d => 'ap band-'+d.key)
+      .attr('d', area)
+      .attr('fill', d => colors[d.key])
+      .attr('fill-opacity', 0.9)
+      .attr('stroke','white').attr('stroke-width',0.5);
+
+    const xAxisG = svg.append('g').attr('class','x-axis').attr('transform',`translate(0,${h})`)
+      .call(d3.axisBottom(x).tickValues(tickValues).tickFormat(d3.format('d')))
+      .call(g=>g.select('.domain').attr('stroke','#ccc').attr('stroke-width','0.5'))
+      .call(g=>g.selectAll('.tick line').attr('stroke','#ccc').attr('stroke-width','0.5'));
+    const effectiveDy = tickOffsetY != null ? tickOffsetY + 'px' : tickDy;
+    if(tickRotate){
+      xAxisG.selectAll('.tick text')
+        .attr('fill','#888').attr('font-size', tickFontSize+'px')
+        .attr('text-anchor','end')
+        .attr('transform', `rotate(${tickRotate})`)
+        .attr('dx','-4px').attr('dy', effectiveDy);
+    } else {
+      xAxisG.selectAll('.tick text')
+        .attr('fill','#888').attr('font-size', tickFontSize+'px')
+        .attr('dy', effectiveDy);
+    }
+
+    svg.append('text')
+      .attr('transform',`translate(${-margin.left+yAxisOffsetX},${h/2}) rotate(-90)`)
+      .attr('text-anchor','middle').attr('fill','#999')
+      .attr('font-size', yAxisFontSize+'px').attr('opacity',0.85)
+      .text('Industry-Needed UX Skills');
+
+    const eraMarkers = [
+      {year:2015.5, label:'UX 1.0', sub:'Peak Mobile Revolution', primary:true, ox:-18},
+      {year:2026.25, label:'UX 2.0', sub:'AI Operator Era', primary:true, ox:-21},
+    ];
+    if(showSecondaryEras){
+      eraMarkers.push(
+        {year:2011.5, label:'Pre-Modern UX', sub:'Figuring it out', primary:false, ox:0, anchor:'middle'},
+        {year:2019, label:'UI Technician Focus', sub:'Post-Bootcamp UI Technician Era', primary:false, ox:4, anchor:'start'}
+      );
+    }
+    eraMarkers.forEach(e=>{
+      const xp = x(e.year);
+      const labelSlug = e.label.replace(/\s+/g,'-');
+      svg.append('line').attr('class','era-marker-line era-marker-' + labelSlug)
+        .attr('data-label', e.label)
+        .attr('x1',xp).attr('x2',xp).attr('y1',0).attr('y2',h)
+        .attr('stroke','#333').attr('stroke-width',1.5).attr('stroke-dasharray','4 3')
+        .attr('opacity', e.primary?0.55:0.18)
+        .attr('data-default-opacity', e.primary?0.55:0.18);
+      svg.append('text').attr('class','era-marker-label').attr('x',xp+e.ox).attr('y',eraTitleY)
+        .attr('data-era-label', e.label)
+        .attr('data-default-opacity', e.primary?1:0.65)
+        .attr('data-default-fill', e.primary?'#222':'#888')
+        .attr('data-primary-fill', '#222')
+        .attr('data-default-fontsize', e.primary ? eraTitleFontSize+'px' : (eraTitleFontSize-2)+'px')
+        .attr('data-primary-fontsize', eraTitleFontSize+'px')
+        .attr('data-default-fontweight', e.primary?700:500)
+        .attr('data-primary-fontweight', 700)
+        .attr('text-anchor', e.anchor||'start')
+        .attr('fill', e.primary?'#222':'#888')
+        .attr('font-size', e.primary ? eraTitleFontSize+'px' : (eraTitleFontSize-2)+'px')
+        .attr('font-weight', e.primary?700:500)
+        .attr('opacity', e.primary?1:0.65)
+        .text(e.label);
+      svg.append('text').attr('class','era-marker-label era-marker-sublabel').attr('x',xp+e.ox).attr('y',eraSubY)
+        .attr('data-era-label', e.label)
+        .attr('data-default-opacity', e.primary?0.8:0.5)
+        .attr('data-default-fill', e.primary?'#666':'#aaa')
+        .attr('data-primary-fill', '#666')
+        .attr('text-anchor', e.anchor||'start')
+        .attr('fill', e.primary?'#666':'#aaa')
+        .attr('font-size', eraSubFontSize+'px')
+        .attr('opacity', e.primary?0.8:0.5)
+        .text(e.sub);
+    });
+
+    function getBandMid(seriesKey, yearVal){
+      const s = series.find(s=>s.key===seriesKey); if(!s) return null;
+      const sorted = [...s].sort((a,b)=>a.data.year-b.data.year);
+      let prev=null, next=null;
+      for(const d of sorted){if(d.data.year<=yearVal)prev=d;if(d.data.year>=yearVal&&!next)next=d;}
+      if(!prev||!next) return null;
+      const t = prev.data.year===next.data.year ? 0 : (yearVal-prev.data.year)/(next.data.year-prev.data.year);
+      const lo = prev[0]+(next[0]-prev[0])*t, hi = prev[1]+(next[1]-prev[1])*t;
+      return {lo, hi, mid:(lo+hi)/2, bandH:Math.abs(hi-lo)};
+    }
+
+    const inlineConfigs = [
+      {key:'intuition', year:2010.6, offsetY:10, fill:'#444441'},
+      {key:'inquiry', year:2020.4, offsetY:2, fill:'#41389c'},
+      {key:'technical', year:2011, offsetY:7, fill:'#2c6d56'},
+      {key:'conceptualizing', year:2015.6, offsetY:45, fill:'#366696'},
+      {key:'ui', year:2021.2, offsetY:0, fill:'#712B13'},
+    ];
+    inlineConfigs.forEach(ic=>{
+      const r = getBandMid(ic.key, ic.year);
+      if(!r || r.bandH < 0.01) return;
+      svg.append('text').attr('class','inline-label inline-'+ic.key)
+        .attr('x', x(ic.year)+8).attr('y', y(r.mid)+ic.offsetY)
+        .attr('text-anchor','start').attr('dominant-baseline','central')
+        .attr('fill', ic.fill).attr('font-size', inlineFontSize+'px').attr('font-weight','500').attr('opacity',0.95)
+        .text(bandLabels[ic.key]);
+    });
+
+    const aiOp = getBandMid('technical', 2027);
+    if(aiOp){
+      const g = svg.append('g').attr('class','annotation-ai-op').attr('opacity',0);
+      ['AI','Operator'].forEach((line, i)=>{
+        g.append('text').attr('x', x(2027)+8).attr('y', y(aiOp.mid)+8 + (i-0.5)*(aiOpFontSize+3))
+          .attr('text-anchor','middle').attr('dominant-baseline','central')
+          .attr('fill','#2c6d56').attr('font-size', aiOpFontSize+'px').attr('font-weight','600').attr('opacity',0.95)
+          .text(line);
+      });
+    }
+
+    const toolingY = h + toolingBaseOffset;
+    [
+      {label:'Photoshop', s:2010, e:2016, bg:'#D8D7D4', tc:'#3A3A38', op:0.35, i:0, key:'photoshop'},
+      {label:'Sketch', s:2013, e:2019, bg:'#D8D7D4', tc:'#3A3A38', op:0.35, i:1, key:'sketch'},
+      {label:'Figma', s:2017, e:2027, bg:'#7F77DD', tc:'white', op:0.9, i:2, key:'figma'},
+    ].forEach(t=>{
+      const ty = toolingY + t.i*toolingSpacing;
+      const x1 = x(t.s), bw = x(t.e)-x(t.s);
+      const g = svg.append('g').attr('class','tooling-marker tool-'+t.key).attr('data-default-opacity', 1);
+      g.append('rect').attr('x',x1).attr('y',ty-markerH/2).attr('width',bw).attr('height',markerH).attr('rx',3).attr('fill',t.bg).attr('opacity',t.op);
+      g.append('text').attr('x',x1+bw/2).attr('y',ty).attr('text-anchor','middle').attr('dominant-baseline','central')
+        .attr('fill',t.tc).attr('font-size',toolingFontSize+'px').attr('font-weight','500').attr('opacity',Math.min(t.op*1.5,1)).text(t.label);
+    });
+
+    const by = h + bootcampOffset;
+    const bcX1 = x(2017), bcBw = x(2020)-x(2017);
+    const bootcampG = svg.append('g').attr('class','tooling-marker tool-bootcamp').attr('data-default-opacity', 1);
+    bootcampG.append('line').attr('x1',x(2016.5)).attr('x2',x(2021.5)).attr('y1',by).attr('y2',by)
+      .attr('stroke','#EF9F27').attr('stroke-width',3).attr('stroke-linecap','round').attr('opacity',0.4);
+    bootcampG.append('rect').attr('x',bcX1).attr('y',by-markerH/2).attr('width',bcBw).attr('height',markerH).attr('rx',3).attr('fill','#EF9F27').attr('opacity',1);
+    bootcampG.append('text').attr('x',bcX1+bcBw/2).attr('y',by).attr('text-anchor','middle').attr('dominant-baseline','central')
+      .attr('fill','white').attr('font-size',toolingFontSize+'px').attr('font-weight','500').text('UX Bootcamp Peak');
+
+    // AI Agents bar — row i=1 (above Figma), ends exactly at 2028
+    const aiTy = toolingY + 1 * toolingSpacing;
+    const aiX1 = x(2026);
+    const aiRight = w; // ends at 2028 (right edge of data area)
+    const aiBw = aiRight - aiX1;
+    const aiR = 3, aiBarH = markerH;
+    const aiPath = [
+      `M ${aiX1+aiR},${aiTy-aiBarH/2}`,
+      `H ${aiX1+aiBw}`,
+      `V ${aiTy+aiBarH/2}`,
+      `H ${aiX1+aiR}`,
+      `A ${aiR},${aiR} 0,0,1 ${aiX1},${aiTy+aiBarH/2-aiR}`,
+      `V ${aiTy-aiBarH/2+aiR}`,
+      `A ${aiR},${aiR} 0,0,1 ${aiX1+aiR},${aiTy-aiBarH/2}`,
+      'Z'
+    ].join(' ');
+    const aiAgentG = svg.append('g').attr('class','tooling-marker tool-ai-agents').attr('data-default-opacity',1).attr('opacity',0);
+    aiAgentG.append('path').attr('d', aiPath).attr('fill','#3DB8A0').attr('opacity',0.9);
+    aiAgentG.append('text')
+      .attr('x', (aiX1 + w) / 2).attr('y', aiTy)
+      .attr('text-anchor','middle').attr('dominant-baseline','central')
+      .attr('fill','white').attr('font-size',toolingFontSize+'px').attr('font-weight','500')
+      .text('AI Agents');
+
+    const dimFill = getComputedStyle(document.documentElement).getPropertyValue('--chart-dim-fill').trim() || '#F3F2F1';
+    const dataAreaTop = margin.top;
+    const dataAreaHeight = h;
+
+    const dimLeft = svgRoot.append('rect').attr('class','range-dim')
+      .attr('x', margin.left).attr('y', dataAreaTop)
+      .attr('width', 0).attr('height', dataAreaHeight)
+      .attr('fill', dimFill).attr('opacity', 0);
+    const dimMiddle = svgRoot.append('rect').attr('class','range-dim')
+      .attr('x', margin.left).attr('y', dataAreaTop)
+      .attr('width', 0).attr('height', dataAreaHeight)
+      .attr('fill', dimFill).attr('opacity', 0);
+    const dimRight = svgRoot.append('rect').attr('class','range-dim')
+      .attr('x', margin.left).attr('y', dataAreaTop)
+      .attr('width', 0).attr('height', dataAreaHeight)
+      .attr('fill', dimFill).attr('opacity', 0);
+
+    // Gradient rect for fade-reveal effect (2025→2026)
+    const gradId = 'dim-fade-' + Math.random().toString(36).substr(2,9);
+    const defs = svgRoot.append('defs');
+    const fadeGrad = defs.append('linearGradient').attr('id', gradId);
+    fadeGrad.append('stop').attr('offset','0%').attr('stop-color', dimFill).attr('stop-opacity',1);
+    fadeGrad.append('stop').attr('offset','100%').attr('stop-color', dimFill).attr('stop-opacity',0);
+    const dimFade = svgRoot.append('rect').attr('class','range-dim-fade')
+      .attr('x', margin.left + x(2025)).attr('y', dataAreaTop)
+      .attr('width', x(2026) - x(2025)).attr('height', dataAreaHeight)
+      .attr('fill', 'url(#'+gradId+')').attr('opacity', 0);
+
+    return { svg, svgRoot, paths, x, y, w, h, margin, dimLeft, dimMiddle, dimRight, dimFade };
+  }
+
+
+  /* Beat states — copied from chart.html / article_mock.html.
+     NOTE: beat 5's spec currently has no `emphasized` field, so all
+     five bands render at full opacity within the active window. The
+     prose for beat 6 (CHART_BEAT_6) says "all bands dim except UI" —
+     that's a known mismatch to resolve. */
+  const beatStates=[
+    {beat:0, ranges:[[2010, 2015.5]], emphasized:null,
+      markers:{photoshop:1, sketch:0, figma:0, bootcamp:0}, eraMarkers:false,
+      eraLabelStates:{'Pre-Modern UX':'primary'},
+      subtitle:'2010–2015.5, when intuition and technical work led'},
+    {beat:1, ranges:[[2012, 2018]], emphasized:null,
+      markers:{photoshop:1, sketch:1, figma:0, bootcamp:0}, eraMarkers:false,
+      eraLabelStates:{'Pre-Modern UX':'secondary','UX 1.0':'primary'},
+      subtitle:'2012–2018, the strategic-designer wave arrives'},
+    {beat:2, ranges:[[2016.5, 2021.5]], emphasized:null,
+      markers:{photoshop:1, sketch:1, figma:1, bootcamp:1}, eraMarkers:false,
+      eraLabelStates:{'Pre-Modern UX':'secondary','UX 1.0':'primary','UI Technician Focus':'secondary'},
+      subtitle:'2016.5–2021.5, bootcamps, hiring, the Figma era'},
+    {beat:3, ranges:[[2019, 2025.5]], emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:0.25, bootcamp:0.25}, eraMarkers:false,
+      eraLabelStates:{'UX 1.0':'secondary','UI Technician Focus':'primary'},
+      subtitle:'2019–2025.5, UI Specifications takes over'},
+    {beat:4, ranges:[[2015.5, 2025.5]], emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:0, bootcamp:0}, eraMarkers:false,
+      subtitle:'2015.5–2025.5, the Director-of-UX decade'},
+    {beat:5, ranges:[[2019.5, 2025.5]], emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:1, bootcamp:1}, eraMarkers:false,
+      eraLabelStates:{'UX 1.0':'secondary','UI Technician Focus':'primary'},
+      subtitle:'2019.5–2025.5, what a 2018 grad has only ever known'},
+    {beat:6, ranges:null, emphasized:null,
+      markers:{photoshop:1, sketch:1, figma:1, bootcamp:1}, eraMarkers:true,
+      subtitle:'2010–2028, the full picture, with the post-2026 cliff visible'},
+    {beat:7, ranges:[[2013.5, 2016],[2026, 2028]], emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:0, bootcamp:0}, dimOpacity:0.55,
+      eraMarkers:['UX 2.0'],
+      eraLabelStates:{'UX 2.0':'primary'},
+      subtitle:'2013.5–2016 paired with 2026–2028, the rhyme'},
+    {beat:8, ranges:[[2025, 2028]], dimFade:true, dimOpacity:0.65, emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:1, bootcamp:0, 'ai-agents':1},
+      eraMarkers:['UX 1.0','UX 2.0'],
+      eraLabelStates:{'UX 1.0':'secondary','UX 2.0':'primary'},
+      subtitle:'2026 Onward: A Post-AI Workflow'},
+    {beat:9, ranges:[[2014, 2016.5],[2025.5, 2028]], emphasized:null,
+      markers:{photoshop:0, sketch:0, figma:0, bootcamp:0}, dimOpacity:0.65,
+      eraMarkers:['UX 1.0','UX 2.0'],
+      eraLabelStates:{'UX 1.0':'primary','UX 2.0':'primary'},
+      subtitle:'2014–2016 and 2026–2028: the familiar reset'},
+  ];
+
+
+  /* Static beat applier — no transitions, just direct attribute sets.
+     Each chart is built then snapshotted to its beat's state. */
+  function applyBeatStateStatic(chart, state){
+    if(!state) return;
+
+    const dimOp = state.dimOpacity != null ? state.dimOpacity : 0.65;
+    const {margin, x, w, dimLeft, dimMiddle, dimRight, dimFade} = chart;
+    const xLeft = margin.left;
+    const xRight = margin.left + w;
+
+    // Reset all dim rectangles (including fade)
+    [dimLeft, dimMiddle, dimRight].forEach(r => r.attr('opacity', 0).attr('width', 0));
+    if(dimFade) dimFade.attr('opacity', 0);
+
+    if(state.ranges && state.ranges.length === 1){
+      const [r0, r1] = state.ranges[0];
+      const x0 = margin.left + x(r0);
+      const x1 = margin.left + x(r1);
+      dimLeft.attr('x', xLeft).attr('width', Math.max(0, x0 - xLeft)).attr('opacity', dimOp);
+      dimRight.attr('x', x1).attr('width', Math.max(0, xRight - x1)).attr('opacity', dimOp);
+    } else if(state.ranges && state.ranges.length === 2){
+      const [a0, a1] = state.ranges[0];
+      const [b0, b1] = state.ranges[1];
+      const xa0 = margin.left + x(a0), xa1 = margin.left + x(a1);
+      const xb0 = margin.left + x(b0), xb1 = margin.left + x(b1);
+      dimLeft.attr('x', xLeft).attr('width', Math.max(0, xa0 - xLeft)).attr('opacity', dimOp);
+      dimMiddle.attr('x', xa1).attr('width', Math.max(0, xb0 - xa1)).attr('opacity', dimOp);
+      dimRight.attr('x', xb1).attr('width', Math.max(0, xRight - xb1)).attr('opacity', dimOp);
+    }
+
+    // Marker opacities
+    if(state.markers){
+      ['photoshop','sketch','figma','bootcamp','ai-agents'].forEach(key => {
+        const fallback = key === 'ai-agents' ? 0 : 1;
+        const op = state.markers[key] != null ? state.markers[key] : fallback;
+        chart.svg.select('.tool-' + key).attr('opacity', op);
+      });
+    }
+
+    // Era markers (dashed lines only)
+    const eraSetting = state.eraMarkers;
+    chart.svg.selectAll('.era-marker-line').attr('opacity', function(){
+      if(eraSetting === false) return 0;
+      const sel = d3.select(this);
+      const defaultOp = parseFloat(sel.attr('data-default-opacity'));
+      if(Array.isArray(eraSetting)){
+        const label = sel.attr('data-label');
+        return eraSetting.includes(label) ? defaultOp : 0;
+      }
+      return defaultOp;
+    });
+
+    // Era marker label visibility + emphasis level (also promotes font/fill for secondary→primary)
+    if(state.eraLabelStates != null){
+      chart.svg.selectAll('.era-marker-label').each(function(){
+        const el = d3.select(this);
+        const label = el.attr('data-era-label');
+        const isSub = el.classed('era-marker-sublabel');
+        const level = state.eraLabelStates[label];
+        if(!level || level === 'hidden'){
+          el.attr('opacity', 0);
+        } else if(level === 'primary'){
+          el.attr('fill', el.attr('data-primary-fill'))
+            .attr('opacity', isSub ? 0.8 : 1);
+          if(!isSub) el.attr('font-size', el.attr('data-primary-fontsize'))
+                       .attr('font-weight', el.attr('data-primary-fontweight'));
+        } else if(level === 'secondary'){
+          el.attr('fill', el.attr('data-default-fill'))
+            .attr('opacity', isSub ? 0.5 : 0.65);
+          if(!isSub) el.attr('font-size', el.attr('data-default-fontsize'))
+                       .attr('font-weight', el.attr('data-default-fontweight'));
+        }
+      });
+    }
+
+    // Dim fade gradient — activate matching dimLeft's opacity so transition is seamless
+    if(dimFade && state.dimFade) dimFade.attr('opacity', dimOp);
+
+    // Band emphasis
+    if(state.emphasized){
+      chart.paths.attr('fill-opacity', d => state.emphasized.includes(d.key) ? 0.9 : 0.08);
+      chart.svg.selectAll('.inline-label').attr('opacity', function(){
+        const cls = d3.select(this).attr('class') || '';
+        const match = cls.match(/inline-(\w+)/);
+        const k = match ? match[1] : null;
+        return state.emphasized.includes(k) ? 0.95 : 0.15;
+      });
+    }
+
+    // AI Operator annotation: visible only on full-chart beat
+    chart.svg.select('.annotation-ai-op').attr('opacity', state.ranges ? 0 : 1);
+  }
+
+
+  /* Render every figure's chart once. */
+  let currentMode = pickChartMode();
+
+  function renderAllCharts(){
+    const cfg = CHART_CONFIGS[currentMode];
+    document.querySelectorAll('.article-chart-figure[data-beat]').forEach(fig => {
+      const beatIdx = parseInt(fig.dataset.beat, 10);
+      const container = fig.querySelector('.article-chart');
+      if(!container || isNaN(beatIdx)) return;
+      const chart = buildChart(container, cfg);
+      applyBeatStateStatic(chart, beatStates[beatIdx]);
+    });
+  }
+
+  renderAllCharts();
+
+  // Re-render when viewport crosses the mobile/desktop breakpoint.
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    const newMode = pickChartMode();
+    if(newMode === currentMode) return;
+    if(resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      currentMode = newMode;
+      renderAllCharts();
+    }, 200);
+  });
+
+  })();
+  </script>
+
+
+</body>
+</html>

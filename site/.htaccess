@@ -37,15 +37,18 @@ RewriteRule ^resume\.html$ /resume/ [R=302,L]
 RewriteRule ^newsletter\.html$ /newsletter/ [R=302,L]
 RewriteRule ^newsletter-confirmed\.html$ /newsletter-confirmed/ [R=302,L]
 
-# === Canonical bare-path → silent internal rewrite to .html =================
+# === Canonical bare-path → silent internal rewrite to .php =================
 # URL bar stays at /foo/. [END] terminates the rewrite engine so the engine
 # doesn't restart and re-trigger the .html→bare 302 rules above (would loop).
-RewriteRule ^about/?$ /about.html [END]
-RewriteRule ^coaching/?$ /coaching.html [END]
-RewriteRule ^work-with-me/?$ /work-with-me.html [END]
-RewriteRule ^resume/?$ /resume.html [END]
-RewriteRule ^newsletter/?$ /newsletter.html [END]
-RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.html [END]
+# Targets are .php (each is a thin assembler that includes the shared head,
+# header.html, the matching body from _bodies/, and footer.html).
+RewriteRule ^$ /landing.php [END]
+RewriteRule ^about/?$ /about.php [END]
+RewriteRule ^coaching/?$ /coaching.php [END]
+RewriteRule ^work-with-me/?$ /work-with-me.php [END]
+RewriteRule ^resume/?$ /resume.php [END]
+RewriteRule ^newsletter/?$ /newsletter.php [END]
+RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.php [END]
 
 # === Front controller fallback (Phase 3) ====================================
 # For any URL that isn't a real file or directory, hand off to index.php.

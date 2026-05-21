@@ -1,0 +1,23 @@
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/" style="position:relative;">On UX 2.0<span style="position:absolute;top:-5px;right:-4px;width:10px;height:10px;background:#d63031;border-radius:50%;display:inline-block;"></span></a>
+    <a href="/about/">About</a>
+    <a href="/coaching/">Coaching</a>
+    <a href="/work-with-me/">Work with me</a>
+    <a href="/resume/">Resume</a>
+  </div>
+</nav>
+<script>
+  // Adds .is-active to whichever nav link matches the current URL. Runs
+  // inline immediately after the nav so there's no visual flash.
+  (function () {
+    var path = location.pathname.replace(/\/$/, '');
+    if (path === '') path = '/';
+    var sel = '.layout-nav a[href="' + path + '"], .layout-nav a[href="' + path + '/"]';
+    var link = document.querySelector(sel);
+    if (link) link.classList.add('is-active');
+  })();
+</script>

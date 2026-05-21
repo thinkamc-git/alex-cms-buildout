@@ -9,7 +9,7 @@
  * GA_ID constant below and redeploy to update every page at once.
  */
 (function () {
-  var GA_ID = 'G-PLACEHOLDER'; // ← swap with the real G-XXXXXXXXXX before going live
+  var GA_ID = 'G-J6443HD1JY';
 
   if (!GA_ID || GA_ID.indexOf('PLACEHOLDER') !== -1) return;
 

@@ -137,9 +137,10 @@ cp site/lib/sanitize.php           "$STAGE/lib/"
 cp site/lib/uploads.php            "$STAGE/lib/"
 mkdir -p "$STAGE/cms/views"
 cp site/cms/views/*.php            "$STAGE/cms/views/"
-cp site/cms/_assets/tiptap.css     "$STAGE/cms/_assets/"
-cp site/cms/_assets/tiptap-setup.js "$STAGE/cms/_assets/"
-cp site/cms/_assets/dragdrop.js    "$STAGE/cms/_assets/"
+cp site/cms/_assets/tiptap.css       "$STAGE/cms/_assets/"
+cp site/cms/_assets/tiptap-setup.js  "$STAGE/cms/_assets/"
+cp site/cms/_assets/dragdrop.js      "$STAGE/cms/_assets/"
+cp site/cms/_assets/scroll-actions.js "$STAGE/cms/_assets/"
 
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point

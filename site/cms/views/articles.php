@@ -110,63 +110,92 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="flash-success" role="status"><?= $e($flash) ?></div>
         <?php endif; ?>
 
+        <?php
+        // Split into "In progress" (idea/concept/outline/draft) and "Published".
+        $inProgress = [];
+        $published  = [];
+        foreach ($articles as $a) {
+            if ((string)($a['status'] ?? '') === 'published') {
+                $published[] = $a;
+            } else {
+                $inProgress[] = $a;
+            }
+        }
+
+        $columns = [
+            ['label' => 'Article Title', 'width' => '40%'],
+            ['label' => 'Stage',         'width' => '12%'],
+            ['label' => 'Special tag',   'width' => '14%'],
+            ['label' => 'Updated',       'width' => '18%'],
+            ['label' => 'Actions',       'width' => '16%'],
+        ];
+
+        $buildRow = static function (array $a) use ($e, $csrf_token, $stagePill): array {
+            $id      = (int)($a['id'] ?? 0);
+            $slug    = (string)($a['slug'] ?? '');
+            $title2  = (string)($a['title'] ?? '');
+            $special = (string)($a['special_tag'] ?? '');
+            $updated = (string)($a['updated_at'] ?? '');
+            $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+
+            $titleHtml = '<a href="/cms/articles/edit?id=' . $id . '" class="row-title">'
+                       . $e($title2 !== '' ? $title2 : '(untitled)')
+                       . '</a>'
+                       . ' <span class="row-slug">/' . $e($slug) . '</span>';
+
+            $specialHtml = $special !== ''
+                ? '<span class="pill special-' . $e($special) . '">' . $e(ucfirst($special)) . '</span>'
+                : '<span class="muted">—</span>';
+
+            $actionsHtml = '<div class="row-actions">'
+                . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
+                . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
+                .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
+                . '</form>'
+                . '</div>';
+
+            return [
+                'href'  => '/cms/articles/edit?id=' . $id,
+                'cells' => [
+                    ['html' => $titleHtml],
+                    ['html' => $stagePill((string)($a['status'] ?? 'draft'))],
+                    ['html' => $specialHtml],
+                    ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
+                    ['html' => $actionsHtml, 'class' => 'cell-actions'],
+                ],
+            ];
+        };
+        ?>
+
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">All articles</span>
-              <span class="content-block-sublabel">Draft + Published</span>
+              <span class="content-block-label">In progress</span>
+              <span class="content-block-sublabel">Idea · Concept · Outline · Draft</span>
             </div>
-            <span class="content-block-count"><?= (int)count($articles) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($inProgress) ?> entries</span>
           </div>
 
           <?php
-          $columns = [
-              ['label' => 'Title',       'width' => '40%'],
-              ['label' => 'Stage',       'width' => '12%'],
-              ['label' => 'Special tag', 'width' => '14%'],
-              ['label' => 'Updated',     'width' => '18%'],
-              ['label' => 'Actions',     'width' => '16%'],
-          ];
+          $rows = array_map($buildRow, $inProgress);
+          $empty_text = 'No articles in progress. Click + New Article to start.';
+          require __DIR__ . '/../partials/table.php';
+          ?>
+        </div>
 
-          $rows = [];
-          foreach ($articles as $a) {
-              $id      = (int)($a['id'] ?? 0);
-              $slug    = (string)($a['slug'] ?? '');
-              $title2  = (string)($a['title'] ?? '');
-              $special = (string)($a['special_tag'] ?? '');
-              $updated = (string)($a['updated_at'] ?? '');
-              $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Published</span>
+              <span class="content-block-sublabel">Live on /writing/[slug]</span>
+            </div>
+            <span class="content-block-count"><?= (int)count($published) ?> entries</span>
+          </div>
 
-              $titleHtml = '<a href="/cms/articles/edit?id=' . $id . '" class="row-title">'
-                         . $e($title2 !== '' ? $title2 : '(untitled)')
-                         . '</a>'
-                         . ' <span class="row-slug">/' . $e($slug) . '</span>';
-
-              $specialHtml = $special !== ''
-                  ? '<span class="pill special-' . $e($special) . '">' . $e(ucfirst($special)) . '</span>'
-                  : '<span class="muted">—</span>';
-
-              $actionsHtml = '<div class="row-actions">'
-                  . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                  . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
-                  .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                  .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
-                  . '</form>'
-                  . '</div>';
-
-              $rows[] = [
-                  'href'  => '/cms/articles/edit?id=' . $id,
-                  'cells' => [
-                      ['html' => $titleHtml],
-                      ['html' => $stagePill((string)($a['status'] ?? 'draft'))],
-                      ['html' => $specialHtml],
-                      ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
-                      ['html' => $actionsHtml, 'class' => 'cell-actions'],
-                  ],
-              ];
-          }
-
-          $empty_text = 'No articles yet. Click + New Article to start.';
+          <?php
+          $rows = array_map($buildRow, $published);
+          $empty_text = 'No published articles yet.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>

@@ -321,7 +321,23 @@ require __DIR__ . '/../partials/topbar.php';
       if ($titleHdr === '') $titleHdr = 'Untitled';
       $title    = $titleHdr;
       $pastTag  = $isPast && $status === 'published' ? ' · PAST' : '';
-      $subtitle = 'Live Session · ' . ucfirst($status) . $pastTag . ' · last saved ' . $e((string)($session['updated_at'] ?? ''));
+      $subtitle = 'Live Session · ' . ucfirst($status) . $pastTag . ' · last saved ' . (string)($session['updated_at'] ?? '');
+
+      $subtitle_extra = '';
+      if ($flash !== '') {
+          $undoHtml = '';
+          if ($canUndo) {
+              $undoHtml = '<form method="post" action="/cms/live-sessions/edit?id=' . (int)$id . '">'
+                        . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                        . '<button type="submit" name="action" value="undo" formnovalidate'
+                        . ' title="Reverts the last advance. Unsaved changes at this stage are lost.">↶ Undo</button>'
+                        . '</form>';
+          }
+          $subtitle_extra = '<span class="view-subtitle-flash" role="status">'
+                          . $e($flash) . $undoHtml
+                          . '</span>';
+      }
+
       $actions  = '<a href="/cms/live-sessions" class="btn-ghost">Back to list</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -337,20 +353,6 @@ require __DIR__ . '/../partials/topbar.php';
       </div>
 
       <div class="content-area">
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status">
-            <?= $e($flash) ?>
-            <?php if ($canUndo): ?>
-              <form method="post" action="/cms/live-sessions/edit?id=<?= (int)$id ?>" class="flash-undo">
-                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                <button type="submit" name="action" value="undo" class="btn-link" formnovalidate
-                  title="Reverts the last advance. Unsaved changes at this stage are lost.">
-                  ↶ Undo
-                </button>
-              </form>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -398,7 +400,7 @@ require __DIR__ . '/../partials/topbar.php';
               <?php endif; ?>
 
               <div class="field-group">
-                <label class="field-label" for="ls-title">Title <span class="field-req">required</span></label>
+                <label class="field-label" for="ls-title">Event Title <span class="field-req">required</span></label>
                 <input
                   type="text"
                   class="field-input large"
@@ -421,7 +423,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
               <div class="field-group">
-                <label class="field-label">Event Details <span class="field-hint-inline">date required · times optional</span></label>
+                <label class="field-label">Event Details <span class="field-hint-inline">date required · times optional · Eastern (Toronto) timezone</span></label>
                 <div class="event-grid">
                   <div>
                     <label class="field-sublabel" for="ls-event-date">Date <span class="field-req">required</span></label>
@@ -553,8 +555,10 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms/live-sessions" class="btn-ghost">Cancel</a>
 
+            <button type="submit" form="live-session-delete-form" class="btn-ghost btn-danger" style="margin-left:auto">Delete</button>
+
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri" style="margin-left:auto">Publish →</button>
+              <button type="submit" name="action" value="publish" class="btn-pri">Publish →</button>
             <?php endif; ?>
 
             <?php if ($status === 'published'): ?>
@@ -563,22 +567,27 @@ require __DIR__ . '/../partials/topbar.php';
                 name="action"
                 value="unpublish"
                 class="btn-ghost"
-                style="margin-left:auto"
                 data-confirm-unpublish="1">Move to draft</button>
+              <a
+                href="/live-sessions/<?= $e((string)($session['slug'] ?? '')) ?>"
+                target="_blank"
+                rel="noopener"
+                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
 
-        <form method="post"
+        <form id="live-session-delete-form"
+              method="post"
               action="/cms/live-sessions/delete?id=<?= (int)$id ?>"
-              class="inline-delete danger-zone"
+              class="inline-delete"
               data-stage="<?= $e($status) ?>"
-              data-slug="<?= $e((string)($session['slug'] ?? '')) ?>">
+              data-slug="<?= $e((string)($session['slug'] ?? '')) ?>"
+              hidden>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <?php if ($slugPublished): ?>
             <input type="hidden" name="typed_slug" value="">
           <?php endif; ?>
-          <button type="submit" class="btn-ghost btn-danger">Delete live session</button>
         </form>
       </div>
     </div>
@@ -595,6 +604,8 @@ require __DIR__ . '/../partials/topbar.php';
     csrfToken:    <?= json_encode($csrf_token, JSON_UNESCAPED_SLASHES) ?>,
   });
 </script>
+
+<script src="/cms/_assets/scroll-actions.js" defer></script>
 
 <script>
   for (const btn of document.querySelectorAll('[data-confirm-unpublish]')) {

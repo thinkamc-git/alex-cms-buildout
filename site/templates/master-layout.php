@@ -32,10 +32,19 @@ $bs = (string)($body_slot ?? '');
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/_ds/css/tokens.css">
-  <link rel="stylesheet" href="/_ds/css/base.css">
-  <link rel="stylesheet" href="/_ds/css/typography.css">
-  <link rel="stylesheet" href="/_templates/style-articles.css">
+  <?php
+  // Cache-buster: stamp each stylesheet with its on-disk mtime so a redeploy
+  // of an existing CSS file invalidates the browser cache automatically. The
+  // file_exists guards keep this safe in any environment.
+  $cssVer = static function (string $rel): string {
+      $full = $_SERVER['DOCUMENT_ROOT'] . $rel;
+      return is_file($full) ? '?v=' . (int)filemtime($full) : '';
+  };
+  ?>
+  <link rel="stylesheet" href="/_ds/css/tokens.css<?= $cssVer('/_ds/css/tokens.css') ?>">
+  <link rel="stylesheet" href="/_ds/css/base.css<?= $cssVer('/_ds/css/base.css') ?>">
+  <link rel="stylesheet" href="/_ds/css/typography.css<?= $cssVer('/_ds/css/typography.css') ?>">
+  <link rel="stylesheet" href="/_templates/style-articles.css<?= $cssVer('/_templates/style-articles.css') ?>">
   <script src="/_layout/analytics.js" async></script>
 </head>
 <body>

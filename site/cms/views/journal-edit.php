@@ -260,7 +260,23 @@ require __DIR__ . '/../partials/topbar.php';
       if ($titleHdr === '') $titleHdr = 'Untitled';
       $title    = $titleHdr;
       $entryHdr = $entryNumPadded !== null ? ' · Entry ' . $entryNumPadded : '';
-      $subtitle = 'Journal · ' . ucfirst($status) . $entryHdr . ' · last saved ' . $e((string)($journal['updated_at'] ?? ''));
+      $subtitle = 'Journal · ' . ucfirst($status) . $entryHdr . ' · last saved ' . (string)($journal['updated_at'] ?? '');
+
+      $subtitle_extra = '';
+      if ($flash !== '') {
+          $undoHtml = '';
+          if ($canUndo) {
+              $undoHtml = '<form method="post" action="/cms/journals/edit?id=' . (int)$id . '">'
+                        . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                        . '<button type="submit" name="action" value="undo" formnovalidate'
+                        . ' title="Reverts the last advance. Unsaved changes at this stage are lost.">↶ Undo</button>'
+                        . '</form>';
+          }
+          $subtitle_extra = '<span class="view-subtitle-flash" role="status">'
+                          . $e($flash) . $undoHtml
+                          . '</span>';
+      }
+
       $actions  = '<a href="/cms/journals" class="btn-ghost">Back to list</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -276,20 +292,6 @@ require __DIR__ . '/../partials/topbar.php';
       </div>
 
       <div class="content-area">
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status">
-            <?= $e($flash) ?>
-            <?php if ($canUndo): ?>
-              <form method="post" action="/cms/journals/edit?id=<?= (int)$id ?>" class="flash-undo">
-                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                <button type="submit" name="action" value="undo" class="btn-link" formnovalidate
-                  title="Reverts the last advance. Unsaved changes at this stage are lost.">
-                  ↶ Undo
-                </button>
-              </form>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -405,8 +407,10 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms/journals" class="btn-ghost">Cancel</a>
 
+            <button type="submit" form="journal-delete-form" class="btn-ghost btn-danger" style="margin-left:auto">Delete</button>
+
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri" style="margin-left:auto">Publish →</button>
+              <button type="submit" name="action" value="publish" class="btn-pri">Publish →</button>
             <?php endif; ?>
 
             <?php if ($status === 'published'): ?>
@@ -415,22 +419,27 @@ require __DIR__ . '/../partials/topbar.php';
                 name="action"
                 value="unpublish"
                 class="btn-ghost"
-                style="margin-left:auto"
                 data-confirm-unpublish="1">Move to draft</button>
+              <a
+                href="/journal/<?= $e((string)($journal['slug'] ?? '')) ?>"
+                target="_blank"
+                rel="noopener"
+                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
 
-        <form method="post"
+        <form id="journal-delete-form"
+              method="post"
               action="/cms/journals/delete?id=<?= (int)$id ?>"
-              class="inline-delete danger-zone"
+              class="inline-delete"
               data-stage="<?= $e($status) ?>"
-              data-slug="<?= $e((string)($journal['slug'] ?? '')) ?>">
+              data-slug="<?= $e((string)($journal['slug'] ?? '')) ?>"
+              hidden>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <?php if ($slugPublished): ?>
             <input type="hidden" name="typed_slug" value="">
           <?php endif; ?>
-          <button type="submit" class="btn-ghost btn-danger">Delete journal</button>
         </form>
       </div>
     </div>
@@ -449,6 +458,8 @@ require __DIR__ . '/../partials/topbar.php';
   });
 </script>
 <?php endif; ?>
+
+<script src="/cms/_assets/scroll-actions.js" defer></script>
 
 <script>
   for (const btn of document.querySelectorAll('[data-confirm-unpublish]')) {

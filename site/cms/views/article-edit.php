@@ -453,7 +453,24 @@ require __DIR__ . '/../partials/topbar.php';
       $titleHdr = (string)($article['title'] ?? 'Untitled');
       if ($titleHdr === '') $titleHdr = 'Untitled';
       $title    = $titleHdr;
-      $subtitle = 'Article · ' . ucfirst($status) . ' · last saved ' . $e((string)($article['updated_at'] ?? ''));
+      $subtitle = 'Article · ' . ucfirst($status) . ' · last saved ' . (string)($article['updated_at'] ?? '');
+
+      // Flash + Undo render inline alongside the subtitle (next to "last saved").
+      $subtitle_extra = '';
+      if ($flash !== '') {
+          $undoHtml = '';
+          if ($canUndo) {
+              $undoHtml = '<form method="post" action="/cms/articles/edit?id=' . (int)$id . '">'
+                        . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                        . '<button type="submit" name="action" value="undo" formnovalidate'
+                        . ' title="Reverts the last advance. Unsaved changes at this stage are lost.">↶ Undo</button>'
+                        . '</form>';
+          }
+          $subtitle_extra = '<span class="view-subtitle-flash" role="status">'
+                          . $e($flash) . $undoHtml
+                          . '</span>';
+      }
+
       $actions  = '<a href="/cms/articles" class="btn-ghost">Back to list</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -469,20 +486,6 @@ require __DIR__ . '/../partials/topbar.php';
       </div>
 
       <div class="content-area">
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status">
-            <?= $e($flash) ?>
-            <?php if ($canUndo): ?>
-              <form method="post" action="/cms/articles/edit?id=<?= (int)$id ?>" class="flash-undo">
-                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                <button type="submit" name="action" value="undo" class="btn-link" formnovalidate
-                  title="Reverts the last advance. Unsaved changes at this stage are lost.">
-                  ↶ Undo
-                </button>
-              </form>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -549,7 +552,8 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="form-actions form-actions-sticky">
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms" class="btn-ghost">Cancel</a>
-            <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto" data-advance-button>
+            <button type="submit" form="article-delete-form" class="btn-ghost btn-danger" style="margin-left:auto">Delete</button>
+            <button type="submit" name="action" value="advance" class="btn-pri" data-advance-button>
               Advance to <span data-advance-target><?= $e(ucfirst($nextStage ?? 'Concept')) ?></span> →
             </button>
           </div>
@@ -780,6 +784,13 @@ require __DIR__ . '/../partials/topbar.php';
                     min="0"
                     max="120"
                     <?= $readTimeDisabled ? 'disabled' : '' ?>>
+                  <p class="field-hint">
+                    <span data-rt-result></span>
+                    <button
+                      type="button"
+                      id="read-time-estimate"
+                      style="background:transparent;border:0;padding:0;color:var(--stage-published);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer;">↻ Get estimate</button>
+                  </p>
                 </div>
               <?php endif; ?>
             </aside>
@@ -789,12 +800,14 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms/articles" class="btn-ghost">Cancel</a>
 
+            <button type="submit" form="article-delete-form" class="btn-ghost btn-danger" style="margin-left:auto">Delete</button>
+
             <?php if ($nextStage !== null && $status !== 'draft' && $status !== 'published'): ?>
-              <button type="submit" name="action" value="advance" class="btn-pri" style="margin-left:auto">Advance to <?= $e(ucfirst($nextStage)) ?> →</button>
+              <button type="submit" name="action" value="advance" class="btn-pri">Advance to <?= $e(ucfirst($nextStage)) ?> →</button>
             <?php endif; ?>
 
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri" style="margin-left:auto">Publish →</button>
+              <button type="submit" name="action" value="publish" class="btn-pri">Publish →</button>
             <?php endif; ?>
 
             <?php if ($status === 'published'): ?>
@@ -803,23 +816,28 @@ require __DIR__ . '/../partials/topbar.php';
                 name="action"
                 value="unpublish"
                 class="btn-ghost"
-                style="margin-left:auto"
                 data-confirm-unpublish="1">Move to draft</button>
+              <a
+                href="/writing/<?= $e((string)($article['slug'] ?? '')) ?>"
+                target="_blank"
+                rel="noopener"
+                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
       <?php endif; ?>
 
-        <form method="post"
+        <form id="article-delete-form"
+              method="post"
               action="/cms/articles/delete?id=<?= (int)$id ?>"
-              class="inline-delete danger-zone"
+              class="inline-delete"
               data-stage="<?= $e($status) ?>"
-              data-slug="<?= $e((string)($article['slug'] ?? '')) ?>">
+              data-slug="<?= $e((string)($article['slug'] ?? '')) ?>"
+              hidden>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <?php if ($slugPublished): ?>
             <input type="hidden" name="typed_slug" value="">
           <?php endif; ?>
-          <button type="submit" class="btn-ghost btn-danger">Delete article</button>
         </form>
       </div>
     </div>
@@ -838,6 +856,47 @@ require __DIR__ . '/../partials/topbar.php';
   });
 </script>
 <?php endif; ?>
+
+<?php if ($showReadTime): ?>
+<script>
+  // "Get estimate" computes a read-time estimate from the current body and
+  // writes it into the input. No auto-management — the field stays in the
+  // user's control. 225 wpm, round up, min 1. Mirrors estimate_read_minutes()
+  // in lib/content.php for the JS-disabled path.
+  (function () {
+    const input  = document.getElementById('article-read-time');
+    const btn    = document.getElementById('read-time-estimate');
+    const result = document.querySelector('[data-rt-result]');
+    const body   = document.getElementById('article-body');
+    if (!input || !btn || !body) return;
+
+    function plainTextFromHtml(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html || '';
+      return div.textContent || '';
+    }
+    function wordCount(text) {
+      const t = (text || '').replace(/\s+/g, ' ').trim();
+      return t ? t.split(' ').filter(Boolean).length : 0;
+    }
+    btn.addEventListener('click', () => {
+      const text  = plainTextFromHtml(body.value);
+      const words = wordCount(text);
+      if (words === 0) {
+        result.textContent = 'No body content yet. ';
+        btn.textContent = '↻ Get estimate';
+        return;
+      }
+      const mins = Math.max(1, Math.ceil(words / 225));
+      input.value = String(mins);
+      result.textContent = 'Estimate: ' + mins + ' min from ' + words + ' words ';
+      btn.textContent = '↻ Refresh';
+    });
+  })();
+</script>
+<?php endif; ?>
+
+<script src="/cms/_assets/scroll-actions.js" defer></script>
 
 <script>
   // Move-to-draft (Published → Draft) needs explicit confirmation.

@@ -711,3 +711,27 @@ function unique_slug(string $candidate, int $excludeId = 0): string
         }
     }
 }
+
+/**
+ * Estimate read-time in whole minutes from sanitized body HTML. Strips tags
+ * and entities, counts words, divides by an average reading speed of 225 wpm
+ * (rounded up). Returns 0 for empty/whitespace-only bodies; otherwise at
+ * least 1 so a non-empty body never reads as "0 min".
+ *
+ * Mirrored client-side in article-edit.php so the sidebar field can show a
+ * live estimate as the user types. Kept here as a server-side fallback for
+ * the JS-disabled / submit-time path.
+ */
+function estimate_read_minutes(string $html): int
+{
+    if ($html === '') return 0;
+    $text = strip_tags($html);
+    $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+    $text = trim($text);
+    if ($text === '') return 0;
+    // str_word_count is ASCII-only; for prose this is close enough and avoids
+    // adding intl/mbstring deps. Falls back gracefully on non-Latin text.
+    $count = str_word_count($text);
+    if ($count === 0) return 0;
+    return max(1, (int)ceil($count / 225));
+}

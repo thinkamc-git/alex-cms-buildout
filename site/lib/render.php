@@ -53,6 +53,19 @@ function render_content(string $slug): void
     $stmt->execute([':slug' => $slug]);
     $row = $stmt->fetch();
     if ($row === false) {
+        // Slug guard (Phase 11): before 404'ing, check redirects on the
+        // full request path. Stored as `old_slug` in `redirects` so each
+        // row encodes the full source URL (e.g. /writing/old-name) rather
+        // than just the slug component — that lets a redirect cross
+        // content types (/writing/foo → /journal/bar). Phase 13 adds the
+        // status_code column; until then every redirect is 301 Permanent.
+        require_once __DIR__ . '/content.php';
+        $path  = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') ?: '';
+        $redir = lookup_redirect($path);
+        if ($redir !== null && $redir !== '' && $redir !== $path) {
+            header('Location: ' . $redir, true, 301);
+            return;
+        }
         render_404();
         return;
     }

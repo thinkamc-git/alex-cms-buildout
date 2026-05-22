@@ -123,11 +123,12 @@ require __DIR__ . '/../partials/topbar.php';
         }
 
         $columns = [
-            ['label' => 'Article Title', 'width' => '40%'],
-            ['label' => 'Stage',         'width' => '12%'],
-            ['label' => 'Special tag',   'width' => '14%'],
-            ['label' => 'Updated',       'width' => '18%'],
-            ['label' => 'Actions',       'width' => '16%'],
+            ['label' => 'Article Title', 'width' => '34%'],
+            ['label' => 'Stage',         'width' => '10%'],
+            ['label' => 'Special tag',   'width' => '12%'],
+            ['label' => 'Series',        'width' => '16%'],
+            ['label' => 'Updated',       'width' => '14%'],
+            ['label' => 'Actions',       'width' => '14%'],
         ];
 
         $buildRow = static function (array $a) use ($e, $csrf_token, $stagePill): array {
@@ -147,6 +148,16 @@ require __DIR__ . '/../partials/topbar.php';
                 ? '<span class="pill special-' . $e($special) . '">' . $e(ucfirst($special)) . '</span>'
                 : '<span class="muted">—</span>';
 
+            $seriesName = (string)($a['series_name'] ?? '');
+            if ($seriesName !== '') {
+                $partNo = (int)($a['series_order'] ?? 0);
+                $partTxt = $partNo > 0 ? ' – ' . str_pad((string)$partNo, 2, '0', STR_PAD_LEFT) : '';
+                $seriesHtml = '<a href="/cms/series" class="val-pill" style="text-decoration:none">'
+                            . $e($seriesName . $partTxt) . '</a>';
+            } else {
+                $seriesHtml = '<span class="muted">—</span>';
+            }
+
             $actionsHtml = '<div class="row-actions">'
                 . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
                 . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
@@ -161,6 +172,7 @@ require __DIR__ . '/../partials/topbar.php';
                     ['html' => $titleHtml],
                     ['html' => $stagePill((string)($a['status'] ?? 'draft'))],
                     ['html' => $specialHtml],
+                    ['html' => $seriesHtml],
                     ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
                 ],

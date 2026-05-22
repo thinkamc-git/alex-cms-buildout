@@ -106,6 +106,16 @@ $router->post('/cms/experiments/edit',         $cms('views/experiment-edit.php')
 $router->post('/cms/experiments/delete',       $cms('views/experiment-delete.php'));
 $router->post('/cms/experiments/upload-image', $cms('views/experiment-upload-image.php'));
 
+// Phase 11: Categories + Series admin. Both views handle their own
+// POST dispatch (add/update/delete) via $_POST['action'] — one route
+// per view, GET and POST share the handler. Series also has a JSON
+// reorder endpoint hit by the drag-drop handler in the series cards.
+$router->get ('/cms/categories',     $cms('views/categories.php'));
+$router->post('/cms/categories',     $cms('views/categories.php'));
+$router->get ('/cms/series',         $cms('views/series.php'));
+$router->post('/cms/series',         $cms('views/series.php'));
+$router->post('/cms/series/reorder', $cms('views/series-reorder.php'));
+
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so
 // /writing/foo/bar won't match — that's intentional (no nested article

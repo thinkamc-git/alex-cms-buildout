@@ -78,11 +78,11 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Content Template
     </a>
-    <a class="nav-item<?= $activeClass('categories') ?>" href="#" data-nav-id="categories">
+    <a class="nav-item<?= $activeClass('categories') ?>" href="/cms/categories" data-nav-id="categories">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
       Categories
     </a>
-    <a class="nav-item<?= $activeClass('series') ?>" href="#" data-nav-id="series">
+    <a class="nav-item<?= $activeClass('series') ?>" href="/cms/series" data-nav-id="series">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h1M8.5 7h1" stroke="currentColor" stroke-width="1.2"/></svg>
       Series<?= $count('series') ?>
     </a>

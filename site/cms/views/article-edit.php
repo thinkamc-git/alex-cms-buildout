@@ -75,6 +75,10 @@ if ($_routeStage !== 'idea' && $_routeType === 'live-session') {
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+// Series list for the sidebar picker (Phase 11). Loaded once here so
+// both the POST validator and the render pass see the same list.
+$allSeries = list_series();
+
 /**
  * `from_stage` suffix for the post-transition redirect. Only forward
  * transitions surface the Undo button; backward/move-to-draft don't.
@@ -235,7 +239,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'hero_caption'  => trim((string)($_POST['hero_caption']  ?? '')),
                 'hero_size'     => trim((string)($_POST['hero_size']     ?? 'default')),
                 'remove_hero'   => isset($_POST['remove_hero']),
+                'series_id'     => trim((string)($_POST['series_id']     ?? '')),
             ];
+
+            // Series — '' = none, otherwise an integer id. Validate against
+            // the loaded list so a tampered POST can't write a stale id.
+            // Part number is no longer editable here: series_order is
+            // auto-assigned by compact_series_order() after save (see below).
+            $seriesIdDb = null;
+            if ($post['series_id'] !== '' && ctype_digit($post['series_id'])) {
+                $sid = (int)$post['series_id'];
+                foreach ($allSeries as $_s) {
+                    if ((int)$_s['id'] === $sid) { $seriesIdDb = $sid; break; }
+                }
+                if ($seriesIdDb === null) {
+                    $errors[] = 'Series no longer exists — pick another or set to None.';
+                }
+            }
+            $prevSeriesId = (int)($article['series_id'] ?? 0);
+            $seriesChanged = $seriesIdDb !== ($prevSeriesId > 0 ? $prevSeriesId : null);
 
             if ($post['title'] === '') {
                 $errors[] = 'Title is required.';
@@ -291,13 +313,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 // in the row exactly as they were. (notes stays frozen — only
                 // the Idea-stage handler ever writes it.)
                 $saveData = [
-                    'id'          => $id,
-                    'template'    => 'article-standard',
-                    'title'       => $post['title'],
-                    'slug'        => $slug,
-                    'special_tag' => $specialTagDb,
-                    'tags'        => $post['tags'] !== '' ? $post['tags'] : null,
+                    'id'           => $id,
+                    'template'     => 'article-standard',
+                    'title'        => $post['title'],
+                    'slug'         => $slug,
+                    'special_tag'  => $specialTagDb,
+                    'tags'         => $post['tags'] !== '' ? $post['tags'] : null,
+                    'series_id'    => $seriesIdDb,
                 ];
+                // When the series changes, clear series_order so the new
+                // series's compact pass appends this row at the end. When
+                // the series clears entirely, also null the order.
+                if ($seriesChanged) {
+                    $saveData['series_order'] = null;
+                }
                 if ($editConcept) {
                     $saveData['concept_text'] = $post['concept_text'] !== '' ? $post['concept_text'] : null;
                 }
@@ -325,6 +354,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
                 if ($targetStage !== null) {
                     save_article($saveData);
+                    if ($seriesChanged) {
+                        if ($prevSeriesId > 0)  compact_series_order($prevSeriesId);
+                        if ($seriesIdDb !== null) compact_series_order($seriesIdDb);
+                    }
                     $res = transition_stage($id, $targetStage);
                     if (!$res['ok']) {
                         header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
@@ -340,6 +373,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 }
 
                 save_article($saveData);
+                if ($seriesChanged) {
+                    if ($prevSeriesId > 0)  compact_series_order($prevSeriesId);
+                    if ($seriesIdDb !== null) compact_series_order($seriesIdDb);
+                }
                 header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
                 exit;
             }
@@ -756,6 +793,47 @@ require __DIR__ . '/../partials/topbar.php';
                   <?php endforeach; ?>
                 </select>
               </div>
+
+              <div class="field-group">
+                <label class="field-label" for="article-series">Series <span class="field-hint-inline">optional</span></label>
+                <?php $currentSeriesId = (int)($article['series_id'] ?? 0); ?>
+                <select class="field-select" id="article-series" name="series_id">
+                  <option value="">— None</option>
+                  <?php foreach ($allSeries as $s): ?>
+                    <option value="<?= (int)$s['id'] ?>" <?= $currentSeriesId === (int)$s['id'] ? 'selected' : '' ?>>
+                      <?= $e((string)$s['name']) ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="field-hint">
+                  Manage the list at <a href="/cms/series">/cms/series</a>.
+                </p>
+              </div>
+
+              <div class="field-group" id="series-order-group"<?= $currentSeriesId === 0 ? ' style="display:none"' : '' ?>>
+                <label class="field-label">Part number <span class="field-hint-inline">in series</span></label>
+                <div style="display:flex;align-items:center;gap:8px;color:var(--secondary);font-family:var(--font-mono);font-size:var(--text-meta)">
+                  <?php $partNo = (int)($article['series_order'] ?? 0); ?>
+                  <?php if ($partNo > 0): ?>
+                    <span class="val-pill" style="font-family:var(--font-mono);font-size:var(--text-micro)"><?= str_pad((string)$partNo, 2, '0', STR_PAD_LEFT) ?></span>
+                  <?php else: ?>
+                    <span style="color:var(--muted);font-style:italic">unset (save once to assign)</span>
+                  <?php endif; ?>
+                </div>
+                <p class="field-hint">Auto-assigned. Drag-reorder parts at <a href="/cms/series">/cms/series</a>.</p>
+              </div>
+
+              <script>
+                (function () {
+                  var sel = document.getElementById('article-series');
+                  var grp = document.getElementById('series-order-group');
+                  if (sel && grp) {
+                    sel.addEventListener('change', function () {
+                      grp.style.display = sel.value === '' ? 'none' : '';
+                    });
+                  }
+                })();
+              </script>
 
               <div class="field-group">
                 <label class="field-label" for="article-tags">Tags <span class="field-hint-inline">optional</span></label>

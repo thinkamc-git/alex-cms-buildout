@@ -107,19 +107,23 @@ function get_article(int $id): ?array
  */
 function list_articles(array $filters = []): array
 {
-    $sql = "SELECT id, slug, title, status, updated_at, published_at, special_tag, pipeline_order
-            FROM content
-            WHERE type = 'article'";
+    $sql = "SELECT c.id, c.slug, c.title, c.status, c.updated_at, c.published_at,
+                   c.special_tag, c.pipeline_order,
+                   c.series_id, c.series_order,
+                   s.name AS series_name, s.slug AS series_slug
+              FROM content c
+         LEFT JOIN series s ON s.id = c.series_id
+             WHERE c.type = 'article'";
     $params = [];
 
     if (isset($filters['status']) && $filters['status'] !== '') {
-        $sql .= " AND status = :status";
+        $sql .= " AND c.status = :status";
         $params[':status'] = (string)$filters['status'];
     }
 
     // Sort: pipeline_order ASC (0 first → unordered new captures at top,
     // dragged items get 1..N below), then recency as tiebreaker.
-    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+    $sql .= " ORDER BY c.pipeline_order ASC, c.updated_at DESC";
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -823,4 +827,455 @@ function save_experiment(array $data): int
 function delete_experiment(int $id): void
 {
     delete_article($id);
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Categories (Phase 11)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * The 18 design-system palette tokens (sans the `--c-` prefix).
+ * The categories admin dropdown enumerates this list; the colour cell
+ * renders as `background:var(--c-<token>)`. New categories must pick
+ * from this set — no raw hex.
+ */
+const PALETTE_COLORS = [
+    'rust', 'terracotta', 'clay',  'amber',  'ochre',  'olive',
+    'moss', 'forest',     'sage',  'teal',   'ocean',  'denim',
+    'indigo','purple',    'violet','plum',   'mauve',  'rose',
+];
+
+/**
+ * Content types that carry categories. Mirrors the seed in
+ * db/migrations/0006_seed_initial_categories.sql.
+ */
+const CATEGORY_TYPES = ['article', 'journal', 'live-session', 'experiment'];
+
+/**
+ * List categories. If $type is given, scopes to that content type
+ * (article / journal / live-session / experiment). Returns rows with
+ * a `usage_count` integer derived from content_categories.
+ *
+ * Ordered by sort_order ASC then label ASC so the admin and dropdowns
+ * agree on display order.
+ */
+function list_categories(?string $type = null): array
+{
+    $sql = "SELECT c.*, (
+              SELECT COUNT(*) FROM content_categories cc
+               WHERE cc.type = c.type AND cc.category = c.value_slug
+            ) AS usage_count
+              FROM categories c";
+    $params = [];
+    if ($type !== null) {
+        $sql .= " WHERE c.type = :t";
+        $params[':t'] = $type;
+    }
+    $sql .= " ORDER BY c.type ASC, c.sort_order ASC, c.label ASC";
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Fetch a single category row by id.
+ */
+function get_category(int $id): ?array
+{
+    $stmt = db()->prepare('SELECT * FROM categories WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * True if a (type, value_slug) already exists. Used by save_category to
+ * block duplicate adds. $excludeId lets updates skip their own row.
+ */
+function category_value_slug_exists(string $type, string $slug, int $excludeId = 0): bool
+{
+    $stmt = db()->prepare(
+        'SELECT id FROM categories
+          WHERE type = :t AND value_slug = :s AND id <> :id
+          LIMIT 1'
+    );
+    $stmt->execute([':t' => $type, ':s' => $slug, ':id' => $excludeId]);
+    return $stmt->fetch() !== false;
+}
+
+/**
+ * Upsert a category. Returns ['ok' => bool, 'error' => string, 'id' => int].
+ *
+ * INSERT path requires (type, label, colour). value_slug is derived
+ * from the label via slugify() and must be unique within the type.
+ *
+ * UPDATE path requires id and changes only label + colour. type and
+ * value_slug are permanent (per CMS-STRUCTURE.md §10) — renaming the
+ * slug would orphan every content_categories row referencing it.
+ */
+function save_category(array $data): array
+{
+    $id     = (int)($data['id'] ?? 0);
+    $type   = (string)($data['type'] ?? '');
+    $label  = trim((string)($data['label'] ?? ''));
+    $colour = (string)($data['colour'] ?? '');
+
+    if (!in_array($colour, PALETTE_COLORS, true)) {
+        return ['ok' => false, 'error' => 'Colour must be one of the design-system palette tokens.', 'id' => 0];
+    }
+    if ($label === '') {
+        return ['ok' => false, 'error' => 'Label is required.', 'id' => 0];
+    }
+
+    if ($id === 0) {
+        if (!in_array($type, CATEGORY_TYPES, true)) {
+            return ['ok' => false, 'error' => 'Type must be article, journal, live-session, or experiment.', 'id' => 0];
+        }
+        $slug = slugify($label);
+        if ($slug === '') {
+            return ['ok' => false, 'error' => 'Label must contain letters or numbers.', 'id' => 0];
+        }
+        if (category_value_slug_exists($type, $slug)) {
+            return ['ok' => false, 'error' => 'Slug "' . $slug . '" is already used in ' . $type . ' categories.', 'id' => 0];
+        }
+
+        // Append at end — leave gaps of 10 so future manual reorders have headroom.
+        $maxStmt = db()->prepare(
+            'SELECT COALESCE(MAX(sort_order), 0) + 10 AS n FROM categories WHERE type = :t'
+        );
+        $maxStmt->execute([':t' => $type]);
+        $sortOrder = (int)($maxStmt->fetch()['n'] ?? 10);
+
+        $stmt = db()->prepare(
+            'INSERT INTO categories (type, value_slug, label, colour, sort_order)
+             VALUES (:t, :s, :l, :c, :o)'
+        );
+        $stmt->execute([
+            ':t' => $type, ':s' => $slug, ':l' => $label,
+            ':c' => $colour, ':o' => $sortOrder,
+        ]);
+        return ['ok' => true, 'error' => '', 'id' => (int)db()->lastInsertId()];
+    }
+
+    // UPDATE — label and colour only. type + value_slug stay locked.
+    $existing = get_category($id);
+    if ($existing === null) {
+        return ['ok' => false, 'error' => 'Category not found.', 'id' => 0];
+    }
+    $stmt = db()->prepare(
+        'UPDATE categories SET label = :l, colour = :c WHERE id = :id'
+    );
+    $stmt->execute([':l' => $label, ':c' => $colour, ':id' => $id]);
+    return ['ok' => true, 'error' => '', 'id' => $id];
+}
+
+/**
+ * Hard-delete a category. Blocked when any content row references it
+ * (usage_count > 0) — the admin disables the trash icon in that case;
+ * this guard is the server-side enforcement.
+ */
+function delete_category(int $id): array
+{
+    $cat = get_category($id);
+    if ($cat === null) {
+        return ['ok' => false, 'error' => 'Category not found.'];
+    }
+    $cnt = db()->prepare(
+        'SELECT COUNT(*) AS n FROM content_categories
+          WHERE type = :t AND category = :s'
+    );
+    $cnt->execute([':t' => (string)$cat['type'], ':s' => (string)$cat['value_slug']]);
+    $n = (int)($cnt->fetch()['n'] ?? 0);
+    if ($n > 0) {
+        return ['ok' => false, 'error' => 'In use by ' . $n . ' piece(s) of content — unassign first.'];
+    }
+    $stmt = db()->prepare('DELETE FROM categories WHERE id = :id');
+    $stmt->execute([':id' => $id]);
+    return ['ok' => true, 'error' => ''];
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Series (Phase 11)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * List every series with a derived `parts_count` (rows on `content`
+ * with matching series_id, regardless of stage — drafts count toward
+ * "n parts" so the author sees the in-progress weight of each series).
+ */
+function list_series(): array
+{
+    return db()->query(
+        "SELECT s.*, (
+            SELECT COUNT(*) FROM content c WHERE c.series_id = s.id
+         ) AS parts_count
+           FROM series s
+          ORDER BY s.name ASC"
+    )->fetchAll();
+}
+
+/**
+ * Fetch one series by id.
+ */
+function get_series(int $id): ?array
+{
+    $stmt = db()->prepare('SELECT * FROM series WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * Ensure a series slug is unique. Mirrors unique_slug for content but
+ * scoped to the `series` table.
+ */
+function unique_series_slug(string $candidate, int $excludeId = 0): string
+{
+    if ($candidate === '') return '';
+    $base = $candidate;
+    $n = 1;
+    while (true) {
+        $try = $n === 1 ? $base : ($base . '-' . $n);
+        $stmt = db()->prepare(
+            'SELECT id FROM series WHERE slug = :s AND id <> :id LIMIT 1'
+        );
+        $stmt->execute([':s' => $try, ':id' => $excludeId]);
+        if ($stmt->fetch() === false) return $try;
+        $n++;
+        if ($n > 1000) {
+            return $base . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
+        }
+    }
+}
+
+/**
+ * Upsert a series. Returns ['ok' => bool, 'error' => string, 'id' => int].
+ *
+ * INSERT generates the slug from name (or accepts an explicit override)
+ * and uniqifies it. UPDATE leaves the slug permanent (it's part of the
+ * /series/[slug]/ public URL) — only name and description change.
+ *
+ * Phase 12 will iterate over `series` to auto-create matching Editorial
+ * Page indexes at /series/[slug]/. Until then, creating a series here
+ * just stores the row — no index side-effect.
+ */
+function save_series(array $data): array
+{
+    $id          = (int)($data['id'] ?? 0);
+    $name        = trim((string)($data['name'] ?? ''));
+    $slug        = trim((string)($data['slug'] ?? ''));
+    $description = trim((string)($data['description'] ?? ''));
+
+    if ($name === '') {
+        return ['ok' => false, 'error' => 'Name is required.', 'id' => 0];
+    }
+
+    if ($id === 0) {
+        $slug = $slug !== '' ? slugify($slug) : slugify($name);
+        if ($slug === '') {
+            return ['ok' => false, 'error' => 'Slug could not be generated — provide a name or slug containing letters or numbers.', 'id' => 0];
+        }
+        $slug = unique_series_slug($slug);
+        $stmt = db()->prepare(
+            'INSERT INTO series (name, slug, description) VALUES (:n, :s, :d)'
+        );
+        $stmt->execute([':n' => $name, ':s' => $slug, ':d' => $description]);
+        return ['ok' => true, 'error' => '', 'id' => (int)db()->lastInsertId()];
+    }
+
+    // UPDATE — name + description only.
+    $existing = get_series($id);
+    if ($existing === null) {
+        return ['ok' => false, 'error' => 'Series not found.', 'id' => 0];
+    }
+    $stmt = db()->prepare(
+        'UPDATE series SET name = :n, description = :d WHERE id = :id'
+    );
+    $stmt->execute([':n' => $name, ':d' => $description, ':id' => $id]);
+    return ['ok' => true, 'error' => '', 'id' => $id];
+}
+
+/**
+ * Hard-delete a series. Blocked when any content row still references it
+ * via series_id — the author has to unassign every part first.
+ */
+function delete_series(int $id): array
+{
+    $cnt = db()->prepare('SELECT COUNT(*) AS n FROM content WHERE series_id = :id');
+    $cnt->execute([':id' => $id]);
+    $n = (int)($cnt->fetch()['n'] ?? 0);
+    if ($n > 0) {
+        return ['ok' => false, 'error' => 'In use by ' . $n . ' piece(s) of content — unassign first.'];
+    }
+    $stmt = db()->prepare('DELETE FROM series WHERE id = :id');
+    $stmt->execute([':id' => $id]);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * List articles that aren't currently assigned to any series. Used by
+ * the series-card "+ Add article" picker. type='article' only — the
+ * series flow is article-centric per CMS-STRUCTURE.md §16. Ordered by
+ * title so the dropdown is easy to scan.
+ */
+function list_unassigned_articles(): array
+{
+    return db()->query(
+        "SELECT id, slug, title, status
+           FROM content
+          WHERE type = 'article' AND series_id IS NULL
+          ORDER BY title ASC"
+    )->fetchAll();
+}
+
+/**
+ * Renumber every part of a series to a contiguous 1..N sequence based
+ * on the current series_order (NULLs and gaps fall to the end via the
+ * deterministic id tiebreaker). Called after add_article_to_series and
+ * remove_article_from_series so the visible "01 / 02 / 03…" never
+ * skips. Pure side-effect — no return value.
+ */
+function compact_series_order(int $seriesId): void
+{
+    if ($seriesId <= 0) return;
+    $stmt = db()->prepare(
+        "SELECT id FROM content
+          WHERE series_id = :s AND type = 'article'
+          ORDER BY series_order IS NULL, series_order ASC, id ASC"
+    );
+    $stmt->execute([':s' => $seriesId]);
+    $i = 0;
+    $upd = db()->prepare('UPDATE content SET series_order = :o WHERE id = :id');
+    foreach ($stmt->fetchAll() as $row) {
+        $i++;
+        $upd->execute([':o' => $i, ':id' => (int)$row['id']]);
+    }
+}
+
+/**
+ * Rewrite series_order for $seriesId using the explicit $articleIds
+ * order (position 0 → series_order = 1, etc.). Ids not currently in
+ * this series are rejected — defends against tampered POSTs.
+ *
+ * Returns ['ok' => bool, 'error' => str]. Used by the drag-drop endpoint.
+ */
+function reorder_series_parts(int $seriesId, array $articleIds): array
+{
+    if ($seriesId <= 0) {
+        return ['ok' => false, 'error' => 'Bad series id.'];
+    }
+    if (count($articleIds) === 0) {
+        return ['ok' => true, 'error' => ''];
+    }
+    $stmt = db()->prepare(
+        "SELECT id FROM content WHERE series_id = :s AND type = 'article'"
+    );
+    $stmt->execute([':s' => $seriesId]);
+    $valid = [];
+    foreach ($stmt->fetchAll() as $r) {
+        $valid[(int)$r['id']] = true;
+    }
+    foreach ($articleIds as $aid) {
+        if (!isset($valid[(int)$aid])) {
+            return ['ok' => false, 'error' => 'Article #' . (int)$aid . ' is not in this series.'];
+        }
+    }
+
+    $pos = 0;
+    $upd = db()->prepare('UPDATE content SET series_order = :o WHERE id = :id');
+    foreach ($articleIds as $aid) {
+        $pos++;
+        $upd->execute([':o' => $pos, ':id' => (int)$aid]);
+    }
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Attach an article to a series. series_order is appended (max + 1)
+ * so the new part lands at the end. Returns ['ok' => bool, 'error' => str].
+ *
+ * Limited to type='article' rows — the series flow is article-centric
+ * and other types don't currently get series UI on their edit screens.
+ */
+function add_article_to_series(int $articleId, int $seriesId): array
+{
+    if ($articleId <= 0 || $seriesId <= 0) {
+        return ['ok' => false, 'error' => 'Bad ids.'];
+    }
+    $s = get_series($seriesId);
+    if ($s === null) {
+        return ['ok' => false, 'error' => 'Series not found.'];
+    }
+    // Confirm the article exists and is type='article' before writing.
+    $check = db()->prepare(
+        "SELECT id, series_id FROM content WHERE id = :id AND type = 'article' LIMIT 1"
+    );
+    $check->execute([':id' => $articleId]);
+    $row = $check->fetch();
+    if ($row === false) {
+        return ['ok' => false, 'error' => 'Article not found.'];
+    }
+
+    // Append at the end of the series.
+    $maxStmt = db()->prepare(
+        'SELECT COALESCE(MAX(series_order), 0) + 1 AS n FROM content WHERE series_id = :s'
+    );
+    $maxStmt->execute([':s' => $seriesId]);
+    $nextOrder = (int)($maxStmt->fetch()['n'] ?? 1);
+
+    $upd = db()->prepare(
+        'UPDATE content SET series_id = :s, series_order = :o WHERE id = :id'
+    );
+    $upd->execute([':s' => $seriesId, ':o' => $nextOrder, ':id' => $articleId]);
+    compact_series_order($seriesId);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Detach an article from its series. Clears both series_id and
+ * series_order. The remaining parts keep their existing orders — a
+ * gap in the sequence is harmless (the public index sorts by ASC).
+ */
+function remove_article_from_series(int $articleId): array
+{
+    if ($articleId <= 0) {
+        return ['ok' => false, 'error' => 'Bad id.'];
+    }
+    // Capture the source series before clearing so we can compact it.
+    $look = db()->prepare("SELECT series_id FROM content WHERE id = :id AND type = 'article' LIMIT 1");
+    $look->execute([':id' => $articleId]);
+    $prevRow  = $look->fetch();
+    $prevSid  = $prevRow !== false ? (int)($prevRow['series_id'] ?? 0) : 0;
+
+    $upd = db()->prepare(
+        "UPDATE content SET series_id = NULL, series_order = NULL
+          WHERE id = :id AND type = 'article'"
+    );
+    $upd->execute([':id' => $articleId]);
+    if ($prevSid > 0) compact_series_order($prevSid);
+    return ['ok' => true, 'error' => ''];
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Slug guard (Phase 11)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * Look up a path in the redirects table. Returns the new target path,
+ * or null if no row matches.
+ *
+ * Callers expected to pass the bare path with query string stripped
+ * (e.g. `/writing/old-slug`). Phase 13 extends this with a status_code
+ * column; for now every redirect is treated as 301 by the render layer.
+ */
+function lookup_redirect(string $path): ?string
+{
+    if ($path === '') return null;
+    $stmt = db()->prepare(
+        'SELECT new_slug FROM redirects WHERE old_slug = :p LIMIT 1'
+    );
+    $stmt->execute([':p' => $path]);
+    $row = $stmt->fetch();
+    return $row === false ? null : (string)$row['new_slug'];
 }

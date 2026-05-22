@@ -108,9 +108,23 @@ function render_content(string $slug): void
         'article-standard' => 'article-standard.php',
         'journal-entry'    => 'journal-entry.php',
         'live-session'     => 'live-session.php',
+        'experiment'       => 'experiment.php',
+        'experiment-html'  => 'experiment-html.php',
     ];
     if (!isset($known[$template])) {
         render_404();
+        return;
+    }
+
+    // Raw HTML passthrough: experiment-html renders its source file directly
+    // with no master-layout wrapper, no CMS chrome. The template handles its
+    // own headers and exits — render_content returns immediately after.
+    // See CMS-STRUCTURE.md §12.
+    if ($template === 'experiment-html') {
+        if (!defined('TEMPLATE_OK')) define('TEMPLATE_OK', true);
+        require_once __DIR__ . '/folders.php';
+        $ctx = ['article' => $row];
+        require dirname(__DIR__) . '/templates/experiment-html.php';
         return;
     }
 

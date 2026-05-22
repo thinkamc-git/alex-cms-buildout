@@ -168,6 +168,9 @@ function save_article(array $data): int
         // are independently optional (see live-session-edit.php).
         'event_date', 'event_time', 'event_end_time',
         'location', 'cost_pill', 'attendance', 'custom_pill',
+        // Experiment fields (Phase 10). source_file is just the filename
+        // inside /content/experiment/<slug>/ — the full path is derived.
+        'source_file',
         'type',
         'published_at', 'published_status',
     ];
@@ -429,7 +432,7 @@ function transition_stage(int $id, string $to): array
                 'error' => 'Set a type before advancing — drag into a column in Ideation or pick one in the Type dropdown.',
             ];
         }
-        if (!in_array($type, ['article', 'journal', 'live-session'], true)) {
+        if (!in_array($type, ['article', 'journal', 'live-session', 'experiment'], true)) {
             return [
                 'ok'    => false,
                 'error' => ucfirst((string)$type) . ' editor isn\'t available yet — that lands in a later phase.',
@@ -734,4 +737,90 @@ function estimate_read_minutes(string $html): int
     $count = str_word_count($text);
     if ($count === 0) return 0;
     return max(1, (int)ceil($count / 225));
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// Experiments (Phase 10)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch a single experiment row by id. Returns null when not of
+ * type='experiment'. As with the other types, Idea-stage captures only
+ * earn type='experiment' once typed — until then they live in the
+ * type-agnostic Idea editor.
+ */
+function get_experiment(int $id): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content WHERE id = :id AND type = 'experiment' LIMIT 1"
+    );
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * Fetch a published experiment by slug for the public render path.
+ * Used by render_content() — same shape as get_journal_by_slug etc.
+ */
+function get_experiment_by_slug(string $slug): ?array
+{
+    $stmt = db()->prepare(
+        "SELECT * FROM content
+          WHERE slug = :slug
+            AND type = 'experiment'
+            AND status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')
+          LIMIT 1"
+    );
+    $stmt->execute([':slug' => $slug]);
+    $row = $stmt->fetch();
+    return $row === false ? null : $row;
+}
+
+/**
+ * List experiments. Mirrors list_articles' filter shape, plus includes
+ * source_file so the list view can flag rows whose folder picker is empty.
+ */
+function list_experiments(array $filters = []): array
+{
+    $sql = "SELECT id, slug, title, status, updated_at, published_at,
+                   template, source_file, pipeline_order
+              FROM content
+             WHERE type = 'experiment'";
+    $params = [];
+
+    if (isset($filters['status']) && $filters['status'] !== '') {
+        $sql .= " AND status = :status";
+        $params[':status'] = (string)$filters['status'];
+    }
+
+    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Upsert an experiment. Delegates to save_article with type forced to
+ * 'experiment'. The shared column whitelist already accepts `template`
+ * and `source_file` (defined since the initial schema), so no extra
+ * plumbing is needed here — just the type override.
+ */
+function save_experiment(array $data): int
+{
+    $data['type'] = 'experiment';
+    return save_article($data);
+}
+
+/**
+ * Hard-delete an experiment. delete_article is type-agnostic; named
+ * separately for callsite clarity. Note: the on-disk content folder
+ * (if any) is removed independently by the delete view, which calls
+ * folder_delete() *before* this — see experiment-delete.php.
+ */
+function delete_experiment(int $id): void
+{
+    delete_article($id);
 }

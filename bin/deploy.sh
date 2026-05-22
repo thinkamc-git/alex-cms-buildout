@@ -150,12 +150,16 @@ cp site/cms/_assets/scroll-actions.js "$STAGE/cms/_assets/"
 # article.html and layouts.html are design references, never deployed).
 cp site/lib/author.php             "$STAGE/lib/"
 cp site/lib/render.php             "$STAGE/lib/"
+# Phase 10: Custom HTML Folder System library (used by experiment-html).
+cp site/lib/folders.php            "$STAGE/lib/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
 cp site/templates/article-standard.php "$STAGE/templates/"
 cp site/templates/journal-entry.php    "$STAGE/templates/"
 cp site/templates/live-session.php     "$STAGE/templates/"
+cp site/templates/experiment.php       "$STAGE/templates/"
+cp site/templates/experiment-html.php  "$STAGE/templates/"
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
 

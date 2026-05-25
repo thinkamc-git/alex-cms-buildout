@@ -65,6 +65,9 @@ if ($status === 'idea') {
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+$allExperimentCategories = list_categories('experiment');
+$currentPrimaryCategory  = get_primary_category($id);
+
 $expStages = stages_for_type('experiment'); // ['idea','draft','published']
 
 $undoSuffix = static function (string $action, string $current): string {
@@ -148,7 +151,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'source_file' => trim((string)($_POST['source_file'] ?? '')),
             'read_time'   => trim((string)($_POST['read_time']   ?? '')),
             'tags'        => trim((string)($_POST['tags']        ?? '')),
+            'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
         ];
+
+        $allowedCatSlugs = array_map(static fn($c) => (string)$c['value_slug'], $allExperimentCategories);
+        if ($post['primary_category'] !== '' && !in_array($post['primary_category'], $allowedCatSlugs, true)) {
+            $errors[] = 'Primary category is not a known experiment category.';
+            $post['primary_category'] = '';
+        }
 
         if ($post['title'] === '') {
             $errors[] = 'Title is required.';
@@ -209,6 +219,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             if ($targetStage !== null) {
                 save_experiment($saveData);
+                assign_primary_category($id, 'experiment', $post['primary_category']);
                 $res = transition_stage($id, $targetStage);
                 if (!$res['ok']) {
                     header('Location: /cms/experiments/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
@@ -224,6 +235,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
 
             save_experiment($saveData);
+            assign_primary_category($id, 'experiment', $post['primary_category']);
             header('Location: /cms/experiments/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
             exit;
         }
@@ -493,6 +505,17 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <aside class="form-side">
+              <div class="field-group">
+                <label class="field-label" for="ex-primary-category">Primary category</label>
+                <select class="field-select" id="ex-primary-category" name="primary_category">
+                  <option value="">— None</option>
+                  <?php foreach ($allExperimentCategories as $cat): ?>
+                    <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="field-hint">Drives card colour on /experiments/ (Prototype vs Concept dark variant).</p>
+              </div>
+
               <div class="field-group">
                 <label class="field-label" for="ex-read-time">Read time <span class="field-hint-inline">manual</span></label>
                 <div style="display:flex;gap:var(--space-8);align-items:center">

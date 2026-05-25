@@ -61,6 +61,9 @@ if ($status === 'idea') {
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+$allJournalCategories  = list_categories('journal');
+$currentPrimaryCategory = get_primary_category($id);
+
 $undoSuffix = static function (string $action, string $current): string {
     return in_array($action, ['advance', 'publish'], true)
         ? '&from_stage=' . urlencode($current)
@@ -121,7 +124,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'key_statement' => trim((string)($_POST['key_statement'] ?? '')),
             'body_raw'      =>      (string)($_POST['body']          ?? ''),
             'tags'          => trim((string)($_POST['tags']          ?? '')),
+            'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
         ];
+
+        $allowedCatSlugs = array_map(static fn($c) => (string)$c['value_slug'], $allJournalCategories);
+        if ($post['primary_category'] !== '' && !in_array($post['primary_category'], $allowedCatSlugs, true)) {
+            $errors[] = 'Primary category is not a known journal category.';
+            $post['primary_category'] = '';
+        }
 
         if ($post['key_statement'] === '') {
             $errors[] = 'Key Statement is required.';
@@ -162,6 +172,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             if ($targetStage !== null) {
                 save_journal($saveData);
+                assign_primary_category($id, 'journal', $post['primary_category']);
                 $res = transition_stage($id, $targetStage);
                 if (!$res['ok']) {
                     header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
@@ -177,6 +188,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
 
             save_journal($saveData);
+            assign_primary_category($id, 'journal', $post['primary_category']);
             header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
             exit;
         }
@@ -380,6 +392,17 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <aside class="form-side">
+              <div class="field-group">
+                <label class="field-label" for="journal-primary-category">Primary category</label>
+                <select class="field-select" id="journal-primary-category" name="primary_category">
+                  <option value="">— None</option>
+                  <?php foreach ($allJournalCategories as $cat): ?>
+                    <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="field-hint">Drives card colour on /journal/ and the per-category entry counter.</p>
+              </div>
+
               <div class="field-group">
                 <label class="field-label" for="journal-tags">Tags <span class="field-hint-inline">optional</span></label>
                 <input

@@ -44,6 +44,9 @@ $bs = (string)($body_slot ?? '');
   <link rel="stylesheet" href="/_ds/css/tokens.css<?= $cssVer('/_ds/css/tokens.css') ?>">
   <link rel="stylesheet" href="/_ds/css/base.css<?= $cssVer('/_ds/css/base.css') ?>">
   <link rel="stylesheet" href="/_ds/css/typography.css<?= $cssVer('/_ds/css/typography.css') ?>">
+  <link rel="stylesheet" href="/_ds/css/components.css<?= $cssVer('/_ds/css/components.css') ?>">
+  <link rel="stylesheet" href="/_ds/css/status.css<?= $cssVer('/_ds/css/status.css') ?>">
+  <link rel="stylesheet" href="/_ds/css/views.css<?= $cssVer('/_ds/css/views.css') ?>">
   <link rel="stylesheet" href="/_templates/style-articles.css<?= $cssVer('/_templates/style-articles.css') ?>">
   <script src="/_layout/analytics.js" async></script>
 </head>

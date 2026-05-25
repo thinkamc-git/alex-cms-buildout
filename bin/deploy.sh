@@ -152,6 +152,8 @@ cp site/lib/author.php             "$STAGE/lib/"
 cp site/lib/render.php             "$STAGE/lib/"
 # Phase 10: Custom HTML Folder System library (used by experiment-html).
 cp site/lib/folders.php            "$STAGE/lib/"
+# Phase 12: Editorial Index data layer (CRUD + feed query + series auto).
+cp site/lib/indexes.php            "$STAGE/lib/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
@@ -160,6 +162,10 @@ cp site/templates/journal-entry.php    "$STAGE/templates/"
 cp site/templates/live-session.php     "$STAGE/templates/"
 cp site/templates/experiment.php       "$STAGE/templates/"
 cp site/templates/experiment-html.php  "$STAGE/templates/"
+# Phase 12: editorial index templates (Basic Listing + Editorial Page) +
+# index-card partial that the two templates share.
+cp site/templates/index-editorial.php  "$STAGE/templates/"
+cp site/templates/index-listing.php    "$STAGE/templates/"
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
 
@@ -214,6 +220,22 @@ EXCLUDES=(
   --exclude='backups/'
   --exclude='backups/**'
 )
+
+# Phase 12–15 prod freeze (see docs/BUILD-PLAN.md §3 + Phase 16 brief).
+# While the build is in progress, the prod public surface stays frozen at
+# its pre-Phase-12 visual state. Three files would otherwise overwrite the
+# live nav + landing copy on every prod deploy — exclude them so prod
+# keeps its existing copies untouched. Phase 16 (Public Cutover) removes
+# these excludes in one diff to flip the new chrome live.
+if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
+  EXCLUDES+=(
+    --exclude='_layout/header.html'
+    --exclude='_bodies/landing.html'
+    --exclude='templates/partials/nav.php'
+  )
+  echo "==> Prod-freeze active: skipping marketing nav, landing copy,"
+  echo "    and CMS-rendered nav.php (Phase 16 flips these)."
+fi
 
 echo
 echo "==> Rsync to alexmchong-ca:$REMOTE_DIR"

@@ -82,7 +82,7 @@ The CMS login form is at `/cms/login`. The path `/admin/` is a convenience redir
 
 **Seventeen phases (15 active + 2 deferred), structured as vertical slices.** Phase 0 is setup; Phase 1 deploys the static marketing site (first public ship); Phases 2–5 are the internal foundation (CSS split, PHP plumbing, auth, admin shell); Phases 6a/6b/7 are Articles end-to-end (second public ship); Phases 8–10 are the other three content types as vertical slices; Phases 11–15 complete the site (categories, indexes, polish); Phases 16 and 17 are deferred enhancements.
 
-**Design system note.** The canonical design system lives at `site/_design-system/`. There is no separate `_design-system-cms/` variant during the build — `docs/design-mockups/cms-ui.html` already serves as the visual reference for admin components. The deferred DS Unification phase (Phase 16) documents admin and article-template components into the canonical DS post-v1.0.
+**Design system note.** The canonical design system lives at `site/_design-system/`. There is no separate `_design-system-cms/` variant during the build — `docs/design-mockups/cms-ui.html` already serves as the visual reference for admin components. The deferred DS Unification phase (Phase 17) documents admin and article-template components into the canonical DS post-v1.0.
 
 ---
 
@@ -103,14 +103,21 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 9** — Live Sessions end-to-end · *Semi-auto* · 4–5h · **Ships:** Live Sessions live
 - [x] **Phase 10** — Experiments end-to-end (both variants) · *Semi-auto* · 4–6h · **Ships:** Experiments live
 - [x] **Phase 11** — Categories + Series + slug guard · *Manual* · 3–4h
-- [ ] **Phase 12** — Indexes + topbar nav switchover · *Manual* · 4–5h · **Ships:** site content-complete
-- [ ] **Phase 13** — Redirects DB + cron + 404 + image UX + backup · *Auto* · 4–5h
-- [ ] **Phase 14** — Newsletter subscribers end-to-end · *Semi-auto* · 3–4h
-- [ ] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Ships:** v1.0
-- [ ] **Phase 16** *(deferred)* — Design system unification · *Semi-auto* · 4–5h
-- [ ] **Phase 17** *(deferred)* — Transactional email · *Semi-auto* · 4–5h
+- [ ] **Phase 12** — Indexes (staging-only ship) · *Manual* · 4–5h
+- [ ] **Phase 13** — Redirects DB + cron + 404 + image UX + backup · *Auto* · 4–5h · **Staging-only**
+- [ ] **Phase 14** — Newsletter subscribers end-to-end · *Semi-auto* · 3–4h · **Staging-only**
+- [ ] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Staging-only**
+- [ ] **Phase 16** — Public cutover · *Manual* · 2–3h · **Ships:** v1.0 public
+- [ ] **Phase 17** *(deferred)* — Design system unification · *Semi-auto* · 4–5h
+- [ ] **Phase 18** *(deferred)* — Transactional email · *Semi-auto* · 4–5h
 
 **Rule:** finish a phase before starting the next. If a phase reveals a missing decision, capture it in `CMS-STRUCTURE.md` §17 (Open Items), make the call with Alex, then continue.
+
+**Prod-freeze rule (Phases 12 → 15).** Starting with Phase 12, no phase ships visible changes to the public prod site. CMS, lib code, and migrations deploy to prod as usual so the author can manage real content; the public surface stays frozen. The freeze is enforced by:
+- `APP_ENV === 'staging'` gate around the new public index routes in `site/index.php`
+- `bin/deploy.sh prod` skip-list for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php`
+
+**Phase 16** is the single moment all of that flips — see its session brief for the exact unfreeze checklist.
 
 ---
 
@@ -241,7 +248,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Touch:** `site/_design-system/css/*.css` (new modules), `site/_design-system/js/showcase.js` (new), `site/_design-system/index.html` (rewrite to load modules + dynamic JS), `docs/design-mockups/cms-ui.html` (remove the inlined `<style>` block, add `<link>` tags pointing at the modules).
 
-**Don't touch:** `site/_pages/`, `site/_templates/`, any PHP, any CMS-scoped tokens (those land in the canonical DS later via Phase 16).
+**Don't touch:** `site/_pages/`, `site/_templates/`, any PHP, any CMS-scoped tokens (those land in the canonical DS later via Phase 17).
 
 **On exit:** Check Phase 2 in §3. Re-deploy the new dynamic `/_ds/` to staging + production (overwriting the Phase 1 static copy).
 
@@ -266,7 +273,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 3. Open `docs/design-mockups/cms-ui.html`. Visually identical to before the split.
 4. Visit `/_ds/` on both environments — dynamic showcase serves.
 
-**Out of scope:** No PHP. No database. No CMS-admin DS variant (eliminated from active build; absorbed into Phase 16).
+**Out of scope:** No PHP. No database. No CMS-admin DS variant (eliminated from active build; absorbed into Phase 17).
 
 ---
 
@@ -380,7 +387,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 6. `/admin/` redirects to `/cms/`.
 7. `setup.php` no longer exists on the server.
 
-**Out of scope:** No email password reset (Phase 17). No multi-user (forever — that's a different system).
+**Out of scope:** No email password reset (Phase 18). No multi-user (forever — that's a different system).
 
 ---
 
@@ -764,55 +771,61 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 ---
 
-## 17. Phase 12 — Indexes + topbar nav switchover
+## 17. Phase 12 — Indexes (staging-only ship)
 
 **Session brief**
 
-- **Autonomy:** Manual *(nav structure is a design call; atomic landing.html swap is high-stakes)*
-- **Ships:** Site is content-complete. `landing-postcms.html` collapses into `landing.html`.
+- **Autonomy:** Manual *(nav + index pages are design-heavy; design-system reference must be applied verbatim)*
+- **Ships:** **Staging** content-complete. Prod gets CMS + lib + migrations only — public-facing chrome stays frozen until **Phase 16 (Public Cutover)**.
+
+**Why staging-only.** The original Phase 12 brief shipped the public nav switchover and `landing.html` port on the same flight as the indexes. We've since pulled both into **Phase 16**: every phase from 12 onward ships to staging first, prod gets only CMS-side changes, and the public flip happens once at the end after a content audit. See §3 for the renumbered phase index.
 
 **Decisions to capture before starting**
-- Topbar nav structure (post-CMS): defaults from `docs/design-mockups/landing-postcms.html` — `What's UX 2.0 / Thoughts / Talks / Work with me` *(edit to taste)*
-- Section URL bindings (fill in the right side):
-  - `What's UX 2.0` → `[your call — landing section or /writing/category/ux-2/]`
+- Topbar nav structure (post-CMS): `What's UX 2.0 (with red dot) / Thoughts / Talks / Work with me`
+- Section URL bindings (staging only — prod nav unchanged):
+  - `What's UX 2.0` → `/ux2.0/how-we-got-here/`
   - `Thoughts` → `/writing/`
   - `Talks` → `/live-sessions/`
-  - `Work with me` → `/work-with-me.html`
+  - `Work with me` → `/work-with-me/`
 - Default sort in index feeds: `published_at DESC`
-- Series auto-index layout: `Editorial Page (with hero feature for the latest part)`
+- Series auto-index layout: `Editorial Page (hero = highest-numbered part, feed = the rest)`
+- Filter pill mode: per-index choice in CMS builder — `categories` | `types` | `none`. Built-ins default to `categories`. Series indexes hardcoded to `none`.
+- Title emphasis: author wraps a word in `*asterisks*` → renders as Instrument Serif italic in-line.
 
-**Read at start (only):** This phase section. `CMS-STRUCTURE.md` §16 (Indexes — table schema, layout types, builder controls). `docs/design-mockups/landing-postcms.html`. `docs/design-mockups/cms-ui.html` (Indexes views).
+**Read at start (only):** This phase section. `CMS-STRUCTURE.md` §16 (Indexes). `docs/design-mockups/landing-postcms.html`. `docs/design-mockups/cms-ui.html`. **`site/_design-system/index.html` §"Content Cards" + §04 Full Page Index + §06 Card Navigation & Filtering** — the canonical card markup. Don't approximate; mirror it.
 
-**Touch:** `db/migrations/000X_indexes_table.sql` (new). `cms/views/indexes.php`, `index-new.php`, `index-edit.php` (new). `templates/index-editorial.php`, `index-listing.php` (new). `lib/indexes.php` (new). `docs/design-mockups/landing-postcms.html` (replace placeholders, then atomically rename to `landing.html`). `site/_pages/about.html`, `coaching.html`, `work-with-me.html`, `resume.html`, `newsletter.html` (propagate the new nav).
+**Touch:** `db/migrations/0007_indexes_table.sql`, `0008_indexes_filter_mode.sql`, `0009_live_session_venue.sql`. `cms/views/indexes.php`, `index-new.php`, `index-edit.php`, `index-delete.php` (new). `cms/views/{article,journal,live-session,experiment}-edit.php` (add Primary Category dropdown). `cms/views/live-sessions.php` (split list into Drafts/Published). `templates/index-editorial.php`, `index-listing.php`, `partials/index-card.php` (new). `lib/indexes.php` (new). `lib/content.php` (add `assign_primary_category`, `get_primary_category`, venue column). `lib/render.php` (add `render_index`, `render_series_index`). `templates/master-layout.php` (load views + status + components CSS). `_templates/style-articles.css` (nav fixes + `.index-*` layout). `_design-system/css/status.css` (filter pill colours for missing categories). `bin/deploy.sh` (ship the new templates + lib files; **add prod-skip list for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php` — those flip in Phase 16**). **DO NOT touch:** `site/_pages/_layout/header.html`, `site/_pages/_bodies/landing.html`, `site/templates/partials/nav.php` (deferred to Phase 16). `docs/design-mockups/landing-postcms.html` (delete in Phase 16).
 
-**Don't touch:** Polish phases (13–15). `_design-system*` (already done).
+**Don't touch:** Anything in `_pages/`, the public-facing nav partial. Polish phases (13–15). The deferred items in §Deferred backlog.
 
-**On exit:** Check Phase 12 in §3. `landing-postcms.html` no longer exists. Nav structure identical across every `site/_pages/*.html`. **Public ship #6 confirmed.**
+**On exit:** Check Phase 12 in §3. New public index routes work on staging; same routes 404 on prod. CMS works identically on prod. Marketing pages on prod unchanged. **No public ship — that's Phase 16.**
 
-**Goal:** Every editorial index renders. The Index Builder works in the CMS. Topbar nav points at the new CMS-served sections.
+**Goal:** Indexes + Editorial Page layouts work on staging end-to-end. CMS gains per-content category assignment (the data the cards need to render in colour). Prod stays visually identical to its pre-Phase-12 state.
 
 **Scope:**
-- `indexes` table (slug, layout type, config JSON).
-- Index Builder UI: page-title block, hero feature (Editorial only), featured articles (Editorial only), content feed with filter chips / sort chips / rows-shown, `+ Add Section` (Editorial only).
-- Public-side rendering for both layout types.
-- Series auto-index: every series gets a `/series/[slug]/` Editorial Page listing its parts in `series_order`.
-- **Topbar nav cutover** per Decisions, via `landing-postcms.html` → `landing.html` rename.
+- `indexes` table + `filter_mode` column + content `venue` column.
+- Index Builder UI: page-title block, hero feature (Editorial only), featured articles (Editorial only), content feed with type chips / sort / rows-shown / filter-pill-mode chooser.
+- Public-side rendering for both layouts, matching the DS reference exactly (no approximation).
+- Series auto-index: every series gets `/series/[slug]/` Editorial Page listing its parts in `series_order`.
+- Primary-Category dropdown on each content-type edit form, writing to `content_categories` so the cards have colour data.
+- Live Sessions list view sectioned by stage (Drafts / Published), location split into `location` + `venue` columns.
+- Masterclass card uses `mc-body / mc-logistics / mc-cta-zone` per the DS reference.
+- Filter pills wired to the DS `.fp[data-cat]` colour system in `status.css`.
+- Topbar nav structure designed and tested on staging only — actual switch to prod is Phase 16.
 
 **Deliverables:**
-- `db/migrations/000X_indexes_table.sql`
-- `cms/views/indexes.php`, `index-new.php`, `index-edit.php`
-- `templates/index-editorial.php`, `index-listing.php`
-- `lib/indexes.php`
-- Updated topbar nav across all `site/_pages/*.html`
-- `landing-postcms.html` collapsed into `landing.html`
+- All migrations + lib + CMS views + public templates listed above
+- `bin/deploy.sh` prod-skip list for the three public-facing files
+- `APP_ENV === 'staging'` gate around the new public routes in `site/index.php`
+- Deferred backlog (§ at end of this doc) updated with items cut from Phase 12
 
-**Verification:**
-1. Visit `/writing/`. Basic Listing renders every published article.
-2. Visit `/digital-garden/` (or whichever Editorial index). Editorial Page renders with hero + featured + feed sections.
-3. Visit `/series/[slug]/`. Series index lists every part in `series_order`.
-4. Topbar nav on every public page matches the Decisions structure with current section marked `is-active`.
+**Verification (staging only):**
+1. Visit `https://staging.alexmchong.ca/writing/`, `/journal/`, `/live-sessions/`, `/experiments/`, `/series/[slug]/` — every layout renders with cards in colour, filter pills working, count chip updating.
+2. CMS: `/cms/indexes` lists the four built-in indexes + any custom; each editable.
+3. Per-content edit forms have the Primary Category dropdown; saving writes to `content_categories`.
+4. After prod deploy: `https://alexmchong.ca/` and all marketing pages unchanged; `https://alexmchong.ca/writing/[existing-slug]` still works with the old nav; `https://alexmchong.ca/writing/` 404s (not yet live).
 
-**Out of scope:** Cron, redirects DB migration, newsletter, a11y (Phases 13–15).
+**Out of scope:** Public-facing nav swap, `landing.html` port, activating new index routes on prod — all of that is **Phase 16**. Cron, redirects DB, newsletter, a11y (Phases 13–15). The deferred backlog at the bottom of this doc.
 
 ---
 
@@ -889,7 +902,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Touch:** `db/migrations/000X_subscribers_table.sql` (new). `lib/subscribers.php` (new). `index.php` (extend with `POST /subscribe` and `GET /subscribe/confirmed/`). `site/_pages/newsletter.html` (change form action + method). `cms/views/subscribers.php` (new). `cms/partials/sidebar.php` (add Audience group entry).
 
-**Don't touch:** Phase 13's work. A11y (Phase 15). Double opt-in via email (Phase 17).
+**Don't touch:** Phase 13's work. A11y (Phase 15). Double opt-in via email (Phase 18).
 
 **On exit:** Check Phase 14 in §3.
 
@@ -918,16 +931,16 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 4. Submit with honeypot field filled. No row created. No error shown to the bot.
 5. Rapid-fire 11 submits from one IP in an hour. 11th rate-limited.
 
-**Out of scope:** Double opt-in by email (Phase 17). One-click unsubscribe via email link (Phase 17). The CMS can manually mark people unsubscribed here.
+**Out of scope:** Double opt-in by email (Phase 18). One-click unsubscribe via email link (Phase 18). The CMS can manually mark people unsubscribed here.
 
 ---
 
-## 20. Phase 15 — Accessibility pass + final polish
+## 20. Phase 15 — Accessibility pass + final polish (staging-only)
 
 **Session brief**
 
 - **Autonomy:** Manual *(judgment-heavy)*
-- **Ships:** v1.0.
+- **Ships:** Staging-only. Public ship of v1.0 is **Phase 16**.
 
 **Decisions to capture before starting**
 - Skip-to-content link target: `#main`
@@ -939,11 +952,11 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Touch:** `cms/views/*.php` (ARIA, focus management, keyboard handlers). `cms/partials/*.php` (landmark roles, keyboard nav). `templates/*.php` (public-side a11y pass). `site/_design-system/css/components.css` (focus styles if refinement needed). `DEPLOYMENT.md` or new `RELEASES.md` (v1.0 notes).
 
-**Don't touch:** New feature work. Deferred phases (16, 17).
+**Don't touch:** New feature work. Public-facing nav / landing files (Phase 16). Deferred phases (17, 18).
 
-**On exit:** Check Phase 15 in §3. **Public ship #7 — v1.0 — confirmed.**
+**On exit:** Check Phase 15 in §3. Staging-only ship. The public v1.0 ship moment is **Phase 16**.
 
-**Goal:** The CMS is keyboard-navigable, screen-reader-friendly, and visually polished. Public site has the same pass.
+**Goal:** The CMS is keyboard-navigable, screen-reader-friendly, and visually polished. Public site (on staging) has the same pass.
 
 **Scope:**
 - Keyboard nav: logical tab order in every view; every interactive element reachable; focus indicators visible.
@@ -955,18 +968,75 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - Updated `cms/views/*.php`, `cms/partials/*.php`
 - Updated `templates/*.php`
 - Any CSS refinements
-- "v1.0 release notes" entry
+- "v1.0 release notes" entry (in `RELEASES.md`)
 
 **Verification:**
 1. Walk the entire CMS using only the keyboard. Every action completes.
 2. VoiceOver through Pipeline → Article edit → Save. Each step announced sensibly.
-3. Visual diff against pre-pass screenshots — nothing regressed.
+3. Visual diff (on staging) against pre-pass screenshots — nothing regressed.
 
-**Out of scope:** Phases 16, 17.
+**Out of scope:** The public cutover itself (Phase 16). Deferred phases 17, 18.
 
 ---
 
-## 21. Phase 16 *(deferred)* — Design system unification
+## 21. Phase 16 — Public cutover
+
+**Session brief**
+
+- **Autonomy:** Manual *(high-stakes — the single moment public prod changes)*
+- **Ships:** **v1.0 public.** The new marketing nav, the new landing copy, the new public index URLs all go live on alexmchong.ca.
+
+**Decisions to capture before starting**
+- All content audited: `every published article / journal / live session / experiment reviewed for production`
+- Categories assigned: `every published row has a primary category set`
+- Indexes configured: `each of /writing/, /journal/, /live-sessions/, /experiments/ has its desired title / subtitle / filter mode in CMS`
+- Series ordering verified: `every series' parts are in the order Alex wants them to appear at /series/[slug]/`
+- Marketing nav final structure confirmed: `What's UX 2.0 (red dot) / Thoughts / Talks / Work with me`
+- Landing page copy final
+- Pre-cutover backup taken: `mysqldump of prod DB and rsync snapshot of webroot, stored locally`
+
+**Read at start (only):** This phase section. The current state of `site/_pages/_layout/header.html`, `site/_pages/_bodies/landing.html`, `site/templates/partials/nav.php` (the three files about to flip). `bin/deploy.sh` (the prod-skip list to remove).
+
+**Touch:** `site/index.php` (remove the `APP_ENV === 'staging'` gate around public index routes). `bin/deploy.sh` (remove the three entries from the prod-skip list). `docs/design-mockups/landing-postcms.html` (delete — the canvas is now the live landing). `BUILD-PLAN.md` (mark Phase 16 complete).
+
+**Don't touch:** Anything else. This phase is exclusively the unfreeze.
+
+**On exit:** Check Phase 16 in §3. `https://alexmchong.ca/writing/`, `/journal/`, `/live-sessions/`, `/experiments/`, `/series/[slug]/` all live. Marketing nav across every `_pages/` page shows the new structure. Landing page shows the new copy. **Public ship #6 (and final v1.0 ship) confirmed.**
+
+**Goal:** Flip the public-facing surface to its final state. Zero new features — only the unfreeze.
+
+**Scope:**
+- Remove the env-gate around the public index routes in `site/index.php`.
+- Remove the prod-skip list entries in `bin/deploy.sh` for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php`.
+- Delete `docs/design-mockups/landing-postcms.html` (the future-canvas no longer needed; current state is `_pages/_bodies/landing.html`).
+- Deploy to prod.
+- Smoke-test every public route + every marketing page.
+
+**Deliverables:**
+- One diff removing the gate + the deploy skip-list entries
+- Deleted `landing-postcms.html`
+- Prod deploy log
+- Smoke-test results
+
+**Verification:**
+1. `https://alexmchong.ca/` shows the new landing copy with the new marketing nav.
+2. Every marketing page (`/about/`, `/coaching/`, `/work-with-me/`, `/resume/`, `/newsletter/`) shows the new nav with the active state matching the current page.
+3. `https://alexmchong.ca/writing/`, `/journal/`, `/live-sessions/`, `/experiments/` each render the configured index with cards in colour, filter pills working.
+4. `https://alexmchong.ca/series/[slug]/` renders for every series.
+5. `https://alexmchong.ca/writing/[existing-slug]` still works (existing articles unaffected).
+6. Every Phase 12-15 CMS capability still works after the flip.
+
+**Out of scope:** New features. Migrations (all should be applied by this point). Deferred phases.
+
+**Rollback plan.** If something visibly broken on prod after deploy:
+1. Re-add the three files to `bin/deploy.sh` skip-list.
+2. Re-deploy `bin/deploy.sh prod` to restore the old marketing chrome.
+3. Re-add the env-gate to `site/index.php` and re-deploy to disable the new public routes.
+4. The pre-cutover backup taken in Decisions is the last-resort fallback.
+
+---
+
+## 22. Phase 17 *(deferred)* — Design system unification
 
 **Session brief**
 
@@ -983,7 +1053,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Don't touch:** Visual treatments — this is reorganization only.
 
-**On exit:** Check Phase 16 in §3. `grep -r "_design-system-cms" .` returns zero matches (it shouldn't exist; this is sanity-check that nothing snuck back).
+**On exit:** Check Phase 17 in §3. `grep -r "_design-system-cms" .` returns zero matches (it shouldn't exist; this is sanity-check that nothing snuck back).
 
 **Goal:** Single canonical design system documenting Brand + Admin + Article Templates in one showcase.
 
@@ -1009,7 +1079,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 ---
 
-## 22. Phase 17 *(deferred)* — Transactional email
+## 23. Phase 18 *(deferred)* — Transactional email
 
 **Session brief**
 
@@ -1028,7 +1098,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Touch:** `lib/vendor/phpmailer/` (manual download). `lib/mailer.php` (new). `db/migrations/000X_password_reset_columns.sql` (new). `cms/login.php` (add Forgot link). `cms/reset.php` (new). `index.php` (extend with `/subscribe/confirm`, `/unsubscribe`). `cms/views/subscribers.php` (add confirmed filter).
 
-**On exit:** Check Phase 17 in §3.
+**On exit:** Check Phase 18 in §3.
 
 This phase lands when any of three triggers fires:
 - Password recovery without admin access becomes a real need.
@@ -1111,7 +1181,7 @@ alex-cms-buildout/
     ├── cms/                           ← Phase 4 onward (admin panel)
     │   ├── .htaccess
     │   ├── index.php, login.php, logout.php, account.php
-    │   ├── reset.php                  ← Phase 17 (deferred)
+    │   ├── reset.php                  ← Phase 18 (deferred)
     │   ├── views/, partials/, assets/
     ├── templates/                     ← Phase 6b onward (PHP rendering)
     │   ├── master-layout.php
@@ -1178,3 +1248,44 @@ These apply in every phase. See `ENGINEERING.md` for the full rulebook.
 7. Walk through the Verification list with Alex before declaring the phase complete.
 
 **Why this works.** Earlier drafts of this plan required Claude to read 5+ docs at the start of every session (~30K tokens). The Session brief pattern drops that to 2K–5K. The Decisions block then collapses ~7 mid-stream clarification round-trips into one upfront review. Combined, ~70% of build time runs unattended.
+
+
+---
+
+## Deferred backlog (post-phases)
+
+Items intentionally cut from a numbered phase to keep its scope tight. Each
+captures the **what**, **why deferred**, and **rough cost** so the eventual
+unblock is a near-zero spin-up. None of these block site launch — they're
+polish, scale, or developer-quality concerns.
+
+### From Phase 12
+
+- **Routed category URLs** (e.g. `/writing/category/ux-industry/`).
+  *Why deferred:* index pages currently filter client-side via pill toggles.
+  Routed URLs add SEO + shareability but require a new route pattern and
+  a reserved-slug rule. *Cost:* ~2h. Decision needed: `/writing/category/<slug>/`
+  vs. `/writing/<slug>/` with category-first lookup.
+
+- **Index page pagination.** Bottom "Showing N of M" + page-button strip,
+  per the DS Full Page Index showcase. *Why deferred:* at v1 traffic and
+  post count (<50 of any one type), pagination is real overhead with no
+  user-visible benefit. *Cost:* ~1h when needed.
+
+- **"+ Add Section" in editorial index builder** (per `CMS-STRUCTURE.md`
+  §16 — stackable curated sections within an Editorial Page). *Why
+  deferred:* the v1 Editorial layout supports hero + featured + one feed,
+  which covers every page Alex has sketched. *Cost:* ~3h.
+
+- **Manual sort for index feeds.** The `feed_sort` enum reserves `'manual'`
+  but the builder doesn't surface a manual-ordering UI; `list_index_feed()`
+  falls back to newest-first when manual is selected. *Cost:* ~2h
+  (drag-orderable card list + per-index ordering table).
+
+### Documentation drift
+
+- **`CMS-STRUCTURE.md` §9 schema is stale.** It still lists `event_start
+  DATETIME` for live-session rows; migration 0005 split that into
+  `event_date / event_time / event_end_time` back in Phase 9. The
+  divergence cost a debug round trip during Phase 12. *Fix:* one-pass
+  reconciliation against the real `DESCRIBE content` output.

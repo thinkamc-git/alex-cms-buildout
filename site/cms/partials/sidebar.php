@@ -93,23 +93,11 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
   </div>
   <div class="nav-section">
     <span class="nav-label">Indexes</span>
-    <a class="nav-item sub<?= $activeClass('idx-writing') ?>" href="#" data-nav-id="idx-writing" title="Basic Listing">
-      <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h7M2 8h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      /writing
+    <a class="nav-item<?= $activeClass('indexes') ?>" href="/cms/indexes" data-nav-id="indexes">
+      <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
+      Indexes<?= $count('indexes') ?>
     </a>
-    <a class="nav-item sub<?= $activeClass('idx-journal') ?>" href="#" data-nav-id="idx-journal" title="Basic Listing">
-      <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h7M2 8h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      /journal
-    </a>
-    <a class="nav-item sub<?= $activeClass('idx-experiments') ?>" href="#" data-nav-id="idx-experiments" title="Basic Listing">
-      <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h7M2 8h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      /experiments
-    </a>
-    <a class="nav-item sub<?= $activeClass('idx-live-sessions') ?>" href="#" data-nav-id="idx-live-sessions" title="Basic Listing">
-      <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h7M2 8h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      /live-sessions
-    </a>
-    <a class="nav-new-idx" href="#" data-nav-id="new-index">
+    <a class="nav-new-idx" href="/cms/indexes/new" data-nav-id="new-index">
       <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
       New Index
     </a>

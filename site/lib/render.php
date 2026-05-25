@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/author.php';
+require_once __DIR__ . '/indexes.php';
 
 /**
  * Include a block partial in a clean scope — only $ctx and $slug are
@@ -151,6 +152,143 @@ function render_content(string $slug): void
 
     ob_start();
     require dirname(__DIR__) . '/templates/' . $known[$template];
+    $body_slot = ob_get_clean();
+
+    header('Content-Type: text/html; charset=utf-8');
+    require dirname(__DIR__) . '/templates/master-layout.php';
+}
+
+/**
+ * Resolve a top-level index slug (e.g. 'writing', 'digital-garden') to a
+ * row in the `indexes` table and render it. Mirrors render_content() in
+ * shape — own slug guard, own template-picker, own master-layout wrap.
+ *
+ * Series indexes are intentionally NOT looked up here — they're handled
+ * by render_series_index() and dispatched directly from the router.
+ */
+function render_index(string $slug): void
+{
+    $slug = trim($slug);
+    if ($slug === '') {
+        render_404();
+        return;
+    }
+
+    $idx = get_index_by_slug($slug);
+    if ($idx === null) {
+        // Slug guard: same redirects-table check as render_content() so a
+        // renamed index URL (e.g. /thoughts → /writing) still resolves.
+        require_once __DIR__ . '/content.php';
+        $path  = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') ?: '';
+        $redir = lookup_redirect($path);
+        if ($redir !== null && $redir !== '' && $redir !== $path) {
+            header('Location: ' . $redir, true, 301);
+            return;
+        }
+        render_404();
+        return;
+    }
+
+    // Build the feed once. For editorial, exclude the hero + featured ids
+    // so the same row doesn't appear twice on the page.
+    $exclude = [];
+    $heroCard      = null;
+    $featuredCards = [];
+    if ((string)$idx['layout'] === 'editorial') {
+        $heroId = (int)($idx['hero_content_id'] ?? 0);
+        if ($heroId > 0) {
+            $heroCard = get_index_content_card($heroId);
+            if ($heroCard !== null) $exclude[] = $heroId;
+        }
+        $featuredIds = $idx['featured_ids'] ?? null;
+        if (is_string($featuredIds)) {
+            $decoded = json_decode($featuredIds, true);
+            $featuredIds = is_array($decoded) ? $decoded : [];
+        }
+        if (is_array($featuredIds)) {
+            foreach ($featuredIds as $fid) {
+                $card = get_index_content_card((int)$fid);
+                if ($card !== null) {
+                    $featuredCards[] = $card;
+                    $exclude[] = (int)$fid;
+                }
+            }
+        }
+    }
+
+    $feedRows = list_index_feed([
+        'feed_types'       => $idx['feed_types'],
+        'feed_sort'        => $idx['feed_sort'],
+        'feed_rows_shown'  => $idx['feed_rows_shown'],
+    ], $exclude);
+
+    $ctx = [
+        'index'          => $idx,
+        'hero_card'      => $heroCard,
+        'featured_cards' => $featuredCards,
+        'feed_rows'      => $feedRows,
+        'is_series'      => false,
+    ];
+
+    $page_title       = (string)($idx['title']    ?? $slug);
+    $page_description = (string)($idx['subtitle'] ?? '');
+
+    if (!defined('TEMPLATE_OK')) define('TEMPLATE_OK', true);
+
+    $tpl = (string)$idx['layout'] === 'editorial'
+        ? 'index-editorial.php'
+        : 'index-listing.php';
+
+    ob_start();
+    require dirname(__DIR__) . '/templates/' . $tpl;
+    $body_slot = ob_get_clean();
+
+    header('Content-Type: text/html; charset=utf-8');
+    require dirname(__DIR__) . '/templates/master-layout.php';
+}
+
+/**
+ * Render /series/[slug]/ from the synthetic series_auto_index(). Always
+ * editorial layout — hero is the latest published part, feed is the rest
+ * of the series in series_order. Series are never rows in the indexes
+ * table; the data flows directly from `series` + `content`.
+ */
+function render_series_index(string $slug): void
+{
+    $slug = trim($slug);
+    if ($slug === '') {
+        render_404();
+        return;
+    }
+
+    $idx = series_auto_index($slug);
+    if ($idx === null) {
+        require_once __DIR__ . '/content.php';
+        $path  = strtok((string)($_SERVER['REQUEST_URI'] ?? ''), '?') ?: '';
+        $redir = lookup_redirect($path);
+        if ($redir !== null && $redir !== '' && $redir !== $path) {
+            header('Location: ' . $redir, true, 301);
+            return;
+        }
+        render_404();
+        return;
+    }
+
+    $ctx = [
+        'index'          => $idx,
+        'hero_card'      => $idx['hero_card']      ?? null,
+        'featured_cards' => $idx['featured_cards'] ?? [],
+        'feed_rows'      => $idx['feed_rows']      ?? [],
+        'is_series'      => true,
+    ];
+
+    $page_title       = (string)($idx['title']    ?? $slug);
+    $page_description = (string)($idx['subtitle'] ?? '');
+
+    if (!defined('TEMPLATE_OK')) define('TEMPLATE_OK', true);
+
+    ob_start();
+    require dirname(__DIR__) . '/templates/index-editorial.php';
     $body_slot = ob_get_clean();
 
     header('Content-Type: text/html; charset=utf-8');

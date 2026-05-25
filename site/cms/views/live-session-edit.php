@@ -63,6 +63,9 @@ if ($status === 'idea') {
 $errors = [];
 $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+$allLiveSessionCategories = list_categories('live-session');
+$currentPrimaryCategory   = get_primary_category($id);
+
 $undoSuffix = static function (string $action, string $current): string {
     return in_array($action, ['advance', 'publish'], true)
         ? '&from_stage=' . urlencode($current)
@@ -123,12 +126,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'event_time'     => trim((string)($_POST['event_time']     ?? '')),
             'event_end_time' => trim((string)($_POST['event_end_time'] ?? '')),
             'location'       => trim((string)($_POST['location']       ?? '')),
+            'venue'          => trim((string)($_POST['venue']          ?? '')),
             'cost_pill'      => trim((string)($_POST['cost_pill']      ?? '')),
             'attendance'     => trim((string)($_POST['attendance']     ?? '')),
             'custom_pill'    => trim((string)($_POST['custom_pill']    ?? '')),
             'body_raw'       =>      (string)($_POST['body']           ?? ''),
             'tags'           => trim((string)($_POST['tags']           ?? '')),
+            'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
         ];
+
+        $allowedCatSlugs = array_map(static fn($c) => (string)$c['value_slug'], $allLiveSessionCategories);
+        if ($post['primary_category'] !== '' && !in_array($post['primary_category'], $allowedCatSlugs, true)) {
+            $errors[] = 'Primary category is not a known live-session category.';
+            $post['primary_category'] = '';
+        }
 
         if ($post['title'] === '') {
             $errors[] = 'Title is required.';
@@ -192,6 +203,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'event_time'     => $eventTime,
                 'event_end_time' => $eventEndTime,
                 'location'       => $post['location']    !== '' ? $post['location']    : null,
+                'venue'          => $post['venue']       !== '' ? $post['venue']       : null,
                 'cost_pill'      => $post['cost_pill']   !== '' ? $post['cost_pill']   : null,
                 'attendance'     => $attendance          !== '' ? $attendance          : null,
                 'custom_pill'    => $post['custom_pill'] !== '' ? $post['custom_pill'] : null,
@@ -204,6 +216,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             if ($targetStage !== null) {
                 save_live_session($saveData);
+                assign_primary_category($id, 'live-session', $post['primary_category']);
                 $res = transition_stage($id, $targetStage);
                 if (!$res['ok']) {
                     header('Location: /cms/live-sessions/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
@@ -219,6 +232,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
 
             save_live_session($saveData);
+            assign_primary_category($id, 'live-session', $post['primary_category']);
             header('Location: /cms/live-sessions/edit?id=' . $id . '&flash=' . rawurlencode($flashMsg));
             exit;
         }
@@ -231,6 +245,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'event_time'     => $eventTime,
             'event_end_time' => $eventEndTime,
             'location'       => $post['location'],
+            'venue'          => $post['venue'],
             'cost_pill'      => $post['cost_pill'],
             'attendance'     => $post['attendance'],
             'custom_pill'    => $post['custom_pill'],
@@ -456,7 +471,7 @@ require __DIR__ . '/../partials/topbar.php';
                 </div>
                 <div class="event-grid" style="margin-top:var(--space-12)">
                   <div style="grid-column:1/-1">
-                    <label class="field-sublabel" for="ls-location">Location</label>
+                    <label class="field-sublabel" for="ls-location">Location <span class="field-hint-inline">city / region</span></label>
                     <input
                       type="text"
                       class="field-input"
@@ -464,7 +479,18 @@ require __DIR__ . '/../partials/topbar.php';
                       name="location"
                       value="<?= $e((string)($session['location'] ?? '')) ?>"
                       maxlength="255"
-                      placeholder="e.g. Vancouver, BC · Online">
+                      placeholder="e.g. Toronto, ON">
+                  </div>
+                  <div style="grid-column:1/-1">
+                    <label class="field-sublabel" for="ls-venue">Venue <span class="field-hint-inline">subline · optional</span></label>
+                    <input
+                      type="text"
+                      class="field-input"
+                      id="ls-venue"
+                      name="venue"
+                      value="<?= $e((string)($session['venue'] ?? '')) ?>"
+                      maxlength="255"
+                      placeholder="e.g. Centre for Social Innovation · 16 seats">
                   </div>
                 </div>
                 <p class="field-hint">Publish Date is separate — that's stamped when the session goes live. Past events stay live with a PAST badge.</p>
@@ -536,6 +562,17 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <aside class="form-side">
+              <div class="field-group">
+                <label class="field-label" for="ls-primary-category">Primary category</label>
+                <select class="field-select" id="ls-primary-category" name="primary_category">
+                  <option value="">— None</option>
+                  <?php foreach ($allLiveSessionCategories as $cat): ?>
+                    <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="field-hint">Drives card colour on /live-sessions/.</p>
+              </div>
+
               <div class="field-group">
                 <label class="field-label" for="ls-tags">Tags <span class="field-hint-inline">optional</span></label>
                 <input

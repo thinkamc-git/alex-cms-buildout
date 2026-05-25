@@ -116,6 +116,14 @@ $router->get ('/cms/series',         $cms('views/series.php'));
 $router->post('/cms/series',         $cms('views/series.php'));
 $router->post('/cms/series/reorder', $cms('views/series-reorder.php'));
 
+// Phase 12: Editorial Index admin (list / new / edit / delete).
+$router->get ('/cms/indexes',        $cms('views/indexes.php'));
+$router->get ('/cms/indexes/new',    $cms('views/index-new.php'));
+$router->post('/cms/indexes/new',    $cms('views/index-new.php'));
+$router->get ('/cms/indexes/edit',   $cms('views/index-edit.php'));
+$router->post('/cms/indexes/edit',   $cms('views/index-edit.php'));
+$router->post('/cms/indexes/delete', $cms('views/index-delete.php'));
+
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so
 // /writing/foo/bar won't match — that's intentional (no nested article
@@ -144,6 +152,31 @@ $router->get('/live-sessions/:slug', static function (array $p): void {
 $router->get('/experiments/:slug', static function (array $p): void {
     render_content((string)($p['slug'] ?? ''));
 });
+
+// Phase 12: Public index routes. The four built-in type indexes resolve
+// from rows seeded by migration 0007 (slug = 'writing' | 'journal' |
+// 'live-sessions' | 'experiments'); render_index() looks up the row and
+// dispatches to the matching template. /series/[slug]/ is auto-generated
+// from the `series` row + its parts (no row in `indexes`).
+//
+// Single-segment paths (/writing) and two-segment paths (/writing/:slug)
+// are matched by segment count, so they coexist cleanly — declaration
+// order doesn't matter.
+//
+// ⚠ Staging-only during the Phase 12–15 prod-freeze (see BUILD-PLAN §3).
+// Prod requests to /writing/, /journal/, /live-sessions/, /experiments/,
+// /series/[slug]/ should fall through to 404 until Phase 16 (Public
+// Cutover) deletes this gate. The marketing-page nav on prod doesn't
+// link here, so visitors never see a 404 in normal flow.
+if (defined('APP_ENV') && APP_ENV === 'staging') {
+    $router->get('/writing',       static function (): void { render_index('writing'); });
+    $router->get('/journal',       static function (): void { render_index('journal'); });
+    $router->get('/live-sessions', static function (): void { render_index('live-sessions'); });
+    $router->get('/experiments',   static function (): void { render_index('experiments'); });
+    $router->get('/series/:slug',  static function (array $p): void {
+        render_series_index((string)($p['slug'] ?? ''));
+    });
+}
 
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

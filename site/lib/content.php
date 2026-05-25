@@ -171,7 +171,7 @@ function save_article(array $data): int
         // event_date is required at save-time; event_time + event_end_time
         // are independently optional (see live-session-edit.php).
         'event_date', 'event_time', 'event_end_time',
-        'location', 'cost_pill', 'attendance', 'custom_pill',
+        'location', 'venue', 'cost_pill', 'attendance', 'custom_pill',
         // Experiment fields (Phase 10). source_file is just the filename
         // inside /content/experiment/<slug>/ — the full path is derived.
         'source_file',
@@ -638,7 +638,7 @@ function list_live_sessions(array $filters = []): array
 {
     $sql = "SELECT id, slug, title, status, updated_at, published_at,
                    event_date, event_time, event_end_time,
-                   location, cost_pill, attendance, custom_pill,
+                   location, venue, cost_pill, attendance, custom_pill,
                    pipeline_order
               FROM content
              WHERE type = 'live-session'";
@@ -850,6 +850,57 @@ const PALETTE_COLORS = [
  * db/migrations/0006_seed_initial_categories.sql.
  */
 const CATEGORY_TYPES = ['article', 'journal', 'live-session', 'experiment'];
+
+/**
+ * Set the primary category for a content row. Idempotent — drops any
+ * existing primary on this row, then inserts the new one if a non-empty
+ * value_slug is provided. Passing '' clears the primary.
+ *
+ * Validates against the categories table: an unknown value_slug for the
+ * given type is silently ignored (returns false). The caller can decide
+ * whether that warrants a user-visible error.
+ */
+function assign_primary_category(int $contentId, string $type, string $valueSlug): bool
+{
+    if ($contentId <= 0 || $type === '') return false;
+
+    // Drop any existing primary on this row (also picks up legacy duplicates).
+    db()->prepare(
+        'DELETE FROM content_categories WHERE content_id = :id AND is_primary = 1'
+    )->execute([':id' => $contentId]);
+
+    if ($valueSlug === '') return true;
+
+    // Validate the slug against the categories table for this type.
+    $check = db()->prepare(
+        'SELECT 1 FROM categories WHERE type = :t AND value_slug = :s LIMIT 1'
+    );
+    $check->execute([':t' => $type, ':s' => $valueSlug]);
+    if ($check->fetchColumn() === false) return false;
+
+    db()->prepare(
+        'INSERT INTO content_categories (content_id, type, category, is_primary)
+         VALUES (:id, :t, :s, 1)'
+    )->execute([':id' => $contentId, ':t' => $type, ':s' => $valueSlug]);
+    return true;
+}
+
+/**
+ * Fetch the primary-category value_slug for a content row, or '' if none.
+ * Used by edit forms to preselect the current value in the dropdown.
+ */
+function get_primary_category(int $contentId): string
+{
+    if ($contentId <= 0) return '';
+    $stmt = db()->prepare(
+        'SELECT category FROM content_categories
+          WHERE content_id = :id AND is_primary = 1
+          LIMIT 1'
+    );
+    $stmt->execute([':id' => $contentId]);
+    $val = $stmt->fetchColumn();
+    return $val === false ? '' : (string)$val;
+}
 
 /**
  * List categories. If $type is given, scopes to that content type

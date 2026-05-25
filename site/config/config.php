@@ -51,6 +51,14 @@ if (!isset($CONFIG)) {
 
     require $env_file;
 
+    // Expose the resolved environment as a constant so downstream code
+    // (e.g. site/index.php's Phase 12–15 prod-freeze gate) can check it
+    // without re-running the resolver. Values: 'local' | 'staging' |
+    // 'production'.
+    if (!defined('APP_ENV')) {
+        define('APP_ENV', $env);
+    }
+
     if (!isset($CONFIG) || !is_array($CONFIG)) {
         $msg = "config.$env.php did not define a \$CONFIG array.\n";
         if (PHP_SAPI === 'cli') {

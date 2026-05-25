@@ -1,11 +1,12 @@
 <?php
 /**
- * cms/views/live-sessions.php — Live Sessions list (Phase 9).
+ * cms/views/live-sessions.php — Live Sessions list (Phase 9 / Phase 12).
  *
- * Two stacked tables: "Upcoming & live" (event end >= now or undated,
- * sorted soonest-first with undated last) and "Past" (event end < now,
- * sorted most-recently-past first). Published rows in the past also get
- * a "PAST" pill alongside the stage pill.
+ * Two stacked tables grouped by stage (matches the articles list pattern):
+ *   - Drafts — idea + draft rows, soonest event first (undated last)
+ *   - Published — every live row, soonest upcoming first then past last
+ *
+ * Past published rows get a "(past)" suffix on the event-date cell.
  */
 
 declare(strict_types=1);
@@ -81,39 +82,55 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
 
         <?php
-        // Split sessions into Upcoming/Live vs Past. A session is "past" when
-        // its effective end timestamp (end time, else start time, else end-of-
-        // day) is in the past. Sessions without a date stay in Upcoming (those
-        // are typically idea/draft entries still being scoped).
-        $nowTs    = time();
-        $upcoming = [];
-        $past     = [];
+        // Split sessions into Drafts (idea + draft) and Published. Matches
+        // the articles list pattern. Within each group, soonest event first
+        // (undated rows last), and within Published, past events sink to
+        // the bottom after upcoming.
+        $nowTs     = time();
+        $drafts    = [];
+        $published = [];
         foreach ($sessions as $s) {
-            $eDate = (string)($s['event_date']     ?? '');
-            $eTime = (string)($s['event_time']     ?? '');
-            $eEnd  = (string)($s['event_end_time'] ?? '');
-            if ($eDate === '') { $upcoming[] = $s; continue; }
-            $cmpTime = $eEnd !== '' ? $eEnd : ($eTime !== '' ? $eTime : '23:59');
-            $eventTs = strtotime($eDate . ' ' . $cmpTime);
-            if ($eventTs !== false && $eventTs < $nowTs) {
-                $past[] = $s;
+            $status = (string)($s['status'] ?? '');
+            if ($status === 'published') {
+                $published[] = $s;
             } else {
-                $upcoming[] = $s;
+                $drafts[] = $s;
             }
         }
-        // Upcoming: soonest event first; undated rows (no event_date) at bottom.
-        usort($upcoming, static function (array $a, array $b): int {
+
+        // Sort helper: soonest event_date first, undated last.
+        $sortByDate = static function (array $a, array $b): int {
             $ad = (string)($a['event_date'] ?? '');
             $bd = (string)($b['event_date'] ?? '');
             if ($ad === '' && $bd === '') return 0;
             if ($ad === '') return 1;
             if ($bd === '') return -1;
             return strcmp($ad, $bd);
-        });
-        // Past: most recently past first.
-        usort($past, static function (array $a, array $b): int {
-            return strcmp((string)($b['event_date'] ?? ''), (string)($a['event_date'] ?? ''));
-        });
+        };
+        usort($drafts, $sortByDate);
+
+        // Published: upcoming first (soonest), past last (most recent past
+        // at the top of the past group).
+        $upcomingPub = [];
+        $pastPub     = [];
+        foreach ($published as $p) {
+            $eDate = (string)($p['event_date']     ?? '');
+            $eTime = (string)($p['event_time']     ?? '');
+            $eEnd  = (string)($p['event_end_time'] ?? '');
+            if ($eDate === '') { $upcomingPub[] = $p; continue; }
+            $cmpTime = $eEnd !== '' ? $eEnd : ($eTime !== '' ? $eTime : '23:59');
+            $eventTs = strtotime($eDate . ' ' . $cmpTime);
+            if ($eventTs !== false && $eventTs < $nowTs) {
+                $pastPub[] = $p;
+            } else {
+                $upcomingPub[] = $p;
+            }
+        }
+        usort($upcomingPub, $sortByDate);
+        usort($pastPub, static fn(array $a, array $b): int =>
+            strcmp((string)($b['event_date'] ?? ''), (string)($a['event_date'] ?? ''))
+        );
+        $published = array_merge($upcomingPub, $pastPub);
 
         $columns = [
             ['label' => 'Event Title', 'width' => '40%'],
@@ -197,15 +214,15 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">Upcoming &amp; live</span>
-              <span class="content-block-sublabel">Sessions still ahead, plus anything in progress</span>
+              <span class="content-block-label">Drafts</span>
+              <span class="content-block-sublabel">Idea · Draft — not yet live</span>
             </div>
-            <span class="content-block-count"><?= (int)count($upcoming) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
 
           <?php
-          $rows = array_map($buildRow, $upcoming);
-          $empty_text = 'No upcoming sessions. Click + New Session to add one.';
+          $rows = array_map($buildRow, $drafts);
+          $empty_text = 'No drafts. Click + New Session to add one.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -213,15 +230,15 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">Past</span>
-              <span class="content-block-sublabel">Events whose end time has passed</span>
+              <span class="content-block-label">Published</span>
+              <span class="content-block-sublabel">Live on /live-sessions/[slug]</span>
             </div>
-            <span class="content-block-count"><?= (int)count($past) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>
 
           <?php
-          $rows = array_map($buildRow, $past);
-          $empty_text = 'No past sessions yet.';
+          $rows = array_map($buildRow, $published);
+          $empty_text = 'No published sessions yet.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>

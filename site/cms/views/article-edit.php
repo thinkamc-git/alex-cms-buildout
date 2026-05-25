@@ -79,6 +79,11 @@ $flash  = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 // both the POST validator and the render pass see the same list.
 $allSeries = list_series();
 
+// Article categories for the Primary category picker. Drives card colour
+// on /writing/ — see views.css .card[data-category="…"] map.
+$allArticleCategories = list_categories('article');
+$currentPrimaryCategory = get_primary_category($id);
+
 /**
  * `from_stage` suffix for the post-transition redirect. Only forward
  * transitions surface the Undo button; backward/move-to-draft don't.
@@ -240,7 +245,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'hero_size'     => trim((string)($_POST['hero_size']     ?? 'default')),
                 'remove_hero'   => isset($_POST['remove_hero']),
                 'series_id'     => trim((string)($_POST['series_id']     ?? '')),
+                'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
             ];
+
+            // Validate primary category against the allowed article slugs.
+            $allowedCatSlugs = array_map(static fn($c) => (string)$c['value_slug'], $allArticleCategories);
+            if ($post['primary_category'] !== '' && !in_array($post['primary_category'], $allowedCatSlugs, true)) {
+                $errors[] = 'Primary category is not a known article category.';
+                $post['primary_category'] = '';
+            }
 
             // Series — '' = none, otherwise an integer id. Validate against
             // the loaded list so a tampered POST can't write a stale id.
@@ -354,6 +367,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
                 if ($targetStage !== null) {
                     save_article($saveData);
+                    assign_primary_category($id, 'article', $post['primary_category']);
                     if ($seriesChanged) {
                         if ($prevSeriesId > 0)  compact_series_order($prevSeriesId);
                         if ($seriesIdDb !== null) compact_series_order($seriesIdDb);
@@ -373,6 +387,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 }
 
                 save_article($saveData);
+                assign_primary_category($id, 'article', $post['primary_category']);
                 if ($seriesChanged) {
                     if ($prevSeriesId > 0)  compact_series_order($prevSeriesId);
                     if ($seriesIdDb !== null) compact_series_order($seriesIdDb);
@@ -780,6 +795,17 @@ require __DIR__ . '/../partials/topbar.php';
                   </select>
                 </div>
               <?php endif; ?>
+
+              <div class="field-group">
+                <label class="field-label" for="article-primary-category">Primary category</label>
+                <select class="field-select" id="article-primary-category" name="primary_category">
+                  <option value="">— None</option>
+                  <?php foreach ($allArticleCategories as $cat): ?>
+                    <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+                <p class="field-hint">Drives card colour on /writing/ and the breadcrumb. Manage at <a href="/cms/categories">/cms/categories</a>.</p>
+              </div>
 
               <div class="field-group">
                 <label class="field-label" for="article-special-tag">Special tag <span class="field-hint-inline">optional</span></label>

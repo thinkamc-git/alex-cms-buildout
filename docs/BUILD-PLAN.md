@@ -103,7 +103,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 9** — Live Sessions end-to-end · *Semi-auto* · 4–5h · **Ships:** Live Sessions live
 - [x] **Phase 10** — Experiments end-to-end (both variants) · *Semi-auto* · 4–6h · **Ships:** Experiments live
 - [x] **Phase 11** — Categories + Series + slug guard · *Manual* · 3–4h
-- [ ] **Phase 12** — Indexes (staging-only ship) · *Manual* · 4–5h
+- [x] **Phase 12** — Indexes (staging-only ship) · *Manual* · 4–5h
 - [ ] **Phase 13** — Redirects DB + cron + 404 + image UX + backup · *Auto* · 4–5h · **Staging-only**
 - [ ] **Phase 14** — Newsletter subscribers end-to-end · *Semi-auto* · 3–4h · **Staging-only**
 - [ ] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Staging-only**

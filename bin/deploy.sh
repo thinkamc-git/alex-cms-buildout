@@ -154,6 +154,9 @@ cp site/lib/render.php             "$STAGE/lib/"
 cp site/lib/folders.php            "$STAGE/lib/"
 # Phase 12: Editorial Index data layer (CRUD + feed query + series auto).
 cp site/lib/indexes.php            "$STAGE/lib/"
+# Phase 13: redirects data layer (resolver + CRUD), wired into the front
+# controller's not-found handler in site/index.php.
+cp site/lib/redirects.php          "$STAGE/lib/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
@@ -166,8 +169,21 @@ cp site/templates/experiment-html.php  "$STAGE/templates/"
 # index-card partial that the two templates share.
 cp site/templates/index-editorial.php  "$STAGE/templates/"
 cp site/templates/index-listing.php    "$STAGE/templates/"
+# Phase 13: themed 404 page (rendered from index.php's not-found handler
+# when no route + no redirect match). Wrapped in master-layout for nav +
+# footer chrome. Public-visible — gated to staging by APP_ENV until the
+# Phase 16 cutover.
+cp site/templates/404.php              "$STAGE/templates/"
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
+
+# Phase 13: cron scripts (scheduled publish + daily backup). Run by the
+# DreamHost crontab — never reached from the web (cron/.htaccess denies
+# all HTTP access). See docs/DEPLOYMENT.md for the cron entries.
+mkdir -p "$STAGE/cron"
+cp site/cron/scheduled-publish.php "$STAGE/cron/"
+cp site/cron/backup.php            "$STAGE/cron/"
+cp site/cron/.htaccess             "$STAGE/cron/"
 
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"

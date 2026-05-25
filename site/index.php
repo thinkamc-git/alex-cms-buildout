@@ -16,6 +16,7 @@ require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/router.php';
 require_once __DIR__ . '/lib/render.php';
+require_once __DIR__ . '/lib/redirects.php';
 
 $router = new Router();
 
@@ -124,6 +125,11 @@ $router->get ('/cms/indexes/edit',   $cms('views/index-edit.php'));
 $router->post('/cms/indexes/edit',   $cms('views/index-edit.php'));
 $router->post('/cms/indexes/delete', $cms('views/index-delete.php'));
 
+// Phase 13: Redirects admin. Single view handles list + add + per-row
+// update/delete via $_POST['action'] (same pattern as /cms/categories).
+$router->get ('/cms/redirects', $cms('views/redirects.php'));
+$router->post('/cms/redirects', $cms('views/redirects.php'));
+
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so
 // /writing/foo/bar won't match — that's intentional (no nested article
@@ -177,6 +183,31 @@ if (defined('APP_ENV') && APP_ENV === 'staging') {
         render_series_index((string)($p['slug'] ?? ''));
     });
 }
+
+// Phase 13: route-miss handler. First check for a DB-backed redirect
+// (replaces the old .htaccess legacy block). If nothing matches and
+// we're on staging, render the themed 404; on prod, fall through to
+// the static /404.html so the pre-cutover behavior is preserved.
+$router->set_not_found(static function (string $method, string $path): void {
+    $hit = resolve_redirect($path);
+    if ($hit !== null) {
+        emit_redirect($hit);
+    }
+    http_response_code(404);
+    if (defined('APP_ENV') && APP_ENV === 'staging') {
+        define('TEMPLATE_OK', true);
+        require __DIR__ . '/templates/404.php';
+        return;
+    }
+    $page = __DIR__ . '/404.html';
+    if (is_file($page)) {
+        header('Content-Type: text/html; charset=utf-8');
+        readfile($page);
+        return;
+    }
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "404 — no route for $method $path\n";
+});
 
 $router->dispatch(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

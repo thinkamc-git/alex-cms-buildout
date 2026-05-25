@@ -332,12 +332,70 @@ The legacy `/admin/` path 301-redirects to `/cms/` (and `/admin/foo` to `/cms/fo
 
 ---
 
-## 8. What still changes in later phases
+## 8. Cron jobs (Phase 13)
 
-Phase 13 adds:
+Phase 13 introduces two scheduled tasks that run on the DreamHost cron daemon. Both scripts live under `/cron/` in the deployed webroot, both are CLI-only (`/cron/.htaccess` denies HTTP), and both pick up env config the same way the front controller does — by setting `APP_ENV` in the cron line.
 
-- **Automated backups** via a cron job, replacing the manual CloudMounter snapshots.
-- **`status_code` column** on the redirects table — once redirects move from `.htaccess` into the DB.
+### 8.1 What runs and when
+
+| Job | Schedule | Script | Purpose |
+|---|---|---|---|
+| Scheduled publish | every 5 min | `cron/scheduled-publish.php` | Flips `content` rows where `published_status='scheduled' AND published_at <= NOW()` to `'live'`. Silent no-op when there's nothing to do. |
+| Daily backup | once / day at 03:30 | `cron/backup.php` | Dumps the DB to `/backups/backup-YYYY-MM-DD.sql.gz`. Keeps 7 days, rotates older files. |
+
+Logs land in `/logs/scheduled-publish.log` and `/logs/backup.log` on the server. Both folders are gitignored and excluded from the deploy.
+
+### 8.2 Installing the cron entries on DreamHost
+
+DreamHost's cron daemon is configured per shell user via the panel (Goodies → Cron Jobs) **or** the `crontab` command over SSH. Either works; the SSH path is reproducible from a shell:
+
+```bash
+ssh alexmchong-ca
+crontab -e
+```
+
+Add these two lines (adjust the absolute path if the home dir differs):
+
+```cron
+# Scheduled publish — every 5 minutes
+*/5 * * * * APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/scheduled-publish.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
+
+# Daily backup — 03:30 server time (DreamHost servers are PST/PDT)
+30 3 * * * APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
+```
+
+For staging, point at `staging.alexmchong.ca/` and use `APP_ENV=staging`. Confirm the PHP binary path with `which php` — DreamHost uses `/usr/local/bin/php` by default but can override per-user.
+
+### 8.3 Verifying cron is running
+
+After installing, schedule a CMS row 6 minutes in the future and wait. It should flip to `'live'` on the next 5-min boundary, and the log line should appear:
+
+```bash
+ssh alexmchong-ca 'tail -n 5 /home/alexmchong/alexmchong.ca/logs/scheduled-publish.log'
+```
+
+For the backup, force-run it once to confirm credentials + gzip both work:
+
+```bash
+ssh alexmchong-ca 'APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php'
+ssh alexmchong-ca 'ls -lh /home/alexmchong/alexmchong.ca/backups/'
+```
+
+Expected output: one `backup-YYYY-MM-DD.sql.gz`, non-zero size, owned by the deploy user.
+
+### 8.4 Restoring from a backup
+
+```bash
+ssh alexmchong-ca
+cd alexmchong.ca/backups
+gunzip -c backup-2026-05-26.sql.gz | mysql -u <db_user> -p<db_pass> <db_name>
+```
+
+(Or use the credentials in `config/config.production.php`.) The dump is `--single-transaction`, so it's a consistent snapshot — no need to stop traffic during restore.
+
+---
+
+## 9. What still changes in later phases
 
 Phase 14 adds:
 

@@ -19,6 +19,9 @@ class Router
     /** @var array<int,array{method:string,path:string,handler:callable}> */
     private array $routes = [];
 
+    /** @var callable|null */
+    private $notFound = null;
+
     public function add(string $method, string $path, callable $handler): void
     {
         $this->routes[] = [
@@ -26,6 +29,18 @@ class Router
             'path'    => $path,
             'handler' => $handler,
         ];
+    }
+
+    /**
+     * Register a callable invoked after every route misses. The handler
+     * receives ($method, $path) and is free to emit any response —
+     * common uses: resolve a DB-backed redirect, render a themed 404,
+     * or fall through to the legacy static page. Phase 13 wires this
+     * in site/index.php to call resolve_redirect() then templates/404.php.
+     */
+    public function set_not_found(callable $handler): void
+    {
+        $this->notFound = $handler;
     }
 
     public function get(string $path, callable $handler): void
@@ -87,10 +102,15 @@ class Router
             }
         }
 
-        // Apache's `ErrorDocument 404` only fires for Apache-level 404s, not
-        // application-level ones. Serve the themed 404 page ourselves so the
-        // public 404 experience matches Phase 1 (when missing URLs went
-        // straight to Apache → ErrorDocument).
+        // No route matched. Defer to the registered not-found handler if
+        // one was installed (Phase 13: resolves DB-backed redirects, then
+        // renders the themed 404). Otherwise fall back to the legacy
+        // static 404.html so old behavior is preserved.
+        if ($this->notFound !== null) {
+            ($this->notFound)($method, $path);
+            return;
+        }
+
         http_response_code(404);
         $page = dirname(__DIR__) . '/404.html';
         if (is_file($page)) {

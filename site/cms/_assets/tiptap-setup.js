@@ -140,30 +140,134 @@ function pickAndUploadImage(editor, { uploadUrl, csrfToken }) {
   input.addEventListener('change', async () => {
     const file = input.files && input.files[0];
     if (!file) return;
+    const overlay = showUploadOverlay(editor, file.name);
     try {
-      const url = await uploadImage(file, { uploadUrl, csrfToken });
+      const url = await uploadImageWithProgress(file, { uploadUrl, csrfToken }, (pct) => {
+        overlay.setProgress(pct);
+      });
+      overlay.setStatus('Done', 'ok');
+      overlay.remove();
       editor.chain().focus().setImage({ src: url, alt: '' }).run();
     } catch (e) {
-      window.alert('Image upload failed: ' + (e && e.message ? e.message : 'unknown error'));
+      overlay.setStatus(
+        'Upload failed: ' + (e && e.message ? e.message : 'unknown error'),
+        'err'
+      );
+      // Leave the overlay up for a couple seconds so the user can read it.
+      setTimeout(() => overlay.remove(), 3500);
     }
   });
   input.click();
 }
 
-async function uploadImage(file, { uploadUrl, csrfToken }) {
-  const fd = new FormData();
-  fd.append('image', file);
-  const res = await fetch(uploadUrl, {
-    method: 'POST',
-    body: fd,
-    headers: { 'X-CSRF-Token': csrfToken },
-    credentials: 'same-origin',
+/**
+ * Phase 13: XHR-based upload so we get progress events. fetch() doesn't
+ * expose upload progress in any browser yet — XMLHttpRequest does, even
+ * though the rest of the codebase prefers fetch().
+ *
+ *   uploadUrl   POST endpoint
+ *   csrfToken   sent as X-CSRF-Token header
+ *   onProgress  called with percent (0..100) during the upload phase
+ */
+function uploadImageWithProgress(file, { uploadUrl, csrfToken }, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('image', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadUrl);
+    xhr.setRequestHeader('X-CSRF-Token', csrfToken);
+    xhr.withCredentials = true;
+    xhr.responseType = 'json';
+    if (xhr.upload) {
+      xhr.upload.addEventListener('progress', (ev) => {
+        if (ev.lengthComputable) {
+          onProgress(Math.round((ev.loaded / ev.total) * 100));
+        }
+      });
+    }
+    xhr.addEventListener('load', () => {
+      const json = xhr.response || {};
+      if (xhr.status >= 200 && xhr.status < 300 && json.ok && json.url) {
+        onProgress(100);
+        resolve(json.url);
+      } else {
+        reject(new Error(json.error || ('HTTP ' + xhr.status)));
+      }
+    });
+    xhr.addEventListener('error', () => reject(new Error('Network error')));
+    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
+    xhr.send(fd);
   });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || !json.ok || !json.url) {
-    throw new Error(json.error || ('HTTP ' + res.status));
+}
+
+/**
+ * Pop an inline progress overlay anchored to the editor's mount node.
+ * Returns a small handle with `setProgress(pct)`, `setStatus(text, kind)`,
+ * and `remove()`. The overlay paints itself with inline styles so this
+ * works without any CSS additions in style-cms.css.
+ */
+function showUploadOverlay(editor, filename) {
+  const host = editor.view && editor.view.dom && editor.view.dom.parentElement;
+  if (!host) {
+    return { setProgress() {}, setStatus() {}, remove() {} };
   }
-  return json.url;
+  // Make sure the host is a positioning context.
+  const cs = window.getComputedStyle(host);
+  if (cs.position === 'static') host.style.position = 'relative';
+
+  const wrap = document.createElement('div');
+  wrap.setAttribute('role', 'status');
+  wrap.setAttribute('aria-live', 'polite');
+  wrap.style.cssText =
+    'position:absolute;left:12px;right:12px;bottom:12px;' +
+    'background:#fff;border:1px solid #ddd;border-radius:6px;' +
+    'box-shadow:0 4px 14px rgba(0,0,0,0.08);' +
+    'padding:10px 14px;font-size:13px;font-family:inherit;color:#333;' +
+    'z-index:50;display:flex;flex-direction:column;gap:6px;pointer-events:none';
+
+  const label = document.createElement('div');
+  label.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px';
+
+  const name = document.createElement('span');
+  name.textContent = 'Uploading ' + (filename || 'image');
+  name.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1';
+
+  const pct = document.createElement('span');
+  pct.textContent = '0%';
+  pct.style.cssText = 'font-variant-numeric:tabular-nums;color:#666;font-size:12px';
+
+  label.appendChild(name);
+  label.appendChild(pct);
+
+  const track = document.createElement('div');
+  track.style.cssText = 'width:100%;height:6px;background:#eee;border-radius:3px;overflow:hidden';
+  const fill = document.createElement('div');
+  fill.style.cssText = 'height:100%;width:0%;background:#2563eb;transition:width 120ms linear';
+  track.appendChild(fill);
+
+  wrap.appendChild(label);
+  wrap.appendChild(track);
+  host.appendChild(wrap);
+
+  return {
+    setProgress(p) {
+      const v = Math.max(0, Math.min(100, p|0));
+      fill.style.width = v + '%';
+      pct.textContent = v + '%';
+    },
+    setStatus(text, kind) {
+      name.textContent = text;
+      if (kind === 'err') {
+        fill.style.background = '#c44';
+        pct.textContent = '';
+      } else if (kind === 'ok') {
+        fill.style.background = '#16a34a';
+      }
+    },
+    remove() {
+      if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
+    },
+  };
 }
 
 /**

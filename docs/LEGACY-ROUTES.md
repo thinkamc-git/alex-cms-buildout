@@ -18,6 +18,8 @@ This file lists every legacy route, where it currently lives on the server, and 
 
 These URLs were live on alexmchong.ca and need to keep resolving.
 
+> **Phase 13 status (2026-05-26):** all ten rules in this section migrated from `site/.htaccess` into the `redirects` table. The `.htaccess` block was deleted; the router's not-found handler in `site/index.php` now resolves each row via `lib/redirects.php`. Edits happen through `/cms/redirects` — do not re-add `RewriteRule` lines for these paths.
+
 **External redirects** — point to off-site destinations:
 
 | Path on alexmchong.ca | Redirects to | HTTP code | Notes |

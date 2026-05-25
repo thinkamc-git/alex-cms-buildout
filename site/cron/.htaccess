@@ -1,0 +1,4 @@
+# /cron/ — server-side scheduled tasks. Block all direct HTTP access so the
+# scripts can only run from the command line (DreamHost cron daemon).
+# Mirrors site/cms/.htaccess and site/config/.htaccess.
+Require all denied

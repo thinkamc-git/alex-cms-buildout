@@ -15,19 +15,9 @@ ErrorDocument 404 /404.html
 
 RewriteEngine On
 
-# === External redirects (302) — see docs/LEGACY-ROUTES.md §2 =================
-RewriteRule ^portfolioforhire/?$ https://alexmchong-portfolio.webflow.io/ [R=302,L]
-RewriteRule ^portfolio/?$ https://alexmchong-portfolio.webflow.io/ [R=302,L]
-RewriteRule ^research/?$ https://alexmchong.notion.site/alexmchong/Alex-s-Master-s-Thesis-NTUT-3ef25dfbb1e145bb8ed9176171828f73 [R=302,L]
-RewriteRule ^talks/?$ https://alexmchong.notion.site/alexmchong/Alex-M-Chong-Design-Talks-455f32067df04918a18875321c3cc9fa [R=302,L]
-RewriteRule ^meet/?$ https://calendly.com/alexmchong/meet [R=302,L]
-RewriteRule ^linkedin/?$ https://linkedin.com/in/alexmchong/ [R=302,L]
-
-# === Legacy renames and discontinued pages (visible 302 to a canonical URL) ==
-RewriteRule ^cv/?$ /resume/ [R=302,L]
-RewriteRule ^community/?$ / [R=302,L]
-RewriteRule ^consulting/?$ / [R=302,L]
-RewriteRule ^landing\.html$ / [R=302,L]
+# === Legacy redirects (Phase 13) ============================================
+# Moved to the `redirects` table — see site/.htaccess for the full note.
+# Resolver: site/lib/redirects.php · CMS: /cms/redirects.
 
 # === /admin → /cms (301, permanent — AUTH-SECURITY.md §9) ===================
 RewriteRule ^admin/?$       /cms/    [R=301,L]

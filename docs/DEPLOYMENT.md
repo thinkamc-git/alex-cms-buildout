@@ -358,13 +358,13 @@ Add these two lines (adjust the absolute path if the home dir differs):
 
 ```cron
 # Scheduled publish — every 5 minutes
-*/5 * * * * APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/scheduled-publish.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
+*/5 * * * * APP_ENV=production /usr/bin/php /home/alexmchong/alexmchong.ca/cron/scheduled-publish.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
 
 # Daily backup — 03:30 server time (DreamHost servers are PST/PDT)
-30 3 * * * APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
+30 3 * * * APP_ENV=production /usr/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php >> /home/alexmchong/alexmchong.ca/logs/cron.log 2>&1
 ```
 
-For staging, point at `staging.alexmchong.ca/` and use `APP_ENV=staging`. Confirm the PHP binary path with `which php` — DreamHost uses `/usr/local/bin/php` by default but can override per-user.
+For staging, point at `staging.alexmchong.ca/` and use `APP_ENV=staging`. Confirm the PHP binary path with `which php` — DreamHost uses `/usr/bin/php` by default but can override per-user.
 
 ### 8.3 Verifying cron is running
 
@@ -377,7 +377,7 @@ ssh alexmchong-ca 'tail -n 5 /home/alexmchong/alexmchong.ca/logs/scheduled-publi
 For the backup, force-run it once to confirm credentials + gzip both work:
 
 ```bash
-ssh alexmchong-ca 'APP_ENV=production /usr/local/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php'
+ssh alexmchong-ca 'APP_ENV=production /usr/bin/php /home/alexmchong/alexmchong.ca/cron/backup.php'
 ssh alexmchong-ca 'ls -lh /home/alexmchong/alexmchong.ca/backups/'
 ```
 

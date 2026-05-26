@@ -29,12 +29,12 @@
       </p>
 
       <!--
-        Form posts to the confirmation page as a static preview.
-        When this is wired into the CMS, the action becomes
-        `/newsletter/subscribe` and the method becomes `POST`. See
-        CMS-STRUCTURE.md §21 and BUILD-PLAN.md Phase 10.
+        Phase 14 — POSTs to /subscribe (handler in site/index.php). The
+        `website` field is a honeypot (bots fill anything labeled "website"
+        with a URL; real users can't see or tab to it). On success the
+        server 302s to /subscribe/confirmed/.
       -->
-      <form class="form" action="/newsletter-confirmed/" method="get" novalidate>
+      <form class="form" action="/subscribe" method="post" novalidate>
 
         <div class="form-field">
           <label class="form-label" for="email">Email</label>
@@ -59,6 +59,12 @@
             placeholder="Alex"
             autocomplete="given-name"
           />
+        </div>
+
+        <!-- Honeypot: visually hidden, removed from tab order, kept fillable by bots. -->
+        <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+          <label for="website">Website</label>
+          <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
         </div>
 
         <div class="form-actions">

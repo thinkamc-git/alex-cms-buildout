@@ -17,6 +17,7 @@ require_once __DIR__ . '/lib/db.php';
 require_once __DIR__ . '/lib/router.php';
 require_once __DIR__ . '/lib/render.php';
 require_once __DIR__ . '/lib/redirects.php';
+require_once __DIR__ . '/lib/subscribers.php';
 
 $router = new Router();
 
@@ -129,6 +130,41 @@ $router->post('/cms/indexes/delete', $cms('views/index-delete.php'));
 // update/delete via $_POST['action'] (same pattern as /cms/categories).
 $router->get ('/cms/redirects', $cms('views/redirects.php'));
 $router->post('/cms/redirects', $cms('views/redirects.php'));
+
+// Phase 14: Newsletter subscribers admin. List/filter/unsubscribe/delete +
+// CSV export (export=csv on GET short-circuits to text/csv). POST handles
+// per-row actions; both verbs share the single view handler.
+$router->get ('/cms/subscribers', $cms('views/subscribers.php'));
+$router->post('/cms/subscribers', $cms('views/subscribers.php'));
+
+// ── Public subscribe (Phase 14) ─────────────────────────────────────
+// POST /subscribe handles the newsletter-form submission: honeypot,
+// rate-limit (1/min, 10/day per IP), email validation, upsert.
+// Outcome → redirect:
+//   ok | honeypot → /subscribe/confirmed/   (honeypot is silent success)
+//   rate          → /subscribe/?error=rate
+//   invalid       → /subscribe/?error=invalid
+//
+// /subscribe/ and /subscribe/confirmed/ both render the existing static
+// _pages bodies via _page-shell.php — the URL is the canonical home for
+// the form going forward; /newsletter/ remains as a redirect (seeded in
+// the redirects table if Alex wants the old URL to stick around).
+$router->post('/subscribe', static function (): void {
+    $result = subscribe_from_post('newsletter-page');
+    if ($result === 'ok' || $result === 'honeypot') {
+        header('Location: /subscribe/confirmed/', true, 302);
+        exit;
+    }
+    header('Location: /subscribe/?error=' . rawurlencode($result), true, 302);
+    exit;
+});
+
+$router->get('/subscribe', static function (): void {
+    require __DIR__ . '/_pages/newsletter.php';
+});
+$router->get('/subscribe/confirmed', static function (): void {
+    require __DIR__ . '/_pages/newsletter-confirmed.php';
+});
 
 // ── Public articles (Phase 6b) ───────────────────────────────────────
 // First dynamic-segment route. The :slug param is single-segment so

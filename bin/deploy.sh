@@ -157,6 +157,9 @@ cp site/lib/indexes.php            "$STAGE/lib/"
 # Phase 13: redirects data layer (resolver + CRUD), wired into the front
 # controller's not-found handler in site/index.php.
 cp site/lib/redirects.php          "$STAGE/lib/"
+# Phase 14: subscribers data layer (public POST /subscribe handler, CMS
+# list/filter/export view at /cms/subscribers).
+cp site/lib/subscribers.php        "$STAGE/lib/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
@@ -248,9 +251,14 @@ if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
     --exclude='_layout/header.html'
     --exclude='_bodies/landing.html'
     --exclude='templates/partials/nav.php'
+    # Phase 14 added a live POST /subscribe handler + form on staging.
+    # Prod keeps the GET-to-/newsletter-confirmed/ static form until the
+    # Phase 16 cutover (consistent with the rest of the prod freeze).
+    --exclude='_bodies/newsletter.html'
   )
   echo "==> Prod-freeze active: skipping marketing nav, landing copy,"
-  echo "    and CMS-rendered nav.php (Phase 16 flips these)."
+  echo "    newsletter form body, and CMS-rendered nav.php"
+  echo "    (Phase 16 flips these)."
 fi
 
 echo

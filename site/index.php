@@ -159,11 +159,13 @@ $router->post('/subscribe', static function (): void {
     exit;
 });
 
+// bin/deploy.sh flattens _pages/*.php to webroot, so newsletter.php and
+// newsletter-confirmed.php sit next to this file post-deploy.
 $router->get('/subscribe', static function (): void {
-    require __DIR__ . '/_pages/newsletter.php';
+    require __DIR__ . '/newsletter.php';
 });
 $router->get('/subscribe/confirmed', static function (): void {
-    require __DIR__ . '/_pages/newsletter-confirmed.php';
+    require __DIR__ . '/newsletter-confirmed.php';
 });
 
 // ── Public articles (Phase 6b) ───────────────────────────────────────

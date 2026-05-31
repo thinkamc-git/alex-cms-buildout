@@ -27,6 +27,8 @@ require_once __DIR__ . '/db.php';
 const SUBSCRIBER_HONEYPOT_FIELD = 'website';
 const SUBSCRIBER_RATE_LIMIT_PER_MINUTE = 1;
 const SUBSCRIBER_RATE_LIMIT_PER_DAY    = 10;
+const SUBSCRIBER_TIME_TRAP_SECONDS     = 2;
+const SUBSCRIBER_TIME_TRAP_COOKIE      = 'newsletter_form_loaded';
 
 /**
  * Look up a subscriber by email. Returns NULL if no row exists.
@@ -262,6 +264,26 @@ function export_subscribers_csv(array $filters = []): never
 }
 
 /**
+ * MX-record check. Returns true when the email's domain has either an
+ * MX record (the standard) or an A record (RFC fallback — some domains
+ * accept mail on the bare hostname). Returns false on syntactically
+ * weird input, no records, or DNS errors.
+ *
+ * Catches typos like 'gmail.con' / 'yhaoo.com' and a lot of throwaway
+ * domains that never serve mail. Adds ~50ms per check; fine for a
+ * form submission, not something you'd put in a tight loop.
+ */
+function email_domain_has_mx(string $email): bool
+{
+    $parts = explode('@', strtolower(trim($email)), 2);
+    if (count($parts) !== 2 || $parts[1] === '') return false;
+    $domain = $parts[1];
+    if (!preg_match('/^[a-z0-9.\-]+\.[a-z]{2,}$/', $domain)) return false;
+    if (checkdnsrr($domain, 'MX')) return true;
+    return checkdnsrr($domain, 'A');
+}
+
+/**
  * Per-IP rate limit. Returns true when the IP is within both windows
  * (1 sub/min, 10 sub/day) — i.e. allowed to submit. Returns false when
  * either window is exceeded.
@@ -291,14 +313,24 @@ function subscriber_rate_ok(string $ip): bool
 }
 
 /**
- * Public-form submission entry point. Pull $_POST + $_SERVER, run honeypot
- * + rate-limit + save. Returns a status string the route handler maps to
+ * Public-form submission entry point. Pull $_POST + $_SERVER, run all
+ * spam checks, save. Returns a status string the route handler maps to
  * a redirect:
  *
  *   'ok'        → 302 to /subscribe/confirmed/
- *   'honeypot'  → 302 to /subscribe/confirmed/ (silent success-shape for bots)
+ *   'honeypot'  → 302 to /subscribe/confirmed/ (silent — bot can't tell)
+ *   'fast'      → 302 to /subscribe/confirmed/ (silent — bot can't tell)
  *   'rate'      → 302 back to the form with ?error=rate
  *   'invalid'   → 302 back to the form with ?error=invalid
+ *
+ * Defense order (cheap → expensive):
+ *   1. Honeypot field — instant memory check.
+ *   2. Time-trap cookie — instant compare; only enforced if the cookie
+ *      is present (don't punish users who block cookies — other checks
+ *      still apply).
+ *   3. Email syntax — local regex.
+ *   4. Per-IP rate-limit — single indexed DB query.
+ *   5. MX-record lookup — ~50ms DNS, only if everything else passed.
  *
  * Source defaults to 'newsletter-page' per Phase 14 decision but the
  * caller can override (e.g. an RSVP form posts with source='live-session-rsvp').
@@ -311,6 +343,15 @@ function subscribe_from_post(string $defaultSource = 'newsletter-page'): string
         return 'honeypot';
     }
 
+    // Time-trap — only enforce when the cookie is present. Cookies are
+    // set by newsletter.php on every GET, so legitimate humans always
+    // have one. Bots that POST without first GETting the form have no
+    // cookie; this check is a no-op for them (the other defenses apply).
+    $loadedAt = (int)($_COOKIE[SUBSCRIBER_TIME_TRAP_COOKIE] ?? 0);
+    if ($loadedAt > 0 && (time() - $loadedAt) < SUBSCRIBER_TIME_TRAP_SECONDS) {
+        return 'fast';
+    }
+
     $email = (string)($_POST['email'] ?? '');
     if (trim($email) === '' || filter_var(trim($email), FILTER_VALIDATE_EMAIL) === false) {
         return 'invalid';
@@ -319,6 +360,10 @@ function subscribe_from_post(string $defaultSource = 'newsletter-page'): string
     $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
     if (!subscriber_rate_ok($ip)) {
         return 'rate';
+    }
+
+    if (!email_domain_has_mx($email)) {
+        return 'invalid';
     }
 
     $res = save_subscriber([

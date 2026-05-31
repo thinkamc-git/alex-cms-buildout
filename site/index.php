@@ -151,7 +151,10 @@ $router->post('/cms/subscribers', $cms('views/subscribers.php'));
 // the redirects table if Alex wants the old URL to stick around).
 $router->post('/subscribe', static function (): void {
     $result = subscribe_from_post('newsletter-page');
-    if ($result === 'ok' || $result === 'honeypot') {
+    // Silent-success statuses look identical to a bot — they can't tell
+    // they were caught (honeypot filled, sub-2s submit). 'ok' is the
+    // real path. Everything else surfaces an error back to the user.
+    if (in_array($result, ['ok', 'honeypot', 'fast'], true)) {
         header('Location: /subscribe/confirmed/', true, 302);
         exit;
     }

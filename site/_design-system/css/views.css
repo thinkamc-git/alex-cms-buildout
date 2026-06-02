@@ -87,6 +87,16 @@
   z-index: 1;
 }
 .card .card-link:hover { color: inherit; }
+
+/* Experiment cards layer their content above a z-index:1 scrim, so the
+   inner blocks (header, title, summary, CTA) get position:relative +
+   z-index:2 inline. That's higher than the stretched-link ::before at
+   z-index:1 — clicks anywhere except the title text fall on those inner
+   blocks and never reach the link. Bump the experiment stretched ::before
+   to sit ABOVE the inner content (z-index:3) so the whole card is
+   clickable. None of the inner elements need individual click handlers
+   on an experiment card. */
+.card--experiment .card-link::before { z-index: 3; }
 /* Other interactive children sit above the stretched ::before via z-index.
    These MUST also have position:relative so z-index applies. */
 .card .series-pill,

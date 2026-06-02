@@ -39,7 +39,18 @@ const SANITIZE_ALLOWED = [
     'span'       => ['class'],   // restricted to class="m" below
     'img'        => ['src', 'alt'],
     'br'         => [],
+    // Phase 21.x — figure-wrapped images with captions + size preset.
+    // data-size accepts: default | wide | full (validated below). The
+    // default value is dropped from output to keep stored HTML lean.
+    'figure'     => ['data-size'],
+    'figcaption' => [],
 ];
+
+/**
+ * Valid values for figure[data-size]. Anything else is treated as the
+ * default (and the attribute is removed entirely on save).
+ */
+const SANITIZE_FIGURE_SIZES = ['wide', 'full'];
 
 /**
  * Tags whose contents should be DROPPED entirely (not unwrapped).
@@ -134,7 +145,21 @@ function sanitize_walk(DOMNode $node): void
                 if (trim($child->getAttribute('class')) !== 'm') {
                     $child->removeAttribute('class');
                 }
+            } elseif ($name === 'data-size' && $tag === 'figure') {
+                // Only allow whitelisted size presets; "default" is implicit
+                // (no attribute) so we drop it too.
+                $v = trim($child->getAttribute('data-size'));
+                if (!in_array($v, SANITIZE_FIGURE_SIZES, true)) {
+                    $child->removeAttribute('data-size');
+                }
             }
+        }
+
+        // Drop empty <figcaption> so blank captions don't ship — saves a
+        // few bytes and prevents an empty CSS box from rendering publicly.
+        if ($tag === 'figcaption' && trim($child->textContent ?? '') === '') {
+            $node->removeChild($child);
+            continue;
         }
 
         // <span> with no class survives parsing — unwrap empty spans so

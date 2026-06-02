@@ -1,9 +1,20 @@
-/* cms/_assets/tiptap.css — editor chrome.
-   Loaded only on the article-edit view. Sits on top of /_ds/css/*.
+/* cms/_assets/tiptap.css — editor chrome only.
+   Loaded only on the post-edit views. Sits on top of /_ds/css/*.
 
-   Per ENGINEERING.md §6.2: no raw hex; no raw px outside tokens.css for
-   spacing/type/radii (structural 1px borders are still pulled through
-   --rule tokens from the design system).
+   Prose rendering inside the editor comes from `.article-prose` in
+   /_templates/style-articles.css — the SAME stylesheet that powers
+   the public post pages. We stamp `article-prose` onto the ProseMirror
+   contenteditable in tiptap-setup.js (editorProps.attributes.class) so
+   every paragraph / heading / list / blockquote / figure rule applies
+   identically here. When the public typography moves, the editor moves
+   with it.
+
+   This file owns only:
+     - the wrap + sticky toolbar
+     - toolbar button states
+     - editor pane padding (acts as the article gutter)
+     - empty-state placeholder
+     - the textarea fallback hide
 */
 
 .tiptap-wrap {
@@ -21,6 +32,11 @@
   background: var(--bg-soft, var(--bg));
   border-top-left-radius: var(--radius-md);
   border-top-right-radius: var(--radius-md);
+  /* Phase 20.2: sticky so the format controls stay reachable while
+     scrolling through long body content. */
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .tiptap-toolbar .tt-btn {
@@ -55,14 +71,13 @@
 }
 
 /* The editor surface. Tiptap mounts a contenteditable inside .tiptap-editor;
-   .ProseMirror is the class Tiptap applies to that element. */
+   that contenteditable is `.ProseMirror.article-prose` — the article-prose
+   class is what gives it its typography. The pane padding acts as the
+   article column's gutter so wrapped lines aren't flush against the border. */
 .tiptap-editor {
   min-height: 360px;
-  padding: var(--space-16) var(--space-20);
-  font-family: var(--font-sans);
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--text);
+  padding: var(--space-24) var(--space-32);
+  background: var(--surface, var(--bg));
 }
 
 .tiptap-editor .ProseMirror {
@@ -70,78 +85,103 @@
   min-height: 360px;
 }
 
-.tiptap-editor .ProseMirror p {
-  margin: 0 0 var(--space-12) 0;
-}
-
-.tiptap-editor .ProseMirror h2 {
-  font-family: var(--font-serif);
-  font-size: var(--text-h2);
-  margin: var(--space-24) 0 var(--space-8) 0;
-  font-style: italic;
-}
-
-.tiptap-editor .ProseMirror h3 {
-  font-family: var(--font-serif);
-  font-size: var(--text-h3);
-  margin: var(--space-20) 0 var(--space-8) 0;
-  font-style: italic;
-}
-
-.tiptap-editor .ProseMirror ul,
-.tiptap-editor .ProseMirror ol {
-  margin: 0 0 var(--space-12) var(--space-24);
-}
-
-.tiptap-editor .ProseMirror li {
-  margin-bottom: var(--space-4);
-}
-
-.tiptap-editor .ProseMirror blockquote {
-  margin: var(--space-16) 0;
-  padding-left: var(--space-16);
-  border-left: 2px solid var(--rule);
-  color: var(--muted);
-  font-style: italic;
-}
-
-.tiptap-editor .ProseMirror code {
-  font-family: var(--font-mono);
-  font-size: 0.92em;
-  padding: 0 var(--space-4);
-  background: var(--bg-soft, var(--bg));
-  border: 1px solid var(--rule-faint);
-  border-radius: var(--radius-sm);
-}
-
-.tiptap-editor .ProseMirror a {
-  color: var(--primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.tiptap-editor .ProseMirror img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: var(--space-16) auto;
-  border-radius: var(--radius-sm);
-}
-
-/* The muted-word treatment is owned by the design system in typography.css.
-   We just make sure the editor's contenteditable copy inherits it. */
-.tiptap-editor .ProseMirror span.m {
-  color: var(--muted);
-}
+/* Tiptap's contenteditable doesn't suppress the first-of-type margin-top
+   the way `.article-prose > * + *` skips the first child — that rule is
+   inherited from style-articles.css and works correctly. No override
+   needed here. */
 
 /* Placeholder when the editor is empty. Tiptap's Placeholder extension can
-   do this, but a CSS-only hint is enough for v1. */
+   do this, but a CSS-only hint is enough for v1. Force regular sans/upright
+   so the empty hint doesn't masquerade as the italic-serif lede the
+   article-prose `:first-of-type p` rule would otherwise apply. */
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: 'Start writing…';
   color: var(--muted);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 400;
+  font-size: var(--text-md);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+/* ── Figure (image + caption + size toggle) ─────────────────────────
+   Authoring affordances on top of the public .article-prose figure
+   styles. The figure renders identically to the published page; we add
+   a selected-state outline + a placeholder for empty captions. */
+.tiptap-editor .ProseMirror figure {
+  position: relative;
+  cursor: default;
+}
+/* The public stylesheet's wide/full figure variants use viewport-relative
+   widths + transform tricks to break out of the article column. Those
+   would punch through the bounded editor pane (and into the metadata
+   sidebar). Neutralize them inside the editor — author still toggles
+   the size, the real width preview lives in the Preview tab. */
+.tiptap-editor .ProseMirror figure[data-size="wide"],
+.tiptap-editor .ProseMirror figure[data-size="full"] {
+  position: relative;
+  left: auto;
+  transform: none;
+  max-width: 100%;
+  width: 100%;
+}
+.tiptap-editor .ProseMirror figure img {
+  max-width: 100%;
+  height: auto;
+}
+.tiptap-editor .ProseMirror figure.ProseMirror-selectednode,
+.tiptap-editor .ProseMirror figure:has(.ProseMirror-selectednode),
+.tiptap-editor .ProseMirror figure:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  outline-offset: 4px;
+  border-radius: var(--r-card);
+}
+/* Empty figcaption hint — TipTap can't easily put placeholder text inside
+   a node's inline content, so use a CSS prompt and hide once it gets
+   any text content. */
+.tiptap-editor .ProseMirror figcaption:empty::before {
+  content: 'Caption (optional)';
+  color: var(--muted);
+  font-style: italic;
+  pointer-events: none;
+}
+
+/* Floating size-toggle panel. Pinned above the selected figure by JS
+   (see updateFigurePanel in tiptap-setup.js). */
+.tt-fig-panel {
+  position: absolute;
+  display: none;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface, var(--bg));
+  border: 1px solid var(--rule-30);
+  border-radius: var(--r-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 20;
+}
+.tt-fig-panel.is-visible { display: flex; }
+
+.tt-fig-btn {
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: var(--space-4) var(--space-12);
+  border: 1px solid var(--rule-30);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tt-fig-btn:hover { color: var(--primary); border-color: var(--primary); }
+.tt-fig-btn.is-active {
+  background: var(--primary);
+  color: var(--surface, var(--bg));
+  border-color: var(--primary);
 }
 
 /* The textarea fallback is hidden when the editor mounts. If JS fails to

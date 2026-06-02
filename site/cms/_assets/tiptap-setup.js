@@ -15,7 +15,7 @@
 // Heading levels are restricted to [2, 3] because the article template
 // reserves <h1> for the title block — body headings must be H2 or H3.
 
-import { Editor, Mark, mergeAttributes }
+import { Editor, Mark, Node, mergeAttributes }
   from 'https://esm.sh/@tiptap/core@2.6.6';
 import StarterKit
   from 'https://esm.sh/@tiptap/starter-kit@2.6.6';
@@ -23,6 +23,78 @@ import Link
   from 'https://esm.sh/@tiptap/extension-link@2.6.6';
 import Image
   from 'https://esm.sh/@tiptap/extension-image@2.6.6';
+
+/**
+ * Custom Figure block node — renders `<figure data-size><img><figcaption>`.
+ *
+ * The image src/alt live on the node attributes (single source of truth);
+ * the figcaption is rendered as inline-editable content. `data-size` is one
+ * of `default | wide | full`; matches the figure-size rules in
+ * site/_templates/style-articles.css. Inserted via the `setFigure({src})`
+ * command added below. Existing bare `<img>` content still parses through
+ * the standalone Image extension — both schemas coexist.
+ */
+const Figure = Node.create({
+  name: 'figure',
+  group: 'block',
+  content: 'inline*',           // the inline content IS the figcaption text
+  draggable: true,
+  selectable: true,
+  isolating: true,              // protect from join/lift collapsing the figure into surrounding blocks
+
+  addAttributes() {
+    return {
+      src:  { default: null },
+      alt:  { default: '' },
+      dataSize: {
+        default: 'default',
+        parseHTML: el => el.getAttribute('data-size') || 'default',
+        renderHTML: attrs => {
+          if (!attrs.dataSize || attrs.dataSize === 'default') return {};
+          return { 'data-size': attrs.dataSize };
+        },
+      },
+    };
+  },
+
+  parseHTML() {
+    return [{
+      tag: 'figure',
+      contentElement: 'figcaption',  // extract caption text into node content
+      getAttrs: el => {
+        const img = el.querySelector('img');
+        if (!img) return false;       // skip non-image figures (defensive)
+        return {
+          src: img.getAttribute('src'),
+          alt: img.getAttribute('alt') || '',
+          dataSize: el.getAttribute('data-size') || 'default',
+        };
+      },
+    }];
+  },
+
+  renderHTML({ node, HTMLAttributes }) {
+    return [
+      'figure',
+      HTMLAttributes,
+      ['img', { src: node.attrs.src, alt: node.attrs.alt }],
+      ['figcaption', 0],         // 0 = where inline (caption) content goes
+    ];
+  },
+
+  addCommands() {
+    return {
+      setFigure: (attrs) => ({ commands }) =>
+        commands.insertContent({
+          type: this.name,
+          attrs,
+          content: [],            // empty caption — placeholder hint via CSS
+        }),
+      setFigureSize: (size) => ({ commands }) =>
+        commands.updateAttributes(this.name, { dataSize: size }),
+    };
+  },
+});
 
 /**
  * Custom inline mark for muted-word: <span class="m">…</span>.
@@ -63,6 +135,12 @@ export function setupTiptap({ mount, fallback, toolbar, uploadUrl, csrfToken }) 
 
   const editor = new Editor({
     element: mount,
+    // Phase 21.x: stamp the contenteditable with `article-prose` so the
+    // public template's stylesheet (style-articles.css) styles the editor
+    // body too — same CSS, same rendering, no drift.
+    editorProps: {
+      attributes: { class: 'article-prose' },
+    },
     extensions: [
       StarterKit.configure({
         heading:    { levels: [2, 3] },
@@ -75,16 +153,25 @@ export function setupTiptap({ mount, fallback, toolbar, uploadUrl, csrfToken }) 
         protocols: ['http', 'https', 'mailto'],
         HTMLAttributes: { rel: null, target: null },  // bare <a href>
       }),
+      // Image extension stays for backward compat — older articles with
+      // bare <img> tags still parse correctly. New images get inserted
+      // through Figure (see pickAndUploadImage below).
       Image.configure({ inline: false }),
+      Figure,
       Muted,
     ],
     content: fallback.value,
     onUpdate({ editor }) {
       fallback.value = editor.getHTML();
+      // Mirror a synthetic input event so listeners like preview-tab-guard
+      // (which tracks dirtiness via input/change) detect TipTap edits.
+      fallback.dispatchEvent(new Event('input', { bubbles: true }));
       updateToolbarState(editor, toolbar);
+      updateFigurePanel(editor, mount);
     },
     onSelectionUpdate({ editor }) {
       updateToolbarState(editor, toolbar);
+      updateFigurePanel(editor, mount);
     },
   });
 
@@ -147,7 +234,10 @@ function pickAndUploadImage(editor, { uploadUrl, csrfToken }) {
       });
       overlay.setStatus('Done', 'ok');
       overlay.remove();
-      editor.chain().focus().setImage({ src: url, alt: '' }).run();
+      // Insert as a Figure (figure + img + empty figcaption) so the author
+      // gets a caption slot + size toggle. Older bare <img> content still
+      // renders via the Image extension.
+      editor.chain().focus().setFigure({ src: url, alt: '' }).run();
     } catch (e) {
       overlay.setStatus(
         'Upload failed: ' + (e && e.message ? e.message : 'unknown error'),
@@ -268,6 +358,78 @@ function showUploadOverlay(editor, filename) {
       if (wrap.parentNode) wrap.parentNode.removeChild(wrap);
     },
   };
+}
+
+/**
+ * Floating figure-controls panel.
+ *
+ * Pinned above the currently-selected figure with two size-preset pills:
+ * Column (default — column width) and Full Browser (data-size="full"). The
+ * panel is created lazily on first use and reused thereafter. Hidden when
+ * selection is outside any figure.
+ *
+ * Caption editing isn't here — `<figcaption>` is part of the figure node's
+ * inline content, so the author just clicks into it and types.
+ */
+function updateFigurePanel(editor, mount) {
+  const host = mount && mount.parentElement;
+  if (!host) return;
+
+  // Lazy-create the panel on first call. Anchored absolutely to the host
+  // (mount's parent — the .tiptap-wrap), which is positioned for sticky.
+  let panel = host.querySelector(':scope > .tt-fig-panel');
+  if (!panel) {
+    if (window.getComputedStyle(host).position === 'static') {
+      host.style.position = 'relative';
+    }
+    panel = document.createElement('div');
+    panel.className = 'tt-fig-panel';
+    panel.setAttribute('role', 'toolbar');
+    panel.setAttribute('aria-label', 'Image controls');
+    panel.innerHTML =
+      '<button type="button" class="tt-fig-btn" data-size="default">Column</button>' +
+      '<button type="button" class="tt-fig-btn" data-size="full">Full browser</button>';
+    panel.addEventListener('mousedown', (ev) => {
+      // Keep the editor selection while clicking the toolbar.
+      ev.preventDefault();
+    });
+    panel.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.tt-fig-btn');
+      if (!btn) return;
+      const size = btn.dataset.size || 'default';
+      editor.chain().focus().setFigureSize(size).run();
+    });
+    host.appendChild(panel);
+  }
+
+  if (!editor.isActive('figure')) {
+    panel.classList.remove('is-visible');
+    return;
+  }
+
+  // Position the panel above the selected figure. Use the DOM node for the
+  // current selection's parent figure element.
+  const { from } = editor.state.selection;
+  const domAtPos = editor.view.domAtPos(from);
+  let el = domAtPos && domAtPos.node;
+  while (el && el.nodeType === 3) el = el.parentNode;
+  while (el && el !== host && el.tagName !== 'FIGURE') el = el.parentNode;
+  if (!el || el === host) {
+    panel.classList.remove('is-visible');
+    return;
+  }
+
+  const hostRect = host.getBoundingClientRect();
+  const figRect  = el.getBoundingClientRect();
+  panel.style.top  = (figRect.top - hostRect.top - panel.offsetHeight - 8) + 'px';
+  panel.style.left = (figRect.left - hostRect.left) + 'px';
+  panel.classList.add('is-visible');
+
+  // Reflect current data-size on the buttons.
+  const current = editor.getAttributes('figure').dataSize || 'default';
+  for (const btn of panel.querySelectorAll('.tt-fig-btn')) {
+    btn.classList.toggle('is-active', btn.dataset.size === current);
+  }
 }
 
 /**

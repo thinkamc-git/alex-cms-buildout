@@ -644,6 +644,18 @@ a.article-series-pill:hover {
   border-radius: var(--r-card);
   border: var(--rule-faint);
 }
+/* Bare <img> (no <figure> wrap) — caps width so an oversized upload doesn't
+   blow past the column. TipTap can insert bare images via the toolbar
+   Image button when the author doesn't add a caption. */
+.article-prose > img,
+.article-prose p > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--space-32) auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
 .article-prose figcaption {
   font-family: var(--font-cond);
   font-size: var(--text-label);

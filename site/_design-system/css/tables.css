@@ -30,7 +30,9 @@
 
 .cms-main { display: flex; flex-direction: column; }
 .cms-topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--space-24); border-bottom: var(--rule); }
-.cms-page-title { font-size: var(--text-md); font-weight: 600; letter-spacing: -0.01em; }
+/* DS showcase only — mirrors style-cms.css's .view-title canonical rule so
+   the documented "CMS page title" look matches what runs in production. */
+.cms-page-title { font-family: var(--font-serif); font-style: italic; font-size: 26px; font-weight: 400; letter-spacing: -0.01em; color: var(--primary); line-height: 1.2; }
 .cms-actions { display: flex; gap: var(--space-8); }
 .cms-btn-sec { padding: 7px 14px; border-radius: 3px; background: transparent; border: 1px solid var(--primary); color: var(--primary); font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; }
 .cms-btn-sec:hover { border-color: var(--primary); color: var(--primary); }

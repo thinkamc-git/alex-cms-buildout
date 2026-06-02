@@ -1,19 +1,24 @@
 <?php
 /**
- * cms/views/pipeline.php — Articles pipeline kanban.
+ * cms/views/pipeline.php — Draft Writing (the in-flight kanban).
  *
- * Routed from site/index.php as GET /cms.
+ * Phase 19 reshape: was "Pipeline" with 5 stage lanes (concept/outline/
+ * draft/scheduled/published). Renamed to "Draft Writing" with five
+ * conceptually-distinct columns:
  *
- * Header: stat row (counts per stage) + a quick-capture bar that
- * creates a new Article at Idea stage (POSTs to /cms/articles/new-idea).
+ *   Concept · Outline · Draft · Scheduled · Recently Published
  *
- * Body: five lanes — Idea / Concept / Outline / Drafts / Published.
- * Each card surfaces title + slug + last-modified relative time, with
- * a category color band reserved for Phase 8+ when categories ship.
+ * Differences from the old Pipeline:
+ *   - "Idea" stage stays in Ideation Board (separate view) — never appears here
+ *   - "Scheduled" sub-groups by calendar week (This Week / Next Week / Future)
+ *     using list_scheduled_content() in the author's timezone
+ *   - "Recently Published" shows the top 5 most recent live rows
+ *     (list_recently_published(5)), read-only — not a drop target
+ *   - All 4 content types feed every column (articles + journals + sessions +
+ *     experiments). Old view excluded experiments.
  *
- * Phase 7 is Articles-only; other content types extend the SELECT in a
- * later phase. The type-badge on each card is rendered defensively so
- * the same template can welcome Journals/Sessions/Experiments later.
+ * URL stays `/cms/` (root) so existing bookmarks keep working; only the
+ * label flipped.
  */
 
 declare(strict_types=1);
@@ -28,62 +33,54 @@ $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
-$articles = list_articles();
-$journals = list_journals();
-$sessions = list_live_sessions();
+$articles    = list_articles();
+$journals    = list_journals();
+$sessions    = list_live_sessions();
+$experiments = list_experiments();
 
-// Tag each row with its display type so the kanban card render picks the
-// right badge. (list_articles / list_journals / list_live_sessions don't
-// ship a `type` column because each query is filtered to one type —
-// synthesize it here.)
-foreach ($articles as &$a) { $a['type'] = 'article'; }       unset($a);
-foreach ($journals as &$j) { $j['type'] = 'journal'; }       unset($j);
-foreach ($sessions as &$s) { $s['type'] = 'live-session'; }  unset($s);
+foreach ($articles    as &$a) { $a['type'] = 'article'; }       unset($a);
+foreach ($journals    as &$j) { $j['type'] = 'journal'; }       unset($j);
+foreach ($sessions    as &$s) { $s['type'] = 'live-session'; }  unset($s);
+foreach ($experiments as &$x) { $x['type'] = 'experiment'; }    unset($x);
 
-// Merge then re-sort by pipeline_order ASC, updated_at DESC. Each list
-// already arrives in its lane-local order; the merge needs a stable
-// global sort so the three types share lane positions cleanly.
-$rows = array_merge($articles, $journals, $sessions);
+$rows = array_merge($articles, $journals, $sessions, $experiments);
 usort($rows, static function (array $a, array $b): int {
     $po = (int)($a['pipeline_order'] ?? 0) <=> (int)($b['pipeline_order'] ?? 0);
     if ($po !== 0) return $po;
     return strcmp((string)($b['updated_at'] ?? ''), (string)($a['updated_at'] ?? ''));
 });
 
-// Per-bucket counts across all types. The "scheduled" bucket is virtual:
-// rows where status='published' but published_status='scheduled' (cron
-// hasn't promoted to 'live' yet). Phase 14.6 split.
-$counts = ['concept' => 0, 'outline' => 0, 'draft' => 0, 'scheduled' => 0, 'published' => 0];
+// In-flight bucketing — Concept / Outline / Draft only. Scheduled +
+// Recently Published come from dedicated helpers (cross-type, with
+// week-bucketing + ordering already applied).
+$byStage = ['concept' => [], 'outline' => [], 'draft' => []];
 foreach ($rows as $r) {
-    $s  = (string)($r['status'] ?? '');
-    $ps = (string)($r['published_status'] ?? '');
-    if ($s === 'published' && $ps === 'scheduled') {
-        $counts['scheduled']++;
-    } elseif (isset($counts[$s])) {
-        $counts[$s]++;
-    }
-}
-$inFlight = $counts['concept'] + $counts['outline'] + $counts['draft'] + $counts['scheduled'];
-
-$flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
-
-// Group rows by bucket for kanban rendering. Scheduled siphons rows out
-// of the 'published' bucket so the lane only shows live posts.
-$byStage = ['concept' => [], 'outline' => [], 'draft' => [], 'scheduled' => [], 'published' => []];
-foreach ($rows as $r) {
-    $s  = (string)($r['status'] ?? 'draft');
-    $ps = (string)($r['published_status'] ?? '');
-    if ($s === 'published' && $ps === 'scheduled') {
-        $byStage['scheduled'][] = $r;
-    } elseif (isset($byStage[$s])) {
+    $s = (string)($r['status'] ?? 'draft');
+    if (isset($byStage[$s])) {
         $byStage[$s][] = $r;
     }
 }
 
-// Scheduled lane: sort by published_at ASC (soonest-next first).
-usort($byStage['scheduled'], static function (array $a, array $b): int {
-    return strcmp((string)($a['published_at'] ?? ''), (string)($b['published_at'] ?? ''));
-});
+$scheduledBuckets   = list_scheduled_content();
+$recentlyPublished  = list_recently_published(5);
+$scheduledTotal     = count($scheduledBuckets['this_week'])
+                    + count($scheduledBuckets['next_week'])
+                    + count($scheduledBuckets['future']);
+
+// Stat-row counts. "Live" = total ever-published live rows (separate from
+// the Recently Published column which caps at 5). Hand-counted across all
+// 4 lists so we don't run an extra query just for the dash header.
+$liveTotal = 0;
+foreach ($rows as $r) {
+    $st = (string)($r['status'] ?? '');
+    $ps = (string)($r['published_status'] ?? '');
+    if ($st === 'published' && ($ps === '' || $ps === 'live' || $ps === null)) {
+        $liveTotal++;
+    }
+}
+$inFlight = count($byStage['concept']) + count($byStage['outline']) + count($byStage['draft']) + $scheduledTotal;
+
+$flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
@@ -91,74 +88,126 @@ header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 /**
- * Render one kanban card. Pipeline now mixes types (articles + journals);
- * the badge and edit URL switch on the row's `type`. Journals past Idea
- * live at /cms/journals/edit and prefer key_statement as the display name.
+ * Edit URL for a row by type. Concept/Outline/Draft stages route to the
+ * type-specific editor; idea rows would route to the shared editor but
+ * they don't appear in this view anymore.
  */
-$renderCard = static function (array $a, string $stage) use ($e): string {
-    $id      = (int)($a['id'] ?? 0);
-    $type    = (string)($a['type'] ?? 'article');
-    $slug    = (string)($a['slug'] ?? '');
-    $updated = relative_time((string)($a['updated_at'] ?? ''));
+$editUrlFor = static function (array $r): string {
+    $id   = (int)($r['id'] ?? 0);
+    $type = (string)($r['type'] ?? 'article');
+    return match ($type) {
+        'journal'      => '/cms/journals/edit?id='      . $id,
+        'live-session' => '/cms/live-sessions/edit?id=' . $id,
+        'experiment'   => '/cms/experiments/edit?id='   . $id,
+        default        => '/cms/articles/edit?id='      . $id,
+    };
+};
 
-    $display = $type === 'journal'
-        ? (string)($a['key_statement'] ?? '') ?: (string)($a['title'] ?? '')
-        : (string)($a['title'] ?? '');
-    if ($display === '') $display = '(untitled)';
-
-    $variant = $stage === 'idea' ? ' idea' : ($stage === 'concept' ? ' concept' : '');
-
-    // Idea stage stays in the shared editor for every type; past Idea each
-    // type lives in its own editor.
-    if ($stage === 'idea') {
-        $editUrl = '/cms/articles/edit?id=' . $id;
-    } elseif ($type === 'journal') {
-        $editUrl = '/cms/journals/edit?id=' . $id;
-    } elseif ($type === 'live-session') {
-        $editUrl = '/cms/live-sessions/edit?id=' . $id;
-    } else {
-        $editUrl = '/cms/articles/edit?id=' . $id;
+/**
+ * Display name for a row. Journals prefer key_statement (their primary
+ * surface field); everything else uses title.
+ */
+$displayOf = static function (array $r): string {
+    $type = (string)($r['type'] ?? 'article');
+    if ($type === 'journal') {
+        $ks = (string)($r['key_statement'] ?? '');
+        if ($ks !== '') return $ks;
     }
+    $t = (string)($r['title'] ?? '');
+    return $t !== '' ? $t : '(untitled)';
+};
 
-    [$badgeClass, $badgeLabel] = match ($type) {
+$typeBadge = static function (string $type): array {
+    return match ($type) {
         'journal'      => ['tb-journal',      'Journal'],
         'live-session' => ['tb-live-session', 'Session'],
+        'experiment'   => ['tb-experiment',   'Experiment'],
         default        => ['tb-article',      'Article'],
     };
+};
 
-    $head = '<div class="kcard-head">'
-          . '<div class="kcard-title">' . $e($display) . '</div>'
-          . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
-          . '</div>';
+/**
+ * Render a kanban card for the in-flight columns (Concept / Outline / Draft).
+ * These remain draggable for stage reordering.
+ */
+$renderInFlightCard = static function (array $r, string $stage) use ($e, $editUrlFor, $displayOf, $typeBadge): string {
+    $id      = (int)($r['id'] ?? 0);
+    $slug    = (string)($r['slug'] ?? '');
+    $updated = relative_time((string)($r['updated_at'] ?? ''));
+    $display = $displayOf($r);
+    $variant = $stage === 'concept' ? ' concept' : '';
+    [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
 
-    $foot = '';
-    if ($stage === 'scheduled') {
-        // Show the scheduled-for date prominently — it's the most useful
-        // info on a scheduled card. updated_at lives below as a smaller line.
-        $scheduledAt = (string)($a['published_at'] ?? '');
-        $when = $scheduledAt !== '' ? date('M j · g:i A', strtotime($scheduledAt)) : '—';
-        $foot = '<div class="kcard-foot">'
-              . '<span class="kcard-date" style="font-weight:600;color:var(--stage-published)">→ ' . $e($when) . '</span>'
-              . '<span class="row-slug">/' . $e($slug) . '</span>'
-              . '</div>';
-    } elseif ($stage !== 'idea') {
-        $foot = '<div class="kcard-foot">'
-              . '<span class="row-slug">/' . $e($slug) . '</span>'
-              . '<span class="kcard-date">' . $e($updated) . '</span>'
-              . '</div>';
-    }
-
-    return '<a href="' . $e($editUrl) . '" class="kcard' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
-         . $head . $foot
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
+         . '<div class="kcard-head">'
+         . '<div class="kcard-title">' . $e($display) . '</div>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
+         . '</div>'
+         . '<div class="kcard-foot">'
+         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '<span class="kcard-date">' . $e($updated) . '</span>'
+         . '</div>'
          . '</a>';
 };
 
-$lanes = [
-    ['stage' => 'concept',   'label' => 'Concepts',  'token' => 'concept'],
-    ['stage' => 'outline',   'label' => 'Outlines',  'token' => 'outline'],
-    ['stage' => 'draft',     'label' => 'Drafts',    'token' => 'draft'],
-    ['stage' => 'scheduled', 'label' => 'Scheduled', 'token' => 'concept'],
-    ['stage' => 'published', 'label' => 'Published', 'token' => 'published'],
+/**
+ * Render a scheduled-column card. Shows the scheduled date prominently,
+ * not draggable (sub-grouped by week — DnD ordering doesn't apply here).
+ */
+$renderScheduledCard = static function (array $r) use ($e, $editUrlFor, $displayOf, $typeBadge): string {
+    $id          = (int)($r['id'] ?? 0);
+    $slug        = (string)($r['slug'] ?? '');
+    $scheduledAt = (string)($r['published_at'] ?? '');
+    $when        = $scheduledAt !== '' ? date('M j · g:i A', strtotime($scheduledAt)) : '—';
+    $display     = $displayOf($r);
+    [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
+
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
+         . '<div class="kcard-head">'
+         . '<div class="kcard-title">' . $e($display) . '</div>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
+         . '</div>'
+         . '<div class="kcard-foot">'
+         . '<span class="kcard-date" style="font-weight:600;color:var(--stage-published)">→ ' . $e($when) . '</span>'
+         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '</div>'
+         . '</a>';
+};
+
+/**
+ * Render a recently-published card. Static (not draggable, not a drop
+ * target). Shows the published date.
+ */
+$renderPublishedCard = static function (array $r) use ($e, $editUrlFor, $displayOf, $typeBadge): string {
+    $id          = (int)($r['id'] ?? 0);
+    $slug        = (string)($r['slug'] ?? '');
+    $publishedAt = (string)($r['published_at'] ?? '');
+    $when        = $publishedAt !== '' ? date('M j', strtotime($publishedAt)) : '—';
+    $display     = $displayOf($r);
+    [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
+
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
+         . '<div class="kcard-head">'
+         . '<div class="kcard-title">' . $e($display) . '</div>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
+         . '</div>'
+         . '<div class="kcard-foot">'
+         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '<span class="kcard-date">' . $e($when) . '</span>'
+         . '</div>'
+         . '</a>';
+};
+
+$inFlightLanes = [
+    ['stage' => 'concept', 'label' => 'Concepts', 'token' => 'concept'],
+    ['stage' => 'outline', 'label' => 'Outlines', 'token' => 'outline'],
+    ['stage' => 'draft',   'label' => 'Drafts',   'token' => 'draft'],
+];
+
+$weekBuckets = [
+    ['key' => 'this_week', 'label' => 'This Week'],
+    ['key' => 'next_week', 'label' => 'Next Week'],
+    ['key' => 'future',    'label' => 'Future'],
 ];
 ?><!doctype html>
 <html lang="en">
@@ -167,7 +216,7 @@ $lanes = [
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
-<title>Pipeline — alexmchong.ca CMS</title>
+<title>Draft Writing — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -184,44 +233,46 @@ $lanes = [
 <body>
 
 <?php
-$breadcrumb = 'Pipeline';
+$breadcrumb = 'Draft Writing';
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'pipeline';
+  $active_nav_id = 'draft-writing';
   $nav_counts    = ['articles' => count($articles)];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
   <main class="main" id="main" tabindex="-1">
-    <div class="view active" id="view-pipeline">
+    <div class="view active" id="view-draft-writing">
       <div class="pipeline-header">
-        <div class="pipeline-title">Pipeline</div>
-        <div class="pipeline-desc">All work in progress — from raw idea to final draft. Capture quickly, develop deliberately. Content moves left to right as it matures toward publication.</div>
+        <div class="pipeline-title">Draft Writing</div>
+        <div class="pipeline-desc">All work in progress and recently shipped — Concept through Recently Published. Capture quickly, develop deliberately. Content moves left to right as it matures.</div>
         <div class="dash-meta">
           <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$counts['concept'] ?></span><span class="lbl">Concept</span></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)count($byStage['concept']) ?></span><span class="lbl">Concept</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-outline)"><?= (int)$counts['outline'] ?></span><span class="lbl">Outline</span></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-outline)"><?= (int)count($byStage['outline']) ?></span><span class="lbl">Outline</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-draft)"><?= (int)$counts['draft'] ?></span><span class="lbl">Draft</span></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-draft)"><?= (int)count($byStage['draft']) ?></span><span class="lbl">Draft</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$counts['scheduled'] ?></span><span class="lbl">Scheduled</span></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$scheduledTotal ?></span><span class="lbl">Scheduled</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$counts['published'] ?></span><span class="lbl">Live</span></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$liveTotal ?></span><span class="lbl">Live</span></div>
         </div>
         <?php if ($flash !== ''): ?>
           <div class="flash-success" role="status" style="margin-top:var(--space-12)"><?= $e($flash) ?></div>
         <?php endif; ?>
       </div>
+
       <div class="kanban-board"
            data-dnd-mode="pipeline"
            data-dnd-endpoint="/cms/articles/reorder-pipeline"
            data-csrf-token="<?= $e($csrf_token) ?>">
-        <?php foreach ($lanes as $lane):
+
+        <?php foreach ($inFlightLanes as $lane):
           $stage = $lane['stage'];
           $cards = $byStage[$stage];
         ?>
@@ -235,24 +286,50 @@ require __DIR__ . '/../partials/topbar.php';
               <?php if (count($cards) === 0): ?>
                 <div class="idea-lane-empty">Nothing here yet</div>
               <?php else:
-                $paginate = ($stage === 'published' && count($cards) > 5);
-                $hiddenCount = $paginate ? count($cards) - 5 : 0;
-                foreach ($cards as $idx => $card):
-                  $hiddenClass = ($paginate && $idx >= 5) ? ' pipeline-load-more-hidden' : '';
-              ?>
-                <?php if ($hiddenClass !== ''): ?>
-                  <div class="<?= ltrim($hiddenClass) ?>"><?= $renderCard($card, $stage) ?></div>
-                <?php else: ?>
-                  <?= $renderCard($card, $stage) ?>
-                <?php endif; ?>
-              <?php endforeach; ?>
-                <?php if ($paginate): ?>
-                  <button class="pipeline-load-more" type="button" data-count="<?= (int)$hiddenCount ?>">Load <?= (int)$hiddenCount ?> more</button>
-                <?php endif; ?>
-              <?php endif; ?>
+                foreach ($cards as $card):
+                  echo $renderInFlightCard($card, $stage);
+                endforeach;
+              endif; ?>
             </div>
           </div>
         <?php endforeach; ?>
+
+        <div class="kanban-lane lane-scheduled" data-key="scheduled">
+          <div class="lane-header">
+            <div class="lane-dot" style="background:var(--stage-concept)"></div>
+            <div class="lane-title" style="color:var(--stage-concept)">Scheduled</div>
+            <div class="lane-count"><?= (int)$scheduledTotal ?></div>
+          </div>
+          <div class="lane-cards">
+            <?php if ($scheduledTotal === 0): ?>
+              <div class="idea-lane-empty">Nothing scheduled</div>
+            <?php else:
+              foreach ($weekBuckets as $wb):
+                $bucket = $scheduledBuckets[$wb['key']];
+                if (count($bucket) === 0) continue;
+            ?>
+              <div class="kgroup-label"><?= $e($wb['label']) ?> · <?= (int)count($bucket) ?></div>
+              <?php foreach ($bucket as $card) echo $renderScheduledCard($card); ?>
+            <?php endforeach;
+            endif; ?>
+          </div>
+        </div>
+
+        <div class="kanban-lane lane-recently-published" data-key="recently-published">
+          <div class="lane-header">
+            <div class="lane-dot" style="background:var(--stage-published)"></div>
+            <div class="lane-title" style="color:var(--stage-published)">Recently Published</div>
+            <div class="lane-count"><?= (int)count($recentlyPublished) ?></div>
+          </div>
+          <div class="lane-cards">
+            <?php if (count($recentlyPublished) === 0): ?>
+              <div class="idea-lane-empty">Nothing published yet</div>
+            <?php else:
+              foreach ($recentlyPublished as $card) echo $renderPublishedCard($card);
+            endif; ?>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>

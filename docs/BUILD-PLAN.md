@@ -112,7 +112,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **═══ PROJECT: CMS Reorganization (v2.0) — sidebar IA + new admin surfaces ═══**
 
-- [ ] **Phase 19** — Nav reorg + Writer's Desk · *Semi-auto* · 3h · **Staging-only**
+- [x] **Phase 19** — Nav reorg + Writer's Desk · *Semi-auto* · 3h · **Staging-only**
 - [ ] **Phase 20** — Pages mocks + Navigation editor · *Manual* · 6–8h · **Staging-only**
 - [ ] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 
@@ -1462,26 +1462,27 @@ CREATE TABLE nav_items (
 
 ---
 
-## 24. Phase 21 — Post Templates rename + Settings (v2.0 ship)
+## 24. Phase 21 — Settings (v2.0 ship)
 
 **Session brief**
 
 - **Autonomy:** Semi-auto
 - **Ships:** **v2.0 public.** Final v2.0 deploy; unfreeze v2.0-specific gates on prod.
 
+**Scope reduced from original:** the Post Templates label rename was pulled forward into Phase 19 (sidebar now says "Post Templates", view's breadcrumb + heading updated, link points at `/cms/content-template`). Phase 21 is now Settings + shell integration only.
+
 **Decisions to capture before starting**
-- **Content Template view status:** built in Phase 14.5 (read-only port + Author editable). Phase 21 work is now a true rename: change sidebar label from "Content Template" to "Post Templates" and update the page heading; the view itself stays as-is. No `[soon]` badge.
 - Settings keys (v1): `site_title`, `site_tagline`, `default_og_image`, `default_og_type`, `default_twitter_card`, `footer_copyright`, `analytics_script`
 - Settings inheritance: per-page-mock-metadata → Settings-default → hardcoded shell fallback
 - v2.0 ship moment: end of this phase; same mechanics as Phase 29
 
-**Read at start (only):** This phase section. `cms/partials/sidebar.php` (label flip). `_pages/_layout/_page-shell.php` (Settings integration site).
+**Read at start (only):** This phase section. `cms/partials/sidebar.php` (un-disable Settings). `_pages/_layout/_page-shell.php` (Settings integration site).
 
 **Touch:**
 - `db/migrations/0015_settings_table.sql` (new) — `settings` table
 - `lib/settings.php` (new) — `get_setting`, `set_setting`, `list_settings`
 - `cms/views/settings.php` (new) — form editor
-- `cms/partials/sidebar.php` — flip "Content Template" → "Post Templates"; un-disable Settings; Post Templates label points at the existing `/cms/content-template` route (built in Phase 14.5) — no `[soon]` badge
+- `cms/partials/sidebar.php` — un-disable Settings (currently `.is-placeholder`), wire it to `/cms/settings`
 - `_pages/_layout/_page-shell.php` — read settings for `<title>` suffix, og defaults, footer text, analytics script injection
 - Migration seed: initial settings keys with current hardcoded values
 - `docs/BUILD-PLAN.md` — mark Phase 21 complete on exit
@@ -1489,11 +1490,11 @@ CREATE TABLE nav_items (
 **Don't touch:**
 - Phase 19 / 20 work
 - DS work
-- Content Template view internals (built in Phase 14.5 — rename only, no functional changes here)
+- Content Template view internals (Phase 14.5 view, already renamed to "Post Templates" in Phase 19)
 
-**On exit:** Phase 21 checked in §3. Settings view live and functional. "Post Templates" label live in sidebar, points at the Phase 14.5 view. Settings values propagate into public rendering. **v2.0 prod-shipped.**
+**On exit:** Phase 21 checked in §3. Settings view live and functional. Settings values propagate into public rendering. **v2.0 prod-shipped.**
 
-**Goal:** Add Settings view with v1 keys. Rename Content Template → Post Templates (label only — the view itself shipped in Phase 14.5). Ship v2.0 to prod.
+**Goal:** Add Settings view with v1 keys. Ship v2.0 to prod.
 
 **Scope:**
 
@@ -1516,11 +1517,6 @@ CREATE TABLE settings (
 **Shell integration**
 - `_page-shell.php` reads `site_title` (used as title-suffix), `default_og_image` / `default_og_type` / `default_twitter_card` (rendered as `<meta>` tags when a page doesn't supply its own), `footer_copyright` (rendered in footer if present), `analytics_script` (injected raw before `</body>` if non-empty)
 
-**Post Templates rename** *(view itself was built in Phase 14.5)*
-- Rename sidebar.php label from "Content Template" to "Post Templates"
-- Update the view's page heading to match the new label
-- Link stays pointed at the existing `/cms/content-template` route — no `[soon]` badge, no disabled styling. The view is real and shipped.
-
 **v2.0 ship checklist**
 - Smoke-test every public route on prod after deploy
 - Verify settings propagation: change site_title in staging Settings → confirm prod still serves prod settings (separate envs)
@@ -1530,7 +1526,7 @@ CREATE TABLE settings (
 - 1 migration
 - 1 new lib file
 - 1 new view
-- Sidebar label flip + `[soon]` badge
+- Sidebar: un-disable Settings (drop `.is-placeholder`, wire `/cms/settings`)
 - `_page-shell.php` integration
 - v2.0 prod deploy log + smoke results
 
@@ -1539,7 +1535,7 @@ CREATE TABLE settings (
 2. Edit site_title → save → public page `<title>` reflects new value after reload.
 3. Edit default_og_image → save → page without own og_image renders default in `<meta property="og:image">`.
 4. Edit analytics_script with a `<script>` tag → save → script renders before `</body>` on every public page.
-5. Sidebar: "Post Templates" under SYSTEM with `[soon]` badge; clicking does nothing.
+5. Sidebar: Settings under SYSTEM is now a real link (no longer `.is-placeholder`); clicking opens the Settings view.
 6. v2.0 prod smoke: every CMS view accessible; every public page renders; nav items correct; subscribe flow still works.
 7. **No regressions** from v1.0 prod baseline.
 

@@ -1402,3 +1402,80 @@ function lookup_redirect(string $path): ?string
     $row = $stmt->fetch();
     return $row === false ? null : (string)$row['new_slug'];
 }
+
+// ═════════════════════════════════════════════════════════════════════
+// Cross-type list helpers (Phase 19 — Writer's Desk)
+// ═════════════════════════════════════════════════════════════════════
+
+/**
+ * List every scheduled row across all 4 content types, grouped by
+ * calendar week in the author's timezone. Week boundary is Monday 00:00
+ * through Sunday 23:59 (ISO-style). Returns three buckets:
+ *   ['this_week' => [...], 'next_week' => [...], 'future' => [...]]
+ * Each row carries `type` ('article'|'journal'|'live-session'|'experiment')
+ * so callers can route edit URLs without an extra query.
+ *
+ * Used by Draft Writing's Scheduled column. Sort within each bucket is
+ * published_at ASC (soonest-next first).
+ */
+function list_scheduled_content(string $tz = 'America/Vancouver'): array
+{
+    $stmt = db()->prepare(
+        "SELECT id, slug, type, title, key_statement, status,
+                published_status, published_at, updated_at
+           FROM content
+          WHERE status = 'published'
+            AND published_status = 'scheduled'
+            AND published_at IS NOT NULL
+       ORDER BY published_at ASC"
+    );
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+
+    $zone        = new DateTimeZone($tz);
+    $now         = new DateTimeImmutable('now', $zone);
+    // Monday-of-this-week 00:00 in author tz.
+    $weekStart   = $now->modify('monday this week')->setTime(0, 0, 0);
+    // Inclusive boundaries: this_week_end = Sunday 23:59:59 of this week.
+    $thisWeekEnd = $weekStart->modify('+7 days')->modify('-1 second');
+    $nextWeekEnd = $weekStart->modify('+14 days')->modify('-1 second');
+
+    $buckets = ['this_week' => [], 'next_week' => [], 'future' => []];
+    foreach ($rows as $r) {
+        $when = new DateTimeImmutable((string)$r['published_at'], new DateTimeZone('UTC'));
+        $whenLocal = $when->setTimezone($zone);
+        if ($whenLocal <= $thisWeekEnd) {
+            $buckets['this_week'][] = $r;
+        } elseif ($whenLocal <= $nextWeekEnd) {
+            $buckets['next_week'][] = $r;
+        } else {
+            $buckets['future'][] = $r;
+        }
+    }
+    return $buckets;
+}
+
+/**
+ * List the N most recently published rows across all 4 content types.
+ * Filters out scheduled rows (only `published_status='live'` or NULL).
+ * Returns rows already merged + ordered by published_at DESC.
+ *
+ * Used by Draft Writing's Recently Published column.
+ */
+function list_recently_published(int $n = 5): array
+{
+    $n = max(1, min(50, $n));
+    $stmt = db()->prepare(
+        "SELECT id, slug, type, title, key_statement, status,
+                published_status, published_at, updated_at
+           FROM content
+          WHERE status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')
+            AND published_at IS NOT NULL
+            AND published_at <= NOW()
+       ORDER BY published_at DESC
+          LIMIT $n"
+    );
+    $stmt->execute();
+    return $stmt->fetchAll();
+}

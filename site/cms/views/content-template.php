@@ -104,7 +104,7 @@ $tabHref = static function (string $tab) use ($selected): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
-<title>Content Template — alexmchong.ca CMS</title>
+<title>Post Templates — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -144,20 +144,20 @@ $tabHref = static function (string $tab) use ($selected): string {
 <body>
 
 <?php
-$breadcrumb = 'Content Template';
+$breadcrumb = 'Post Templates';
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'templates';
+  $active_nav_id = 'post-templates';
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
   <main class="main" id="main" tabindex="-1">
     <div class="view active" id="view-content-template">
       <?php
-      $title    = 'Content Template';
+      $title    = 'Post Templates';
       $subtitle = "Each content type uses a PHP layout file that controls how its fields render on the live site. The Master template lists every available field and its PHP variable — it doesn't turn anything on or off. Each sub-template inherits everything and can suppress specific fields.";
       require __DIR__ . '/../partials/view-header.php';
       ?>

@@ -191,6 +191,7 @@ body {
 .nav-item.sub.active { color:var(--primary); border-left-color:var(--primary); }
 .nav-count { margin-left:auto; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.08em; color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-12); padding:1px 5px; border-radius:2px; }
 .nav-icon { width:13px; height:13px; flex-shrink:0; opacity:0.45; transition:opacity 0.1s; }
+.nav-item.is-placeholder .nav-icon { opacity:0.30; }
 .nav-item:hover .nav-icon,.nav-item.active .nav-icon { opacity:1; }
 .nav-new-idx { display:flex; align-items:center; padding:8px var(--space-16) 8px var(--space-24); cursor:pointer; font-family:var(--font); font-size:var(--text-meta); font-weight:500; color:var(--secondary); gap:6px; transition:color 0.1s; }
 .nav-new-idx:hover { color:var(--primary); background:var(--ink-08); }
@@ -383,6 +384,11 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .lane-title { font-family:var(--font-cond); font-size:var(--text-tiny); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; }
 .lane-count { margin-left:auto; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-12); padding:1px 6px; border-radius:2px; }
 .lane-cards { flex:1; overflow-y:auto; padding:var(--space-12); display:flex; flex-direction:column; gap:var(--space-8); }
+/* Sub-group label inside the Scheduled lane — This Week / Next Week / Future.
+   Slightly smaller than .lane-title, dimmed, with a thin underline divider
+   so each week's stack is visually distinct without adding a second header. */
+.kgroup-label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); padding:var(--space-8) 0 var(--space-4); border-bottom:var(--rule-faint); margin-bottom:var(--space-4); }
+.kgroup-label:first-child { padding-top:0; }
 .kcard { background:var(--surface); border:1px solid var(--ink-18); border-radius:var(--r-card); padding:var(--space-16); cursor:pointer; transition:border-color 0.15s; box-shadow:0 1px 3px var(--ink-08); }
 .kcard:hover { border-color:var(--primary); }
 .kcard-head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-8); margin-bottom:var(--space-8); }

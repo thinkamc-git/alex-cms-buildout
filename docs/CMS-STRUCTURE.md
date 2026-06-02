@@ -74,39 +74,64 @@ Whether to promote `--canvas-raised` and `--live-green` into `site/_design-syste
 
 ## 4. Navigation
 
-Sidebar groups, in order:
+Sidebar groups, in order (Phase 19 reorg):
 
 **Overview**
-- Pipeline — kanban of all in-progress content
-- Ideation — pre-pipeline holding space
-- Published — everything live, scheduled, or hidden
+- Dashboard *(placeholder)*
+- Analytics *(placeholder)*
+- Post History *(placeholder)*
 
-**Content**
+**Writer's Desk**
+- Ideation Board — pre-pipeline holding space (rename of "Ideation")
+- Draft Writing — kanban of in-flight + scheduled + recently published (rename of "Pipeline")
+
+**Library**
 - Articles, Journals, Live Sessions, Experiments
 
-**Structure**
-- Content Template (the master template + per-template block toggles)
-- Categories, Series, Redirects
+**Site**
+- Pages *(placeholder, Phase 20)*
+- Navigation *(placeholder, Phase 20)*
+- Redirects
 
-**Indexes** (formerly "Editorial Indexes")
-- `/digital-garden`, `/thoughts`, `/series/[slug]`, `/writing`, `/journal`, `/experiments`, `/live-sessions`
-- `+ New Index` action at bottom
-- Each item has an icon distinguishing **Editorial Page** layout (layered hero+grid icon) from **Basic Listing** layout (three stacked lines)
+**Collections**
+- Categories
+- Series
+- Indexes (the `+ New Index` action lives inside the Indexes view itself)
+
+**Audience**
+- Subscribers
+
+**System**
+- Post Templates — points at `/cms/content-template` (Phase 14.5's view, label-only rename in Phase 19)
+- Settings *(placeholder, Phase 21)*
+
+Items marked *(placeholder)* render as muted `.is-placeholder` spans (no href, `aria-disabled="true"`, default cursor) — they preview the upcoming IA without navigating. Each group's role:
+- **Overview** — at-a-glance status of the site (currently all placeholders)
+- **Writer's Desk** — where new writing happens (Ideation → Draft Writing → publish)
+- **Library** — per-type backing-store views (filtered lists, search, edit access)
+- **Site** — public-facing chrome and routing (pages, nav, redirects)
+- **Collections** — cross-cutting taxonomies (categories, series, indexes that aggregate content)
+- **Audience** — newsletter subscribers (and any future reader-facing concerns)
+- **System** — global configuration (templates, settings)
+
+Indexes inside Collections distinguish layout type via icon: **Editorial Page** (layered hero+grid) vs **Basic Listing** (three stacked lines).
 
 ---
 
 ## 5. Views
 
-### Pipeline
-Kanban board: **Ideas / Concepts / Outlines / Drafts** (plurals).
-- White header with italic-serif "Pipeline" title, description, stage-coloured stat row, and a quick-capture bar (input + type select + Add).
+### Draft Writing *(Phase 19 — was "Pipeline")*
+Kanban board: **Concepts / Outlines / Drafts / Scheduled / Recently Published**.
+- White header with italic-serif "Draft Writing" title, description, stage-coloured stat row.
 - Lane headers use `--canvas-raised` background. Cards are white with subtle shadow.
-- Card variants per stage: Idea cards show title + type badge only; Concept onward show title + summary + meta + foot (with category and date).
-- Category text in card meta is **coloured per category** (using the category's design-system token).
-- Series indicator uses the standard `.tag` pill.
+- Card variants per stage: Concept onward show title + type badge + slug + relative date.
+- Scheduled column sub-groups by calendar week: **This Week / Next Week / Future** (Mon 00:00 → Sun 23:59 in `America/Vancouver`). Each card surfaces the scheduled date prominently.
+- Recently Published shows the top 5 most-recent live rows (read-only — not a drop target). Sourced from `list_recently_published(5)`.
+- Idea-stage rows do NOT appear here — they live in Ideation Board.
+- URL stays `/cms/` (root) so existing bookmarks keep working; only the label flipped from "Pipeline" to "Draft Writing".
 
-### Ideation
-Per-type kanban (Articles / Journals / Live Sessions / Experiments) — same `.kanban-board` shell as Pipeline.
+### Ideation Board *(Phase 19 — was "Ideation")*
+Per-type kanban (Articles / Journals / Live Sessions / Experiments) — same `.kanban-board` shell as Draft Writing.
 - Smaller `.idea-card` variant: title, optional description, footer with date + secondary "Build →" button.
 - "Build" button is white-outlined (`.btn-sec`), advances the idea to **Concept** in Pipeline.
 - Cards have `cursor: grab` to communicate drag-and-drop reclassification across type lanes.

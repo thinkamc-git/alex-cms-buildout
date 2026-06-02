@@ -104,7 +104,7 @@ require __DIR__ . '/../partials/topbar.php';
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
-  <main class="main">
+  <main class="main" id="main" tabindex="-1">
     <div class="view active" id="view-experiment-new">
       <?php
       $title    = 'New experiment';

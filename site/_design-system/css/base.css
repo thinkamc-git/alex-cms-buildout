@@ -17,3 +17,51 @@ body {
   background-repeat: repeat;
   -webkit-font-smoothing: antialiased;
 }
+
+/* ── Keyboard focus ring ──
+   Single global rule for keyboard-only focus. Mouse clicks do NOT trigger
+   :focus-visible in modern browsers, so this leaves pointer interactions
+   visually untouched. Inputs that already use border-color on :focus keep
+   that treatment AND get the ring; the ring sits outside the border via
+   box-shadow so it never shifts layout. */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+/* Form inputs use a tighter ring (no offset, follows their pill border). */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--c-focus);
+  outline-offset: 1px;
+}
+/* The skip-link target is <main tabindex="-1">; suppress the giant ring
+   that would otherwise outline the whole content area. */
+main:focus,
+main:focus-visible {
+  outline: none;
+}
+
+/* ── Skip-to-content link ──
+   Visually hidden until focused; jumps keyboard users past the nav rail. */
+.skip-link {
+  position: absolute;
+  top: -100px; left: 8px;
+  z-index: 9999;
+  padding: 8px 14px;
+  background: var(--primary);
+  color: var(--surface);
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 3px;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 8px;
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}

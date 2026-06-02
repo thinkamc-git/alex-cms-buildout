@@ -108,7 +108,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 14** — Newsletter subscribers end-to-end · *Semi-auto* · 3–4h · **Staging-only**
 - [ ] **Phase 14.5** — Content Template view (read-only port + Author editable) · *Semi-auto* · ~5h · **Staging-only**
 - [ ] **Phase 14.6** — Scheduled-publish UX (CMS-side, completes Phase 13 infra) · *Semi-auto* · ~3–4h · **Staging-only**
-- [ ] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Staging-only**
+- [x] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Staging-only**
 - [ ] **Phase 16** — Public cutover · *Manual* · 2–3h · **Ships:** v1.0 public
 
 **═══ PROJECT: CMS Reorganization (v2.0) — sidebar IA + new admin surfaces ═══**

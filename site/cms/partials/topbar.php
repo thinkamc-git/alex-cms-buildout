@@ -18,7 +18,8 @@ if (!defined('CMS_PARTIAL_OK')) { http_response_code(404); exit; }
 $breadcrumb = isset($breadcrumb) ? (string)$breadcrumb : 'Pipeline';
 $csrf_token = (string)($csrf_token ?? '');
 ?>
-<div class="topbar dot-surface">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar dot-surface" role="banner">
   <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em></div>
   <div class="topbar-divider"></div>
   <div class="topbar-breadcrumb" id="breadcrumb"><span class="crumb-active"><?= htmlspecialchars($breadcrumb, ENT_QUOTES, 'UTF-8') ?></span></div>
@@ -28,4 +29,4 @@ $csrf_token = (string)($csrf_token ?? '');
       <button type="submit" class="btn-ghost">Log out</button>
     </form>
   </div>
-</div>
+</header>

@@ -115,4 +115,12 @@
   /* Utility */
   --white:         #ffffff;
   --primary-hover: #333333;
+
+  /* ── Focus ── */
+  /* Keyboard-only focus ring (applied via :focus-visible in base.css).
+     Denim picked to stay readable on both light surfaces and the dark
+     experiment cards / dark author bio. */
+  --c-focus:        var(--c-denim);
+  --focus-ring:     0 0 0 2px var(--c-focus);
+  --focus-ring-off: 0 0 0 4px var(--surface), 0 0 0 6px var(--c-focus);
 }

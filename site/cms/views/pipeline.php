@@ -195,7 +195,7 @@ require __DIR__ . '/../partials/topbar.php';
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
-  <main class="main">
+  <main class="main" id="main" tabindex="-1">
     <div class="view active" id="view-pipeline">
       <div class="pipeline-header">
         <div class="pipeline-title">Pipeline</div>

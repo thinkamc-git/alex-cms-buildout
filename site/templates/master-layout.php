@@ -51,8 +51,9 @@ $bs = (string)($body_slot ?? '');
   <script src="/_layout/analytics.js" async></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <?php require __DIR__ . '/partials/nav.php'; ?>
-  <main class="layout-main">
+  <main class="layout-main" id="main" tabindex="-1">
 <?= $bs ?>
   </main>
   <?php require __DIR__ . '/partials/footer.php'; ?>

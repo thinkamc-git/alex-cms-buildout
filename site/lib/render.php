@@ -91,17 +91,39 @@ function render_content(string $slug): void
     // Series (article-series template only — left null otherwise). We
     // still try the join for article-standard since the spec allows an
     // optional series there; the partial no-ops on null.
+    //
+    // "Part N of M" must count published-only on BOTH sides, otherwise a
+    // draft in the middle of the series produces "Part 3 of 2" — the row's
+    // raw series_order keeps the unfiltered position while the count
+    // filters to published. Computing position via "rank by series_order
+    // among published rows" keeps both numbers consistent.
     $series = null;
     if (!empty($row['series_id'])) {
         $sStmt = db()->prepare('SELECT id, name, slug FROM series WHERE id = :id LIMIT 1');
         $sStmt->execute([':id' => (int)$row['series_id']]);
         $sRow = $sStmt->fetch();
         if ($sRow !== false) {
-            // Count members for the "Part N of M" line. Cheap enough to do inline.
-            $cStmt = db()->prepare('SELECT COUNT(*) AS n FROM content WHERE series_id = :id AND status = \'published\'');
+            $cStmt = db()->prepare(
+                'SELECT COUNT(*) AS n FROM content
+                  WHERE series_id = :id AND status = \'published\''
+            );
             $cStmt->execute([':id' => (int)$row['series_id']]);
-            $cntRow = $cStmt->fetch();
-            $sRow['_count'] = (int)($cntRow['n'] ?? 0);
+            $sRow['_count'] = (int)($cStmt->fetch()['n'] ?? 0);
+
+            // Published-only position: how many published rows in this
+            // series have a series_order at or before mine. Same series_id,
+            // status='published', and series_order <= my own.
+            $myOrder = (int)($row['series_order'] ?? 0);
+            $pStmt = db()->prepare(
+                'SELECT COUNT(*) AS n FROM content
+                  WHERE series_id = :sid
+                    AND status = \'published\'
+                    AND series_order IS NOT NULL
+                    AND series_order <= :ord'
+            );
+            $pStmt->execute([':sid' => (int)$row['series_id'], ':ord' => $myOrder]);
+            $sRow['_position'] = (int)($pStmt->fetch()['n'] ?? 0);
+
             $series = $sRow;
         }
     }

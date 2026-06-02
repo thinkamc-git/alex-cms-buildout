@@ -81,7 +81,7 @@ $activeClass = static function (string $id) use ($active_nav_id): string {
   </div>
   <div class="nav-section">
     <span class="nav-label">Structure</span>
-    <a class="nav-item<?= $activeClass('templates') ?>" href="#" data-nav-id="templates">
+    <a class="nav-item<?= $activeClass('templates') ?>" href="/cms/content-template" data-nav-id="templates">
       <svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Content Template
     </a>

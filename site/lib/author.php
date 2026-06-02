@@ -29,12 +29,48 @@ function get_author(): array
     static $cached = null;
     if ($cached !== null) return $cached;
 
-    $row = db()->query('SELECT image, name, short_description, extended_description FROM author LIMIT 1')->fetch();
+    $row = db()->query('SELECT id, image, name, short_description, extended_description FROM author LIMIT 1')->fetch();
     if ($row === false) {
-        $row = ['image' => null, 'name' => null, 'short_description' => null, 'extended_description' => null];
+        $row = ['id' => null, 'image' => null, 'name' => null, 'short_description' => null, 'extended_description' => null];
     }
     $cached = $row;
     return $row;
+}
+
+/**
+ * Update the single author row. Phase 14.5 — Content Template's Author info tab
+ * writes through this function.
+ *
+ * Empty strings are coerced to NULL so the schema's nullable fields stay
+ * accurate (and `author_display()` falls back to its placeholders). The
+ * static cache in `get_author()` is not cleared here — the CMS uses a
+ * POST → 302 redirect pattern, so the next request reads fresh.
+ */
+function save_author(
+    ?string $name,
+    ?string $short_description,
+    ?string $extended_description,
+    ?string $image = null
+): void {
+    $norm = static function (?string $v): ?string {
+        if ($v === null) return null;
+        $t = trim($v);
+        return $t === '' ? null : $t;
+    };
+
+    // UPDATE without WHERE relies on the table holding a single row
+    // (seeded in 0001_initial_schema.sql). LIMIT 1 is a guard.
+    $stmt = db()->prepare(
+        'UPDATE author SET image = :image, name = :name,
+                short_description = :short, extended_description = :ext
+         LIMIT 1'
+    );
+    $stmt->execute([
+        ':image' => $norm($image),
+        ':name'  => $norm($name),
+        ':short' => $norm($short_description),
+        ':ext'   => $norm($extended_description),
+    ]);
 }
 
 /**

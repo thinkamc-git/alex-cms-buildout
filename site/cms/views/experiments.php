@@ -40,6 +40,7 @@ $stagePill = static function (string $status) use ($e): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Experiments — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,13 +84,19 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
 
         <?php
-        $inProgress = [];
-        $published  = [];
+        // Three sections: Drafts (concept + outline + draft) / Scheduled / Published (live).
+        // Idea-stage hidden — Ideation view only.
+        $drafts    = [];
+        $scheduled = [];
+        $published = [];
         foreach ($experiments as $x) {
-            if ((string)($x['status'] ?? '') === 'published') {
-                $published[] = $x;
+            $st = (string)($x['status'] ?? '');
+            $ps = (string)($x['published_status'] ?? '');
+            if ($st === 'idea') continue;
+            if ($st === 'published') {
+                if ($ps === 'scheduled') { $scheduled[] = $x; } else { $published[] = $x; }
             } else {
-                $inProgress[] = $x;
+                $drafts[] = $x;
             }
         }
 
@@ -128,7 +135,13 @@ require __DIR__ . '/../partials/topbar.php';
                 $tplHtml = '<span class="muted">—</span>';
             }
 
+            $isPublished = (string)($x['status'] ?? '') === 'published';
+            $liveBtn = $isPublished && $slug !== ''
+                ? '<a href="/experiments/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+                : '';
+
             $actionsHtml = '<div class="row-actions">'
+                . $liveBtn
                 . '<a href="/cms/experiments/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
                 . '<form method="post" action="/cms/experiments/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this experiment? This cannot be undone.">'
                 .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
@@ -140,7 +153,7 @@ require __DIR__ . '/../partials/topbar.php';
                 'href'  => '/cms/experiments/edit?id=' . $id,
                 'cells' => [
                     ['html' => $titleHtml],
-                    ['html' => $stagePill((string)($x['status'] ?? 'draft'))],
+                    ['html' => $stagePill(((string)($x['status'] ?? '') === 'published' && (string)($x['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($x['status'] ?? 'draft'))],
                     ['html' => $tplHtml],
                     ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
@@ -152,18 +165,34 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">In progress</span>
-              <span class="content-block-sublabel">Idea · Draft</span>
+              <span class="content-block-label">Drafts</span>
+              <span class="content-block-sublabel">Concept · Outline · Draft</span>
             </div>
-            <span class="content-block-count"><?= (int)count($inProgress) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
-
           <?php
-          $rows = array_map($buildRow, $inProgress);
-          $empty_text = 'No experiments in progress. Click + New Experiment to start.';
+          $rows = array_map($buildRow, $drafts);
+          $empty_text = 'No experiment drafts. Click + New Experiment to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
+
+        <?php if (count($scheduled) > 0): ?>
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Scheduled</span>
+              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+            </div>
+            <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
+          </div>
+          <?php
+          $rows = array_map($buildRow, $scheduled);
+          $empty_text = 'No scheduled experiments.';
+          require __DIR__ . '/../partials/table.php';
+          ?>
+        </div>
+        <?php endif; ?>
 
         <div class="content-block">
           <div class="content-block-header">
@@ -173,7 +202,6 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>
-
           <?php
           $rows = array_map($buildRow, $published);
           $empty_text = 'No published experiments yet.';

@@ -106,9 +106,30 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 12** — Indexes (staging-only ship) · *Manual* · 4–5h
 - [x] **Phase 13** — Redirects DB + cron + 404 + image UX + backup · *Auto* · 4–5h · **Staging-only**
 - [x] **Phase 14** — Newsletter subscribers end-to-end · *Semi-auto* · 3–4h · **Staging-only**
+- [ ] **Phase 14.5** — Content Template view (read-only port + Author editable) · *Semi-auto* · ~5h · **Staging-only**
+- [ ] **Phase 14.6** — Scheduled-publish UX (CMS-side, completes Phase 13 infra) · *Semi-auto* · ~3–4h · **Staging-only**
 - [ ] **Phase 15** — Accessibility pass + final polish · *Manual* · 3–4h · **Staging-only**
 - [ ] **Phase 16** — Public cutover · *Manual* · 2–3h · **Ships:** v1.0 public
-- [ ] **Phase 17** *(deferred)* — Design system unification · *Semi-auto* · 4–5h
+
+**═══ PROJECT: CMS Reorganization (v2.0) — sidebar IA + new admin surfaces ═══**
+
+- [ ] **Phase 19** — Nav reorg + Writer's Desk · *Semi-auto* · 3h · **Staging-only**
+- [ ] **Phase 20** — Pages mocks + Navigation editor · *Manual* · 6–8h · **Staging-only**
+- [ ] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
+
+**═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
+
+- [ ] **Phase 22** — DS-1: Audit · *Semi-auto* · 2h · **No code** (deliverable: `docs/DS-AUDIT.md`)
+- [ ] **Phase 23** — DS-2: Root tokens · *Semi-auto* · 2h · **Staging-only**
+- [ ] **Phase 24** — DS-3: Pages migration · *Semi-auto* · 2.5h · **Staging-only**
+- [ ] **Phase 25** — DS-4: Blocks migration · *Manual* · 3h · **Staging-only** *(highest risk)*
+- [ ] **Phase 26** — DS-4.5: Block recipe doc · *Semi-auto* · 1.5h · **No public ship**
+- [ ] **Phase 27** — DS-5: CMS migration · *Semi-auto* · 2.5h · **Staging-only**
+- [ ] **Phase 28** — DS-6: Cleanup + sunset · *Manual* · 1.5h · **Ships:** v2.1 public
+
+**═══ DEFERRED ═══**
+
+- [ ] **Phase 17** *(superseded by Phases 22–28)* — original single-phase DS unification, now expanded into the v2.1 project above. Kept for historical reference.
 - [ ] **Phase 18** *(deferred)* — Transactional email · *Semi-auto* · 4–5h
 
 **Rule:** finish a phase before starting the next. If a phase reveals a missing decision, capture it in `CMS-STRUCTURE.md` §17 (Open Items), make the call with Alex, then continue.
@@ -935,6 +956,227 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 ---
 
+## 19.5. Phase 14.5 — Content Template view (read-only port + Author editable)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Goes to prod at Phase 16 cutover.
+
+**Decisions captured (locked at plan time, defaults accepted)**
+- **Scope:** α — read-only port of the mockup with Author info editable. Sub-template visibility toggles are read-only documentation; "Save Template" button hidden. Full edit-with-persistence (β) deferred to a future phase.
+- **Block-data source:** hardcoded PHP array in `lib/blocks_data.php`, sourced from `docs/BLOCKS.md`. Update both together if blocks change.
+- **PHP Layout File tab:** shows real template file content (read-only, monospace) from `site/templates/*.php` corresponding to the selected sub-template. Master Template shows `master-layout.php`.
+- **`article-series.php` status:** file missing from `site/templates/`. For v1.0 read-only view: render the article-series sub-template panel from the BLOCKS.md content-type matrix (matrix data exists; file does not). Flag whether `article-series` is folded into `article-standard` via a conditional or genuinely needs its own file as a follow-up — does NOT block this phase.
+- **Sub-template Save button:** hidden in v1.0. No `template_block_settings` table, no render-layer changes.
+
+**Read at start (only):** This phase section. `docs/BLOCKS.md` (the contract — the data source). `docs/design-mockups/cms-ui.html` lines 2198–2302 (the UI design). One existing CMS view (e.g. `subscribers.php`) for the view pattern.
+
+**Touch:**
+- `db/migrations/` — none (no new schema; uses existing `author` table from 0001)
+- `lib/blocks_data.php` (new) — hardcoded port of BLOCKS.md §5, §6, §7a into PHP arrays
+- `lib/author.php` (new) — `get_author()`, `save_author(...)`
+- `cms/views/content-template.php` (new) — the full view (Master + sub-template panels + 4 master tabs)
+- `cms/partials/sidebar.php` — replace `href="#"` on the Content Template link with `/cms/content-template`
+- `site/index.php` — add GET `/cms/content-template` route + POST `/cms/content-template/save-author`
+- `bin/deploy.sh` — `cp` lines for the three new files
+- `docs/BUILD-PLAN.md` — mark Phase 14.5 complete on exit; update Phase 21 Decisions block (Content Template view now exists, rename-only)
+
+**Don't touch:**
+- `templates/*.php` (sub-template files — viewed but not edited)
+- `lib/render.php` (no render-layer changes in α)
+- `docs/BLOCKS.md` (it's the source of truth; this phase consumes it)
+- Phase 15 a11y scope
+- Any unfinished v2.0+ work
+
+**On exit:** Phase 14.5 checked in §3. `/cms/content-template` route live on staging. Sidebar link goes there (no `href="#"`). Master Template view renders 4 working tabs (Content Blocks / Field Reference / Author info / PHP Layout File). Author info form saves to the `author` table. Sub-template panels show read-only visibility tables. PHP Layout File tab shows real file content. Phase 21's Decisions block updated to reflect that the view exists.
+
+**Goal:** Ship the Content Template view to v1.0. Honor the design work in `docs/design-mockups/cms-ui.html`. Get the broken `href="#"` stub off the sidebar. Make Author info editable (the one piece of user-meaningful state in this view).
+
+**Scope:**
+
+**`lib/blocks_data.php`** — pure data, no I/O. Functions:
+- `blocks_reference(): array` — keyed by slug. Each entry: `name`, `composition`, `purpose`. Sourced from BLOCKS.md §5 (19 blocks).
+- `fields_reference(): array` — keyed by field name. Each entry: `php_var`, `description`. Sourced from BLOCKS.md §5 + §7a.
+- `sub_templates_reference(): array` — keyed by sub-template slug. Each entry: `name`, `desc`, `php_file`. 6 sub-templates.
+- `content_type_matrix(): array` — `matrix[sub_template_slug][block_slug] = mode` where mode is `always`/`optional`/`auto`/`required`/`—`. Sourced from BLOCKS.md §6.
+
+**`lib/author.php`** — single-row CRUD for the `author` table (id=1, NULL-seeded):
+- `get_author(): array` — returns the single row.
+- `save_author(string $name, string $short, string $extended, ?string $image = null): void` — UPDATE. Trim inputs; convert empty strings to NULL.
+
+**`cms/views/content-template.php`** — port the mockup with light state:
+- URL state: `?tpl=<slug>` (master|article-standard|...) and `?tab=<key>` (blocks|fields|author|php) for master.
+- POST `/cms/content-template/save-author` with CSRF → calls `save_author()` → 302 back to `?tpl=master&tab=author&saved=1`.
+- Layout: two-pane (left list of templates, right detail panel). Active state on the selected template.
+- Master detail = 4 tabs:
+  - **Content Blocks:** read-only table of all 19 blocks (name / slug / composition / purpose). Info-box explaining what Master is.
+  - **Field Reference:** read-only table of every field with PHP variable + description.
+  - **Author info:** editable form with image picker (link to existing uploads if available, else file path text input — text input is acceptable for v1.0), name, short_description (textarea), extended_description (textarea), Save Author button. CSRF token. Success flash when `?saved=1`.
+  - **PHP Layout File:** read content of `site/templates/master-layout.php`, display in monospace `<pre>` (escaped via `htmlspecialchars`). No editing.
+- Sub-template detail = single panel (no tabs):
+  - Info-box describing the sub-template (from `desc`).
+  - Visibility table: for each block in the matrix where mode != `—`, show name / slug / mode pill / notes. Pill styling per mode (always / optional / auto / required) matching the mockup's `.mode-*` styles.
+  - PHP Layout File preview: read the corresponding `templates/<sub>.php` file and show in monospace (same as master tab). If file missing (e.g. article-series), show a dashed-border placeholder noting the gap.
+  - **No Save Template button.**
+
+**`cms/partials/sidebar.php`** — change `href="#"` to `href="/cms/content-template"` on the Content Template nav item.
+
+**`site/index.php`** — add two routes:
+- GET `/cms/content-template` → require `cms/views/content-template.php`
+- POST `/cms/content-template/save-author` → CSRF verify, call `save_author()`, redirect
+
+**`bin/deploy.sh`** — add three `cp` lines (lib/blocks_data.php, lib/author.php, cms/views/content-template.php).
+
+**Deliverables:**
+- 2 new lib files
+- 1 new CMS view
+- 1 sidebar update (3-char edit)
+- 1 router update
+- 1 deploy.sh update
+- Phase 14.5 checked in §3; Phase 21 Decisions block updated
+
+**Verification:**
+1. Staging: `/cms/content-template` loads (was 404 / dead link).
+2. Sidebar "Content Template" link goes to the view (not `#`).
+3. Master Template card selected by default; right panel shows Content Blocks tab with all 19 blocks listed.
+4. Click Field Reference tab → table of every field with its PHP variable.
+5. Click Author info tab → form pre-filled with current `author` row data. Save with edits → row updates → flash success.
+6. Click PHP Layout File tab → contents of `templates/master-layout.php` shown in monospace.
+7. Click each sub-template (article-standard, article-series, journal-entry, live-session, experiment, experiment-html):
+   - Info-box visible
+   - Visibility table renders blocks applicable to that sub-template with correct mode pills
+   - PHP file preview shows the sub-template's PHP file (or placeholder for missing article-series)
+   - No Save Template button visible
+8. CSRF: POST without valid token → 403.
+9. No new schema. Confirm only existing tables touched (`author` UPDATE on save).
+10. No render-layer changes. Confirm `lib/render.php` and `templates/*.php` unchanged. Public articles still render identically.
+
+**Out of scope:**
+- Persistent block-visibility toggles per sub-template (β scope — deferred)
+- `template_block_settings` table
+- Render-layer suppression logic
+- Editing template `.php` files from the CMS (PHP Layout File tab is read-only display)
+- Creating `templates/article-series.php` if missing — flag for separate decision
+- Image-upload integration for Author info (file path text input is sufficient for v1.0)
+- A11y polish (Phase 15 will cover this view in the sweep)
+
+**Deferred follow-up** (new entry for §3 Deferred block when triggered): "Content Template — editable visibility per sub-template" (β scope) — when a real use case for sub-template-wide block suppression emerges.
+
+---
+
+## 19.6. Phase 14.6 — Scheduled-publish UX (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Public ship at Phase 16 cutover (along with the rest of the CMS).
+
+**Background — why this phase exists**
+
+Phase 13 built the scheduled-publish *infrastructure* (the `cron/scheduled-publish.php` cron, the `published_status='scheduled'` schema column, the public-route gate that hides scheduled rows) but did NOT add the CMS UI to create a scheduled row. The capability is on prod from Phase 13, but only reachable via raw SQL. This phase closes the gap by adding the admin-facing UX across all four content types.
+
+**Decisions captured (locked at plan time)**
+- **Schedule state of truth:** `published_status='scheduled'` (existing ENUM value since migration 0001). `status='published'` AND `published_at` set to a future date. The cron promotes `'scheduled'` → `'live'` when `published_at <= NOW()`.
+- **No schema change.** Everything used here is in 0001.
+- **Right-side "Publish" section** in the draft edit view, radio pair:
+  - `Publish immediately` (default)
+  - `Schedule for later` → reveals a `<input type="datetime-local">`
+- **Action row buttons** at the bottom of the form:
+  - Default state (radio = Publish immediately): **Publish** + secondary **Set a schedule**
+  - "Set a schedule" is a JS-driven shortcut: clicks the schedule radio + focuses the datetime input
+  - After radio flips to Schedule: action row shows **Schedule →** (renamed Publish button) and the "Set a schedule" secondary disappears
+- **Server-side rules:**
+  - `action=schedule` requires a future `published_at`. Past date or empty → 422 with error flash, focus the input.
+  - `action=publish` ignores the date input — captures NOW() and goes live immediately.
+  - Unschedule path: edit + flip radio back to "Publish immediately" + Save → moves the row to Draft (`status='draft'`, `published_status=NULL`).
+- **Pipeline view** gains a Scheduled column between Draft and Published:
+  - Filters `published_status='scheduled'` ORDER BY `published_at` ASC
+  - Cards show the scheduled date prominently
+  - Drag Scheduled → Draft: unschedules
+  - Drag Scheduled → Published: immediately publishes (sets `published_status='live'`, optionally bumps `published_at` to NOW if it's still in the future; preserve original date if already passed)
+- **Published column query tightens:** from `status='published'` to `status='published' AND (published_status IS NULL OR published_status='live')`. NULL-guard is defensive — every current published row has `published_status='live'`.
+- All 4 content types (article, journal, live-session, experiment) get the same UX. Single phase.
+
+**Read at start (only):** This phase section. `lib/content.php` (the `transition_stage` function — the model for the new `schedule_content` helper). `cms/views/article-edit.php` (the right-side panel + action row pattern to mirror in the other 3 views). `cms/views/pipeline.php` (the column pattern to extend). `cron/scheduled-publish.php` (read-only — confirm what it expects).
+
+**Touch:**
+- `lib/content.php` — add `schedule_content(int $id, string $datetime): array` helper (parallel to `transition_stage`)
+- `cms/views/article-edit.php` — add right-side Publish section, `action=schedule` handler, "Set a schedule" button
+- `cms/views/journal-edit.php` — same
+- `cms/views/live-session-edit.php` — same
+- `cms/views/experiment-edit.php` — same
+- `cms/views/pipeline.php` — Scheduled column + refined Published query
+- `cms/_assets/style-cms.css` — styles for the new right-side Publish section + Pipeline Scheduled column
+- `cms/_assets/scroll-actions.js` (or a new small JS file) — "Set a schedule" button → radio flip + datetime focus; radio-change → button label swap
+- `docs/BUILD-PLAN.md` — mark Phase 14.6 complete on exit; correct Phase 19's Scheduled state Decision (it currently says derived from `status+published_at` — that's wrong; it's `published_status='scheduled'`)
+
+**Don't touch:**
+- `cron/scheduled-publish.php` — already works
+- Public route gating in `lib/content.php` (lines 274, 626, 777 — already filters scheduled correctly)
+- BLOCKS.md, render-layer, or any rendering templates
+- Phase 19's broader sidebar/Writer's Desk reshape
+- Any schema
+
+**On exit:** Phase 14.6 checked in §3. Right-side Publish section visible in all 4 edit views at the Draft stage. "Set a schedule" affordance works. A scheduled row appears in Pipeline's new Scheduled column and is hidden from public until the cron flips it. v1.0 ships with full scheduling.
+
+**Goal:** Complete the CMS-side scheduling UX so the infrastructure built in Phase 13 becomes usable from the admin panel.
+
+**Scope:**
+
+**`lib/content.php`** — new helper:
+```
+schedule_content(int $id, string $datetime): array
+  - parses $datetime, rejects if not parseable or not in future
+  - UPDATE content SET status='published', published_status='scheduled',
+                       published_at=$datetime WHERE id=:id
+  - returns ['ok' => bool, 'error' => string]
+```
+
+**Edit-view changes (all 4 views, same pattern):**
+- New right-side panel section "Publish" with radio pair + datetime-local (revealed when "Schedule for later" selected)
+- POST handler branch: `case 'schedule':` → validates future date → calls `schedule_content()` → 302 to listing with flash
+- Action row at Draft stage: **Publish** (primary) + **Set a schedule** (secondary). When schedule mode is active (server-side or JS-driven), the Publish button label becomes "Schedule →" and "Set a schedule" hides.
+
+**Pipeline view changes:**
+- Insert Scheduled column between Draft and Published in the column order
+- Lane query: `WHERE status='published' AND published_status='scheduled' ORDER BY published_at ASC`
+- Lane card variant: shows `published_at` formatted as "Mon, Jun 12 · 2:00 PM" prominently
+- Tighten Published lane to `status='published' AND (published_status IS NULL OR published_status='live')`
+
+**JS for "Set a schedule" affordance:**
+- On click: check the radio, dispatch a change event, focus the datetime input
+- On radio change: toggle visibility of the datetime input + flip the Publish button label
+
+**Deliverables:**
+- 1 new helper in `lib/content.php`
+- 4 edit-view patches
+- 1 pipeline.php patch
+- Small CSS for the right-side Publish section + Scheduled lane card variant
+- Small JS for the radio/button choreography
+- Phase 14.6 entry in §3; Phase 19 Decision corrected
+
+**Verification:**
+1. Article at Draft stage: right-side "Publish" section shows two radios; "Publish immediately" selected by default. Action row shows **Publish** + **Set a schedule**.
+2. Click **Set a schedule** → radio flips to "Schedule for later", datetime input appears focused, action row's Publish button becomes **Schedule →**.
+3. Enter a future date (5 minutes out) → click **Schedule →** → row appears in Pipeline → Scheduled column with date label.
+4. Public `/writing/<slug>` still 404s.
+5. Run cron manually (`php cron/scheduled-publish.php`) after the date passes → row flips to Pipeline → Published, public URL serves the page, log line written.
+6. Repeat the flow for a Journal, Live Session, Experiment — same UX on all four.
+7. Edit a scheduled row → flip radio back to "Publish immediately" + Save → row moves back to Draft, `published_status=NULL`, Pipeline reflects.
+8. Edit a scheduled row → change the date → click **Schedule →** again → date updates, row stays in Scheduled.
+9. Pipeline drag: drag a Scheduled card to Published → immediately publishes (`published_status='live'`), public URL serves.
+10. Past date rejected: enter a date in the past + click Schedule → 422 with flash error, row unchanged.
+
+**Out of scope:**
+- New schema
+- The full Writer's Desk reshape (Phase 19) — this only patches the existing Pipeline; the broader Ideation/Draft Writing split lands later
+- "Recently Published" 5-row cap (Phase 19's Draft Writing concept)
+- Render-layer changes
+- Any non-scheduling polish
+
+---
+
 ## 20. Phase 15 — Accessibility pass + final polish (staging-only)
 
 **Session brief**
@@ -1036,7 +1278,736 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 ---
 
-## 22. Phase 17 *(deferred)* — Design system unification
+## 22. CMS Reorganization (v2.0) — project intro
+
+The next three phases reshape the CMS admin around a new information architecture. The sidebar gets re-grouped (Overview / Writer's Desk / Library / Site / Collections / Audience / System); the Pipeline view splits into Ideation Board (existing, unchanged) and a new Draft Writing view; a Pages mock-edit surface and a Navigation editor land under the Site group; Content Templates gets renamed; and a new Settings view captures site-wide config.
+
+The Overview and System groups arrive as visible placeholders to preview the future IA without committing to implementation. Most v2.0 work ships staging-only; the v2.0 prod ship happens at the end of Phase 21.
+
+**Why this project exists.** v1.0 (Phases 0–16) was about hitting feature parity with the old site through a usable CMS. v2.0 is the first round of post-launch organizational polish — taking what was built fast and giving it a cleaner shape. No data model changes; mostly UI restructuring + two small new admin surfaces.
+
+---
+
+## 23. Phase 19 — Nav reorg + Writer's Desk (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. v2.0 prod ship is end of Phase 21.
+
+**Decisions to capture before starting**
+- Sidebar group order: `Overview · Writer's Desk · Library · Site · Collections · Audience · System`
+- OVERVIEW placeholders (Dashboard, Analytics, Post History): rendered as disabled items with `[future]` badge
+- SITE placeholders (Pages, Navigation, Homepage, Redirects): Redirects stays live; Pages/Navigation/Homepage rendered as disabled `[future]` until Phase 20 enables them
+- SYSTEM placeholders (Post Templates, Settings): both disabled `[future]` until Phase 21
+- "Ideation Board" label = existing Ideation view, no functional change
+- "Draft Writing" view: reshape of existing Pipeline. Columns: `Concept · Outline · Draft · Scheduled · Recently Published`
+- Scheduled state derivation: `published_status='scheduled'` (existing column since migration 0001; the CMS UI for creating these rows ships in Phase 14.6, before this phase)
+- Scheduled column sub-grouping: This Week / Next Week / Future, by calendar week (Mon 00:00 → Sun 23:59), in the author's timezone (America/Vancouver)
+- Recently Published count: `5` (last 5 with `status='published' AND published_at <= NOW()`)
+- Old `/cms/pipeline` URL: keep as-is and rename the view label, OR add `/cms/draft-writing` with 301 from old URL — *(default: keep old URL, rename label only — simpler, lower risk)*
+- Group rename: Structure → Collections
+
+**Read at start (only):** This phase section. `cms/partials/sidebar.php`. `cms/views/pipeline.php`. `CMS-STRUCTURE.md` §4 (sidebar IA) and §6 (Pipeline view).
+
+**Touch:**
+- `cms/partials/sidebar.php` — full restructure to new groups + disabled placeholders
+- `cms/views/pipeline.php` — reshape to 5-column Draft Writing
+- `lib/content.php` — add `list_scheduled_content()` (grouped by calendar week) and `list_recently_published($n=5)` helpers
+- `cms/views/ideation.php` — no functional change; verify sidebar label flip is only visible diff
+- `cms/_assets/style-cms.css` — week-group headers, Recently Published column styling, `[future]` placeholder styling
+- `docs/BUILD-PLAN.md` — mark Phase 19 complete on exit
+
+**Don't touch:**
+- Library views per type (Articles/Journals/Live Sessions/Experiments)
+- Any Phase 20 surface (Pages, Navigation editor, Homepage)
+- Any Phase 21 surface (Post Templates, Settings)
+- Any DS work
+- `content` table schema
+
+**On exit:** Phase 19 checked in §3. New sidebar IA visible on staging CMS. Ideation Board accessible (label flipped). Draft Writing shows 5 columns; Scheduled sub-groups by week; Recently Published shows top 5. Placeholders in OVERVIEW/SITE/SYSTEM render as disabled `[future]` badges. v2.0 prod ship deferred to Phase 21.
+
+**Goal:** Sidebar matches new IA. Writer's Desk concept lands. Disabled placeholders preview future surfaces.
+
+**Scope:**
+- Sidebar restructure to new groups in the specified order
+- Disabled placeholder treatment for not-yet-built items
+- Pipeline → Draft Writing reshape per columns above
+- Calendar-week bucketing inside Scheduled column
+- Recently Published column on the right (last 5)
+
+**Deliverables:**
+- Updated `cms/partials/sidebar.php`
+- Reshaped `cms/views/pipeline.php`
+- New helpers in `lib/content.php`
+- CSS for week groups + placeholder badges
+
+**Verification:**
+1. Sidebar on staging matches new IA, in specified group order.
+2. Click "Ideation Board" → existing Ideation view loads.
+3. Click "Draft Writing" → 5-column board: Concept / Outline / Draft / Scheduled / Recently Published.
+4. Set a content row's `published_at` to a date in the current Mon–Sun window → appears in Scheduled → This Week with correct date label.
+5. Same with a next-Mon–Sun date → Scheduled → Next Week.
+6. Same with a 3-weeks-out date → Scheduled → Future.
+7. Content row with `status=published` + past `published_at` → Recently Published. Only top 5 shown.
+8. Disabled placeholder items don't navigate; carry `[future]` badge.
+9. Existing `/cms/pipeline` URL still works (or 301s if rename chosen).
+
+**Out of scope:** Pages CMS, Navigation editor, Homepage (Phase 20). Post Templates, Settings (Phase 21). DS work. Schema changes. Public site changes.
+
+---
+
+## 24. Phase 20 — Pages mocks + Navigation editor (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Manual *(largest phase of v2.0 — two new admin surfaces with real complexity)*
+- **Ships:** Staging-only. v2.0 prod ship is end of Phase 21.
+
+**Decisions to capture before starting**
+- Pages in scope for mock-edit view: scan `site/_pages/*.html` and `site/_pages/*.php` (excludes `_pages/_layout/`, `_pages/_bodies/`)
+- Default page-mock view: Live Version (read-only, pulled from on-disk file content)
+- Mock versioning: Create New Mock / Duplicate requires a name; Save overwrites the current mock; Rename available
+- CodeMirror version: vendor locally to `cms/_assets/codemirror/` from official 6.x release (no CDN — avoids network dependency on every CMS load)
+- Preview gating: `?_preview=<mock_id>` + valid CMS session cookie required
+- Nav default highlight color: `--c-terracotta` (or whatever the current red-dot token resolves to — confirm exact token at phase start)
+- Nav per-item color override: optional `highlight_color` field (hex or token name)
+- Broken-target soft-flag UX: BROKEN badge in nav editor; `is_active=0` auto-set by nightly cron sweep
+- `bin/deploy.sh`: **no changes** to deploy behavior for `_pages/*.html` — files remain canonical and ship as today
+- Header/footer file rename: `_pages/_layout/header.html` → `header.php`, `footer.html` → `footer.php`
+- Footer layout: flat single list (no columns/nested groups in v1)
+
+**Read at start (only):** This phase section. v2.0 planning conversation context (extensive). `CMS-STRUCTURE.md` §16 (Indexes — for nav target resolution).
+
+**Touch:**
+- `db/migrations/0013_page_mock_versions.sql` (new — schema below)
+- `db/migrations/0014_nav_items.sql` (new — schema below)
+- `lib/pages.php` (new) — file scanning, mock CRUD, preview hook
+- `lib/nav.php` (new) — nav items CRUD, target resolver, broken-target sweep
+- `cms/views/pages.php` (new) — list of pages from filesystem + mock status
+- `cms/views/page-edit.php` (new) — editor view (version dropdown, CodeMirror, Save/Rename/Duplicate/Delete/Preview, Metadata tab, unfurl preview)
+- `cms/views/navigation.php` (new) — header + footer flat lists + add/edit panel
+- `cms/partials/sidebar.php` — un-disable SITE group items (Pages, Navigation, Homepage)
+- `cms/_assets/codemirror/` (new — vendored)
+- `site/index.php` — add `/:slug/?_preview=<id>` route hook
+- `_pages/_layout/header.html` → renamed `header.php`, calls `render_nav('header')`
+- `_pages/_layout/footer.html` → renamed `footer.php`, calls `render_nav('footer')`
+- `_pages/_layout/_page-shell.php` — pass-through hook for preview-mode body injection
+- `bin/deploy.sh` — add `cp` lines for new lib files; update existing references from `header.html`/`footer.html` to `.php`
+- Migration seed: initial nav items for header matching current static header
+- `docs/BUILD-PLAN.md` — mark Phase 20 complete on exit
+
+**Don't touch:**
+- File content of any `_pages/*.html` (CMS reads them; never writes)
+- Phase 19 surfaces
+- Post Templates / Settings (Phase 21)
+- Any DS work
+- The `content` table or any per-type CMS views
+
+**On exit:** Phase 20 checked in §3. CMS Pages view lists every scanned `_pages/*.html|.php` file with mock-edit status. Page editor functional with Live/mock dropdown, CodeMirror editing, Save/Rename/Duplicate/Delete/Preview, Metadata tab with og:image/title/description, unfurl preview card. Navigation editor: header + footer drag-orderable lists; add/edit panel with polymorphic targets; broken-target soft-flag working. **No file on disk is ever written by the CMS.** `bin/deploy.sh staging` continues to ship `_pages/*.html` unchanged.
+
+**Goal:** Two new admin surfaces ship to staging. Pages stays mock-only (DB sandbox; files canonical). Navigation goes live (nav items CMS-data; wrapper PHP in code).
+
+**Scope:**
+
+**Schema — `page_mock_versions`**
+```sql
+CREATE TABLE page_mock_versions (
+  id                INT AUTO_INCREMENT PRIMARY KEY,
+  slug              VARCHAR(120) NOT NULL,
+  name              VARCHAR(255) NOT NULL,
+  body_html         LONGTEXT NOT NULL,
+  meta_title        VARCHAR(255) NULL,
+  meta_description  TEXT NULL,
+  og_image          VARCHAR(500) NULL,
+  og_type           VARCHAR(40) NULL DEFAULT 'website',
+  twitter_card      VARCHAR(40) NULL DEFAULT 'summary_large_image',
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX ix_slug_updated (slug, updated_at)
+);
+```
+
+**Schema — `nav_items`**
+```sql
+CREATE TABLE nav_items (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  zone            ENUM('header','footer') NOT NULL,
+  label           VARCHAR(120) NOT NULL,
+  target_type     ENUM('index','category','series','content','page','custom') NOT NULL,
+  target_id       INT NULL,
+  target_slug     VARCHAR(120) NULL,
+  custom_url      VARCHAR(500) NULL,
+  highlight       ENUM('none','dot','pill') DEFAULT 'none',
+  highlight_text  VARCHAR(40) NULL,
+  highlight_color VARCHAR(20) NULL,
+  position        INT NOT NULL DEFAULT 0,
+  is_active       BOOLEAN DEFAULT TRUE,
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX ix_zone_position (zone, position)
+);
+```
+
+**Pages flow**
+- List view scans `_pages/*.html|.php`, shows filename + last-modified + mock-count badge
+- Edit view: version dropdown (Live Version pinned at top; mocks sorted `updated_at DESC` with name + relative date)
+- Live Version selected: textarea read-only; action row = **Preview Live · Create New Mock**
+- Mock selected: textarea editable (CodeMirror HTML mode + on-save validation warning); action row = **Save · Rename · Duplicate · Delete · Preview**
+- Tabs: **Body HTML · Metadata**
+- Metadata tab: meta_title, meta_description (with char counter), og_image (with uploads picker), og_type, twitter_card, live unfurl preview card
+- Switching dropdown with unsaved edits: confirm "Discard unsaved edits?"
+- No auto-save; soft "(unsaved changes)" indicator when textarea diverges from selected version
+
+**Navigation flow**
+- Two stacked drag-orderable lists (header + footer)
+- Each item shows drag handle, label, resolved URL preview, highlight indicator, edit/delete
+- Add-new panel: label, target-type dropdown, dependent picker (or custom URL field), highlight (none/dot/pill), pill text (when pill), color (default + custom hex)
+- Custom URL validation: starts with `/` (internal, must end in `/`) or `https://` (external)
+- Resolver returns URL for non-custom types; uses custom_url for custom; returns NULL if target row deleted
+- Broken-target sweep: nightly cron checks resolver per item; sets `is_active=0` on broken; surfaces BROKEN badge in editor
+
+**Preview integration**
+- `site/index.php` `/:slug/` handler: if `?_preview=<id>` present, look up `page_mock_versions[id]`, verify slug matches, check CMS session via Auth::check(); if valid, pass `body_html` + metadata to `_page-shell.php` as overrides; else fall back to file rendering
+
+**Header/footer integration**
+- `header.php` calls `render_nav('header')` where the static `<a>` list used to be
+- `footer.php` same for `render_nav('footer')`
+- Initial nav-items seed migration ensures visible nav doesn't disappear when rename ships
+
+**Deliverables:**
+- 2 migrations
+- 2 new lib files
+- 3 new CMS views + sidebar update
+- 2 file renames (`header.html`/`footer.html` → `.php`)
+- CodeMirror vendored
+- Cron extension for broken-target sweep
+- Migration seed for initial header nav items
+
+**Verification:**
+1. CMS Pages view lists 7 marketing pages from filesystem with last-modified timestamps.
+2. Click "about" → editor shows Live Version content (read-only) pulled from `_pages/about.html`.
+3. Click "Create New Mock" → name dialog → editable mock created with current Live content.
+4. Edit body in CodeMirror → Save → reload → mock persists.
+5. Rename mock → name updates in dropdown.
+6. Duplicate mock with new name → new mock with current textarea content; original unchanged.
+7. Click Preview → opens `/about/?_preview=<id>` → page-shell renders mock body.
+8. Delete mock → confirms → row removed → dropdown returns to Live Version.
+9. Metadata tab: edit og_image → unfurl preview card updates instantly.
+10. Navigation view: header list shows 4 seeded items in correct order.
+11. Add nav item with type=Page, target=newsletter → resolves to `/newsletter/`.
+12. Add nav item with type=Custom URL, value `/contact/` → renders correctly on staging header.
+13. Add nav item with type=Custom URL, value `https://github.com/...` → renders correctly.
+14. Drag-reorder items → positions update; refresh persists.
+15. Add dot-only highlight → red dot renders next to label on staging header.
+16. Add pill highlight with text "NEW" → pill renders next to label.
+17. Set custom highlight color hex → pill uses that color.
+18. Manually delete a referenced category from DB → next cron run marks dependent nav items broken with BROKEN badge; item hidden from public.
+19. `_pages/about.html` file on disk: byte-identical before and after all of the above.
+20. `bin/deploy.sh staging` succeeds normally; ships unchanged `_pages/*.html`.
+
+**Out of scope:**
+- Full CMS-published Pages (DB body served to public) — future
+- File-write-back from CMS edits to repo
+- Footer columns / nested nav groups
+- Per-mock revision history beyond named snapshots
+- Mock auto-save / localStorage
+- Real-time unfurl scraper testing (Slack/Twitter bots can't pass the preview cookie)
+- DS work
+- Post Templates / Settings (Phase 21)
+
+---
+
+## 25. Phase 21 — Post Templates rename + Settings (v2.0 ship)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** **v2.0 public.** Final v2.0 deploy; unfreeze v2.0-specific gates on prod.
+
+**Decisions to capture before starting**
+- **Content Template view status:** built in Phase 14.5 (read-only port + Author editable). Phase 21 work is now a true rename: change sidebar label from "Content Template" to "Post Templates" and update the page heading; the view itself stays as-is. No `[soon]` badge.
+- Settings keys (v1): `site_title`, `site_tagline`, `default_og_image`, `default_og_type`, `default_twitter_card`, `footer_copyright`, `analytics_script`
+- Settings inheritance: per-page-mock-metadata → Settings-default → hardcoded shell fallback
+- v2.0 ship moment: end of this phase; same mechanics as Phase 16
+
+**Read at start (only):** This phase section. `cms/partials/sidebar.php` (label flip). `_pages/_layout/_page-shell.php` (Settings integration site).
+
+**Touch:**
+- `db/migrations/0015_settings_table.sql` (new) — `settings` table
+- `lib/settings.php` (new) — `get_setting`, `set_setting`, `list_settings`
+- `cms/views/settings.php` (new) — form editor
+- `cms/partials/sidebar.php` — flip "Content Template" → "Post Templates"; un-disable Settings; Post Templates label points at the existing `/cms/content-template` route (built in Phase 14.5) — no `[soon]` badge
+- `_pages/_layout/_page-shell.php` — read settings for `<title>` suffix, og defaults, footer text, analytics script injection
+- Migration seed: initial settings keys with current hardcoded values
+- `docs/BUILD-PLAN.md` — mark Phase 21 complete on exit
+
+**Don't touch:**
+- Phase 19 / 20 work
+- DS work
+- Content Template view internals (built in Phase 14.5 — rename only, no functional changes here)
+
+**On exit:** Phase 21 checked in §3. Settings view live and functional. "Post Templates" label live in sidebar, points at the Phase 14.5 view. Settings values propagate into public rendering. **v2.0 prod-shipped.**
+
+**Goal:** Add Settings view with v1 keys. Rename Content Template → Post Templates (label only — the view itself shipped in Phase 14.5). Ship v2.0 to prod.
+
+**Scope:**
+
+**Schema — `settings`**
+```sql
+CREATE TABLE settings (
+  `key`       VARCHAR(120) PRIMARY KEY,
+  value       TEXT,
+  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+```
+
+**Settings view**
+- One form, one input per setting, grouped by purpose:
+  - **Identity:** site_title, site_tagline, footer_copyright
+  - **Social preview defaults:** default_og_image (upload picker), default_og_type (radio), default_twitter_card (radio)
+  - **Integrations:** analytics_script (textarea — accepts full `<script>` tag)
+- CSRF-protected save action
+
+**Shell integration**
+- `_page-shell.php` reads `site_title` (used as title-suffix), `default_og_image` / `default_og_type` / `default_twitter_card` (rendered as `<meta>` tags when a page doesn't supply its own), `footer_copyright` (rendered in footer if present), `analytics_script` (injected raw before `</body>` if non-empty)
+
+**Post Templates stub**
+- Rename sidebar.php label from "Content Template" to "Post Templates"
+- Treatment: `href="#"` stays; add `[soon]` badge; same disabled styling as OVERVIEW placeholders from Phase 19
+
+**v2.0 ship checklist**
+- Smoke-test every public route on prod after deploy
+- Verify settings propagation: change site_title in staging Settings → confirm prod still serves prod settings (separate envs)
+- Pre-cutover backup: mysqldump + webroot rsync snapshot, stored locally
+
+**Deliverables:**
+- 1 migration
+- 1 new lib file
+- 1 new view
+- Sidebar label flip + `[soon]` badge
+- `_page-shell.php` integration
+- v2.0 prod deploy log + smoke results
+
+**Verification:**
+1. Settings view renders with 7 fields populated from seeded values.
+2. Edit site_title → save → public page `<title>` reflects new value after reload.
+3. Edit default_og_image → save → page without own og_image renders default in `<meta property="og:image">`.
+4. Edit analytics_script with a `<script>` tag → save → script renders before `</body>` on every public page.
+5. Sidebar: "Post Templates" under SYSTEM with `[soon]` badge; clicking does nothing.
+6. v2.0 prod smoke: every CMS view accessible; every public page renders; nav items correct; subscribe flow still works.
+7. **No regressions** from v1.0 prod baseline.
+
+**Rollback plan:**
+1. `git revert` Phase 21 commits and re-deploy.
+2. Settings table can stay (unused); migration forward-only and safe.
+3. Restore pre-cutover backup as last resort.
+
+**Out of scope:**
+- Building the actual Content Template / Post Templates view (deferred — separate phase)
+- Master template + sub-template editing logic
+- DS work
+- Phase 18
+
+---
+
+## 26. DS Reorganization (v2.1) — project intro
+
+The next seven phases (DS-1 through DS-6, with DS-4.5 in the middle) reorganize the design system into a clean three-branch structure: **Root** (shared tokens), **Pages** (marketing-page slice), **Blocks** (article-template slice), **CMS** (admin slice). Redundancy across the three branches is intentional — the goal is *clarity*, not deduplication.
+
+**Why this project exists.** The CSS surface grew organically during v1.0. System tokens, marketing-page styles, article-template styles, and admin styles are scattered across `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, and inline `<style>` blocks in `cms/views/*.php`. There's no clean ownership boundary. This project draws those lines.
+
+**Risk posture.** This is a refactor that touches every visual surface — public pages, articles, CMS. High blast radius if done as a single phase. We split into seven phases with these safety patterns:
+- **Audit-first** — DS-1 produces a complete map before any code moves
+- **Additive migration** — DS-2 through DS-5 add new structure alongside the old; old files keep loading
+- **Per-phase visual diff** — every migration phase ships only after a screenshot diff of its affected surface
+- **Staging-only through DS-5** — nothing public-facing on prod until DS-6 final ship
+- **Manual sign-off on the riskiest phase** — DS-4 (Blocks) is highest-risk and is Manual tier
+
+The existing deferred Phase 17 ("Design system unification") was the single-phase version of this same intent. It's superseded by this 7-phase project.
+
+---
+
+## 27. Phase 22 — DS-1: Audit (no code)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Nothing — deliverable is `docs/DS-AUDIT.md`.
+
+**Decisions to capture before starting**
+- Audit document location: `docs/DS-AUDIT.md` (markdown, committed)
+- Categorization buckets: `Root · Pages · Blocks · CMS · Dead`
+- Files in scope: `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, all inline `<style>` blocks in `cms/views/*.php`, inlined token block in `docs/design-mockups/cms-ui.html`
+- Audit row format: markdown table with columns `Selector · File · Category · Notes · Move-To-Path`
+
+**Read at start (only):** This phase section. `docs/BUILD-PLAN.md` §26 (project intro). Every CSS file listed above.
+
+**Touch:** `docs/DS-AUDIT.md` (new). Nothing else.
+
+**Don't touch:** Any CSS. Any HTML or PHP. Research only.
+
+**On exit:** Phase 22 checked in §3. DS-AUDIT.md complete with every selector categorized, file-layout proposed, naming decisions captured.
+
+**Goal:** Complete map of the existing CSS surface so DS-2 through DS-6 know exactly what moves where.
+
+**Scope:**
+- Inventory every CSS file and inline block listed above
+- For each selector, decide: Root / Pages / Blocks / CMS / Dead, with one-line reasoning
+- Sketch the proposed `_design-system/` directory layout
+- Flag selectors that span categories and propose resolution
+- Capture naming conventions: prefix scheme per slice, file naming, token-vs-class boundaries
+- Identify dead code (grep-verify before flagging)
+
+**Deliverables:**
+- `docs/DS-AUDIT.md` covering all of the above
+- "Ready for DS-2" checklist at the bottom
+
+**Verification:**
+1. Every CSS file in the listed sources scanned.
+2. Each selector has a row in the audit.
+3. No selector uncategorized.
+4. Proposed directory tree matches the v2.1 plan.
+5. Naming-convention decisions documented and ready to apply in DS-2+.
+
+**Out of scope:** Any code changes. JS audit. HTML structural changes.
+
+---
+
+## 28. Phase 23 — DS-2: Root tokens (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Additive — no consumer rewiring yet.
+
+**Decisions to capture before starting**
+- New directory: `site/_design-system/root/` with `colors.css`, `fonts.css`, `base.css`
+- Approach: additive — existing `system.css` continues to load alongside new root files
+- Verification page: `/_ds/__root-test.html` — imports only root, renders every token
+- Old `system.css`: untouched (deletion happens in DS-6)
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Root-tier rows). `_design-system/system.css`.
+
+**Touch:**
+- `site/_design-system/root/colors.css` (new)
+- `site/_design-system/root/fonts.css` (new)
+- `site/_design-system/root/base.css` (new)
+- `site/_design-system/__root-test.html` (new)
+- `bin/deploy.sh` — extend to ship new root files
+
+**Don't touch:**
+- `system.css`
+- Any consumer CSS or PHP
+- DS showcase site (DS-6 work)
+
+**On exit:** Phase 23 checked in §3. Root files deployed to staging. `/_ds/__root-test.html` renders every token. No visual regression elsewhere.
+
+**Goal:** Build the shared root layer in isolation, verify it independently, zero impact on running surfaces.
+
+**Scope:**
+- Per DS-AUDIT.md, populate `colors.css` with every Root-tier color token
+- Populate `fonts.css` with `@font-face` declarations + font-family/weight/size tokens
+- Populate `base.css` with spacing scale, radii, breakpoints, shadows, transition durations
+- Build `__root-test.html` rendering each token as a labeled swatch/sample
+
+**Deliverables:**
+- 3 new CSS files in `_design-system/root/`
+- 1 verification HTML page
+- bin/deploy.sh updated
+
+**Verification:**
+1. `/_ds/__root-test.html` renders all colors as labeled swatches.
+2. Renders all fonts as labeled samples at each size.
+3. Renders spacing scale as visual rulers.
+4. `system.css` still loads on every existing page.
+5. Visual diff: every existing page (5 marketing, 1 article, 1 CMS view) identical before/after.
+
+**Out of scope:** Anything not Root. Showcase site rebuild. Consumer rewiring.
+
+---
+
+## 29. Phase 24 — DS-3: Pages migration (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Additive — old `style-pages.css` keeps loading.
+
+**Decisions to capture before starting**
+- New directory: `site/_design-system/pages/` with `typography.css`, `layouts.css`
+- Migration approach: copy Pages-categorized rules into new files; leave `style-pages.css` intact (additive)
+- Consumer change: `_pages/_layout/_page-shell.php` adds new `<link>` tags alongside existing ones
+- Visual diff: screenshot each marketing page before/after, save pairs to `docs/DS-VERIFY/pages/`
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Pages-tier rows). `_pages/_layout/style-pages.css`.
+
+**Touch:**
+- `site/_design-system/pages/typography.css` (new)
+- `site/_design-system/pages/layouts.css` (new)
+- `site/_pages/_layout/_page-shell.php` — add new `<link>` imports
+- `docs/DS-AUDIT.md` — annotate Pages migration complete
+- `bin/deploy.sh` — ship new pages slice files
+- `docs/DS-VERIFY/pages/` (new directory) — screenshot pairs
+
+**Don't touch:**
+- `style-pages.css`
+- Any CMS or block CSS
+- Any HTML structure
+
+**On exit:** Phase 24 checked in §3. New pages slice loaded by `_page-shell.php` alongside old `style-pages.css`. Visual diff confirms zero regression. Staging-only.
+
+**Goal:** Set up Pages branch and rewire `_page-shell.php`, old setup still loaded as safety net.
+
+**Scope:**
+- Per DS-AUDIT.md, copy Pages-categorized rules into `typography.css` and `layouts.css`
+- Each file `@import`s `../root/*.css` first
+- `_page-shell.php` adds new link tags after existing style-pages.css link
+
+**Deliverables:**
+- 2 new CSS files in `_design-system/pages/`
+- Updated `_page-shell.php`
+- Screenshot pairs (5 marketing pages × before/after)
+- DS-AUDIT.md annotated
+
+**Verification:**
+1. Each marketing page on staging renders identically to its pre-DS-3 screenshot.
+2. Network panel shows new pages slice files loading.
+3. Toggling off `style-pages.css` in DevTools: page mostly retains layout (note gaps for DS-6).
+4. CMS and article pages unaffected.
+
+**Out of scope:** Removing `style-pages.css`. CMS or blocks work. Showcase updates.
+
+---
+
+## 30. Phase 25 — DS-4: Blocks migration (staging-only, Manual)
+
+**Session brief**
+
+- **Autonomy:** **Manual** *(highest-risk DS phase — touches every published article)*
+- **Ships:** Staging-only. Additive — old `style-articles.css` keeps loading.
+
+**Decisions to capture before starting**
+- New directory: `site/_design-system/blocks/` with `blocks.css` (single file unless audit suggests splitting)
+- Migration approach: copy Blocks-categorized rules from `style-articles.css` into `blocks.css`; leave original intact
+- Consumer change: article template loader adds new `<link>` alongside existing one
+- Visual diff: screenshot every published article + journal + live session + experiment (both variants); manual sign-off from Alex before phase exit
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Blocks-tier rows). `_templates/style-articles.css`. `docs/BLOCKS.md` (block contract).
+
+**Touch:**
+- `site/_design-system/blocks/blocks.css` (new)
+- `site/templates/master-layout.php` (or wherever article styles load) — add new `<link>`
+- `docs/DS-AUDIT.md` — annotate Blocks migration complete
+- `bin/deploy.sh` — ship new blocks slice
+- `docs/DS-VERIFY/blocks/` (new directory) — screenshot pairs
+
+**Don't touch:**
+- `style-articles.css`
+- Block HTML structure (pure CSS reorganization)
+- Any Pages or CMS work
+- `docs/BLOCKS.md` — recipe content is DS-4.5
+
+**On exit:** Phase 25 checked in §3. New blocks slice loaded alongside old `style-articles.css`. Visual diff confirms zero regression on every published content row. **Manual sign-off from Alex before exit.** Staging-only.
+
+**Goal:** Set up Blocks branch and rewire article rendering; old setup still loaded as safety net.
+
+**Scope:**
+- Per DS-AUDIT.md, copy Blocks-categorized rules into `blocks.css`
+- `@import`s root first
+- Article template loader adds new link tag after existing `style-articles.css` link
+- Screenshot every published content row → save before-pair → ship to staging → save after-pair → manual diff
+
+**Deliverables:**
+- 1 new CSS file in `_design-system/blocks/`
+- Updated article template loader
+- Screenshot pairs (every published content row × before/after)
+- DS-AUDIT.md annotated
+- Manual sign-off note appended to phase exit
+
+**Verification:**
+1. Every published article on staging renders identically to its pre-DS-4 screenshot.
+2. Every block (Hero, Quote, Gallery, etc. — all in BLOCKS.md) renders correctly in context.
+3. Network panel shows `blocks.css` loading.
+4. Toggling off `style-articles.css` in DevTools: page mostly retains structure (note gaps).
+5. CMS pages and marketing pages unaffected.
+6. **Manual sign-off:** Alex eyeballs each screenshot pair before phase exit.
+
+**Out of scope:** Removing `style-articles.css`. New block types. BLOCKS.md recipe (DS-4.5). CMS work. Marketing-page work.
+
+---
+
+## 31. Phase 26 — DS-4.5: Block recipe doc
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Nothing public-facing. Documentation only.
+
+**Decisions to capture before starting**
+- Extend existing `docs/BLOCKS.md` with a "Recipe: Adding a new block" section
+- Recipe covers: block contract entry, CSS scaffold, HTML scaffold, CMS editor field, showcase entry
+- Worked example: one fully-described addition of a hypothetical new block
+
+**Read at start (only):** This phase section. `docs/BLOCKS.md`. DS-AUDIT.md (Blocks section).
+
+**Touch:** `docs/BLOCKS.md` (extend).
+
+**Don't touch:** Any CSS. Any HTML. Any blocks themselves.
+
+**On exit:** Phase 26 checked in §3. BLOCKS.md has a self-contained "Recipe" section.
+
+**Goal:** Codify how to add new blocks, leveraging the cleaner Blocks structure from DS-4.
+
+**Scope:**
+- Recipe section in BLOCKS.md covering:
+  1. Defining the block in the contract (slug, mode, composition, fields)
+  2. Adding CSS to `_design-system/blocks/blocks.css`
+  3. Adding HTML scaffold to article template
+  4. Adding the CMS editor field
+  5. Adding a showcase entry to the DS site (forward-ref to DS-6)
+- Worked example using real selectors and real files
+
+**Deliverables:**
+- Extended `docs/BLOCKS.md`
+
+**Verification:**
+1. Recipe section is self-contained — readable without other context.
+2. Worked example references real files and real selectors.
+
+**Out of scope:** Actually adding a new block. CSS or code changes.
+
+---
+
+## 32. Phase 27 — DS-5: CMS migration (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Additive — inline `<style>` blocks remain for now.
+
+**Decisions to capture before starting**
+- New directory: `site/_design-system/cms/` with `tables.css`, `navigation.css`, `buttons.css`, `fields.css`, `pills.css`, `states.css`
+- Migration approach: collect CMS-categorized rules from inline `<style>` blocks + any CMS-relevant shared CSS; copy into new files; leave originals intact
+- Consumer change: CMS header partial (or `cms/index.php`) adds `<link>` tags for new slice files
+- Visual diff: screenshot each CMS view before/after
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (CMS-tier rows). All `cms/views/*.php`.
+
+**Touch:**
+- `site/_design-system/cms/tables.css` (new)
+- `site/_design-system/cms/navigation.css` (new)
+- `site/_design-system/cms/buttons.css` (new)
+- `site/_design-system/cms/fields.css` (new)
+- `site/_design-system/cms/pills.css` (new)
+- `site/_design-system/cms/states.css` (new)
+- `cms/partials/header.php` (or wherever CMS shell loads) — add `<link>` tags
+- `docs/DS-AUDIT.md` — annotate CMS migration complete
+- `bin/deploy.sh` — ship new cms slice
+- `docs/DS-VERIFY/cms/` (new directory) — screenshot pairs
+
+**Don't touch:**
+- Inline `<style>` blocks in `cms/views/*.php` — left intact (cleanup is DS-6)
+- Any Pages or Blocks work
+- Any HTML structure
+
+**On exit:** Phase 27 checked in §3. New CMS slice loaded alongside existing inline styles. Every CMS view renders identically. Staging-only.
+
+**Goal:** Set up CMS branch and add imports; old inline styles remain as safety net.
+
+**Scope:**
+- Per DS-AUDIT.md, distribute CMS-categorized rules across the 6 cms-slice files
+- Each file `@import`s root first
+- CMS shell adds link tags
+- Screenshot every CMS view before/after
+
+**Deliverables:**
+- 6 new CSS files in `_design-system/cms/`
+- Updated CMS shell loader
+- Screenshot pairs (~16 views × before/after)
+- DS-AUDIT.md annotated
+
+**Verification:**
+1. Every CMS view on staging renders identically to its pre-DS-5 screenshot.
+2. Public site unaffected.
+3. Network panel shows the 6 cms slice files loading on every CMS view.
+
+**Out of scope:** Removing inline `<style>` blocks. Showcase rebuild. Pages or Blocks work.
+
+---
+
+## 33. Phase 28 — DS-6: Cleanup + sunset (v2.1 ship)
+
+**Session brief**
+
+- **Autonomy:** Manual *(removes safety nets; ships v2.1 to prod)*
+- **Ships:** **v2.1 public.** Final DS reorganization ship.
+
+**Decisions to capture before starting**
+- Remove `_design-system/system.css` entirely (root replaces it)
+- Remove `_pages/_layout/style-pages.css` entirely (pages slice replaces it)
+- Remove `_templates/style-articles.css` entirely (blocks slice replaces it)
+- Strip inline `<style>` blocks from `cms/views/*.php` (one view at a time, per-view verification)
+- Rebuild `_design-system/index.html` as 4-tab showcase: Root / Pages / Blocks / CMS
+- Pre-cutover backup: mysqldump + webroot rsync snapshot
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (final state).
+
+**Touch:**
+- DELETE `site/_design-system/system.css`
+- DELETE `site/_pages/_layout/style-pages.css`
+- DELETE `site/_templates/style-articles.css`
+- `cms/views/*.php` — strip inline `<style>` blocks (sequentially with verification)
+- `_pages/_layout/_page-shell.php` — remove `<link>` tags for deleted files
+- Article template loader — remove `<link>` for style-articles.css
+- `site/_design-system/index.html` — full rebuild as 4-tab showcase
+- `site/_design-system/index.js` — if needed for showcase interactivity
+- `docs/DS-AUDIT.md` — final annotation
+- `bin/deploy.sh` — remove `cp` lines for deleted files
+
+**Don't touch:**
+- Block recipe doc (DS-4.5 work done)
+- Anything outside DS scope
+
+**On exit:** Phase 28 checked in §3. Old CSS files deleted. Inline styles removed. Showcase rebuilt. **v2.1 prod-shipped.**
+
+**Goal:** Remove redundant old CSS, rebuild showcase as four tabs, ship v2.1 to prod.
+
+**Scope:**
+- Delete old CSS files (3 files)
+- Strip inline styles from each `cms/views/*.php` in sequence with per-view verification
+- Rebuild `_design-system/index.html` with four tabs (Root / Pages / Blocks / CMS), each showing live-rendered examples + token swatches
+- Deploy to prod
+
+**Deliverables:**
+- Deletions of old CSS
+- Strip-cleaned cms/views/*.php
+- Rebuilt showcase
+- Updated bin/deploy.sh
+- v2.1 prod deploy log
+- Final visual-diff verification (every surface re-shot post-cleanup)
+
+**Verification:**
+1. `grep -r "system.css" site/` returns zero matches.
+2. `grep -r "style-pages.css" site/` returns zero matches.
+3. `grep -r "style-articles.css" site/` returns zero matches.
+4. `grep -rn "<style>" site/cms/views/` returns zero matches (or only documented exceptions).
+5. Every public page on prod renders identically to its v2.0 baseline.
+6. Every CMS view on prod renders identically to its v2.0 baseline.
+7. `/_ds/` showcase has 4 tabs (Root / Pages / Blocks / CMS), each rendering live components and tokens.
+
+**Rollback plan:** If broken on prod after deploy:
+1. `git revert` Phase 28 commit (reverses deletions + showcase rebuild).
+2. Re-deploy. DS-2 through DS-5 setups still in place (additive); old files come back. Site returns to v2.0 visual state.
+3. Pre-cutover backup is last-resort fallback.
+
+**Out of scope:** New features. Deferred backlog items. Phase 18.
+
+---
+
+## 34. Phase 17 *(superseded)* — Design system unification
+
+> **Superseded by the v2.1 project (Phases 22–28).** This was the original single-phase version of the DS reorganization. It's been expanded into a seven-phase project for risk control. Kept here for historical reference. The decisions and approach below are NOT current — see Phases 22–28 for the live plan.
 
 **Session brief**
 
@@ -1079,7 +2050,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 ---
 
-## 23. Phase 18 *(deferred)* — Transactional email
+## 35. Phase 18 *(deferred)* — Transactional email
 
 **Session brief**
 
@@ -1116,7 +2087,7 @@ Not built in v1.
 
 ---
 
-## 23. Canonical folder structure
+## 36. Canonical folder structure
 
 This is the shape the repo will have by end of Phase 6b. Everything below is created across Phases 0–15 in the order needed. The split is intentional: **everything under `docs/` is reference and never deploys; everything under `site/` is rsynced to the DreamHost webroot.**
 
@@ -1209,7 +2180,7 @@ alex-cms-buildout/
 
 ---
 
-## 24. Cross-cutting principles
+## 37. Cross-cutting principles
 
 These apply in every phase. See `ENGINEERING.md` for the full rulebook.
 
@@ -1225,7 +2196,7 @@ These apply in every phase. See `ENGINEERING.md` for the full rulebook.
 
 ---
 
-## 25. Working with this plan
+## 38. Working with this plan
 
 **For Alex.**
 

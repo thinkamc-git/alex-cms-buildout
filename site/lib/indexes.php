@@ -490,14 +490,24 @@ function series_auto_index(string $slug): ?array
     $stmt->execute([':sid' => $sid]);
     $parts = $stmt->fetchAll() ?: [];
 
-    // Hero is the highest-numbered part (the most recent in series order),
-    // which mirrors "latest in the series" without needing published_at.
-    $hero = null;
-    $rest = $parts;
-    if ($parts !== []) {
-        $hero = $parts[count($parts) - 1];
-        $rest = array_slice($parts, 0, count($parts) - 1);
+    // Series index: no hero, no featured. Every part renders as a uniform
+    // card. Order is series_order DESC so the latest part appears first
+    // (03, 02, 01). Each card carries `_series_number` so the partial can
+    // render the faint italic watermark over the card.
+    //
+    // The watermark uses *published-only position* — never the raw
+    // series_order. Drafts in the middle of a series should not punch
+    // holes in the numbering. With A(order=1, published), B(order=2, draft),
+    // C(order=3, published): the public series shows "01" + "02" (not
+    // "01" + "03"). When B publishes, it slots in and the cards renumber
+    // to "01" + "02" + "03" automatically.
+    $totalPublished = count($parts);
+    $feed = array_reverse($parts);
+    foreach ($feed as $i => &$row) {
+        // Latest (feed[0]) gets the highest number; oldest gets 1.
+        $row['_series_number'] = $totalPublished - $i;
     }
+    unset($row);
 
     return [
         'id'              => 0, // Synthetic — not in indexes table.
@@ -506,12 +516,12 @@ function series_auto_index(string $slug): ?array
         'title'           => (string)$series['name'],
         'subtitle'        => (string)($series['description'] ?? ''),
         'show_title'      => 1,
-        'hero_content_id' => $hero === null ? null : (int)$hero['id'],
+        'hero_content_id' => null,
         'feed_sort'       => 'manual',
         'feed_rows_shown' => 'all',
-        'hero_card'       => $hero,
+        'hero_card'       => null,
         'featured_cards'  => [],
-        'feed_rows'       => $rest,
+        'feed_rows'       => $feed,
         'is_series'       => true,
         'series_row'      => $series,
     ];

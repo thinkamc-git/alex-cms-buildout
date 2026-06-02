@@ -28,7 +28,7 @@ $bs = (string)($body_slot ?? '');
   <?php if ($pd !== ''): ?>
     <meta name="description" content="<?= htmlspecialchars($pd, ENT_QUOTES, 'UTF-8') ?>">
   <?php endif; ?>
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" href="/_layout/favicon<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

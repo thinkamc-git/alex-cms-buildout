@@ -141,6 +141,7 @@ cp site/cms/_assets/tiptap.css       "$STAGE/cms/_assets/"
 cp site/cms/_assets/tiptap-setup.js  "$STAGE/cms/_assets/"
 cp site/cms/_assets/dragdrop.js      "$STAGE/cms/_assets/"
 cp site/cms/_assets/scroll-actions.js "$STAGE/cms/_assets/"
+cp site/cms/_assets/publish-choreography.js "$STAGE/cms/_assets/"
 
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point
@@ -160,6 +161,10 @@ cp site/lib/redirects.php          "$STAGE/lib/"
 # Phase 14: subscribers data layer (public POST /subscribe handler, CMS
 # list/filter/export view at /cms/subscribers).
 cp site/lib/subscribers.php        "$STAGE/lib/"
+# Phase 14.5: Content Template view data layer (blocks/fields/sub-templates/
+# matrix sourced from docs/BLOCKS.md). Read-only — consumed by the
+# /cms/content-template view.
+cp site/lib/blocks_data.php        "$STAGE/lib/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"

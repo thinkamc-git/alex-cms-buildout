@@ -96,16 +96,49 @@ switch ($type):
     $tagsRaw = (string)($card['tags'] ?? '');
     $tags    = $tagsRaw !== '' ? array_filter(array_map('trim', explode(',', $tagsRaw))) : [];
   ?>
-  <a class="card card--article" data-type="article" data-category="<?= $e($catSlug) ?>" href="<?= $e($href) ?>">
+  <?php
+    $seriesWatermark = (int)($card['_series_number'] ?? 0);
+    // Published-only position for "Part N of M" on the card.
+    // _series_number (set by series_auto_index) is the published-position;
+    // for cards rendered outside the series index, compute it on demand.
+    $seriesPart = (int)($card['_series_number'] ?? 0);
+    if ($seriesPart === 0 && $seriesSlug !== '' && $seriesPart === 0) {
+        $rawOrder = (int)($card['series_order'] ?? 0);
+        if ($rawOrder > 0) {
+            $cacheKey = '_seriespos_' . $seriesSlug . '_' . $rawOrder;
+            if (!isset($catMap[$cacheKey])) {
+                $st = db()->prepare(
+                    "SELECT COUNT(*) FROM content c
+                      WHERE c.series_id = (SELECT id FROM series WHERE slug = :s)
+                        AND c.status = 'published'
+                        AND (c.published_status IS NULL OR c.published_status = 'live')
+                        AND c.series_order IS NOT NULL
+                        AND c.series_order <= :o"
+                );
+                $st->execute([':s' => $seriesSlug, ':o' => $rawOrder]);
+                $catMap[$cacheKey] = (int)$st->fetchColumn();
+            }
+            $seriesPart = (int)$catMap[$cacheKey];
+        }
+    }
+  ?>
+  <div class="card card--article<?= $seriesWatermark > 0 ? ' card--has-series-number' : '' ?>" data-type="article" data-category="<?= $e($catSlug) ?>">
+    <?php if ($seriesWatermark > 0): ?>
+      <span class="card-series-number" aria-hidden="true"><?= str_pad((string)$seriesWatermark, 2, '0', STR_PAD_LEFT) ?></span>
+    <?php endif; ?>
     <div class="card-header">
       <span class="cat"><?= $e($catLabel !== '' ? $catLabel : 'Article') ?></span>
       <?= $bookmarkSvg ?>
     </div>
     <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)"><?= $e($title !== '' ? $title : '(untitled)') ?></h2>
+      <h2 class="title" style="margin-bottom: var(--space-12)"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title !== '' ? $title : '(untitled)') ?></a></h2>
       <?php if ($seriesName !== ''): ?>
         <div class="series-row">
-          <span class="series-pill"><?= $e($seriesName) ?></span>
+          <?php if ($seriesSlug !== ''): ?>
+            <a class="series-pill" href="/series/<?= $e($seriesSlug) ?>/"><?= $e($seriesName) ?></a>
+          <?php else: ?>
+            <span class="series-pill"><?= $e($seriesName) ?></span>
+          <?php endif; ?>
           <?php if ($seriesPart > 0 && $seriesTotal > 0): ?>
             <span class="series-pos">Part <?= $seriesPart ?> of <?= $seriesTotal ?></span>
             <div class="series-dots">
@@ -138,7 +171,7 @@ switch ($type):
       <span><?= $e($pubShort) ?></span>
       <?php if ($readTime > 0): ?><span><?= $readTime ?> min read</span><?php endif; ?>
     </div>
-  </a>
+  </div>
   <?php break;
 
   /* ════════ JOURNAL ═══════════════════════════════════════════════════ */
@@ -177,7 +210,7 @@ switch ($type):
         return '';
     };
   ?>
-  <a class="card card--journal" data-type="journal" data-category="<?= $e($catSlug) ?>" href="<?= $e($href) ?>">
+  <div class="card card--journal" data-type="journal" data-category="<?= $e($catSlug) ?>">
     <div class="card-header">
       <div style="display:flex;align-items:center;gap: 7px">
         <?= $journalIcon($catSlug, $catColour) ?>
@@ -187,7 +220,9 @@ switch ($type):
     </div>
     <div class="card-body">
       <?php if ($title !== ''): ?>
-        <p class="j-ruled"><?= $e($title) ?></p>
+        <p class="j-ruled"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></p>
+      <?php else: ?>
+        <a class="card-link" href="<?= $e($href) ?>" aria-label="Open journal entry"></a>
       <?php endif; ?>
       <?php if ($summary !== ''): ?>
         <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"><?= $e($summary) ?></p>
@@ -199,7 +234,7 @@ switch ($type):
         <span class="arrow">→</span>
       </div>
     </div>
-  </a>
+  </div>
   <?php break;
 
   /* ════════ LIVE SESSION ══════════════════════════════════════════════ */
@@ -273,7 +308,7 @@ switch ($type):
       $ctaLabel = $isPast ? 'View Details' : 'Register Now';
       $ctaSub   = (string)($card['custom_pill'] ?? '');
     ?>
-    <a class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>" href="<?= $e($href) ?>">
+    <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>">
       <div class="card-header">
         <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Masterclass') ?></span>
         <?php if ($isPast): ?>
@@ -284,7 +319,9 @@ switch ($type):
       </div>
       <div class="mc-body">
         <?php if ($title !== ''): ?>
-          <h2 class="<?= $isPast ? 'ev-title-past' : 'ev-title' ?>" style="margin-bottom: var(--space-12)"><?= $e($title) ?></h2>
+          <h2 class="<?= $isPast ? 'ev-title-past' : 'ev-title' ?>" style="margin-bottom: var(--space-12)"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></h2>
+        <?php else: ?>
+          <a class="card-link" href="<?= $e($href) ?>" aria-label="Open live session"></a>
         <?php endif; ?>
         <?php if ($summary !== ''): ?>
           <p class="ev-desc"><?= $e($summary) ?></p>
@@ -314,11 +351,11 @@ switch ($type):
           <span class="mc-arrow">→</span>
         </div>
       </div>
-    </a>
+    </div>
     <?php break;
     }
   ?>
-  <a class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>" href="<?= $e($href) ?>">
+  <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>">
     <div class="card-header">
       <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Talk') ?></span>
       <?php if ($isPast): ?>
@@ -358,7 +395,9 @@ switch ($type):
         </div>
       <?php endif; ?>
       <?php if ($title !== ''): ?>
-        <h2 class="<?= $isPast ? 'ev-title-past' : 'ev-title' ?>" style="margin-bottom: var(--space-12)"><?= $e($title) ?></h2>
+        <h2 class="<?= $isPast ? 'ev-title-past' : 'ev-title' ?>" style="margin-bottom: var(--space-12)"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></h2>
+      <?php else: ?>
+        <a class="card-link" href="<?= $e($href) ?>" aria-label="Open live session"></a>
       <?php endif; ?>
       <?php if ($summary !== ''): ?>
         <p class="ev-desc"><?= $e($summary) ?></p>
@@ -376,7 +415,7 @@ switch ($type):
         <span class="arrow">→</span>
       </div>
     </div>
-  </a>
+  </div>
   <?php break;
 
   /* ════════ EXPERIMENT ════════════════════════════════════════════════ */
@@ -388,7 +427,7 @@ switch ($type):
     $tagsRaw   = (string)($card['tags'] ?? '');
     $tags      = $tagsRaw !== '' ? array_filter(array_map('trim', explode(',', $tagsRaw))) : [];
   ?>
-  <a class="card card--experiment" data-type="experiment" data-category="<?= $e($catSlug) ?>" href="<?= $e($href) ?>" style="min-height:320px;background:<?= $bgToken ?>;position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="<?= $e($catSlug) ?>" style="min-height:320px;background:<?= $bgToken ?>;position:relative">
     <div class="<?= $e($scrim) ?>"></div>
     <div class="exp-content">
       <div class="card-header" style="position:relative;z-index:2">
@@ -397,7 +436,9 @@ switch ($type):
       <div style="flex:1;min-height:80px"></div>
       <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
         <?php if ($title !== ''): ?>
-          <h2 class="od-title" style="margin-bottom: 10px"><?= $e($title) ?></h2>
+          <h2 class="od-title" style="margin-bottom: 10px"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></h2>
+        <?php else: ?>
+          <a class="card-link" href="<?= $e($href) ?>" aria-label="Open experiment"></a>
         <?php endif; ?>
         <?php if ($summary !== ''): ?>
           <p class="od-excerpt" style="margin-bottom:14px"><?= $e($summary) ?></p>
@@ -418,6 +459,6 @@ switch ($type):
         <span class="arrow">→</span>
       </div>
     </div>
-  </a>
+  </div>
   <?php break;
 endswitch;

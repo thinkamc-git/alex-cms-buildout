@@ -167,7 +167,65 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 $saveData['body'] = $bodyClean;
             }
 
+            // Phase 14.6 — published_at editable on live rows. Only honor
+            // when the row is currently live AND a value was posted.
+            $rowIsCurrentlyLive = ((string)($journal['status'] ?? '') === 'published')
+                && ((string)($journal['published_status'] ?? '') !== 'scheduled');
+            if ($rowIsCurrentlyLive && isset($_POST['published_at']) && trim((string)$_POST['published_at']) !== '') {
+                $rawPa = trim((string)$_POST['published_at']);
+                $tsPa  = strtotime($rawPa);
+                if ($tsPa !== false) {
+                    $saveData['published_at'] = date('Y-m-d H:i:s', $tsPa);
+                }
+            }
+
+            // Phase 14.6 (followup 2) — show_updated + updated_display (date-only).
+            // If submitted date matches actual updated_at date, store NULL.
+            if ($rowIsCurrentlyLive) {
+                $saveData['show_updated'] = isset($_POST['show_updated']) ? 1 : 0;
+                $udRaw = trim((string)($_POST['updated_display'] ?? ''));
+                if ($udRaw === '' || $udRaw === $updatedAtDateOnly) {
+                    $saveData['updated_display'] = null;
+                } else {
+                    $tsUd = strtotime($udRaw);
+                    $saveData['updated_display'] = $tsUd === false
+                        ? null
+                        : date('Y-m-d 00:00:00', $tsUd);
+                }
+            }
+
             $flashMsg = 'Saved.';
+
+            // Phase 14.6 — publish-now branch. Promotes a scheduled row
+            // to live immediately (published_status='live', published_at=NOW()).
+            if ($action === 'publish-now') {
+                $stmt = db()->prepare("UPDATE content SET published_status='live', published_at=NOW() WHERE id = :id AND status='published'");
+                $stmt->execute([':id' => $id]);
+                header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode('Published — live now.'));
+                exit;
+            }
+
+            // Phase 14.6 — schedule branch (see article-edit.php for the canonical
+            // explanation). Saves form fields then schedules; the cron promotes.
+            if ($action === 'schedule') {
+                $scheduleAt = trim((string)($_POST['schedule_at'] ?? ''));
+                if ($scheduleAt === '') {
+                    $errors[] = 'A schedule date/time is required.';
+                } else {
+                    save_journal($saveData);
+                    assign_primary_category($id, 'journal', $post['primary_category']);
+                    $res = schedule_content($id, $scheduleAt);
+                    if (!$res['ok']) {
+                        header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode($res['error']));
+                        exit;
+                    }
+                    $stamp = (string)($res['published_at'] ?? $scheduleAt);
+                    $msg = 'Scheduled for ' . date('M j, Y · g:i A', strtotime($stamp));
+                    header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode($msg));
+                    exit;
+                }
+            }
+
             [$targetStage, $stageMsg] = $actionToStage($action, $currentStage);
 
             if ($targetStage !== null) {
@@ -208,6 +266,33 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 $status        = (string)($journal['status'] ?? 'draft');
 $slugPublished = $status === 'published';
+
+// Phase 14.6 — publish-state derivation (same shape as article-edit.php).
+$publishedStatus    = (string)($journal['published_status'] ?? '');
+$isScheduled        = ($status === 'published' && $publishedStatus === 'scheduled');
+$isLive             = ($status === 'published' && $publishedStatus !== 'scheduled');
+$showPublishSection = ($status === 'draft' || $isScheduled);
+$publishedAtRaw     = (string)($journal['published_at'] ?? '');
+$scheduleAtForInput = $isScheduled && $publishedAtRaw !== ''
+    ? str_replace(' ', 'T', substr($publishedAtRaw, 0, 16))
+    : '';
+$minScheduleAt      = date('Y-m-d\TH:i', time() + 60);
+
+// Phase 14.6 (followup) — Publish info box for live rows.
+$publishedAtForInput = $publishedAtRaw !== ''
+    ? str_replace(' ', 'T', substr($publishedAtRaw, 0, 16))
+    : '';
+$updatedAtRaw       = (string)($journal['updated_at'] ?? '');
+$updatedAtFormatted = $updatedAtRaw !== ''
+    ? date('M j, Y · g:i A', strtotime($updatedAtRaw))
+    : '—';
+$updatedAtDateOnly  = $updatedAtRaw !== '' ? substr($updatedAtRaw, 0, 10) : '';
+$showUpdated        = !empty($journal['show_updated']);
+$updatedDisplayRaw  = (string)($journal['updated_display'] ?? '');
+$updatedDisplayDateOnly = $updatedDisplayRaw !== '' ? substr($updatedDisplayRaw, 0, 10) : '';
+$updatedHasOverride = $updatedDisplayDateOnly !== '' && $updatedDisplayDateOnly !== $updatedAtDateOnly;
+$updatedInputValue  = $updatedHasOverride ? $updatedDisplayDateOnly : $updatedAtDateOnly;
+
 $bodyInitial   = (string)($journal['body'] ?? '');
 
 $myStatusIdx = array_search($status, $journalStages, true);
@@ -233,6 +318,7 @@ $entryNumPadded = $journal['journal_number'] !== null
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Edit journal: <?= $e((string)($journal['key_statement'] ?? $journal['title'] ?? 'Untitled')) ?> — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -272,7 +358,8 @@ require __DIR__ . '/../partials/topbar.php';
       if ($titleHdr === '') $titleHdr = 'Untitled';
       $title    = $titleHdr;
       $entryHdr = $entryNumPadded !== null ? ' · Entry ' . $entryNumPadded : '';
-      $subtitle = 'Journal · ' . ucfirst($status) . $entryHdr . ' · last saved ' . (string)($journal['updated_at'] ?? '');
+      $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
+      $subtitle = 'Journal · ' . $stageLabel . $entryHdr . ' · last saved ' . (string)($journal['updated_at'] ?? '');
 
       $subtitle_extra = '';
       if ($flash !== '') {
@@ -319,6 +406,16 @@ require __DIR__ . '/../partials/topbar.php';
               action="/cms/journals/edit?id=<?= (int)$id ?>"
               class="cms-form cms-form-wide">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+
+          <?php if ($isScheduled): ?>
+            <div class="schedule-banner" data-target="<?= $e($publishedAtRaw) ?>">
+              <span class="schedule-banner-icon">⏱</span>
+              <span class="schedule-banner-text">
+                Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
+                · <span class="schedule-countdown" data-countdown>computing…</span>
+              </span>
+            </div>
+          <?php endif; ?>
 
           <div class="form-grid">
             <div class="form-main">
@@ -423,6 +520,65 @@ require __DIR__ . '/../partials/topbar.php';
                   <p class="field-hint">Assigned on first publish. Permanent identifier.</p>
                 </div>
               <?php endif; ?>
+
+              <?php if ($isLive): ?>
+                <div class="cms-publish-box">
+                  <label class="field-label">Publish info</label>
+                  <div class="field-group" style="margin-bottom:var(--space-12)">
+                    <label class="field-sublabel" for="journal-published-at">Published</label>
+                    <input type="datetime-local"
+                           name="published_at"
+                           id="journal-published-at"
+                           class="field-input"
+                           value="<?= $e($publishedAtForInput) ?>">
+                    <p class="field-hint">Editable. Changes the publish date displayed on the live page.</p>
+                  </div>
+                  <div class="field-group cms-updated-group" data-updated-group style="margin-bottom:0">
+                    <label class="cms-publish-check">
+                      <input type="checkbox" name="show_updated" value="1" <?= $showUpdated ? 'checked' : '' ?> data-show-updated>
+                      <span>Show "Updated" date on the article</span>
+                    </label>
+                    <div class="cms-updated-input-row" data-updated-row>
+                      <input type="date"
+                             name="updated_display"
+                             class="field-input <?= !$updatedHasOverride ? 'is-default' : '' ?>"
+                             value="<?= $e($updatedInputValue) ?>"
+                             data-default="<?= $e($updatedAtDateOnly) ?>"
+                             data-updated-input
+                             <?= !$showUpdated ? 'disabled' : '' ?>>
+                      <button type="button"
+                              class="cms-updated-clear"
+                              data-clear-updated
+                              title="Reset to actual last update date"
+                              <?= !$updatedHasOverride ? 'hidden' : '' ?>>×</button>
+                    </div>
+                    <p class="field-hint">Default: actual last save date. Override to display a different date.</p>
+                  </div>
+                </div>
+              <?php endif; ?>
+
+              <?php if ($showPublishSection): ?>
+                <div class="cms-publish-box">
+                  <div class="field-group cms-publish-section" data-publish-section>
+                    <label class="field-label">Schedule for Publish</label>
+                    <div class="cms-publish-toggle">
+                      <label class="cms-publish-check">
+                        <input type="checkbox" name="schedule_enabled" value="1" <?= $isScheduled ? 'checked' : '' ?> data-publish-toggle>
+                        <span>Schedule for later</span>
+                      </label>
+                    </div>
+                    <div class="cms-publish-schedule" data-publish-schedule-row<?= !$isScheduled ? ' hidden' : '' ?>>
+                      <input type="datetime-local"
+                             name="schedule_at"
+                             class="field-input"
+                             value="<?= $e($scheduleAtForInput) ?>"
+                             min="<?= $e($minScheduleAt) ?>"
+                             data-schedule-input>
+                      <p class="field-hint">Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.</p>
+                    </div>
+                  </div>
+                </div>
+              <?php endif; ?>
             </aside>
           </div>
 
@@ -430,13 +586,26 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
             <a href="/cms/journals" class="btn-ghost">Cancel</a>
 
-            <button type="submit" form="journal-delete-form" class="btn-ghost btn-danger" style="margin-left:auto">Delete</button>
+            <button type="submit" form="journal-delete-form" class="btn-ghost btn-danger">Delete</button>
 
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri">Publish →</button>
+              <button type="submit" name="action" value="publish" class="btn-pri" data-publish-btn>Publish →</button>
+              <button type="submit" name="action" value="schedule" class="btn-pri" data-schedule-btn hidden>Schedule →</button>
+              <button type="button" class="btn-ghost" data-set-schedule>Schedule Publish</button>
             <?php endif; ?>
 
-            <?php if ($status === 'published'): ?>
+            <?php if ($isScheduled): ?>
+              <button type="submit" name="action" value="publish-now" class="btn-pri"
+                      onclick="return confirm('Publish this now? It will go live immediately at the current time.');">Publish Now</button>
+              <button
+                type="submit"
+                name="action"
+                value="unpublish"
+                class="btn-ghost"
+                data-confirm-unpublish="1">Move back to Draft</button>
+            <?php endif; ?>
+
+            <?php if ($isLive): ?>
               <button
                 type="submit"
                 name="action"
@@ -516,5 +685,6 @@ require __DIR__ . '/../partials/topbar.php';
   }
 </script>
 
+<script src="/cms/_assets/publish-choreography.js" defer></script>
 </body>
 </html>

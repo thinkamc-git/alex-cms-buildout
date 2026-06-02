@@ -67,8 +67,57 @@
   transition: border-color 0.15s;
   display: flex; flex-direction: column;
   --pad: 24px;
+  position: relative;
 }
 .card:hover { border-color: var(--primary); }
+
+/* Stretched-link pattern — the card root is a <div>, not an <a>, so that
+   intentional nested links inside (series-pill, future tag links) don't
+   trip the nested-anchor auto-close behaviour in the HTML parser. The
+   .card-link inside the title's <h2> covers the whole card via ::before.
+   Critical: .card-link itself must NOT be position:relative, because that
+   would make the ::before's containing block the link itself (covering
+   only the title) instead of .card. Same reason no intermediate ancestor
+   between .card-link and .card may be position:relative. */
+.card .card-link { color: inherit; text-decoration: none; }
+.card .card-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.card .card-link:hover { color: inherit; }
+/* Other interactive children sit above the stretched ::before via z-index.
+   These MUST also have position:relative so z-index applies. */
+.card .series-pill,
+.card a.series-pill,
+.card .tag,
+.card .od-tag,
+.card .ev-countdown-label,
+.card .ev-past-label { position: relative; z-index: 2; }
+
+/* Series index — faint italic part-number watermark sitting behind the
+   card content. Renders for /series/[slug]/ cards (set by series_auto_index
+   via $card['_series_number']). */
+.card-series-number {
+  position: absolute;
+  right: var(--space-12);
+  bottom: -10px;
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 144px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--c-current, var(--primary)) 12%, transparent);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+/* No position:relative on card-header/body — would break the stretched
+   link's containing-block lookup. Watermark uses pointer-events:none, so
+   it visually overlaps content but clicks still pass through to the
+   stretched link below. */
 .card .card-header { display: flex; align-items: center; justify-content: space-between; padding: var(--pad) var(--pad) 0; flex-shrink: 0; }
 .card--event .card-header { background: var(--primary); padding-bottom: var(--space-4); }
 .card .card-body { padding: var(--space-16) var(--pad) var(--space-20); display: flex; flex-direction: column; flex: 1; }
@@ -82,7 +131,9 @@
 .card .meta-strip { display: flex; align-items: center; justify-content: space-between; padding: 11px var(--pad); border-top: 1px solid var(--ink-18); }
 .card .meta-strip span { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .card .series-row { display: flex; align-items: center; gap: var(--space-8); margin-bottom: 18px; flex-wrap: wrap; }
-.card .series-pill { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; background: transparent; white-space: nowrap; }
+.card .series-pill { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; background: transparent; white-space: nowrap; text-decoration: none; transition: background-color 0.12s ease, border-color 0.12s ease; }
+a.card .series-pill, .card a.series-pill { /* defensive: ensure no underline when anchor is the pill */ text-decoration: none; }
+.card a.series-pill:hover { background-color: color-mix(in srgb, var(--c-current) 8%, transparent); border-color: color-mix(in srgb, var(--c-current) 60%, transparent); }
 .card .series-pos { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .card .sdot { width: 5px; height: 5px; border-radius: 50%; background: color-mix(in srgb, var(--c-terracotta) 20%, transparent); }
 .card .series-dots { display: flex; align-items: center; gap: 3px; }

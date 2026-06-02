@@ -44,6 +44,7 @@ $stagePill = static function (string $status) use ($e): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Articles — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,14 +112,28 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
 
         <?php
-        // Split into "In progress" (idea/concept/outline/draft) and "Published".
-        $inProgress = [];
-        $published  = [];
+        // Three sections: Drafts (concept + outline + draft), Scheduled
+        // (status=published + published_status=scheduled), Published (live).
+        // Idea-stage rows are intentionally hidden — they live in the Ideation
+        // view only. Concept/Outline fold into Drafts.
+        $drafts    = [];
+        $scheduled = [];
+        $published = [];
         foreach ($articles as $a) {
-            if ((string)($a['status'] ?? '') === 'published') {
-                $published[] = $a;
+            $st = (string)($a['status'] ?? '');
+            $ps = (string)($a['published_status'] ?? '');
+            if ($st === 'idea') {
+                continue; // hidden — only visible in Ideation view
+            }
+            if ($st === 'published') {
+                if ($ps === 'scheduled') {
+                    $scheduled[] = $a;
+                } else {
+                    $published[] = $a;
+                }
             } else {
-                $inProgress[] = $a;
+                // concept / outline / draft all roll into Drafts
+                $drafts[] = $a;
             }
         }
 
@@ -158,7 +173,13 @@ require __DIR__ . '/../partials/topbar.php';
                 $seriesHtml = '<span class="muted">—</span>';
             }
 
+            $isPublished = (string)($a['status'] ?? '') === 'published';
+            $liveBtn = $isPublished && $slug !== ''
+                ? '<a href="/writing/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+                : '';
+
             $actionsHtml = '<div class="row-actions">'
+                . $liveBtn
                 . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
                 . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
                 .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
@@ -170,7 +191,7 @@ require __DIR__ . '/../partials/topbar.php';
                 'href'  => '/cms/articles/edit?id=' . $id,
                 'cells' => [
                     ['html' => $titleHtml],
-                    ['html' => $stagePill((string)($a['status'] ?? 'draft'))],
+                    ['html' => $stagePill(((string)($a['status'] ?? '') === 'published' && (string)($a['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($a['status'] ?? 'draft'))],
                     ['html' => $specialHtml],
                     ['html' => $seriesHtml],
                     ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
@@ -183,18 +204,36 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="content-block">
           <div class="content-block-header">
             <div>
-              <span class="content-block-label">In progress</span>
-              <span class="content-block-sublabel">Idea · Concept · Outline · Draft</span>
+              <span class="content-block-label">Drafts</span>
+              <span class="content-block-sublabel">Concept · Outline · Draft</span>
             </div>
-            <span class="content-block-count"><?= (int)count($inProgress) ?> entries</span>
+            <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
 
           <?php
-          $rows = array_map($buildRow, $inProgress);
-          $empty_text = 'No articles in progress. Click + New Article to start.';
+          $rows = array_map($buildRow, $drafts);
+          $empty_text = 'No drafts in progress. Click + New Article to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
+
+        <?php if (count($scheduled) > 0): ?>
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Scheduled</span>
+              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+            </div>
+            <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
+          </div>
+
+          <?php
+          $rows = array_map($buildRow, $scheduled);
+          $empty_text = 'No scheduled articles.';
+          require __DIR__ . '/../partials/table.php';
+          ?>
+        </div>
+        <?php endif; ?>
 
         <div class="content-block">
           <div class="content-block-header">

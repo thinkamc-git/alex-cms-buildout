@@ -137,6 +137,13 @@ $router->post('/cms/redirects', $cms('views/redirects.php'));
 $router->get ('/cms/subscribers', $cms('views/subscribers.php'));
 $router->post('/cms/subscribers', $cms('views/subscribers.php'));
 
+// Phase 14.5: Content Template view. Master Template + 6 sub-templates,
+// read-only port of the design mockup with Author info editable. GET
+// handles all template/tab navigation via ?tpl=...&tab=... query params;
+// POST handles the Author save action (CSRF-protected) inside the view.
+$router->get ('/cms/content-template', $cms('views/content-template.php'));
+$router->post('/cms/content-template', $cms('views/content-template.php'));
+
 // ── Public subscribe (Phase 14) ─────────────────────────────────────
 // POST /subscribe handles the newsletter-form submission: honeypot,
 // rate-limit (1/min, 10/day per IP), email validation, upsert.

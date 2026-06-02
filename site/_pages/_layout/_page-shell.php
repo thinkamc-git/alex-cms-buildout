@@ -42,7 +42,7 @@ $_e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/_layout/style-pages.css" />
-  <link rel="icon" type="image/png" href="/_layout/favicon.png" />
+  <link rel="icon" type="image/png" href="/_layout/favicon<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png" />
   <script src="/_layout/analytics.js" async></script>
 </head>
 <body>

@@ -89,8 +89,10 @@ a { color: inherit; }
   --r-pill: 4px;
   --r-tag:  3px;
 
-  /* Dot-grid paper texture (inline SVG, no asset dependency) */
-  --dot-grid: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23e8e8e8%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221.5%22%20fill%3D%22%23b8b6b2%22%20opacity%3D%220.15%22/%3E%3C/svg%3E");
+  /* Paper texture — shared with marketing pages. background.png is a
+     400×400 tile served from /_layout/, displayed at 200×200 via
+     background-size below. */
+  --dot-grid: url("/_layout/background.png");
 }
 
 
@@ -105,7 +107,7 @@ body {
   color: var(--primary);
   background-color: var(--neutral);
   background-image: var(--dot-grid);
-  background-size: 4px 4px;
+  background-size: 200px 200px;
   background-repeat: repeat;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -116,13 +118,37 @@ body {
 /* ── 4. Layout chrome ───────────────────────────────────── */
 
 .layout-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 52px;
   padding: 0 var(--space-48);
-  background: var(--neutral);
+  /* Frosted nav matching marketing pages — translucent + backdrop-blur,
+     with the body's dot-grid texture layered in via the ::before below
+     so the header reacts to scrolled content rather than sitting flat. */
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  isolation: isolate;
   border-bottom: var(--rule-30);
+}
+.layout-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--dot-grid);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.layout-nav > * {
+  position: relative;
+  z-index: 1;
 }
 .layout-nav-logo {
   display: inline-flex;
@@ -188,8 +214,29 @@ body {
    adding a new category is one mapping line below.
    ──────────────────────────────────────────────────────── */
 
-/* Category mapping — one line per hue, driven by data-category */
+/* Category mapping — one line per hue, driven by data-category. The CMS
+   stores the colour slug on the category row; templates set the matching
+   attribute on the <article> root; every category-tinted element below
+   reads var(--c-current, var(--primary)). Matches every brand --c-* token
+   defined in _design-system/css/tokens.css. */
+.article[data-category="rust"]       { --c-current: var(--c-rust); }
 .article[data-category="terracotta"] { --c-current: var(--c-terracotta); }
+.article[data-category="clay"]       { --c-current: var(--c-clay); }
+.article[data-category="amber"]      { --c-current: var(--c-amber); }
+.article[data-category="ochre"]      { --c-current: var(--c-ochre); }
+.article[data-category="olive"]      { --c-current: var(--c-olive); }
+.article[data-category="moss"]       { --c-current: var(--c-moss); }
+.article[data-category="forest"]     { --c-current: var(--c-forest); }
+.article[data-category="sage"]       { --c-current: var(--c-sage); }
+.article[data-category="teal"]       { --c-current: var(--c-teal); }
+.article[data-category="ocean"]      { --c-current: var(--c-ocean); }
+.article[data-category="denim"]      { --c-current: var(--c-denim); }
+.article[data-category="indigo"]     { --c-current: var(--c-indigo); }
+.article[data-category="purple"]     { --c-current: var(--c-purple); }
+.article[data-category="violet"]     { --c-current: var(--c-violet); }
+.article[data-category="plum"]       { --c-current: var(--c-plum); }
+.article[data-category="mauve"]      { --c-current: var(--c-mauve); }
+.article[data-category="rose"]       { --c-current: var(--c-rose); }
 
 .article-breadcrumb {
   display: flex;
@@ -359,6 +406,13 @@ body {
   border-radius: var(--r-pill);
   border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 35%, transparent);
   color: var(--c-current, var(--primary));
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+a.article-series-pill:hover {
+  background-color: color-mix(in srgb, var(--c-current, var(--primary)) 8%, transparent);
+  border-color: color-mix(in srgb, var(--c-current, var(--primary)) 60%, transparent);
 }
 .article-series-progress {
   font-family: var(--font-cond);
@@ -1013,16 +1067,9 @@ body {
   letter-spacing: -0.01em;
   color: var(--primary);
   padding-left: var(--space-24);
-  border-left: 4px solid var(--ink-30);
+  border-left: 4px solid var(--c-current, var(--ink-30));
   margin: var(--space-16) 0 var(--space-32);
 }
-.article[data-category="terracotta"] .article-key-statement { border-left-color: var(--c-terracotta); }
-.article[data-category="forest"]     .article-key-statement { border-left-color: var(--c-forest); }
-.article[data-category="denim"]      .article-key-statement { border-left-color: var(--c-denim); }
-.article[data-category="purple"]     .article-key-statement { border-left-color: var(--c-purple); }
-.article[data-category="mauve"]      .article-key-statement { border-left-color: var(--c-mauve); }
-.article[data-category="amber"]      .article-key-statement { border-left-color: var(--c-amber); }
-.article[data-category="teal"]       .article-key-statement { border-left-color: var(--c-teal); }
 
 /* Entry Number — small monospace label in the topstrip right slot. */
 .article-entry-number {
@@ -1053,58 +1100,76 @@ body {
 /* Event Card combines Event Details + Format Tags into one white panel,
    per BLOCKS.md §7. Same surface treatment as Author Bio: a faint-bordered
    card sitting between the publish date and the byline row. */
-.article-event-card {
-  background: var(--white);
-  border: 1px solid var(--ink-18);
-  border-radius: var(--r-card);
-  padding: var(--space-20) var(--space-24);
-  margin: var(--space-24) 0 var(--space-32);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-16);
-}
-.article-event-details {
-  margin: 0;
+/* Event card — combined When/Where + format tags in a single white card
+   with the same surface treatment as the author bio block. Date and
+   location render in Instrument Serif italic at 28px for editorial
+   flair. Format tags fill the bottom row across both columns with a
+   top rule separator. Design ported from site/_templates/layouts.html. */
+.event-card {
   display: grid;
-  grid-template-columns: 80px 1fr;
-  row-gap: var(--space-8);
-  column-gap: var(--space-16);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-32);
+  margin: var(--space-24) 0 var(--space-32);
+  padding: var(--space-32);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
 }
-.article-event-row { display: contents; }
-.article-event-row dt {
+.event-meta-block-label {
   font-family: var(--font-cond);
   font-size: var(--text-label);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0;
+  margin-bottom: var(--space-12);
 }
-.article-event-row dd {
-  margin: 0;
+.event-date,
+.event-location {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+}
+.event-time,
+.event-cost-detail {
   font-family: var(--font);
   font-size: var(--text-md);
-  color: var(--primary);
+  color: var(--secondary);
+  margin-top: var(--space-8);
 }
-.article-format-tags {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.event-card-tags {
+  grid-column: 1 / -1;
   display: flex;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: var(--space-8);
+  padding-top: var(--space-24);
+  border-top: var(--rule-faint);
 }
-.article-format-pill {
+.event-format-tag {
   font-family: var(--font-cond);
   font-size: var(--text-pill);
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--primary);
-  background: var(--surface);
-  border: 1px solid var(--ink-18);
+  padding: 3px 10px;
   border-radius: var(--r-pill);
-  padding: 4px 10px;
+  border: 1px solid var(--ink-18);
+  color: var(--secondary);
+  background: transparent;
+}
+.event-format-tag.is-free {
+  color: #246636;
+  border-color: rgba(36,102,54,0.4);
+  background: rgba(36,102,54,0.08);
+}
+.event-format-tag.is-in-person {
+  color: #6B4010;
+  border-color: rgba(107,64,16,0.4);
+  background: rgba(107,64,16,0.07);
 }
 
 /* PAST badge — small chip in the topstrip right slot when the event has
@@ -1124,8 +1189,15 @@ body {
 }
 
 @media (max-width: 480px) {
-  .article-event-details {
-    grid-template-columns: 64px 1fr;
+  /* Event card stacks (When over Where), tighter padding, smaller dates. */
+  .event-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-20);
+    padding: var(--space-24);
+  }
+  .event-date,
+  .event-location {
+    font-size: 24px;
   }
 }
 

@@ -39,6 +39,7 @@ $stagePill = static function (string $status) use ($e): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Live Sessions — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,13 +87,19 @@ require __DIR__ . '/../partials/topbar.php';
         // the articles list pattern. Within each group, soonest event first
         // (undated rows last), and within Published, past events sink to
         // the bottom after upcoming.
+        // Three sections: Drafts (concept + outline + draft) / Scheduled /
+        // Published (live). Idea-stage hidden — Ideation view only.
         $nowTs     = time();
         $drafts    = [];
+        $scheduled = [];
         $published = [];
         foreach ($sessions as $s) {
             $status = (string)($s['status'] ?? '');
+            $pubStatus = (string)($s['published_status'] ?? '');
+            if ($status === 'idea') continue;
             if ($status === 'published') {
-                $published[] = $s;
+                if ($pubStatus === 'scheduled') { $scheduled[] = $s; }
+                else { $published[] = $s; }
             } else {
                 $drafts[] = $s;
             }
@@ -190,7 +197,13 @@ require __DIR__ . '/../partials/topbar.php';
                        . '</a>'
                        . ' <span class="row-slug">/' . $e($slug) . '</span>';
 
+            $isPublished = (string)($s['status'] ?? '') === 'published';
+            $liveBtn = $isPublished && $slug !== ''
+                ? '<a href="/live-sessions/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+                : '';
+
             $actionsHtml = '<div class="row-actions">'
+                . $liveBtn
                 . '<a href="/cms/live-sessions/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
                 . '<form method="post" action="/cms/live-sessions/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this session? This cannot be undone.">'
                 .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
@@ -202,7 +215,7 @@ require __DIR__ . '/../partials/topbar.php';
                 'href'  => '/cms/live-sessions/edit?id=' . $id,
                 'cells' => [
                     ['html' => $titleHtml],
-                    ['html' => $stagePill((string)($s['status'] ?? 'idea'))],
+                    ['html' => $stagePill(((string)($s['status'] ?? '') === 'published' && (string)($s['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($s['status'] ?? 'idea'))],
                     ['html' => $whenHtml],
                     ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
@@ -215,7 +228,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Drafts</span>
-              <span class="content-block-sublabel">Idea · Draft — not yet live</span>
+              <span class="content-block-sublabel">Concept · Outline · Draft</span>
             </div>
             <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
@@ -226,6 +239,24 @@ require __DIR__ . '/../partials/topbar.php';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
+
+        <?php if (count($scheduled) > 0): ?>
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Scheduled</span>
+              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+            </div>
+            <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
+          </div>
+
+          <?php
+          $rows = array_map($buildRow, $scheduled);
+          $empty_text = 'No scheduled sessions.';
+          require __DIR__ . '/../partials/table.php';
+          ?>
+        </div>
+        <?php endif; ?>
 
         <div class="content-block">
           <div class="content-block-header">

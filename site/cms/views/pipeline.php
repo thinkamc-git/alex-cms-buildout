@@ -50,22 +50,40 @@ usort($rows, static function (array $a, array $b): int {
     return strcmp((string)($b['updated_at'] ?? ''), (string)($a['updated_at'] ?? ''));
 });
 
-// Per-stage counts across both types.
-$counts = ['idea' => 0, 'concept' => 0, 'outline' => 0, 'draft' => 0, 'published' => 0];
+// Per-bucket counts across all types. The "scheduled" bucket is virtual:
+// rows where status='published' but published_status='scheduled' (cron
+// hasn't promoted to 'live' yet). Phase 14.6 split.
+$counts = ['concept' => 0, 'outline' => 0, 'draft' => 0, 'scheduled' => 0, 'published' => 0];
 foreach ($rows as $r) {
-    $s = (string)($r['status'] ?? '');
-    if (isset($counts[$s])) $counts[$s]++;
+    $s  = (string)($r['status'] ?? '');
+    $ps = (string)($r['published_status'] ?? '');
+    if ($s === 'published' && $ps === 'scheduled') {
+        $counts['scheduled']++;
+    } elseif (isset($counts[$s])) {
+        $counts[$s]++;
+    }
 }
-$inFlight = $counts['idea'] + $counts['concept'] + $counts['outline'] + $counts['draft'];
+$inFlight = $counts['concept'] + $counts['outline'] + $counts['draft'] + $counts['scheduled'];
 
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
-// Group rows by stage for kanban rendering.
-$byStage = array_fill_keys(ARTICLE_STAGES, []);
+// Group rows by bucket for kanban rendering. Scheduled siphons rows out
+// of the 'published' bucket so the lane only shows live posts.
+$byStage = ['concept' => [], 'outline' => [], 'draft' => [], 'scheduled' => [], 'published' => []];
 foreach ($rows as $r) {
-    $s = (string)($r['status'] ?? 'idea');
-    if (isset($byStage[$s])) $byStage[$s][] = $r;
+    $s  = (string)($r['status'] ?? 'draft');
+    $ps = (string)($r['published_status'] ?? '');
+    if ($s === 'published' && $ps === 'scheduled') {
+        $byStage['scheduled'][] = $r;
+    } elseif (isset($byStage[$s])) {
+        $byStage[$s][] = $r;
+    }
 }
+
+// Scheduled lane: sort by published_at ASC (soonest-next first).
+usort($byStage['scheduled'], static function (array $a, array $b): int {
+    return strcmp((string)($a['published_at'] ?? ''), (string)($b['published_at'] ?? ''));
+});
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
@@ -114,7 +132,16 @@ $renderCard = static function (array $a, string $stage) use ($e): string {
           . '</div>';
 
     $foot = '';
-    if ($stage !== 'idea') {
+    if ($stage === 'scheduled') {
+        // Show the scheduled-for date prominently — it's the most useful
+        // info on a scheduled card. updated_at lives below as a smaller line.
+        $scheduledAt = (string)($a['published_at'] ?? '');
+        $when = $scheduledAt !== '' ? date('M j · g:i A', strtotime($scheduledAt)) : '—';
+        $foot = '<div class="kcard-foot">'
+              . '<span class="kcard-date" style="font-weight:600;color:var(--stage-published)">→ ' . $e($when) . '</span>'
+              . '<span class="row-slug">/' . $e($slug) . '</span>'
+              . '</div>';
+    } elseif ($stage !== 'idea') {
         $foot = '<div class="kcard-foot">'
               . '<span class="row-slug">/' . $e($slug) . '</span>'
               . '<span class="kcard-date">' . $e($updated) . '</span>'
@@ -127,10 +154,10 @@ $renderCard = static function (array $a, string $stage) use ($e): string {
 };
 
 $lanes = [
-    ['stage' => 'idea',      'label' => 'Ideas',     'token' => 'idea'],
     ['stage' => 'concept',   'label' => 'Concepts',  'token' => 'concept'],
     ['stage' => 'outline',   'label' => 'Outlines',  'token' => 'outline'],
     ['stage' => 'draft',     'label' => 'Drafts',    'token' => 'draft'],
+    ['stage' => 'scheduled', 'label' => 'Scheduled', 'token' => 'concept'],
     ['stage' => 'published', 'label' => 'Published', 'token' => 'published'],
 ];
 ?><!doctype html>
@@ -139,6 +166,7 @@ $lanes = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Pipeline — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -175,13 +203,13 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="dash-meta">
           <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-idea)"><?= (int)$counts['idea'] ?></span><span class="lbl">Ideas</span></div>
-          <div class="dash-stat-div"></div>
           <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$counts['concept'] ?></span><span class="lbl">Concept</span></div>
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><span class="num" style="color:var(--stage-outline)"><?= (int)$counts['outline'] ?></span><span class="lbl">Outline</span></div>
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><span class="num" style="color:var(--stage-draft)"><?= (int)$counts['draft'] ?></span><span class="lbl">Draft</span></div>
+          <div class="dash-stat-div"></div>
+          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$counts['scheduled'] ?></span><span class="lbl">Scheduled</span></div>
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$counts['published'] ?></span><span class="lbl">Live</span></div>
         </div>
@@ -206,9 +234,22 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="lane-cards">
               <?php if (count($cards) === 0): ?>
                 <div class="idea-lane-empty">Nothing here yet</div>
-              <?php else: foreach ($cards as $card): ?>
-                <?= $renderCard($card, $stage) ?>
-              <?php endforeach; endif; ?>
+              <?php else:
+                $paginate = ($stage === 'published' && count($cards) > 5);
+                $hiddenCount = $paginate ? count($cards) - 5 : 0;
+                foreach ($cards as $idx => $card):
+                  $hiddenClass = ($paginate && $idx >= 5) ? ' pipeline-load-more-hidden' : '';
+              ?>
+                <?php if ($hiddenClass !== ''): ?>
+                  <div class="<?= ltrim($hiddenClass) ?>"><?= $renderCard($card, $stage) ?></div>
+                <?php else: ?>
+                  <?= $renderCard($card, $stage) ?>
+                <?php endif; ?>
+              <?php endforeach; ?>
+                <?php if ($paginate): ?>
+                  <button class="pipeline-load-more" type="button" data-count="<?= (int)$hiddenCount ?>">Load <?= (int)$hiddenCount ?> more</button>
+                <?php endif; ?>
+              <?php endif; ?>
             </div>
           </div>
         <?php endforeach; ?>

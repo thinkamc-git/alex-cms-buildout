@@ -127,6 +127,7 @@ $stagePill = static function (string $status) use ($e): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
 <title>Series — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -198,6 +199,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-12)">
               <span class="val-pill"><?= $e((string)$s['slug']) ?></span>
               <span style="color:var(--muted);font-size:var(--text-micro);font-family:var(--font-mono)">/series/<?= $e((string)$s['slug']) ?>/</span>
+              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-ghost btn-tiny" style="margin-left:auto" title="Open the live series index">Launch ↗</a>
             </div>
 
             <textarea name="description" rows="2" placeholder="Optional description — shown on the series index page."

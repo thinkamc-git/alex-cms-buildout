@@ -305,7 +305,35 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .pill-outline   { color:var(--stage-outline);   background:color-mix(in srgb,var(--stage-outline) 10%,transparent);   border:1px solid color-mix(in srgb,var(--stage-outline) 28%,transparent); }
 .pill-draft     { color:var(--stage-draft);     background:color-mix(in srgb,var(--stage-draft) 10%,transparent);     border:1px solid color-mix(in srgb,var(--stage-draft) 28%,transparent); }
 .pill-live      { color:var(--live-green);      background:color-mix(in srgb,var(--live-green) 10%,transparent);      border:1px solid color-mix(in srgb,var(--live-green) 28%,transparent); }
-.pill-scheduled { color:var(--c-denim);         background:color-mix(in srgb,var(--c-denim) 10%,transparent);         border:1px solid color-mix(in srgb,var(--c-denim) 28%,transparent); }
+.pill-scheduled { color:var(--c-amber);         background:color-mix(in srgb,var(--c-amber) 14%,transparent);         border:1px solid color-mix(in srgb,var(--c-amber) 40%,transparent); }
+
+/* Phase 14.6 (followup 2) — updated-date row inside Publish info box.
+   Checkbox sits above; input + X clear button live in a flex row below. */
+.cms-updated-group { padding-top: var(--space-12); border-top: var(--rule-faint); margin-top: var(--space-12); }
+.cms-updated-input-row { display: flex; align-items: center; gap: var(--space-8); margin-top: var(--space-8); }
+.cms-updated-input-row .field-input { flex: 1; font-family: var(--font-mono); font-size: var(--text-meta); transition: color 0.15s, opacity 0.15s; }
+.cms-updated-input-row .field-input:disabled { opacity: 0.55; cursor: not-allowed; }
+/* "Default" state: value matches actual updated_at — render dimmed to
+   signal "this is just the default, no override". When user types a
+   different date, .is-default falls off and the input renders full
+   darkness. */
+.cms-updated-input-row .field-input.is-default { color: var(--muted); opacity: 0.7; }
+.cms-updated-clear {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--ink-18);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+.cms-updated-clear:hover { color: var(--c-terracotta); border-color: var(--c-terracotta); }
+.cms-updated-clear[hidden] { display: none; }
 .pill-hidden    { color:var(--muted);           background:var(--ink-08);                                               border:1px solid var(--ink-18); }
 
 .type-badge { display:inline-block; padding:2px 6px; border-radius:2px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
@@ -804,3 +832,54 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
   color: var(--muted);
   margin-bottom: var(--space-4);
 }
+
+/* Phase 14.6 (revised) — Schedule for Publish box. Visually distinct
+   container in the right aside; single checkbox replaces the prior
+   radio pair. */
+.cms-publish-box {
+  margin-top: var(--space-20);
+  padding: var(--space-16);
+  background: var(--canvas-raised);
+  border: 1px solid var(--ink-18);
+  border-radius: var(--r-card);
+}
+.cms-publish-box .field-label { margin-bottom: var(--space-12); }
+.cms-publish-toggle { display: flex; align-items: center; gap: var(--space-8); }
+.cms-publish-check { display: flex; align-items: center; gap: var(--space-8); cursor: pointer; font-family: var(--font); font-size: var(--text-meta); color: var(--primary); }
+.cms-publish-check input[type="checkbox"] { margin: 0; }
+.cms-publish-schedule { margin-top: var(--space-12); display: block; }
+.cms-publish-schedule[hidden] { display: none; }
+.cms-publish-schedule input[type="datetime-local"] { font-family: var(--font-mono); font-size: var(--text-meta); }
+
+/* Scheduled-row alert banner — sits at the top of the form column when
+   the row is scheduled. Amber tone to signal "pending future event". */
+.schedule-banner {
+  display: flex; align-items: center; gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  margin-bottom: var(--space-20);
+  background: color-mix(in srgb, var(--c-amber) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-amber) 35%, transparent);
+  border-radius: var(--r-card);
+  color: var(--primary);
+  font-size: var(--text-meta);
+}
+.schedule-banner-icon { font-size: 18px; flex-shrink: 0; }
+.schedule-banner-text { line-height: 1.5; }
+.schedule-banner-text strong { color: var(--c-amber); font-weight: 700; }
+.schedule-countdown { font-weight: 600; color: var(--c-amber); }
+
+/* Pipeline — Load More button for the Published lane (Phase 14.6 revision). */
+.pipeline-load-more {
+  margin-top: var(--space-12);
+  padding: var(--space-8) var(--space-16);
+  background: transparent;
+  border: 1px dashed var(--ink-18);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  width: 100%;
+}
+.pipeline-load-more:hover { color: var(--primary); border-color: var(--primary); }
+.pipeline-load-more-hidden { display: none; }

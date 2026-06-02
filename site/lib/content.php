@@ -108,6 +108,7 @@ function get_article(int $id): ?array
 function list_articles(array $filters = []): array
 {
     $sql = "SELECT c.id, c.slug, c.title, c.status, c.updated_at, c.published_at,
+                   c.published_status,
                    c.special_tag, c.pipeline_order,
                    c.series_id, c.series_order,
                    s.name AS series_name, s.slug AS series_slug
@@ -163,6 +164,7 @@ function save_article(array $data): int
         'slug', 'status', 'template', 'title', 'summary', 'body',
         'hero_image', 'hero_caption', 'hero_size',
         'show_author', 'show_author_bio',
+        'show_updated', 'updated_display',
         'special_tag', 'series_id', 'series_order',
         'read_time', 'tags',
         'notes', 'concept_text', 'outline_text',
@@ -285,6 +287,7 @@ function get_journal_by_slug(string $slug): ?array
 function list_journals(array $filters = []): array
 {
     $sql = "SELECT id, slug, key_statement, title, status, updated_at, published_at,
+                   published_status,
                    journal_number, pipeline_order
               FROM content
              WHERE type = 'journal'";
@@ -478,6 +481,73 @@ function transition_stage(int $id, string $to): array
 }
 
 /**
+ * Schedule a content row for future publish. Sets status='published' +
+ * published_status='scheduled' + published_at=<future datetime>. The cron
+ * (cron/scheduled-publish.php, Phase 13) sweeps every 5 minutes and flips
+ * 'scheduled' → 'live' once the date arrives.
+ *
+ * Phase 14.6 — added to complete the CMS-side scheduling UX. The
+ * infrastructure (schema column, cron, public-route gate) all shipped
+ * earlier; only this helper + the edit-view UI were missing.
+ *
+ * Allowed source states: draft, or already-scheduled (re-schedule with
+ * a new date). Other stages (idea/concept/outline) must Advance to Draft
+ * first — guarded here as a defence-in-depth.
+ *
+ * Date must be strictly in the future. Validation rejects past + present
+ * (within 60s of NOW). Returns ['ok' => bool, 'error' => string,
+ * 'published_at' => string?].
+ */
+function schedule_content(int $id, string $datetime): array
+{
+    $ts = strtotime($datetime);
+    if ($ts === false) {
+        return ['ok' => false, 'error' => 'Invalid date/time format.'];
+    }
+    // Require at least 60s in the future — guards against accidental
+    // immediate-publish-via-schedule from clock skew or fast-clicks.
+    if ($ts <= time() + 60) {
+        return ['ok' => false, 'error' => 'Schedule time must be at least a minute in the future.'];
+    }
+    $normalized = date('Y-m-d H:i:s', $ts);
+
+    $stmt = db()->prepare("SELECT id, status, type, journal_number FROM content WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    if ($row === false) {
+        return ['ok' => false, 'error' => 'Content not found.'];
+    }
+
+    $from = (string)($row['status'] ?? 'idea');
+    if ($from !== 'draft' && $from !== 'published') {
+        return ['ok' => false, 'error' => 'Schedule is only available from the Draft stage.'];
+    }
+
+    $type = (string)($row['type'] ?? '');
+    if (!in_array($type, CONTENT_TYPES, true)) {
+        return ['ok' => false, 'error' => 'Cannot schedule untyped content.'];
+    }
+
+    $stmt = db()->prepare(
+        "UPDATE content
+            SET status = 'published',
+                published_status = 'scheduled',
+                published_at = :pat
+          WHERE id = :id"
+    );
+    $stmt->execute([':pat' => $normalized, ':id' => $id]);
+
+    // Side-effect: first publish (including scheduled first-publish) of a
+    // journal earns it a per-category entry number. Mirrors the rule in
+    // transition_stage() — entry numbers are archival, never reassigned.
+    if ($type === 'journal' && empty($row['journal_number'])) {
+        assign_journal_number($id);
+    }
+
+    return ['ok' => true, 'error' => '', 'published_at' => $normalized];
+}
+
+/**
  * Whitelist of content types. Mirrors the schema enum. NULL = untyped
  * (Idea stage only).
  */
@@ -637,6 +707,7 @@ function get_live_session_by_slug(string $slug): ?array
 function list_live_sessions(array $filters = []): array
 {
     $sql = "SELECT id, slug, title, status, updated_at, published_at,
+                   published_status,
                    event_date, event_time, event_end_time,
                    location, venue, cost_pill, attendance, custom_pill,
                    pipeline_order
@@ -789,6 +860,7 @@ function get_experiment_by_slug(string $slug): ?array
 function list_experiments(array $filters = []): array
 {
     $sql = "SELECT id, slug, title, status, updated_at, published_at,
+                   published_status,
                    template, source_file, pipeline_order
               FROM content
              WHERE type = 'experiment'";

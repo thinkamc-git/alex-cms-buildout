@@ -150,8 +150,6 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  .nav-zone { margin: 0 var(--space-24) var(--space-24); }
-  .nav-zone-label { font-family:var(--font-cond); font-size:11px; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); padding:var(--space-8) 0; font-weight:700; }
   .nav-list { display:flex; flex-direction:column; gap:6px; }
   /* Fixed grid template — every row uses the same column widths so
      fields line up vertically across rows. Pill-text + color stay in
@@ -218,6 +216,16 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
   }
   .np-mark.hl-pill input::placeholder { color: var(--np-contrast, #fff); opacity: 0.6; }
   .np-mark.hl-none input { visibility:hidden; }
+  /* Save button: hidden until the row is dirty (the JS swaps it from
+     btn-ghost to btn-pri to signal pending changes). Add button at the
+     bottom doesn't carry data-save-btn so it stays visible. */
+  .nav-row [data-save-btn] { visibility:hidden; }
+  .nav-row [data-save-btn].btn-pri { visibility:visible; }
+  /* Delete: only on row-hover so it doesn't always shout. visibility,
+     not display, so the column doesn't collapse. */
+  .nav-row .btn-danger { visibility:hidden; }
+  .nav-row:hover .btn-danger,
+  .nav-row:focus-within .btn-danger { visibility:visible; }
   .nav-row.is-dragging { opacity:0.4; }
   .nav-row.is-over-top    { box-shadow: 0 -2px 0 0 var(--c-denim); }
   .nav-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
@@ -245,6 +253,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Navigation';
       $subtitle = 'Header and footer link lists. Drag to reorder. Items whose target row no longer resolves are flagged BROKEN and hidden from the public site until you fix them.';
+      $actions  = '<a href="/" target="_blank" rel="noopener" class="btn-ghost">Open homepage ↗</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -263,9 +272,18 @@ require __DIR__ . '/../partials/topbar.php';
       // Render-one-zone helper (closure to keep scope tight).
       $renderZone = function (string $zone, array $items) use ($e, $csrf_token, $broken_ids,
           $indexes, $categories, $series_rows, $content_rows, $page_files, $renderMarkCell): void {
+      $zone_sub = $zone === 'header'
+        ? 'Top nav rendered above every public page'
+        : 'Bottom links rendered in the page footer';
       ?>
-        <div class="nav-zone">
-          <div class="nav-zone-label"><?= $e(ucfirst($zone)) ?> &nbsp; <span style="font-weight:400;text-transform:none;letter-spacing:0">— <?= count($items) ?> item<?= count($items)===1?'':'s' ?></span></div>
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label"><?= $e(ucfirst($zone)) ?></span>
+              <span class="content-block-sublabel"><?= $e($zone_sub) ?></span>
+            </div>
+            <span class="content-block-count"><?= count($items) ?> item<?= count($items)===1?'':'s' ?></span>
+          </div>
 
           <div class="nav-list" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
             <?php foreach ($items as $it): $broken = isset($broken_ids[(int)$it['id']]); ?>
@@ -319,7 +337,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </select>
                   <?= $renderMarkCell((string)$it['highlight'], (string)$it['highlight_text'], (string)$it['highlight_color']) ?>
                   <input type="text" name="highlight_color" value="<?= $e((string)$it['highlight_color']) ?>" placeholder="#d63031" data-color<?= $it['highlight']==='none' ? ' class="is-off"' : '' ?>>
-                  <button type="submit" class="btn-ghost btn-tiny">Save</button>
+                  <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
                 </form>
                 <form method="post" action="/cms/navigation" style="display:inline" onsubmit="return confirm('Delete &quot;<?= $e((string)$it['label']) ?>&quot;?');">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -373,7 +391,7 @@ require __DIR__ . '/../partials/topbar.php';
                 </select>
                 <?= $renderMarkCell('none', '', '') ?>
                 <input type="text" name="highlight_color" placeholder="#d63031" data-color class="is-off">
-                <button type="submit" class="btn-pri btn-tiny">Add</button>
+                <button type="submit" class="btn-ghost btn-tiny">Add</button>
               </form>
             </div>
           </div>
@@ -464,6 +482,33 @@ require __DIR__ . '/../partials/topbar.php';
       if (!el) return;
       const evt = el.tagName === 'SELECT' ? 'change' : 'input';
       el.addEventListener(evt, () => navRefreshMark(f));
+    });
+  });
+
+  // Mark a row's Save button primary when any field in that row changes.
+  // The button starts ghost (no pending changes); becomes primary on dirty;
+  // on click, shows "Saved" briefly before the form submits.
+  document.querySelectorAll('.nav-row form').forEach(form => {
+    const saveBtn = form.querySelector('[data-save-btn]');
+    if (!saveBtn) return;
+    // Track baseline values so the dirty check resets correctly after save.
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+      const evt = (el.tagName === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
+      el.addEventListener(evt, () => {
+        saveBtn.classList.remove('btn-ghost');
+        saveBtn.classList.add('btn-pri');
+      });
+    });
+    // On submit, flash "Saved" then let the form post. The page redirects
+    // after POST, so the flash only shows for a moment — that's enough to
+    // confirm the click was registered.
+    saveBtn.addEventListener('click', (e) => {
+      if (!saveBtn.classList.contains('btn-pri')) return; // nothing to save
+      e.preventDefault();
+      saveBtn.textContent = 'Saved';
+      saveBtn.disabled = true;
+      setTimeout(() => form.submit(), 300);
     });
   });
   function navSyncTargetId(form) {

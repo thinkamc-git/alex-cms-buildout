@@ -40,6 +40,38 @@ foreach ([__DIR__ . '/../config/config.php', __DIR__ . '/../../config/config.php
 
 $_is_staging = defined('APP_ENV') && APP_ENV === 'staging';
 
+// Load slug-level metadata from page_metadata. Title and description in
+// the table override the values set by the per-page assembler; og_* tags
+// only emit when their fields are filled in.
+$_meta_title = $_meta_desc = $_meta_og_image = null;
+$_meta_og_type = 'website';
+$_meta_tw_card = 'summary_large_image';
+if (function_exists('_pageshell_require_lib')) {
+    // already defined below; we need it earlier — define minimally inline.
+}
+foreach ([__DIR__ . '/../lib/db.php', __DIR__ . '/../../lib/db.php'] as $_p) {
+    if (is_file($_p)) { require_once $_p; break; }
+}
+foreach ([__DIR__ . '/../lib/pages.php', __DIR__ . '/../../lib/pages.php'] as $_p) {
+    if (is_file($_p)) { require_once $_p; break; }
+}
+if (function_exists('get_page_metadata') && $body !== '') {
+    try {
+        $_pmeta = get_page_metadata($body);
+    } catch (Throwable $e) {
+        $_pmeta = null;
+    }
+    if ($_pmeta !== null) {
+        $_meta_title    = $_pmeta['meta_title']       ?: null;
+        $_meta_desc     = $_pmeta['meta_description'] ?: null;
+        $_meta_og_image = $_pmeta['og_image']         ?: null;
+        $_meta_og_type  = $_pmeta['og_type']          ?: 'website';
+        $_meta_tw_card  = $_pmeta['twitter_card']     ?: 'summary_large_image';
+        if ($_meta_title !== null) $title = $_meta_title;
+        if ($_meta_desc  !== null) $description = $_meta_desc;
+    }
+}
+
 // Tolerate two layouts. Post-deploy: webroot/_layout → webroot/lib
 // (../lib). Source: site/_pages/_layout → site/lib (../../lib).
 if (!function_exists('_pageshell_require_lib')) {
@@ -132,6 +164,15 @@ if ($preview_mock !== null && ($preview_mock['slug'] ?? '') === $body) {
 <?php endif; ?>
 <?php if ($noindex): ?>
   <meta name="robots" content="noindex" />
+<?php endif; ?>
+<?php if ($_meta_og_image !== null): ?>
+  <meta property="og:title" content="<?= $_e($title) ?>" />
+  <meta property="og:type" content="<?= $_e($_meta_og_type) ?>" />
+<?php if ($description !== ''): ?>
+  <meta property="og:description" content="<?= $_e($description) ?>" />
+<?php endif; ?>
+  <meta property="og:image" content="<?= $_e($_meta_og_image) ?>" />
+  <meta name="twitter:card" content="<?= $_e($_meta_tw_card) ?>" />
 <?php endif; ?>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

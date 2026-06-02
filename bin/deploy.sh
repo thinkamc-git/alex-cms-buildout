@@ -163,7 +163,7 @@ cp site/lib/redirects.php          "$STAGE/lib/"
 cp site/lib/subscribers.php        "$STAGE/lib/"
 # Phase 14.5: Content Template view data layer (blocks/fields/sub-templates/
 # matrix sourced from docs/BLOCKS.md). Read-only — consumed by the
-# /cms/content-template view.
+# /cms/post-template view.
 cp site/lib/blocks_data.php        "$STAGE/lib/"
 # Phase 20: Pages CMS (mock versions + token-substituted partial render)
 # and Navigation editor (header/footer items + resolver). Both are read by

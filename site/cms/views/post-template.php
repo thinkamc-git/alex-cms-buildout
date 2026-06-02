@@ -1,6 +1,6 @@
 <?php
 /**
- * cms/views/content-template.php — Content Template admin (Phase 14.5).
+ * cms/views/post-template.php — Post Template admin (Phase 14.5).
  *
  * Read-only port of the design-mockups Content Template view, with the
  * Author info tab editable so the single-row `author` config can be
@@ -47,7 +47,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 (string)($_POST['extended_description'] ?? ''),
                 (string)($_POST['image'] ?? '')
             );
-            header('Location: /cms/content-template?tpl=master&tab=author&flash=' . rawurlencode('Author saved.'));
+            header('Location: /cms/post-template?tpl=master&tab=author&flash=' . rawurlencode('Author saved.'));
             exit;
         } else {
             $errors[] = 'Unknown action.';
@@ -95,7 +95,7 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 // Build a tab href that preserves the selected template.
 $tabHref = static function (string $tab) use ($selected): string {
-    return '/cms/content-template?tpl=' . rawurlencode($selected) . '&tab=' . rawurlencode($tab);
+    return '/cms/post-template?tpl=' . rawurlencode($selected) . '&tab=' . rawurlencode($tab);
 };
 ?><!doctype html>
 <html lang="en">
@@ -117,17 +117,18 @@ $tabHref = static function (string $tab) use ($selected): string {
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/codemirror/codemirror.min.css">
 <style>
   /* View-specific tweaks layered on top of style-cms.css's .templates-layout. */
-  #view-content-template { display:flex; flex-direction:column; flex:1; min-height:0; }
+  #view-post-template { display:flex; flex-direction:column; flex:1; min-height:0; }
   /* Make panels behave block-style — we render one panel at a time server-side
      rather than the mockup's JS-toggled .tpl-panel.active pattern. */
   .tpl-panel.is-server-active { display:block; }
   /* "Optional" mode pill — base .block-mode-pill exists but mode-optional doesn't
      have its own color in style-cms.css. Lean italic + muted for read-only feel. */
   .block-mode-pill.mode-optional { color:var(--muted); font-style:italic; }
-  /* PHP file preview viewer. */
-  .ct-code { font-family:var(--font-mono); font-size:var(--text-tiny); line-height:1.55; color:var(--secondary); background:var(--canvas-bg); border:1px solid var(--ink-12); border-radius:var(--r-card); padding:var(--space-16); overflow:auto; max-height:520px; white-space:pre; }
+  /* PHP file preview viewer — CodeMirror-driven, syntax-highlighted. */
+  .ct-code-editor + .CodeMirror { border:1px solid var(--border); border-radius:var(--r-card); font-size:13px; height:520px; }
   .ct-code-missing { font-family:var(--font-mono); font-size:var(--text-meta); color:var(--muted); border:1px dashed var(--ink-18); padding:var(--space-24); text-align:center; border-radius:var(--r-card); }
   /* Author info layout. */
   .ct-author-grid { display:flex; gap:var(--space-24); margin-top:var(--space-24); align-items:flex-start; }
@@ -155,7 +156,7 @@ require __DIR__ . '/../partials/topbar.php';
   ?>
 
   <main class="main" id="main" tabindex="-1">
-    <div class="view active" id="view-content-template">
+    <div class="view active" id="view-post-template">
       <?php
       $title    = 'Post Templates';
       $subtitle = "Each content type uses a PHP layout file that controls how its fields render on the live site. The Master template lists every available field and its PHP variable — it doesn't turn anything on or off. Each sub-template inherits everything and can suppress specific fields.";
@@ -179,7 +180,7 @@ require __DIR__ . '/../partials/topbar.php';
         <!-- ═══ LEFT: Template list ═══ -->
         <div class="template-list">
           <a class="tpl-master<?= $selected === 'master' ? ' active' : '' ?>"
-             href="/cms/content-template?tpl=master&tab=blocks"
+             href="/cms/post-template?tpl=master&tab=blocks"
              style="display:block;text-decoration:none">
             <div class="tpl-master-label">Reference</div>
             <div class="tpl-master-name">Master Template</div>
@@ -187,7 +188,7 @@ require __DIR__ . '/../partials/topbar.php';
           </a>
           <?php foreach ($subs as $slug => $info): ?>
             <a class="tpl-item<?= $selected === $slug ? ' active' : '' ?>"
-               href="/cms/content-template?tpl=<?= $e($slug) ?>"
+               href="/cms/post-template?tpl=<?= $e($slug) ?>"
                style="display:block;text-decoration:none">
               <div class="tpl-item-name"><?= $e($info['name']) ?><span class="tpl-sys">system</span></div>
               <div class="tpl-item-desc"><?= $e($info['desc']) ?></div>
@@ -263,7 +264,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="info-box">
                   The author block renders next to the byline on every template that includes the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">$author</code> fields. Sub-templates can hide it on a per-content basis via the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author</code> / <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author_bio</code> booleans on each content row.
                 </div>
-                <form method="post" action="/cms/content-template">
+                <form method="post" action="/cms/post-template">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="action" value="save-author">
                   <div class="ct-author-grid">
@@ -315,7 +316,7 @@ require __DIR__ . '/../partials/topbar.php';
                 </div>
                 <?php if ($masterCode !== null): ?>
                   <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-16) 0 var(--space-8)">site/templates/master-layout.php</div>
-                  <pre class="ct-code"><?= $e($masterCode) ?></pre>
+                  <textarea class="ct-code-editor" data-ct-code readonly><?= $e($masterCode) ?></textarea>
                 <?php else: ?>
                   <div class="ct-code-missing">master-layout.php not found at site/templates/ — check the deploy.</div>
                 <?php endif; ?>
@@ -366,7 +367,7 @@ require __DIR__ . '/../partials/topbar.php';
               <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-32) 0 var(--space-8)">PHP Layout File</div>
               <?php if ($subCode !== null): ?>
                 <div style="font-family:var(--font-mono);font-size:var(--text-tiny);color:var(--muted);margin-bottom:var(--space-8)">site/templates/<?= $e($info['php_file']) ?></div>
-                <pre class="ct-code"><?= $e($subCode) ?></pre>
+                <textarea class="ct-code-editor" data-ct-code readonly><?= $e($subCode) ?></textarea>
               <?php else: ?>
                 <div class="ct-code-missing">
                   <strong style="color:var(--secondary)"><?= $e($info['php_file']) ?></strong> not found in <code>site/templates/</code>.
@@ -382,6 +383,30 @@ require __DIR__ . '/../partials/topbar.php';
     </div>
   </main>
 </div>
+
+<script src="/cms/_assets/codemirror/codemirror.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/xml/xml.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/javascript/javascript.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/css/css.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/clike/clike.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/php/php.min.js"></script>
+<script src="/cms/_assets/codemirror/addon/edit/matchbrackets.min.js"></script>
+<script>
+  // Turn every [data-ct-code] textarea into a read-only CodeMirror with
+  // PHP syntax highlighting. Mirrors the editor in /cms/pages/edit.
+  document.querySelectorAll('[data-ct-code]').forEach(function (ta) {
+    CodeMirror.fromTextArea(ta, {
+      mode: 'application/x-httpd-php',
+      lineNumbers: true,
+      matchBrackets: true,
+      readOnly: true,
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: false,
+    });
+  });
+</script>
 
 </body>
 </html>

@@ -13,7 +13,7 @@ if (!function_exists('render_nav')) {
 }
 ?>
 <footer class="layout-footer">
-  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <span class="layout-footer-left">© <?= date('Y') ?> alex m. chong</span>
   <div class="layout-footer-right">
 <?php render_nav('footer'); ?>
   </div>

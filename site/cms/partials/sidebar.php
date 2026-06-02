@@ -9,7 +9,7 @@ if (!defined('CMS_PARTIAL_OK')) { http_response_code(404); exit; }
  * Items not yet wired show as muted `.is-placeholder` spans (no href,
  * `aria-disabled`, default cursor). Indexes folded into Collections.
  * Post Templates points to the existing Content Template view at
- * `/cms/content-template` (Phase 14.5's view, label-only rename here).
+ * `/cms/post-template` (Phase 14.5's view, label-only rename here).
  *
  * Inputs (set before include):
  *   $active_nav_id  string  Slug of the currently-active nav item, matching
@@ -127,7 +127,7 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
 
   <div class="nav-section">
     <span class="nav-label">System</span>
-    <a class="nav-item<?= $activeClass('post-templates') ?>"<?= $activeAria('post-templates') ?> href="/cms/content-template" data-nav-id="post-templates">
+    <a class="nav-item<?= $activeClass('post-templates') ?>"<?= $activeAria('post-templates') ?> href="/cms/post-template" data-nav-id="post-templates">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Post Templates
     </a>

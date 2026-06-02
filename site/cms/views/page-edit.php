@@ -53,20 +53,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             } else {
                 $seed   = read_page_file($slug) ?? '';
                 $new_id = create_page_mock($slug, $name, $seed);
-                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $new_id . '&flash=' . rawurlencode('Mock created.'));
+                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $new_id . '&flash=' . rawurlencode('Mock created.'));
                 exit;
             }
         } elseif ($action === 'save_mock') {
+            // Mocks only carry body content; metadata is page-level now.
             $body = (string)($_POST['body_html'] ?? '');
-            $meta = [
+            update_page_mock($id, $body);
+            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $id . '&flash=' . rawurlencode('Saved.'));
+            exit;
+        } elseif ($action === 'save_metadata') {
+            // Slug-level metadata. No version concept, no mock needed.
+            upsert_page_metadata($slug, [
                 'meta_title'       => trim((string)($_POST['meta_title'] ?? '')) ?: null,
                 'meta_description' => trim((string)($_POST['meta_description'] ?? '')) ?: null,
                 'og_image'         => trim((string)($_POST['og_image'] ?? '')) ?: null,
                 'og_type'          => trim((string)($_POST['og_type'] ?? 'website')),
                 'twitter_card'     => trim((string)($_POST['twitter_card'] ?? 'summary_large_image')),
-            ];
-            update_page_mock($id, $body, null, $meta);
-            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $id . '&flash=' . rawurlencode('Saved.'));
+            ]);
+            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&flash=' . rawurlencode('Metadata saved.'));
             exit;
         } elseif ($action === 'rename_mock') {
             $name = trim((string)($_POST['name'] ?? ''));
@@ -74,7 +79,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 $errors[] = 'A name is required.';
             } else {
                 rename_page_mock($id, $name);
-                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $id . '&flash=' . rawurlencode('Renamed.'));
+                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $id . '&flash=' . rawurlencode('Renamed.'));
                 exit;
             }
         } elseif ($action === 'duplicate_mock') {
@@ -86,27 +91,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 if ($new_id === null) {
                     $errors[] = 'Could not duplicate.';
                 } else {
-                    header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $new_id . '&flash=' . rawurlencode('Duplicated.'));
+                    header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $new_id . '&flash=' . rawurlencode('Duplicated.'));
                     exit;
                 }
             }
         } elseif ($action === 'delete_mock') {
             delete_page_mock($id);
-            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&flash=' . rawurlencode('Mock deleted.'));
+            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&flash=' . rawurlencode('Mock deleted.'));
             exit;
         } elseif ($action === 'publish_mock') {
             if (publish_page_mock($id)) {
-                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $id . '&flash=' . rawurlencode('Published — this mock is now live on staging.'));
+                header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $id . '&flash=' . rawurlencode('Published — this mock is now live on staging.'));
                 exit;
             }
             $errors[] = 'Could not publish (publishing is only available for header / footer partials).';
         } elseif ($action === 'unpublish_mock') {
             unpublish_page_mock($id);
-            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&version_id=' . $id . '&flash=' . rawurlencode('Un-published — fell back to file.'));
+            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&version_id=' . $id . '&flash=' . rawurlencode('Un-published — fell back to file.'));
             exit;
         } elseif ($action === 'revert_to_file') {
             unpublish_all_for_slug($slug);
-            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&flash=' . rawurlencode('Reverted to file.'));
+            header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&flash=' . rawurlencode('Reverted to file.'));
             exit;
         } else {
             $errors[] = 'Unknown action.';
@@ -118,20 +123,13 @@ if ($flash === '' && isset($_GET['flash'])) {
     $flash = (string)$_GET['flash'];
 }
 
-// Load state for the chosen version.
+// Load state for the chosen version (body) and the slug-level metadata.
 $mocks      = list_page_mocks($slug);
 $version_id = isset($_GET['version_id']) ? (int)$_GET['version_id'] : 0;
 
 $current_mock = null;
 $current_body = '';
-$current_meta = [
-    'meta_title'       => null,
-    'meta_description' => null,
-    'og_image'         => null,
-    'og_type'          => 'website',
-    'twitter_card'     => 'summary_large_image',
-];
-$is_live = ($version_id === 0);
+$is_live      = ($version_id === 0);
 
 if ($is_live) {
     $current_body = read_page_file($slug) ?? '';
@@ -140,13 +138,6 @@ if ($is_live) {
         if ((int)$m['id'] === $version_id) {
             $current_mock = $m;
             $current_body = (string)$m['body_html'];
-            $current_meta = [
-                'meta_title'       => $m['meta_title'],
-                'meta_description' => $m['meta_description'],
-                'og_image'         => $m['og_image'],
-                'og_type'          => $m['og_type'] ?? 'website',
-                'twitter_card'     => $m['twitter_card'] ?? 'summary_large_image',
-            ];
             break;
         }
     }
@@ -161,8 +152,27 @@ foreach ($mocks as $m) {
     if ((int)$m['is_published'] === 1) { $published_mock = $m; break; }
 }
 
-$tab = (string)($_GET['tab'] ?? 'body');
-if (!in_array($tab, ['body', 'metadata'], true)) $tab = 'body';
+// Page-level metadata. Falls back to parsed file values for meta_title /
+// meta_description so the form pre-populates with something sensible on
+// first visit; user can save to commit to page_metadata.
+$saved_meta = get_page_metadata($slug);
+$file_body  = read_page_file($slug) ?? '';
+$file_title = preg_match('/\$title\s*=\s*[\'"]([^\'"]+)[\'"]/', $file_body, $_tm) ? $_tm[1] : null;
+$file_desc  = preg_match('/\$description\s*=\s*[\'"]([^\'"]+)[\'"]/', $file_body, $_dm) ? $_dm[1] : null;
+$current_meta = [
+    'meta_title'       => $saved_meta['meta_title']       ?? $file_title,
+    'meta_description' => $saved_meta['meta_description'] ?? $file_desc,
+    'og_image'         => $saved_meta['og_image']         ?? null,
+    'og_type'          => $saved_meta['og_type']          ?? 'website',
+    'twitter_card'     => $saved_meta['twitter_card']     ?? 'summary_large_image',
+];
+
+// Default tab is metadata (the always-editable side); partials don't have
+// metadata so they default to body and the metadata tab is hidden.
+$default_tab = $is_partial ? 'body' : 'metadata';
+$tab = (string)($_GET['tab'] ?? $default_tab);
+if (!in_array($tab, ['body', 'metadata'], true)) $tab = $default_tab;
+if ($is_partial && $tab === 'metadata') $tab = 'body';
 
 // Preview URL: partials preview against /about/; pages preview against themselves.
 $preview_url      = '';
@@ -190,6 +200,9 @@ $rel_time = static function (string $ts) use ($e): string {
 };
 
 $_mock_name_js = $current_mock ? (string)$current_mock['name'] : '';
+// CodeMirror mode key — 'html' for marketing-page body files, '' (default
+// = PHP) for partials and 404. Threaded onto the textarea via data-mode.
+$_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html' : 'php';
 ?><!doctype html>
 <html lang="en">
 <head>
@@ -239,6 +252,23 @@ $_mock_name_js = $current_mock ? (string)$current_mock['name'] : '';
   .pe-unfurl-title { font-weight:600; color:var(--ink); font-size:14px; margin-bottom:4px; }
   .pe-unfurl-desc  { color:var(--muted); font-size:12px; line-height:1.4; }
   .pe-inline-form { display:inline; }
+  /* Uniform button dimensions inside the page-edit chrome — btn-ghost and
+     btn-pri only differ in colour, not size, so dirty-flips don't jump. */
+  .pe-version-actions .btn-ghost, .pe-version-actions .btn-pri,
+  .pe-version-actions a.btn-ghost, a.pe-btn,
+  .pe-meta-form .btn-ghost, .pe-meta-form .btn-pri {
+    padding: 7px 16px;
+    font-family: var(--font-cond);
+    font-size: var(--text-label);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1;
+    border-radius: var(--r-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 </style>
 </head>
 <body>
@@ -277,154 +307,152 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="flash-success" role="status"><?= $e($flash) ?></div>
         <?php endif; ?>
 
-        <!-- Version selector + actions -->
-        <div class="pe-version-row">
-          <span class="pe-version-label">Version:</span>
-          <select id="pe-version-select" onchange="peSwitchVersion(this.value)">
-            <option value="0"<?= $is_live ? ' selected' : '' ?>>Live Version (file on disk)</option>
-            <?php foreach ($mocks as $m): ?>
-              <option value="<?= (int)$m['id'] ?>"<?= ((int)$m['id'] === $version_id) ? ' selected' : '' ?>>
-                <?= $e($m['name']) ?> [ <?= $e($rel_time((string)$m['updated_at'])) ?> ]<?= ((int)$m['is_published'] === 1) ? ' [LIVE]' : '' ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-
-          <?php if ($is_live && $published_mock !== null): ?>
-            <span class="pe-override-note">↪ Override active: <strong><?= $e($published_mock['name']) ?></strong></span>
-          <?php endif; ?>
-          <span class="pe-unsaved" id="pe-unsaved">(unsaved changes)</span>
-
-          <div class="pe-version-actions">
-            <?php if ($is_live): ?>
-              <a class="btn-ghost" href="<?= $e($preview_live_url) ?>" target="_blank" rel="noopener">Preview Live ↗</a>
-              <?php if ($published_mock !== null && $is_publishable): ?>
-                <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Revert to file? This un-publishes all mocks for this slug.');">
-                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                  <input type="hidden" name="slug" value="<?= $e($slug) ?>">
-                  <input type="hidden" name="action" value="revert_to_file">
-                  <button type="submit" class="btn-ghost btn-danger">Revert to file</button>
-                </form>
-              <?php endif; ?>
-              <button type="button" class="btn-pri" onclick="peCreateMock()">+ New Mock</button>
-            <?php else: ?>
-              <button type="button" class="btn-ghost" onclick="peRenameMock()">Rename</button>
-              <button type="button" class="btn-ghost" onclick="peDuplicateMock()">Duplicate</button>
-              <a class="btn-ghost" href="<?= $e($preview_url) ?>" target="_blank" rel="noopener">Preview ↗</a>
-              <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This cannot be undone.');">
-                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                <input type="hidden" name="slug" value="<?= $e($slug) ?>">
-                <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
-                <input type="hidden" name="action" value="delete_mock">
-                <button type="submit" class="btn-ghost btn-danger">Delete</button>
-              </form>
-              <?php if ($is_publishable): ?>
-                <?php if ((int)$current_mock['is_published'] === 1): ?>
-                  <form class="pe-inline-form" method="post" action="/cms/pages/edit">
-                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                    <input type="hidden" name="slug" value="<?= $e($slug) ?>">
-                    <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
-                    <input type="hidden" name="action" value="unpublish_mock">
-                    <button type="submit" class="btn-ghost">Un-publish</button>
-                  </form>
-                <?php else: ?>
-                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This will override <?= $e($file_row['filename']) ?> on staging.');">
-                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                    <input type="hidden" name="slug" value="<?= $e($slug) ?>">
-                    <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
-                    <input type="hidden" name="action" value="publish_mock">
-                    <button type="submit" class="btn-pri">Publish →</button>
-                  </form>
-                <?php endif; ?>
-              <?php endif; ?>
-              <button type="submit" form="pe-mock-form" class="btn-pri">Save</button>
-            <?php endif; ?>
-          </div>
-        </div>
-
-        <!-- Tabs -->
+        <!-- Tabs (Metadata default for pages; partials skip Metadata) -->
         <div class="pe-tabs">
+          <?php if (!$is_partial): ?>
+            <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
+          <?php endif; ?>
           <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
-          <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Metadata</a>
         </div>
 
         <?php if ($tab === 'body'): ?>
+          <!-- Version selector + actions (only in the Body HTML tab) -->
+          <div class="pe-version-row">
+            <span class="pe-version-label">Version:</span>
+            <select id="pe-version-select" onchange="peSwitchVersion(this.value)">
+              <option value="0"<?= $is_live ? ' selected' : '' ?>>Live Version (file on disk)</option>
+              <?php foreach ($mocks as $m): ?>
+                <option value="<?= (int)$m['id'] ?>"<?= ((int)$m['id'] === $version_id) ? ' selected' : '' ?>>
+                  <?= $e($m['name']) ?> [ <?= $e($rel_time((string)$m['updated_at'])) ?> ]<?= ((int)$m['is_published'] === 1) ? ' [LIVE]' : '' ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+
+            <?php if ($is_live && $published_mock !== null): ?>
+              <span class="pe-override-note">↪ Override active: <strong><?= $e($published_mock['name']) ?></strong></span>
+            <?php endif; ?>
+            <span class="pe-unsaved" id="pe-unsaved">(unsaved changes)</span>
+
+            <div class="pe-version-actions">
+              <?php if ($is_live): ?>
+                <a class="btn-ghost" href="<?= $e($preview_live_url) ?>" target="_blank" rel="noopener">Preview Live ↗</a>
+                <?php if ($published_mock !== null && $is_publishable): ?>
+                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Revert to file? This un-publishes all mocks for this slug.');">
+                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                    <input type="hidden" name="slug" value="<?= $e($slug) ?>">
+                    <input type="hidden" name="action" value="revert_to_file">
+                    <button type="submit" class="btn-ghost btn-danger">Revert to file</button>
+                  </form>
+                <?php endif; ?>
+                <button type="button" class="btn-pri" onclick="peCreateMock()">+ New Mock</button>
+              <?php else: ?>
+                <button type="button" class="btn-ghost" onclick="peRenameMock()">Rename</button>
+                <button type="button" class="btn-ghost" onclick="peDuplicateMock()">Duplicate</button>
+                <a class="btn-ghost" href="<?= $e($preview_url) ?>" target="_blank" rel="noopener">Preview ↗</a>
+                <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This cannot be undone.');">
+                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                  <input type="hidden" name="slug" value="<?= $e($slug) ?>">
+                  <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
+                  <input type="hidden" name="action" value="delete_mock">
+                  <button type="submit" class="btn-ghost btn-danger">Delete version</button>
+                </form>
+                <?php if ($is_publishable): ?>
+                  <?php if ((int)$current_mock['is_published'] === 1): ?>
+                    <form class="pe-inline-form" method="post" action="/cms/pages/edit">
+                      <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                      <input type="hidden" name="slug" value="<?= $e($slug) ?>">
+                      <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
+                      <input type="hidden" name="action" value="unpublish_mock">
+                      <button type="submit" class="btn-ghost">Un-publish</button>
+                    </form>
+                  <?php else: ?>
+                    <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This will override <?= $e($file_row['filename']) ?> on staging.');">
+                      <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                      <input type="hidden" name="slug" value="<?= $e($slug) ?>">
+                      <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
+                      <input type="hidden" name="action" value="publish_mock">
+                      <button type="submit" class="btn-pri">Publish →</button>
+                    </form>
+                  <?php endif; ?>
+                <?php endif; ?>
+                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save>Save</button>
+              <?php endif; ?>
+            </div>
+          </div>
+
           <?php if ($is_live): ?>
             <div class="pe-readonly-notice">This is the on-disk file. The CMS never writes here — click <strong>+ New Mock</strong> to start editing.</div>
-            <textarea id="pe-editor-live" readonly><?= $e($current_body) ?></textarea>
+            <textarea id="pe-editor-live" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
           <?php else: ?>
             <form id="pe-mock-form" method="post" action="/cms/pages/edit">
               <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
               <input type="hidden" name="slug" value="<?= $e($slug) ?>">
               <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
               <input type="hidden" name="action" value="save_mock">
-              <input type="hidden" name="meta_title"       value="<?= $e($current_meta['meta_title']) ?>">
-              <input type="hidden" name="meta_description" value="<?= $e($current_meta['meta_description']) ?>">
-              <input type="hidden" name="og_image"         value="<?= $e($current_meta['og_image']) ?>">
-              <input type="hidden" name="og_type"          value="<?= $e($current_meta['og_type']) ?>">
-              <input type="hidden" name="twitter_card"     value="<?= $e($current_meta['twitter_card']) ?>">
-              <textarea id="pe-editor-mock" name="body_html"><?= $e($current_body) ?></textarea>
+              <textarea id="pe-editor-mock" name="body_html" data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
             </form>
           <?php endif; ?>
 
         <?php else: /* metadata */ ?>
-          <?php if ($is_live): ?>
-            <div class="pe-readonly-notice">Metadata is stored per-mock. Create a mock to edit metadata.</div>
-          <?php else: ?>
-            <form method="post" action="/cms/pages/edit" id="pe-meta-form">
-              <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-              <input type="hidden" name="slug" value="<?= $e($slug) ?>">
-              <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
-              <input type="hidden" name="action" value="save_mock">
-              <input type="hidden" name="body_html" value="<?= $e($current_body) ?>">
+          <?php
+          // Live mode: form is visible but every field is read-only. The
+          // values come from the parsed file ($title / $description) plus
+          // Metadata is page-level — always editable, saves to page_metadata,
+          // no version concept, no mock required.
+          $unfurl_fallback_title = (string)$file_row['filename'];
+          ?>
+          <form method="post" action="/cms/pages/edit" id="pe-meta-form">
+            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+            <input type="hidden" name="slug" value="<?= $e($slug) ?>">
+            <input type="hidden" name="action" value="save_metadata">
 
-              <div class="pe-meta-form">
-                <label for="pe-meta-title">Meta title</label>
-                <div>
-                  <input id="pe-meta-title" type="text" name="meta_title" maxlength="60" value="<?= $e($current_meta['meta_title']) ?>" oninput="document.getElementById('pe-meta-title-count').textContent = this.value.length + ' / 60'; peUnfurlSync();">
-                  <div class="pe-meta-charcount" id="pe-meta-title-count"><?= strlen((string)$current_meta['meta_title']) ?> / 60</div>
-                </div>
-
-                <label for="pe-meta-description">Meta description</label>
-                <div>
-                  <textarea id="pe-meta-description" name="meta_description" maxlength="160" oninput="document.getElementById('pe-meta-desc-count').textContent = this.value.length + ' / 160'; peUnfurlSync();"><?= $e($current_meta['meta_description']) ?></textarea>
-                  <div class="pe-meta-charcount" id="pe-meta-desc-count"><?= strlen((string)$current_meta['meta_description']) ?> / 160</div>
-                </div>
-
-                <label for="pe-og-image">og:image URL</label>
-                <div>
-                  <input id="pe-og-image" type="text" name="og_image" placeholder="/uploads/og/about.jpg" value="<?= $e($current_meta['og_image']) ?>" oninput="peUnfurlSync();">
-                  <div class="pe-meta-charcount">Recommended 1200×630. Paths starting with / resolve relative to site root.</div>
-                </div>
-
-                <label for="pe-og-type">og:type</label>
-                <select id="pe-og-type" name="og_type">
-                  <?php foreach (['website','article','profile'] as $t): ?>
-                    <option value="<?= $t ?>"<?= ($current_meta['og_type'] === $t) ? ' selected' : '' ?>><?= $t ?></option>
-                  <?php endforeach; ?>
-                </select>
-
-                <label for="pe-twitter-card">twitter:card</label>
-                <select id="pe-twitter-card" name="twitter_card">
-                  <?php foreach (['summary','summary_large_image'] as $t): ?>
-                    <option value="<?= $t ?>"<?= ($current_meta['twitter_card'] === $t) ? ' selected' : '' ?>><?= $t ?></option>
-                  <?php endforeach; ?>
-                </select>
-
-                <div></div>
-                <div><button type="submit" class="btn-pri">Save metadata</button></div>
+            <div class="pe-meta-form">
+              <label for="pe-meta-title">Meta title</label>
+              <div>
+                <input id="pe-meta-title" type="text" name="meta_title" maxlength="60" value="<?= $e($current_meta['meta_title']) ?>" oninput="document.getElementById('pe-meta-title-count').textContent = this.value.length + ' / 60'; peUnfurlSync();">
+                <div class="pe-meta-charcount" id="pe-meta-title-count"><?= strlen((string)$current_meta['meta_title']) ?> / 60</div>
               </div>
 
-              <div class="content-block-header"><span class="content-block-label">Unfurl preview</span></div>
-              <div class="pe-unfurl">
-                <div class="pe-unfurl-img" id="pe-unfurl-img" style="background-image:url('<?= $e($current_meta['og_image']) ?>');"></div>
-                <div class="pe-unfurl-body">
-                  <div class="pe-unfurl-title" id="pe-unfurl-title"><?= $e($current_meta['meta_title'] ?: $current_mock['name']) ?></div>
-                  <div class="pe-unfurl-desc"  id="pe-unfurl-desc"><?= $e($current_meta['meta_description']) ?></div>
-                  <div class="pe-meta-charcount" style="margin-top:8px;">alexmchong.ca<?= $is_partial ? '' : ('/' . $e($slug) . '/') ?></div>
-                </div>
+              <label for="pe-meta-description">Meta description</label>
+              <div>
+                <textarea id="pe-meta-description" name="meta_description" maxlength="160" oninput="document.getElementById('pe-meta-desc-count').textContent = this.value.length + ' / 160'; peUnfurlSync();"><?= $e($current_meta['meta_description']) ?></textarea>
+                <div class="pe-meta-charcount" id="pe-meta-desc-count"><?= strlen((string)$current_meta['meta_description']) ?> / 160</div>
+              </div>
+
+              <label for="pe-og-image">og:image URL</label>
+              <div>
+                <input id="pe-og-image" type="text" name="og_image" placeholder="/uploads/og/about.jpg" value="<?= $e($current_meta['og_image']) ?>" oninput="peUnfurlSync();">
+                <div class="pe-meta-charcount">Recommended 1200×630. Paths starting with / resolve relative to site root.</div>
+              </div>
+
+              <label for="pe-og-type">og:type</label>
+              <select id="pe-og-type" name="og_type">
+                <?php foreach (['website','article','profile'] as $t): ?>
+                  <option value="<?= $t ?>"<?= ($current_meta['og_type'] === $t) ? ' selected' : '' ?>><?= $t ?></option>
+                <?php endforeach; ?>
+              </select>
+
+              <label for="pe-twitter-card">twitter:card</label>
+              <select id="pe-twitter-card" name="twitter_card">
+                <?php foreach (['summary','summary_large_image'] as $t): ?>
+                  <option value="<?= $t ?>"<?= ($current_meta['twitter_card'] === $t) ? ' selected' : '' ?>><?= $t ?></option>
+                <?php endforeach; ?>
+              </select>
+
+              <div></div>
+              <div><button type="submit" class="btn-ghost" data-save-btn>Save metadata</button></div>
+            </div>
+
+            <div class="content-block-header"><span class="content-block-label">Unfurl preview</span></div>
+            <div class="pe-unfurl">
+              <div class="pe-unfurl-img" id="pe-unfurl-img" style="background-image:url('<?= $e($current_meta['og_image']) ?>');"></div>
+              <div class="pe-unfurl-body">
+                <div class="pe-unfurl-title" id="pe-unfurl-title"><?= $e($current_meta['meta_title'] ?: $unfurl_fallback_title) ?></div>
+                <div class="pe-unfurl-desc"  id="pe-unfurl-desc"><?= $e($current_meta['meta_description']) ?></div>
+                <div class="pe-meta-charcount" style="margin-top:8px;">alexmchong.ca<?= $is_partial ? '' : ('/' . $e($slug) . '/') ?></div>
+              </div>
               </div>
             </form>
-          <?php endif; ?>
         <?php endif; ?>
       </div>
     </div>
@@ -467,8 +495,12 @@ require __DIR__ . '/../partials/topbar.php';
     var ta = document.getElementById('pe-editor-mock') || document.getElementById('pe-editor-live');
     if (!ta) return;
     var isLive = ta.id === 'pe-editor-live';
+    // HTML body files use the htmlmixed mode (HTML + inline CSS/JS); PHP
+    // partials and the 404 page use the PHP mode so embedded PHP blocks
+    // highlight correctly.
+    var mode = (ta.dataset.mode === 'html') ? 'htmlmixed' : 'application/x-httpd-php';
     var cm = CodeMirror.fromTextArea(ta, {
-      mode: 'application/x-httpd-php',
+      mode: mode,
       lineNumbers: true,
       matchBrackets: true,
       autoCloseBrackets: true,
@@ -479,11 +511,17 @@ require __DIR__ . '/../partials/topbar.php';
     });
     if (!isLive) {
       var initial = cm.getValue();
+      var saveBtn = document.querySelector('[data-body-save]');
       cm.on('change', function () {
-        var f = document.getElementById('pe-unsaved');
-        if (!f) return;
-        if (cm.getValue() !== initial) f.classList.add('is-visible');
-        else f.classList.remove('is-visible');
+        var dirty = cm.getValue() !== initial;
+        var flag = document.getElementById('pe-unsaved');
+        if (flag) flag.classList.toggle('is-visible', dirty);
+        // Body Save button: ghost → primary on dirty, mirroring the
+        // metadata Save and the navigation editor's universal pattern.
+        if (saveBtn) {
+          saveBtn.classList.toggle('btn-ghost', !dirty);
+          saveBtn.classList.toggle('btn-pri', dirty);
+        }
       });
     }
     window._peEditor = cm;
@@ -491,7 +529,9 @@ require __DIR__ . '/../partials/topbar.php';
 
   function peSwitchVersion(vid) {
     var v = String(vid || '0');
-    var qs = 'slug=<?= rawurlencode($slug) ?>';
+    // The version selector only lives in the Body HTML tab, so always
+    // return there after a switch (default tab is now metadata).
+    var qs = 'slug=<?= rawurlencode($slug) ?>&tab=body';
     if (v !== '0') qs += '&version_id=' + encodeURIComponent(v);
     location.href = '/cms/pages/edit?' + qs;
   }
@@ -515,6 +555,24 @@ require __DIR__ . '/../partials/topbar.php';
     document.getElementById('pe-duplicate-name').value = name;
     document.getElementById('pe-duplicate-form').submit();
   }
+  // Dirty-flip: Save metadata starts btn-ghost and flips to btn-pri when
+  // the user changes any field in the metadata form. Mirrors the same
+  // pattern in /cms/navigation.
+  (function () {
+    const form = document.getElementById('pe-meta-form');
+    if (!form) return;
+    const btn = form.querySelector('[data-save-btn]');
+    if (!btn) return;
+    const flip = () => {
+      btn.classList.remove('btn-ghost');
+      btn.classList.add('btn-pri');
+    };
+    form.querySelectorAll('input, textarea, select').forEach(el => {
+      const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+      el.addEventListener(evt, flip);
+    });
+  })();
+
   function peUnfurlSync() {
     var t  = document.getElementById('pe-meta-title');
     var d  = document.getElementById('pe-meta-description');

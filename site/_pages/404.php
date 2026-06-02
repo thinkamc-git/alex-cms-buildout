@@ -154,7 +154,7 @@
   </main>
 
   <footer class="layout-footer">
-    <span class="layout-footer-left">© 2026 alex m. chong</span>
+    <span class="layout-footer-left">© <?= date('Y') ?> alex m. chong</span>
     <div class="layout-footer-right">
       <a href="/about/">About</a>
       <a href="/coaching/">Coaching</a>

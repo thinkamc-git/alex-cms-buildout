@@ -141,8 +141,8 @@ $router->post('/cms/subscribers', $cms('views/subscribers.php'));
 // read-only port of the design mockup with Author info editable. GET
 // handles all template/tab navigation via ?tpl=...&tab=... query params;
 // POST handles the Author save action (CSRF-protected) inside the view.
-$router->get ('/cms/content-template', $cms('views/content-template.php'));
-$router->post('/cms/content-template', $cms('views/content-template.php'));
+$router->get ('/cms/post-template', $cms('views/post-template.php'));
+$router->post('/cms/post-template', $cms('views/post-template.php'));
 
 // Phase 20: Pages CMS (mock-versioning sandbox for the marketing pages
 // and the layout partials header.php / footer.php). The editor uses

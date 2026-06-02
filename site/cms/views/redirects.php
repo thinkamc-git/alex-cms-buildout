@@ -100,18 +100,23 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
+  /* Match the design-system .cms-table look used by articles/pages so
+     the redirects table reads as part of the same family. */
   .red-table { width: 100%; border-collapse: collapse; }
-  .red-table th, .red-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
-  .red-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-align: left; font-weight: 600; }
+  .red-table th { padding: 12px 14px; border-bottom: 1px solid var(--border); font-family: var(--font-cond); font-size: var(--text-micro); text-transform: uppercase; letter-spacing: 0.10em; color: var(--muted); text-align: left; font-weight: 700; background: var(--bg-soft); }
+  .red-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
   .red-table input[type="text"] { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-family: var(--font-mono); font-size: 12px; background: var(--surface); color: var(--ink); }
   .red-table select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: var(--surface); color: var(--ink); }
   .red-add { background: var(--bg-soft); }
   .red-add td { padding-top: 14px; padding-bottom: 14px; }
-  .btn-row-action { padding: 4px 10px; font-size: 11px; border: 1px solid var(--border); background: var(--surface); border-radius: 4px; cursor: pointer; }
-  .btn-row-action:hover { background: var(--bg-soft); }
-  .btn-row-del { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; line-height: 0; }
-  .btn-row-del:hover { color: var(--c-danger, #c44); }
-  .btn-row-del svg { width: 14px; height: 14px; }
+  /* Save: ghost-by-default, hidden when not dirty (matches the universal
+     CMS pattern from /cms/navigation + /cms/pages/edit). */
+  .red-table [data-save-btn] { visibility:hidden; }
+  .red-table [data-save-btn].btn-pri { visibility:visible; }
+  /* Delete: visible only on row hover (or when a child input is focused). */
+  .red-table tr:not(.red-add) .btn-danger { visibility:hidden; }
+  .red-table tr:hover .btn-danger,
+  .red-table tr:focus-within .btn-danger { visibility:visible; }
 </style>
 </head>
 <body>
@@ -191,10 +196,8 @@ require __DIR__ . '/../partials/topbar.php';
                 </select>
               </td>
               <td style="text-align:right;white-space:nowrap">
-                <button type="submit" name="action" value="update" form="<?= $e($rid) ?>" class="btn-row-action">Save</button>
-                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-row-del" title="Delete" aria-label="Delete" onclick="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;?');">
-                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
+                <button type="submit" name="action" value="update" form="<?= $e($rid) ?>" class="btn-ghost btn-tiny" data-save-btn>Save</button>
+                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-ghost btn-tiny btn-danger" onclick="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;?');">Delete</button>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -213,7 +216,7 @@ require __DIR__ . '/../partials/topbar.php';
               </select>
             </td>
             <td style="text-align:right">
-              <button type="submit" form="red-add-form" class="btn-row-action">Add</button>
+              <button type="submit" form="red-add-form" class="btn-ghost btn-tiny">Add</button>
             </td>
           </tr>
         </tbody>
@@ -222,6 +225,43 @@ require __DIR__ . '/../partials/topbar.php';
     </div>
   </main>
 </div>
+
+<script>
+  // Universal Save-button dirty-flip pattern (mirrors /cms/navigation +
+  // /cms/pages/edit). Each row's Save button starts hidden; first edit in
+  // the row makes it visible + primary. Click → "Saved" → submit.
+  document.querySelectorAll('.red-table tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input[type=text], select');
+    const saveBtn = tr.querySelector('[data-save-btn]');
+    if (!saveBtn || inputs.length === 0) return;
+    inputs.forEach(el => {
+      const evt = el.tagName === 'SELECT' ? 'change' : 'input';
+      el.addEventListener(evt, () => {
+        saveBtn.classList.remove('btn-ghost');
+        saveBtn.classList.add('btn-pri');
+      });
+    });
+    saveBtn.addEventListener('click', (e) => {
+      if (!saveBtn.classList.contains('btn-pri')) return;
+      e.preventDefault();
+      saveBtn.textContent = 'Saved';
+      saveBtn.disabled = true;
+      const form = document.getElementById(saveBtn.getAttribute('form'));
+      if (!form) return;
+      // Programmatic submit() doesn't carry the submit button's
+      // name/value, so inject the action explicitly.
+      if (!form.querySelector('input[name=action][data-injected]')) {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'action';
+        inp.value = 'update';
+        inp.setAttribute('data-injected', '');
+        form.appendChild(inp);
+      }
+      setTimeout(() => form.submit(), 300);
+    });
+  });
+</script>
 
 </body>
 </html>

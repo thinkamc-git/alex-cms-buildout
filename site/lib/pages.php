@@ -65,25 +65,40 @@ function list_pages_files(): array
     $pages = [];
     $errors = [];
 
-    foreach (glob(_pages_root() . '/*.php') ?: [] as $path) {
-        $filename = basename($path);
-        if (in_array($filename, $skip, true)) continue;
-        $slug = substr($filename, 0, -4);
+    // The top-level *.php files are page assemblers (4-line shells that
+    // set $title + $body and require _page-shell.php). The actual
+    // editable body content for marketing pages lives at
+    // _bodies/<slug>.html — that's what we surface to the editor.
+    foreach (glob(_pages_root() . '/*.php') ?: [] as $assembler_path) {
+        $assembler_filename = basename($assembler_path);
+        if (in_array($assembler_filename, $skip, true)) continue;
+        $slug = substr($assembler_filename, 0, -4);
+        $is_error = in_array($slug, $error_slugs, true);
+
+        if ($is_error) {
+            // Error pages are standalone PHP — show the whole file.
+            $row_path     = $assembler_path;
+            $row_filename = $assembler_filename;
+        } else {
+            // Marketing pages — editable surface is the body HTML.
+            $row_path     = _pages_root() . '/_bodies/' . $slug . '.html';
+            $row_filename = $slug . '.html';
+        }
         $row = [
             'slug'        => $slug,
-            'kind'        => in_array($slug, $error_slugs, true) ? 'error' : 'page',
-            'filename'    => $filename,
-            'path'        => $path,
-            'exists'      => true,
-            'modified_at' => filemtime($path) ?: 0,
+            'kind'        => $is_error ? 'error' : 'page',
+            'filename'    => $row_filename,
+            'path'        => $row_path,
+            'exists'      => is_file($row_path),
+            'modified_at' => is_file($row_path) ? (filemtime($row_path) ?: 0) : 0,
         ];
-        if ($row['kind'] === 'error') $errors[] = $row;
-        else                          $pages[]  = $row;
+        if ($is_error) $errors[] = $row;
+        else           $pages[]  = $row;
     }
     usort($pages,  fn($a, $b) => strcmp($a['slug'], $b['slug']));
     usort($errors, fn($a, $b) => strcmp($a['slug'], $b['slug']));
 
-    // Layout partials live under _layout/, not at the pages root.
+    // Layout partials live under _layout/.
     $partials = [];
     foreach (['header.php', 'footer.php'] as $filename) {
         $path = _layout_root() . '/' . $filename;
@@ -285,6 +300,52 @@ function unpublish_all_for_slug(string $slug): void
 {
     db()->prepare('UPDATE page_mock_versions SET is_published = 0 WHERE slug = ?')
         ->execute([$slug]);
+}
+
+// ── Per-page metadata (slug-level, independent of mocks) ──────────────
+
+/**
+ * Fetch metadata for a slug. Returns NULL if no row exists yet (caller
+ * should fall back to defaults).
+ */
+function get_page_metadata(string $slug): ?array
+{
+    $stmt = db()->prepare(
+        'SELECT slug, meta_title, meta_description, og_image, og_type,
+                twitter_card, created_at, updated_at
+           FROM page_metadata
+          WHERE slug = ?'
+    );
+    $stmt->execute([$slug]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+/**
+ * Upsert metadata for a slug. $data may contain any of:
+ *   meta_title, meta_description, og_image, og_type, twitter_card
+ */
+function upsert_page_metadata(string $slug, array $data): void
+{
+    $stmt = db()->prepare(
+        'INSERT INTO page_metadata
+           (slug, meta_title, meta_description, og_image, og_type, twitter_card)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           meta_title       = VALUES(meta_title),
+           meta_description = VALUES(meta_description),
+           og_image         = VALUES(og_image),
+           og_type          = VALUES(og_type),
+           twitter_card     = VALUES(twitter_card)'
+    );
+    $stmt->execute([
+        $slug,
+        $data['meta_title']       ?? null,
+        $data['meta_description'] ?? null,
+        $data['og_image']         ?? null,
+        $data['og_type']          ?? 'website',
+        $data['twitter_card']     ?? 'summary_large_image',
+    ]);
 }
 
 // ── Token substitution at preview / runtime ───────────────────────────

@@ -274,14 +274,21 @@ function render_nav(string $zone): void
 
         if ($item['highlight'] === 'dot') {
             $extra_style = ' style="position:relative"';
-            $highlight_html = '<span aria-hidden="true" style="position:absolute;top:-5px;right:-4px;width:10px;height:10px;background:' . $color_attr . ';border-radius:50%"></span>';
+            // Header: corner (top-right). Footer: centered above.
+            $dot_pos = $zone === 'footer'
+                ? 'top:-9px;left:50%;transform:translateX(-50%)'
+                : 'top:-5px;right:-4px';
+            $highlight_html = '<span aria-hidden="true" style="position:absolute;' . $dot_pos . ';width:8px;height:8px;background:' . $color_attr . ';border-radius:50%;pointer-events:none"></span>';
         } elseif ($item['highlight'] === 'pill') {
             $pill_text = htmlspecialchars((string)($item['highlight_text'] ?? 'NEW'), ENT_QUOTES, 'UTF-8');
             // Auto-contrast pill text: parse hex; CSS var or anything else
             // falls back to white (the default red reads fine that way).
             $fg = nav_contrast_text((string)($item['highlight_color'] ?? ''));
             $extra_style = ' style="position:relative"';
-            $highlight_html = '<span class="layout-nav-pill" style="position:absolute;top:-7px;right:-4px;background:' . $color_attr . ';color:' . $fg . ';font-family:var(--font-cond,sans-serif);font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;padding:1px 6px;border-radius:4px;z-index:1;white-space:nowrap;pointer-events:none">' . $pill_text . '</span>';
+            $pill_pos = $zone === 'footer'
+                ? 'top:-12px;left:50%;transform:translateX(-50%)'
+                : 'top:-7px;right:-4px';
+            $highlight_html = '<span class="layout-nav-pill" style="position:absolute;' . $pill_pos . ';background:' . $color_attr . ';color:' . $fg . ';font-family:var(--font-cond,sans-serif);font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;padding:1px 6px;border-radius:4px;z-index:1;white-space:nowrap;pointer-events:none">' . $pill_text . '</span>';
         }
 
         echo "<a href=\"$href_attr\"$key_attr$extra_style>$label_html$highlight_html</a>\n";

@@ -25,14 +25,19 @@ $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 $files = list_pages_files();
 
-// Sidecar: mock count + published-mock name per slug.
+// Sidecar: mock count + published-mock name + page metadata per slug.
 $mock_counts    = [];
 $published_name = [];
+$meta_titles    = [];
 foreach ($files as $f) {
     $mocks = list_page_mocks($f['slug']);
     $mock_counts[$f['slug']] = count($mocks);
     foreach ($mocks as $m) {
         if ((int)$m['is_published'] === 1) { $published_name[$f['slug']] = (string)$m['name']; break; }
+    }
+    $meta = get_page_metadata($f['slug']);
+    if ($meta !== null && !empty($meta['meta_title'])) {
+        $meta_titles[$f['slug']] = (string)$meta['meta_title'];
     }
 }
 
@@ -54,13 +59,18 @@ $rel_time = static function (int $epoch) use ($e): string {
     return '<span class="muted">' . $e(date('Y-m-d', $epoch)) . '</span>';
 };
 
-$buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $rel_time): array {
+$buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $meta_titles, $rel_time): array {
     $slug     = (string)$f['slug'];
     $filename = (string)$f['filename'];
     $editUrl  = '/cms/pages/edit?slug=' . rawurlencode($slug);
     $liveUrl  = '/' . rawurlencode($slug) . '/';
 
     $nameHtml = '<a href="' . $e($editUrl) . '" class="row-title">' . $e($filename) . '</a>';
+
+    $title = $meta_titles[$slug] ?? '';
+    $titleHtml = $title !== ''
+        ? $e($title)
+        : '<span class="muted">—</span>';
 
     $n = (int)($mock_counts[$slug] ?? 0);
     if ($n === 0) {
@@ -83,6 +93,7 @@ $buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $
         'href'  => $editUrl,
         'cells' => [
             ['html' => $nameHtml],
+            ['html' => $titleHtml],
             ['html' => $mockHtml],
             ['html' => $modHtml],
             ['html' => $actionsHtml, 'class' => 'cell-actions'],
@@ -139,10 +150,11 @@ require __DIR__ . '/../partials/topbar.php';
 
         <?php
         $columns = [
-            ['label' => 'File',          'width' => '36%'],
-            ['label' => 'Mocks',         'width' => '28%'],
-            ['label' => 'Last modified', 'width' => '14%'],
-            ['label' => 'Actions',       'width' => '22%'],
+            ['label' => 'File',          'width' => '22%'],
+            ['label' => 'Meta title',    'width' => '35%'],
+            ['label' => 'Mocks',         'width' => '13%'],
+            ['label' => 'Last modified', 'width' => '12%'],
+            ['label' => 'Actions',       'width' => '18%'],
         ];
         ?>
 

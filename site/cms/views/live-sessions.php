@@ -16,11 +16,19 @@ require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/csrf.php';
 require_once __DIR__ . '/../../lib/content.php';
 
+// Phase 20.3 filter bar — multi-select per-type stages + categories.
+$filterStages     = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['stage']    ?? ''))), 'strlen'));
+$filterCategories = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['category'] ?? ''))), 'strlen'));
+
 Auth::require_login();
 $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
-$sessions   = list_live_sessions();
+$sessions      = list_live_sessions([
+    'stage'    => implode(',', $filterStages),
+    'category' => implode(',', $filterCategories),
+]);
+$allCategories = list_categories('live-session');
 $flash      = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
@@ -73,8 +81,16 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Live Sessions';
       $subtitle = 'Talks, workshops, conversations. Past events stay live with a PAST badge.';
-      $actions  = '<a href="/cms/live-sessions/new" class="btn-pri">+ New Session</a>';
+      $actions  = '<a href="/live-sessions/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+                . '<a href="/cms/live-sessions/new" class="btn-pri">+ New Session</a>';
       require __DIR__ . '/../partials/view-header.php';
+      ?>
+
+      <?php
+      // Live-session pipeline is idea→draft→published — only Draft/Scheduled/
+      // Published render in the stage bar (no Concept/Outline).
+      $groups = build_filter_groups('live-session', '/cms/live-sessions', $filterStages, $filterCategories, $allCategories);
+      require __DIR__ . '/../partials/filter-bar.php';
       ?>
 
       <div class="content-area">
@@ -139,20 +155,25 @@ require __DIR__ . '/../partials/topbar.php';
         );
         $published = array_merge($upcomingPub, $pastPub);
 
-        $columns = [
-            ['label' => 'Event Title', 'width' => '40%'],
-            ['label' => 'Stage',       'width' => '12%'],
-            ['label' => 'Event Date',  'width' => '22%'],
-            ['label' => 'Updated',     'width' => '12%'],
-            ['label' => 'Actions',     'width' => '14%'],
-        ];
+        $makeColumns = static function (string $dateLabel): array {
+            return [
+                ['label' => 'Event Title', 'width' => '32%'],
+                ['label' => 'Stage',       'width' => '10%'],
+                ['label' => 'Category',    'width' => '14%'],
+                ['label' => 'Event Date',  'width' => '20%'],
+                ['label' => $dateLabel,    'width' => '12%'],
+                ['label' => '',            'width' => '12%'],
+            ];
+        };
 
-        $buildRow = static function (array $s) use ($e, $csrf_token, $stagePill, $nowTs): array {
+        $buildRow = static function (array $s, string $dateMode) use ($e, $csrf_token, $stagePill, $nowTs): array {
             $id      = (int)($s['id'] ?? 0);
             $slug    = (string)($s['slug'] ?? '');
             $title2  = (string)($s['title'] ?? '');
             $updated = (string)($s['updated_at'] ?? '');
-            $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+            $pubAt   = (string)($s['published_at'] ?? '');
+            $dateRaw = $dateMode === 'published' ? ($pubAt !== '' ? $pubAt : $updated) : $updated;
+            $dateShort = $dateRaw !== '' ? date('Y-m-d', strtotime($dateRaw)) : '';
 
             $eDate    = (string)($s['event_date']     ?? '');
             $eTimeRaw = (string)($s['event_time']     ?? '');
@@ -192,32 +213,45 @@ require __DIR__ . '/../partials/topbar.php';
                 $whenHtml = '<span class="muted">' . $e($datePart . $timePart . $pastSuffix) . '</span>';
             }
 
-            $titleHtml = '<a href="/cms/live-sessions/edit?id=' . $id . '" class="row-title">'
+            $titleHtml = '<a href="/cms/live-sessions/edit?id=' . $id . '&from=live-sessions" class="row-title">'
                        . $e($title2 !== '' ? $title2 : '(untitled)')
                        . '</a>'
-                       . ' <span class="row-slug">/' . $e($slug) . '</span>';
+                       . '<div class="row-slug">/' . $e($slug) . '</div>';
 
-            $isPublished = (string)($s['status'] ?? '') === 'published';
-            $liveBtn = $isPublished && $slug !== ''
-                ? '<a href="/live-sessions/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+            $catLabel  = (string)($s['category_label']  ?? '');
+            $catColour = (string)($s['category_colour'] ?? '');
+            if ($catLabel !== '') {
+                $bg = $catColour !== '' ? 'var(--c-' . $e($catColour) . ')' : 'var(--ink-30)';
+                $catHtml = '<span class="cat-chip" style="--cat-bg:' . $bg . '">' . $e($catLabel) . '</span>';
+            } else {
+                $catHtml = '<span class="muted">—</span>';
+            }
+
+            $isLiveRow = (string)($s['status'] ?? '') === 'published'
+                      && (string)($s['published_status'] ?? '') !== 'scheduled';
+            $liveBtn = $isLiveRow && $slug !== ''
+                ? '<a href="/live-sessions/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
-                . '<a href="/cms/live-sessions/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                . '<form method="post" action="/cms/live-sessions/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this session? This cannot be undone.">'
-                .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
-                . '</form>'
+                . '<span class="row-actions-hover">'
+                .   '<a href="/cms/live-sessions/edit?id=' . $id . '&from=live-sessions" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<form method="post" action="/cms/live-sessions/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this session? This cannot be undone.">'
+                .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .   '</form>'
+                . '</span>'
                 . '</div>';
 
             return [
-                'href'  => '/cms/live-sessions/edit?id=' . $id,
+                'href'  => '/cms/live-sessions/edit?id=' . $id . '&from=live-sessions',
                 'cells' => [
                     ['html' => $titleHtml],
                     ['html' => $stagePill(((string)($s['status'] ?? '') === 'published' && (string)($s['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($s['status'] ?? 'idea'))],
+                    ['html' => $catHtml],
                     ['html' => $whenHtml],
-                    ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
+                    ['html' => '<span class="muted">' . $e($dateShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
                 ],
             ];
@@ -234,7 +268,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $drafts);
+          $columns    = $makeColumns('Updated');
+          $rows       = array_map(static fn($s) => $buildRow($s, 'updated'), $drafts);
           $empty_text = 'No drafts. Click + New Session to add one.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -251,7 +286,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $scheduled);
+          $columns    = $makeColumns('Scheduled for');
+          $rows       = array_map(static fn($s) => $buildRow($s, 'published'), $scheduled);
           $empty_text = 'No scheduled sessions.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -268,7 +304,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $published);
+          $columns    = $makeColumns('Published');
+          $rows       = array_map(static fn($s) => $buildRow($s, 'published'), $published);
           $empty_text = 'No published sessions yet.';
           require __DIR__ . '/../partials/table.php';
           ?>

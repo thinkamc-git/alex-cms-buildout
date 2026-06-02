@@ -268,6 +268,7 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
       <?php endif; ?>
 
+      <div class="content-area">
       <?php
       // Render-one-zone helper (closure to keep scope tight).
       $renderZone = function (string $zone, array $items) use ($e, $csrf_token, $broken_ids,
@@ -401,6 +402,7 @@ require __DIR__ . '/../partials/topbar.php';
       $renderZone('header', $header_items);
       $renderZone('footer', $footer_items);
       ?>
+      </div><!-- /.content-area -->
     </div>
   </main>
 </div>

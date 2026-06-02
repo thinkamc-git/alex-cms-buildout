@@ -71,9 +71,15 @@ $selected = (string)($_GET['tpl'] ?? 'master');
 $validTpl = array_merge(['master'], array_keys($subs));
 if (!in_array($selected, $validTpl, true)) $selected = 'master';
 
-$activeTab = (string)($_GET['tab'] ?? 'blocks');
-$validTab  = ['blocks', 'fields', 'author', 'php'];
-if (!in_array($activeTab, $validTab, true)) $activeTab = 'blocks';
+// Master uses: blocks / fields / author / php / preview
+// Sub uses:    visibility / php / preview
+$isSub = ($selected !== 'master');
+$defaultTab = $isSub ? 'visibility' : 'blocks';
+$activeTab = (string)($_GET['tab'] ?? $defaultTab);
+$validTab  = $isSub
+    ? ['visibility', 'php', 'preview']
+    : ['blocks', 'fields', 'author', 'php', 'preview'];
+if (!in_array($activeTab, $validTab, true)) $activeTab = $defaultTab;
 
 // Template file reader for the PHP Layout File tab / sub-template preview.
 // realpath() guards against path traversal even though inputs are sub-template slugs.
@@ -205,6 +211,7 @@ require __DIR__ . '/../partials/topbar.php';
               <a class="tpl-tab<?= $activeTab === 'fields' ? ' active' : '' ?>" href="<?= $e($tabHref('fields')) ?>" style="text-decoration:none">Field Reference</a>
               <a class="tpl-tab<?= $activeTab === 'author' ? ' active' : '' ?>" href="<?= $e($tabHref('author')) ?>" style="text-decoration:none">Author info</a>
               <a class="tpl-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
+              <a class="tpl-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
             </div>
 
             <?php if ($activeTab === 'blocks'): ?>
@@ -321,62 +328,106 @@ require __DIR__ . '/../partials/topbar.php';
                   <div class="ct-code-missing">master-layout.php not found at site/templates/ — check the deploy.</div>
                 <?php endif; ?>
               </div>
+
+            <?php elseif ($activeTab === 'preview'): ?>
+              <div class="tpl-panel is-server-active">
+                <div class="info-box">
+                  Comprehensive preview — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">master-layout.php</code> wrapping <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">article-standard.php</code> with every block populated. This is the live counterpart to <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/_templates/article.html</code> — a single page that exercises the full block inventory.
+                </div>
+                <div style="margin-top:var(--space-16);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;background:#fff">
+                  <iframe
+                    src="/cms/post-template/preview?tpl=master"
+                    title="Master Template Preview — every block populated"
+                    style="display:block;width:100%;height:820px;border:0;background:#fff"
+                    loading="lazy"></iframe>
+                </div>
+              </div>
             <?php endif; ?>
 
           <?php else:
-            // ─── Sub-template view (no tabs) ───
+            // ─── Sub-template view: 3 tabs ───
             $info = $subs[$selected];
             $rowMatrix = $matrix[$selected] ?? [];
             $subCode = $readTemplate($info['php_file']);
           ?>
-            <div class="tpl-panel is-server-active">
-              <div class="info-box">
-                <strong><?= $e($info['name']) ?>.</strong> <?= $e($info['desc']) ?>
-              </div>
+            <div class="tpl-tabs">
+              <a class="tpl-tab<?= $activeTab === 'visibility' ? ' active' : '' ?>" href="<?= $e($tabHref('visibility')) ?>" style="text-decoration:none">Block Visibility</a>
+              <a class="tpl-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
+              <a class="tpl-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
+            </div>
 
-              <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-24) 0 var(--space-8)">Block visibility</div>
-              <table class="master-field-table">
-                <thead>
-                  <tr>
-                    <th style="width:22%">Block</th>
-                    <th style="width:18%">Slug</th>
-                    <th style="width:18%">Visibility</th>
-                    <th>Notes</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($blocks as $blockSlug => $b):
-                    $mode = $rowMatrix[$blockSlug] ?? '—';
-                    if ($mode === '—') continue;
-                    $pillClass = 'block-mode-pill mode-' . $mode;
-                    $pillLabel = ucfirst($mode);
-                  ?>
+            <?php if ($activeTab === 'visibility'): ?>
+              <div class="tpl-panel is-server-active">
+                <div class="info-box">
+                  <strong><?= $e($info['name']) ?>.</strong> <?= $e($info['desc']) ?>
+                </div>
+                <table class="master-field-table" style="margin-top:var(--space-16)">
+                  <thead>
                     <tr>
-                      <td><?= $e($b['name']) ?></td>
-                      <td><span class="val-pill"><?= $e($blockSlug) ?></span></td>
-                      <td><span class="<?= $e($pillClass) ?>"><?= $e($pillLabel) ?></span></td>
-                      <td style="font-size:var(--text-tiny);color:var(--muted);line-height:1.55"><?= $e($notes[$mode] ?? '') ?></td>
+                      <th style="width:22%">Block</th>
+                      <th style="width:18%">Slug</th>
+                      <th style="width:18%">Visibility</th>
+                      <th>Notes</th>
                     </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-              <div class="ct-readonly-note">
-                Per-sub-template visibility toggles are read-only in v1.0 (modes shown above are the BLOCKS.md matrix defaults). Editable per-sub-template suppression is deferred to a future phase — see <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">docs/BUILD-PLAN.md</code> §19.5.
+                  </thead>
+                  <tbody>
+                    <?php foreach ($blocks as $blockSlug => $b):
+                      $mode = $rowMatrix[$blockSlug] ?? '—';
+                      if ($mode === '—') continue;
+                      $pillClass = 'block-mode-pill mode-' . $mode;
+                      $pillLabel = ucfirst($mode);
+                    ?>
+                      <tr>
+                        <td><?= $e($b['name']) ?></td>
+                        <td><span class="val-pill"><?= $e($blockSlug) ?></span></td>
+                        <td><span class="<?= $e($pillClass) ?>"><?= $e($pillLabel) ?></span></td>
+                        <td style="font-size:var(--text-tiny);color:var(--muted);line-height:1.55"><?= $e($notes[$mode] ?? '') ?></td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+                <div class="ct-readonly-note">
+                  Per-sub-template visibility toggles are read-only in v1.0 (modes shown above are the BLOCKS.md matrix defaults). Editable per-sub-template suppression is deferred to a future phase — see <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">docs/BUILD-PLAN.md</code> §19.5.
+                </div>
               </div>
 
-              <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-32) 0 var(--space-8)">PHP Layout File</div>
-              <?php if ($subCode !== null): ?>
-                <div style="font-family:var(--font-mono);font-size:var(--text-tiny);color:var(--muted);margin-bottom:var(--space-8)">site/templates/<?= $e($info['php_file']) ?></div>
-                <textarea class="ct-code-editor" data-ct-code readonly><?= $e($subCode) ?></textarea>
-              <?php else: ?>
-                <div class="ct-code-missing">
-                  <strong style="color:var(--secondary)"><?= $e($info['php_file']) ?></strong> not found in <code>site/templates/</code>.
+            <?php elseif ($activeTab === 'php'): ?>
+              <div class="tpl-panel is-server-active">
+                <div class="info-box">
+                  The PHP layout file for <strong><?= $e($info['name']) ?></strong>. Read-only view; edits happen in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code>) and ship through deploy.
+                </div>
+                <?php if ($subCode !== null): ?>
+                  <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-16) 0 var(--space-8)">site/templates/<?= $e($info['php_file']) ?></div>
+                  <textarea class="ct-code-editor" data-ct-code readonly><?= $e($subCode) ?></textarea>
+                <?php else: ?>
+                  <div class="ct-code-missing">
+                    <strong style="color:var(--secondary)"><?= $e($info['php_file']) ?></strong> not found in <code>site/templates/</code>.
+                    <?php if ($selected === 'article-series'): ?>
+                      <div style="margin-top:var(--space-8)">Likely folded into <code>article-standard.php</code> via a conditional, or pending creation. Flagged in Phase 14.5 brief.</div>
+                    <?php endif; ?>
+                  </div>
+                <?php endif; ?>
+              </div>
+
+            <?php elseif ($activeTab === 'preview'): ?>
+              <div class="tpl-panel is-server-active">
+                <div class="info-box">
+                  Live preview of <strong><?= $e($info['name']) ?></strong> — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> against synthetic content. Edits to the template file show up here immediately.
                   <?php if ($selected === 'article-series'): ?>
-                    <div style="margin-top:var(--space-8)">Likely folded into <code>article-standard.php</code> via a conditional, or pending creation. Flagged in Phase 14.5 brief.</div>
+                    <div style="margin-top:var(--space-8);color:var(--muted);font-style:italic">Article-series renders via <code>article-standard.php</code> (series detail folds into the topstrip).</div>
+                  <?php elseif ($selected === 'experiment-html'): ?>
+                    <div style="margin-top:var(--space-8);color:var(--muted);font-style:italic">Experiment-html bypasses master-layout in production and <code>readfile()</code>s a folder we don't have in preview — so the chrome shown here is <code>experiment.php</code>'s.</div>
                   <?php endif; ?>
                 </div>
-              <?php endif; ?>
-            </div>
+                <div style="margin-top:var(--space-16);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;background:#fff">
+                  <iframe
+                    src="/cms/post-template/preview?tpl=<?= $e($selected) ?>"
+                    title="Preview — <?= $e($info['name']) ?>"
+                    style="display:block;width:100%;height:820px;border:0;background:#fff"
+                    loading="lazy"></iframe>
+                </div>
+              </div>
+            <?php endif; ?>
           <?php endif; ?>
         </div>
       </div>

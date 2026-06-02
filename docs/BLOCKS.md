@@ -130,8 +130,8 @@ the PHP variable(s) the block reads. Mode is the toggleability behaviour.
 | Series | `series` | optional | `$article['series']` (joined from `series` table), `$article['series_order']` | Renders pill + "Part N of M" + progress dots. Required in the article-series template; optional in article-standard. Articles only. |
 | Special Tag | `special-tag` | optional | `$article['special_tag']` (`null` / `principle` / `framework`) | Articles only. Renders as a small pill with the category-tinted border. |
 | Hero Image | `hero-image` | optional | `$article['hero_image']`, `$article['hero_caption']`, `$article['hero_size']` (ENUM: 'default'/'wide'/'full') | Sits between the header and the body. Has size variants: default (column-width), wide (~1080px), full (100vw). Articles and live sessions only. |
-| Body | `body` | always | `$article['body']` (rich-text HTML emitted by the Tiptap editor) | Rendered inside `.article-prose`. Hidden in the experiment-html template (replaced by Custom HTML). |
-| Custom HTML | `custom-html` | always (experiment-html) | `$article['source_file']` | Replaces Body in the experiment-html template. Rendered in production via PHP readfile() — no template wrapper, no nav. The .experiment-placeholder frame on the preview page is scaffolding, not the production render. |
+| Body | `body` | always | `$article['body']` (rich-text HTML emitted by the Tiptap editor) **or** `$article['source_file']` (referenced .html file) — picked by `body_mode` | Phase 20.3: three body-source modes. `rtf` echoes `$article['body']` inside `.article-prose`. `html-body` keeps the surrounding chrome but `readfile()`s a file in `/content/<type>/<slug>/` into the same `.article-prose` slot. `html-swap` bypasses the whole template and renders the file as the full document (no chrome, no nav). |
+| Custom HTML | `custom-html` | always (`body_mode='html-swap'`) | `$article['source_file']` | Replaces the entire page when `body_mode='html-swap'` (formerly the `experiment-html` template). Rendered in production via PHP readfile() — no template wrapper, no nav. The .experiment-placeholder frame on the preview page is scaffolding, not the production render. |
 | Series Navigation | `series-nav` | auto-conditional | derived: prev/next where `series_id` matches and `series_order` is ±1 | Renders only when the article is part of a series and the `series` template is active. |
 | Event Details | `event-details` | always (live-session) | `$article['event_start']` (DATETIME), `$article['location']` | When/Where panel. Live sessions only. |
 | Format Tags | `format-tags` | always (live-session) | `$article['cost_pill']` (string: 'Free'/'Fee'/custom; NULL hides), `$article['attendance']` (ENUM 'in-person'/'remote'; NULL hides), `$article['custom_pill']` (any short string; NULL hides) | Three independent pills. Each NULL hides its own pill. format_type is no longer a separate field — it lives on the live session's category. |
@@ -145,30 +145,37 @@ the PHP variable(s) the block reads. Mode is the toggleability behaviour.
 Which blocks each content type can include. Cells use the toggleability
 mode for that content type, or `—` if the block is not applicable.
 
-| Block | article-standard | article-series | journal-entry | live-session | experiment | experiment-html |
-|---|---|---|---|---|---|---|
-| Category | always | always | always | always | always | always |
-| Publish Date | always | always | always | always | always | always |
-| Read Time | optional | optional | — | optional | optional | optional (manual) |
-| Updated Date | auto | auto | auto | auto | auto | auto |
-| Title | always | always | — | always | always | always |
-| Key Statement | — | — | always | — | — | — |
-| Summary | optional | optional | — | optional | optional | optional |
-| Author | optional | optional | optional | optional | optional | optional |
-| Author Bio | optional | optional | optional | optional | optional | optional |
-| Series | optional | required | — | — | — | — |
-| Special Tag | optional | optional | — | — | — | — |
-| Hero Image | optional | optional | — | optional | optional | — |
-| Body | always | always | always | always | always | — |
-| Custom HTML | — | — | — | — | — | always |
-| Series Navigation | — | auto | — | — | — | — |
-| Event Details | — | — | — | always | — | — |
-| Format Tags | — | — | — | always | — | — |
-| Entry Number | — | — | auto | — | — | — |
-| Tags | auto | auto | auto | auto | auto | auto |
+Phase 20.3 split body-source from chrome: rows below are now (chrome ×
+body_mode) combinations. `article-html-body` and `experiment-html-body`
+share their respective chrome with the rtf variant — only the Body slot's
+source changes. `experiment-html` represents body_mode=`html-swap` (full
+page passthrough, no chrome).
+
+| Block | article-standard | article-html-body | article-series | journal-entry | live-session | experiment | experiment-html-body | experiment-html |
+|---|---|---|---|---|---|---|---|---|
+| Category | always | always | always | always | always | always | always | always |
+| Publish Date | always | always | always | always | always | always | always | always |
+| Read Time | optional | optional (manual) | optional | — | optional | optional | optional (manual) | optional (manual) |
+| Updated Date | auto | auto | auto | auto | auto | auto | auto | auto |
+| Title | always | always | always | — | always | always | always | always |
+| Key Statement | — | — | — | always | — | — | — | — |
+| Summary | optional | optional | optional | — | optional | optional | optional | optional |
+| Author | optional | optional | optional | optional | optional | optional | optional | optional |
+| Author Bio | optional | optional | optional | optional | optional | optional | optional | optional |
+| Series | optional | optional | required | — | — | — | — | — |
+| Special Tag | optional | optional | optional | — | — | — | — | — |
+| Hero Image | optional | optional | optional | — | optional | optional | optional | — |
+| Body | always (rtf) | always (file) | always (rtf) | always (rtf) | always (rtf) | always (rtf) | always (file) | — |
+| Custom HTML | — | — | — | — | — | — | — | always |
+| Series Navigation | — | — | auto | — | — | — | — | — |
+| Event Details | — | — | — | — | always | — | — | — |
+| Format Tags | — | — | — | — | always | — | — | — |
+| Entry Number | — | — | — | auto | — | — | — | — |
+| Tags | auto | auto | auto | auto | auto | auto | auto | auto |
 
 `required` means the data field is required to save the content; the block
-is always shown when the field is populated.
+is always shown when the field is populated. The "(rtf)" / "(file)" tags on
+the Body row mark where the body content is sourced from for that variant.
 
 ---
 

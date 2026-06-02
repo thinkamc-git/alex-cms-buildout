@@ -111,9 +111,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
             if ($action === 'setup_folder') {
                 $res = folder_setup('experiment', $slug);
-                $msg = $res['ok']
-                    ? (($res['created'] ?? false) ? 'Folder created.' : 'Folder already exists.')
-                    : ($res['error'] ?? 'Could not set up folder.');
+                if ($res['ok']) {
+                    $absPath = (string)($res['path'] ?? '');
+                    $msg = ($res['created'] ?? false)
+                        ? 'Folder created at: ' . $absPath
+                        : 'Folder already exists at: ' . $absPath;
+                } else {
+                    $msg = (string)($res['error'] ?? 'Could not set up folder.');
+                }
             } else {
                 $msg = 'Refreshed.';
             }
@@ -141,13 +146,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         }
 
         // ── Save (+ optional stage transition) ────────────────────────
-        $template = (string)($experiment['template'] ?? 'experiment');
+        // Phase 20.3: template stays 'experiment' for all experiment rows;
+        // body_mode (rtf | html-body | html-swap) drives the variant.
+        $template = 'experiment';
+        $postedMode = (string)($_POST['body_mode'] ?? 'rtf');
+        if (!in_array($postedMode, ['rtf', 'html-body', 'html-swap'], true)) $postedMode = 'rtf';
 
         $post = [
             'slug'        => trim((string)($_POST['slug']        ?? '')),
             'title'       => trim((string)($_POST['title']       ?? '')),
             'summary'     => trim((string)($_POST['summary']     ?? '')),
             'body_raw'    =>      (string)($_POST['body']        ?? ''),
+            'body_mode'   => $postedMode,
             'source_file' => trim((string)($_POST['source_file'] ?? '')),
             'read_time'   => trim((string)($_POST['read_time']   ?? '')),
             'tags'        => trim((string)($_POST['tags']        ?? '')),
@@ -180,11 +190,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
         }
 
-        $bodyClean = $template === 'experiment' ? sanitize_html($post['body_raw']) : null;
+        // Phase 20.3: keep TipTap body across mode toggles so flipping the
+        // selector from RTF → HTML → RTF doesn't lose the in-progress draft.
+        $bodyClean = sanitize_html($post['body_raw']);
 
-        // source_file: html variant only. Empty = no file picked yet (allowed).
-        $sourceFile = $template === 'experiment-html'
-            ? ($post['source_file'] !== '' ? $post['source_file'] : null)
+        // source_file lives with both html-body and html-swap (both read
+        // from a real file in /content/experiment/<slug>/).
+        $sourceFile = ($post['body_mode'] !== 'rtf' && $post['source_file'] !== '')
+            ? $post['source_file']
             : null;
 
         // Validate that source_file (if non-null) actually exists in the folder.
@@ -197,20 +210,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         }
 
         if (count($errors) === 0) {
+            // Phase 20.3: always persist body (TipTap state) — toggling the
+            // mode keeps the draft. body_mode drives render-time selection.
+            // source_file only updates when the user is in an HTML mode;
+            // a stale select in a hidden panel can't overwrite the saved
+            // reference when RTF is active.
             $saveData = [
                 'id'        => $id,
                 'template'  => $template,
+                'body_mode' => $post['body_mode'],
                 'slug'      => $slug,
                 'title'     => $post['title'],
                 'summary'   => $post['summary'] !== '' ? $post['summary'] : null,
                 'read_time' => $readTime,
                 'tags'      => $post['tags']    !== '' ? $post['tags']    : null,
+                'body'      => $bodyClean,
             ];
-            if ($template === 'experiment') {
-                $saveData['body']        = $bodyClean;
-                $saveData['source_file'] = null;
-            } else {
-                $saveData['body']        = null;
+            if ($post['body_mode'] !== 'rtf') {
                 $saveData['source_file'] = $sourceFile;
             }
 
@@ -346,6 +362,12 @@ $slugPublished = $status === 'published';
 $bodyInitial   = (string)($experiment['body'] ?? '');
 $slugVal       = (string)($experiment['slug'] ?? '');
 
+// Phase 20.3: body_mode drives the three-way variant selector. Always
+// available — even pre-Phase-20.3 rows backfilled correctly via the
+// migration. Default 'rtf' for any row that somehow lacks the column.
+$bodyMode = (string)($experiment['body_mode'] ?? 'rtf');
+if (!in_array($bodyMode, ['rtf', 'html-body', 'html-swap'], true)) $bodyMode = 'rtf';
+
 $myStatusIdx = array_search($status, $expStages, true);
 if ($myStatusIdx === false) $myStatusIdx = -1;
 
@@ -353,11 +375,21 @@ $saveLabel = $status === 'published' ? 'Save changes' : 'Save ' . ucfirst($statu
 $fromStage = (string)($_GET['from_stage'] ?? '');
 $canUndo   = $fromStage !== '' && $myStatusIdx > 0;
 
-// Folder state (html variant only).
+// Phase 20.2: Preview sub-tab. Experiments render at draft + published.
+$showPreviewTab = ($status === 'draft' || $status === 'published');
+$activeTab      = (string)($_GET['tab'] ?? 'edit');
+if (!in_array($activeTab, ['edit', 'preview'], true)) $activeTab = 'edit';
+if ($activeTab === 'preview' && !$showPreviewTab) $activeTab = 'edit';
+
+// Folder state — always computed when a slug exists, regardless of the
+// row's saved body_mode. The user may toggle to html-body/html-swap on
+// the form without having saved yet; the folder UI needs the path
+// resolved at render time so clicking "Set up folder" creates the right
+// directory.
 $folderExists = false;
 $folderFiles  = [];
 $folderPath   = '';
-if ($template === 'experiment-html' && $slugVal !== '') {
+if ($slugVal !== '') {
     $folderPath   = '/content/experiment/' . $slugVal . '/';
     $folderExists = folder_exists('experiment', $slugVal);
     if ($folderExists) {
@@ -385,20 +417,45 @@ $sourceFileVal = (string)($experiment['source_file'] ?? '');
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
-<?php if ($template === 'experiment'): ?>
+<?php /* Phase 20.3: always load tiptap.css — the RTF panel mounts even
+   when body_mode starts in html-body/html-swap, so the user can flip
+   back to RTF without a stylesheet reload. */ ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
-<?php endif; ?>
+<link rel="stylesheet" href="/_templates/style-articles.css">
 </head>
 <body>
 
 <?php
-$breadcrumb = 'Experiments → Edit';
+// Phase 21.x: resolve provenance BEFORE topbar renders so the breadcrumb
+// reflects where the user came from.
+$validFromKeys = ['ideation', 'draft-writing', 'articles', 'journals', 'live-sessions', 'experiments'];
+$fromKey = (string)($_GET['from'] ?? '');
+if (!in_array($fromKey, $validFromKeys, true)) {
+    if ($status === 'idea') {
+        $fromKey = 'ideation';
+    } elseif ($status === 'published') {
+        $fromKey = 'experiments';
+    } else {
+        $fromKey = 'draft-writing';
+    }
+}
+$navLabelMap = [
+    'ideation'      => ['Ideation',      '/cms/ideation'],
+    'draft-writing' => ['Draft Writing', '/cms/'],
+    'articles'      => ['Articles',      '/cms/articles'],
+    'journals'      => ['Journals',      '/cms/journals'],
+    'live-sessions' => ['Live Sessions', '/cms/live-sessions'],
+    'experiments'   => ['Experiments',   '/cms/experiments'],
+];
+[$_navLabel, $_navHref] = $navLabelMap[$fromKey] ?? ['Experiments', '/cms/experiments'];
+$breadcrumb      = $_navLabel . ' → Edit';
+$breadcrumb_href = $_navHref;
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'experiments';
+  $active_nav_id = $fromKey;
   $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
@@ -428,7 +485,16 @@ require __DIR__ . '/../partials/topbar.php';
                           . '</span>';
       }
 
-      $actions  = '<a href="/cms/experiments" class="btn-ghost">Back to list</a>';
+      $backMap = [
+          'ideation'      => ['/cms/ideation',      'Back to Ideation'],
+          'draft-writing' => ['/cms/',              'Back to Draft Writing'],
+          'articles'      => ['/cms/articles',      'Back to Articles'],
+          'journals'      => ['/cms/journals',      'Back to Journals'],
+          'live-sessions' => ['/cms/live-sessions', 'Back to Live Sessions'],
+          'experiments'   => ['/cms/experiments',   'Back to Experiments'],
+      ];
+      [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/experiments', 'Back to list'];
+      $actions  = '<a href="' . $e($backHref) . '" class="btn-ghost">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -437,12 +503,37 @@ require __DIR__ . '/../partials/topbar.php';
           $cls = '';
           if ($i < $myStatusIdx)        $cls = ' done';
           elseif ($i === $myStatusIdx)  $cls = ' current';
+          $stepLabel = ($s === 'published' && $isScheduled) ? 'Scheduled' : ucfirst($s);
         ?>
-          <div class="stage-bar-step<?= $cls ?>"><?= ucfirst($s) ?></div>
+          <div class="stage-bar-step<?= $cls ?>"><?= $e($stepLabel) ?></div>
         <?php endforeach; ?>
       </div>
 
-      <div class="content-area">
+      <?php if ($showPreviewTab): ?>
+        <div class="post-edit-tabs" role="tablist" aria-label="Experiment edit and preview">
+          <a class="post-edit-tab<?= $activeTab === 'edit' ? ' active' : '' ?>"
+             role="tab" data-tab-target="edit"
+             aria-selected="<?= $activeTab === 'edit' ? 'true' : 'false' ?>"
+             href="/cms/experiments/edit?id=<?= (int)$id ?>&tab=edit">Edit</a>
+          <a class="post-edit-tab<?= $activeTab === 'preview' ? ' active' : '' ?>"
+             role="tab" data-tab-target="preview"
+             aria-selected="<?= $activeTab === 'preview' ? 'true' : 'false' ?>"
+             href="/cms/experiments/edit?id=<?= (int)$id ?>&tab=preview">Preview</a>
+        </div>
+
+        <div class="post-preview-frame<?= $activeTab === 'preview' ? '' : ' is-hidden-tab' ?>" data-tab-panel="preview">
+          <iframe
+            name="post-preview-frame-<?= (int)$id ?>"
+            src="/cms/post/preview?id=<?= (int)$id ?>"
+            title="Preview — Experiment"
+            class="post-preview-iframe"
+            loading="lazy"
+            data-preview-iframe
+            data-preview-endpoint="/cms/post/preview-form?id=<?= (int)$id ?>"></iframe>
+        </div>
+      <?php endif; ?>
+
+      <div class="content-area<?= ($showPreviewTab && $activeTab === 'preview') ? ' is-hidden-tab' : '' ?>" data-tab-panel="edit">
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -456,7 +547,8 @@ require __DIR__ . '/../partials/topbar.php';
 
         <form method="post"
               action="/cms/experiments/edit?id=<?= (int)$id ?>"
-              class="cms-form cms-form-wide">
+              class="cms-form cms-form-wide"
+              data-preview-source-form>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <?php if ($isScheduled): ?>
@@ -466,6 +558,17 @@ require __DIR__ . '/../partials/topbar.php';
                 Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
                 · <span class="schedule-countdown" data-countdown>computing…</span>
               </span>
+            </div>
+          <?php elseif ($isLive): ?>
+            <?php $experimentSlug = (string)($experiment['slug'] ?? ''); ?>
+            <div class="live-banner">
+              <span class="cms-live-dot" aria-hidden="true"></span>
+              <span class="live-banner-text">
+                Published<?php if ($publishedAtRaw !== ''): ?> on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong><?php endif; ?>
+              </span>
+              <?php if ($experimentSlug !== ''): ?>
+                <a class="live-banner-link" href="/experiments/<?= $e($experimentSlug) ?>" target="_blank" rel="noopener">View live ↗</a>
+              <?php endif; ?>
             </div>
           <?php endif; ?>
 
@@ -522,9 +625,27 @@ require __DIR__ . '/../partials/topbar.php';
                   placeholder="One-line deck below the title."><?= $e((string)($experiment['summary'] ?? '')) ?></textarea>
               </div>
 
-              <?php if ($template === 'experiment'): ?>
-                <div class="field-group">
-                  <label class="field-label">Body <span class="field-hint-inline">optional · article-format</span></label>
+              <div class="field-group" data-body-source-block>
+                <div class="body-source-header">
+                  <label class="field-label" style="margin:0">Body</label>
+                  <div class="body-source-toggle" role="radiogroup" aria-label="Body source">
+                    <label class="body-source-option<?= $bodyMode === 'rtf' ? ' is-active' : '' ?>">
+                      <input type="radio" name="body_mode" value="rtf"<?= $bodyMode === 'rtf' ? ' checked' : '' ?>>
+                      <span>Rich text</span>
+                    </label>
+                    <label class="body-source-option<?= $bodyMode === 'html-body' ? ' is-active' : '' ?>">
+                      <input type="radio" name="body_mode" value="html-body"<?= $bodyMode === 'html-body' ? ' checked' : '' ?>>
+                      <span>HTML body</span>
+                    </label>
+                    <label class="body-source-option<?= $bodyMode === 'html-swap' ? ' is-active' : '' ?>">
+                      <input type="radio" name="body_mode" value="html-swap"<?= $bodyMode === 'html-swap' ? ' checked' : '' ?>>
+                      <span>HTML swap</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- RTF — TipTap (always mounted so toggling preserves draft state) -->
+                <div class="body-source-panel" data-body-panel="rtf"<?= $bodyMode !== 'rtf' ? ' hidden' : '' ?>>
                   <div class="tiptap-wrap body-box">
                     <div class="tiptap-toolbar" id="tiptap-toolbar">
                       <button type="button" data-cmd="bold"        class="tt-btn"><strong>B</strong></button>
@@ -546,57 +667,61 @@ require __DIR__ . '/../partials/topbar.php';
                       class="tiptap-fallback"
                       aria-label="Experiment body (HTML)"><?= $e($bodyInitial) ?></textarea>
                   </div>
+                  <p class="field-hint">Article-format body. Strips HTML outside the toolbar allowlist on save.</p>
                 </div>
-              <?php else: /* experiment-html */ ?>
-                <div class="field-group">
-                  <label class="field-label">Content Folder <span class="field-req">required to publish</span></label>
-                  <div class="folder-block">
-                    <div class="folder-block-hd">
-                      <div class="folder-path" style="font-family:var(--font-mono);font-size:var(--text-meta)"><?= $e($folderPath) ?></div>
-                      <span class="folder-status">
-                        <?php if (!$folderExists): ?>
-                          <span class="muted">Folder not set up yet</span>
-                        <?php elseif (count($folderFiles) === 0): ?>
-                          <span class="muted">Folder is empty</span>
-                        <?php else: ?>
-                          <?= (int)count($folderFiles) ?> file<?= count($folderFiles) === 1 ? '' : 's' ?>
-                        <?php endif; ?>
-                      </span>
-                    </div>
-                    <div class="folder-block-bd">
-                      <?php if (!$folderExists): ?>
-                        <p class="field-hint">No folder exists yet for this slug. Click <strong>Set up folder</strong> to create
-                          <code><?= $e($folderPath) ?></code> on the server.
-                          Then drop your <code>.html</code> files into it via SSH/CloudMounter and click <strong>Refresh</strong>.</p>
-                        <button type="submit" name="action" value="setup_folder" class="btn-sec" formnovalidate>
-                          Set up folder
-                        </button>
-                      <?php else: ?>
-                        <div style="display:flex;gap:var(--space-8);align-items:center">
-                          <?php if (count($folderFiles) === 0): ?>
-                            <select class="field-select" name="source_file" disabled style="flex:1">
-                              <option>— no .html files in folder —</option>
-                            </select>
+
+                <!-- HTML body — chrome stays, body slot reads the file -->
+                <!-- HTML swap — full passthrough (no chrome). Same folder picker drives both. -->
+                <?php
+                $folderHintBody = 'The article chrome stays; the body slot reads the selected file.';
+                $folderHintSwap = 'Full-page passthrough — readfile() serves at <code>/experiments/' . $e($slugVal) . '</code> with no template wrapper.';
+                foreach (['html-body' => $folderHintBody, 'html-swap' => $folderHintSwap] as $mode => $hintHtml):
+                ?>
+                  <div class="body-source-panel" data-body-panel="<?= $mode ?>"<?= $bodyMode !== $mode ? ' hidden' : '' ?>>
+                    <div class="folder-block">
+                      <div class="folder-block-hd">
+                        <div class="folder-path" style="font-family:var(--font-mono);font-size:var(--text-meta)"><?= $e($folderPath) ?: '/content/experiment/<slug>/' ?></div>
+                        <span class="folder-status">
+                          <?php if (!$folderExists): ?>
+                            <span class="muted">Folder not set up yet</span>
+                          <?php elseif (count($folderFiles) === 0): ?>
+                            <span class="muted">Folder is empty</span>
                           <?php else: ?>
-                            <select class="field-select" name="source_file" id="ex-source-file" style="flex:1">
-                              <option value="">— Pick a file —</option>
-                              <?php foreach ($folderFiles as $f): ?>
-                                <option value="<?= $e($f) ?>"<?= $sourceFileVal === $f ? ' selected' : '' ?>><?= $e($f) ?></option>
-                              <?php endforeach; ?>
-                            </select>
+                            <?= (int)count($folderFiles) ?> file<?= count($folderFiles) === 1 ? '' : 's' ?>
                           <?php endif; ?>
-                          <button type="submit" name="action" value="refresh_folder" class="btn-sec" formnovalidate>↺ Refresh</button>
-                        </div>
-                        <p class="field-hint">
-                          Drop <code>.html</code> files into <code><?= $e($folderPath) ?></code> via SSH/CloudMounter,
-                          then Refresh. The selected file serves at <code>/experiments/<?= $e($slugVal) ?></code> with no
-                          template wrapper.
-                        </p>
-                      <?php endif; ?>
+                        </span>
+                      </div>
+                      <div class="folder-block-bd">
+                        <?php if (!$folderExists): ?>
+                          <p class="field-hint">No folder exists yet for this slug. Click <strong>Set up folder</strong> to create
+                            <code><?= $e($folderPath) ?: '/content/experiment/&lt;slug&gt;/' ?></code> on the server.
+                            Then drop your <code>.html</code> files into it via SSH/CloudMounter and click <strong>Refresh</strong>.</p>
+                          <button type="submit" name="action" value="setup_folder" class="btn-sec" formnovalidate>
+                            Set up folder
+                          </button>
+                        <?php else: ?>
+                          <div style="display:flex;gap:var(--space-8);align-items:center">
+                            <?php if (count($folderFiles) === 0): ?>
+                              <select class="field-select" name="source_file" disabled style="flex:1">
+                                <option>— no .html files in folder —</option>
+                              </select>
+                            <?php else: ?>
+                              <select class="field-select" name="source_file" id="ex-source-file-<?= $mode ?>" style="flex:1">
+                                <option value="">— Pick a file —</option>
+                                <?php foreach ($folderFiles as $f): ?>
+                                  <option value="<?= $e($f) ?>"<?= $sourceFileVal === $f ? ' selected' : '' ?>><?= $e($f) ?></option>
+                                <?php endforeach; ?>
+                              </select>
+                            <?php endif; ?>
+                            <button type="submit" name="action" value="refresh_folder" class="btn-sec" formnovalidate>↺ Refresh</button>
+                          </div>
+                          <p class="field-hint"><?= $hintHtml ?></p>
+                        <?php endif; ?>
+                      </div>
                     </div>
                   </div>
-                </div>
-              <?php endif; ?>
+                <?php endforeach; ?>
+              </div>
             </div>
 
             <aside class="form-side">
@@ -643,8 +768,17 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
               <?php if ($isLive): ?>
-                <div class="cms-publish-box">
-                  <label class="field-label">Publish info</label>
+                <div class="cms-publish-box is-live">
+                  <div class="cms-publish-header">
+                    <span class="cms-live-indicator">
+                      <span class="cms-live-dot" aria-hidden="true"></span>
+                      Live
+                    </span>
+                    <a href="/experiments/<?= $e((string)($experiment['slug'] ?? '')) ?>"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn-ghost btn-tiny">View live ↗</a>
+                  </div>
                   <div class="field-group" style="margin-bottom:var(--space-12)">
                     <label class="field-sublabel" for="ex-published-at">Published</label>
                     <input type="datetime-local"
@@ -704,8 +838,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
-            <a href="/cms/experiments" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="save" class="btn-ghost" data-primary-save><?= $e($saveLabel) ?></button>
+            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
 
             <button type="submit" form="experiment-delete-form" class="btn-ghost btn-danger">Delete</button>
 
@@ -733,11 +867,6 @@ require __DIR__ . '/../partials/topbar.php';
                 value="unpublish"
                 class="btn-ghost"
                 data-confirm-unpublish="1">Move to draft</button>
-              <a
-                href="/experiments/<?= $e($slugVal) ?>"
-                target="_blank"
-                rel="noopener"
-                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
@@ -759,7 +888,9 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<?php if ($template === 'experiment'): ?>
+<?php /* Phase 20.3: TipTap always mounts so RTF body state is preserved
+   across mode toggles. The RTF panel may be hidden by JS, but the editor
+   instance lives on in the DOM and its fallback textarea still submits. */ ?>
 <script type="module">
   import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
   setupTiptap({
@@ -770,7 +901,35 @@ require __DIR__ . '/../partials/topbar.php';
     csrfToken:    <?= json_encode($csrf_token, JSON_UNESCAPED_SLASHES) ?>,
   });
 </script>
-<?php endif; ?>
+<script>
+  // Phase 20.3: body-source toggle (rtf / html-body / html-swap).
+  // Show only the active panel; preserve form state in all of them so
+  // toggling never loses draft content or a file selection. Sync the
+  // file-picker selects between html-body and html-swap so they share a
+  // single source_file value.
+  (function () {
+    const root = document.querySelector('[data-body-source-block]');
+    if (!root) return;
+    const radios  = root.querySelectorAll('input[name="body_mode"]');
+    const panels  = root.querySelectorAll('[data-body-panel]');
+    const options = root.querySelectorAll('.body-source-option');
+    const selects = root.querySelectorAll('select[name="source_file"]');
+
+    function activate(mode) {
+      panels.forEach(p => { p.hidden = (p.getAttribute('data-body-panel') !== mode); });
+      options.forEach(o => o.classList.toggle('is-active', o.querySelector('input').value === mode));
+    }
+    radios.forEach(r => r.addEventListener('change', () => activate(r.value)));
+
+    // Keep both html-mode selects in lockstep so the value at submit time
+    // matches what the visible select shows.
+    selects.forEach(sel => {
+      sel.addEventListener('change', () => {
+        selects.forEach(other => { if (other !== sel) other.value = sel.value; });
+      });
+    });
+  })();
+</script>
 
 <script src="/cms/_assets/scroll-actions.js" defer></script>
 
@@ -807,5 +966,6 @@ require __DIR__ . '/../partials/topbar.php';
 </script>
 
 <script src="/cms/_assets/publish-choreography.js" defer></script>
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
 </body>
 </html>

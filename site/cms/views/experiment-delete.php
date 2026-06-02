@@ -45,6 +45,7 @@ if ($experiment === null) {
 $status   = (string)($experiment['status']   ?? '');
 $slug     = (string)($experiment['slug']     ?? '');
 $template = (string)($experiment['template'] ?? '');
+$bodyMode = (string)($experiment['body_mode'] ?? 'rtf');
 
 if ($status === 'published') {
     $typed = trim((string)($_POST['typed_slug'] ?? ''));
@@ -55,10 +56,11 @@ if ($status === 'published') {
     }
 }
 
-// Try to remove the content folder if this is an html experiment. Empty
-// folder → quietly removed. Non-empty → bail and ask the author to clean
-// up first (we don't auto-rm files).
-if ($template === 'experiment-html' && $slug !== '' && folder_exists('experiment', $slug)) {
+// Phase 20.3: if this experiment uses a file-backed body mode (html-body
+// or html-swap), try to remove the content folder. Empty folder → quietly
+// removed. Non-empty → bail and ask the author to clean up first.
+$hadFolder = in_array($bodyMode, ['html-body', 'html-swap'], true);
+if ($hadFolder && $slug !== '' && folder_exists('experiment', $slug)) {
     $res = folder_delete('experiment', $slug);
     if (!$res['ok']) {
         header('Location: /cms/experiments/edit?id=' . (int)$id

@@ -269,16 +269,25 @@ function fields_reference(): array
  */
 function sub_templates_reference(): array
 {
+    // Phase 20.3: sub-templates are now (chrome × body_mode) combinations,
+    // not standalone template enum values. The keys here are display slugs
+    // used by /cms/post-template — the data model behind them is
+    // (template, body_mode) per the migration in 0018_body_mode.sql.
     return [
         'article-standard' => [
             'name'     => 'article: standard',
             'desc'     => 'Default long-form article. Body is a Tiptap rich text field.',
             'php_file' => 'article-standard.php',
         ],
+        'article-html-body' => [
+            'name'     => 'article: html body',
+            'desc'     => 'Article chrome (breadcrumb, byline, hero, etc.) with the body slot sourced from an HTML file in /content/article/<slug>/. Same chrome as standard — only the body block differs.',
+            'php_file' => 'article-standard.php',
+        ],
         'article-series' => [
             'name'     => 'article: series',
             'desc'     => 'Articles that belong to a series. Series field required; prev/next nav auto-renders.',
-            'php_file' => 'article-series.php',
+            'php_file' => 'article-standard.php',
         ],
         'journal-entry' => [
             'name'     => 'journal entry',
@@ -291,13 +300,18 @@ function sub_templates_reference(): array
             'php_file' => 'live-session.php',
         ],
         'experiment' => [
-            'name'     => 'experiment',
-            'desc'     => 'Article-format experiment. Uses the rich text Body — no HTML import.',
+            'name'     => 'experiment: rich text',
+            'desc'     => 'Article-format experiment with the rich text body editor.',
+            'php_file' => 'experiment.php',
+        ],
+        'experiment-html-body' => [
+            'name'     => 'experiment: html body',
+            'desc'     => 'Experiment chrome with the body slot sourced from an HTML file in /content/experiment/<slug>/. The chrome stays the same as the rich-text experiment; only the body block reads from disk.',
             'php_file' => 'experiment.php',
         ],
         'experiment-html' => [
-            'name'     => 'experiment: html',
-            'desc'     => 'Raw HTML imported from a folder. For prototypes and hand-built pages.',
+            'name'     => 'experiment: html swap',
+            'desc'     => 'Full-page HTML passthrough. readfile() serves the file directly with no template wrapper. Use for prototypes that need their own <head>, scripts, custom fonts, etc.',
             'php_file' => 'experiment-html.php',
         ],
     ];
@@ -437,6 +451,52 @@ function content_type_matrix(): array
             'hero-image'     => '—',
             'body'           => '—',
             'custom-html'    => 'always',
+            'series-nav'     => '—',
+            'event-details'  => '—',
+            'format-tags'    => '—',
+            'entry-number'   => '—',
+            'tags'           => 'auto',
+        ],
+        // Phase 20.3: article-html-body shares article-standard's chrome —
+        // every block stays except Body switches from rich-text (always) to
+        // file-sourced (still always-rendered, but read from /content/article).
+        'article-html-body' => [
+            'category'       => 'always',
+            'publish-date'   => 'always',
+            'read-time'      => 'optional',  // manual on html-body (no body to count)
+            'updated-date'   => 'auto',
+            'title'          => 'always',
+            'key-statement'  => '—',
+            'summary'        => 'optional',
+            'author'         => 'optional',
+            'author-bio'     => 'optional',
+            'series'         => 'optional',
+            'special-tag'    => 'optional',
+            'hero-image'     => 'optional',
+            'body'           => 'always',  // sourced from file, not RTF
+            'custom-html'    => '—',
+            'series-nav'     => '—',
+            'event-details'  => '—',
+            'format-tags'    => '—',
+            'entry-number'   => '—',
+            'tags'           => 'auto',
+        ],
+        // Phase 20.3: experiment-html-body shares experiment's chrome.
+        'experiment-html-body' => [
+            'category'       => 'always',
+            'publish-date'   => 'always',
+            'read-time'      => 'optional',
+            'updated-date'   => 'auto',
+            'title'          => 'always',
+            'key-statement'  => '—',
+            'summary'        => 'optional',
+            'author'         => 'optional',
+            'author-bio'     => 'optional',
+            'series'         => '—',
+            'special-tag'    => '—',
+            'hero-image'     => 'optional',
+            'body'           => 'always',  // sourced from file
+            'custom-html'    => '—',
             'series-nav'     => '—',
             'event-details'  => '—',
             'format-tags'    => '—',

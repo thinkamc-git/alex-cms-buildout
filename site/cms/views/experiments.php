@@ -21,7 +21,14 @@ Auth::require_login();
 $user        = Auth::current_user();
 $email       = (string)($user['email'] ?? '');
 $csrf_token  = Csrf::token();
-$experiments = list_experiments();
+// Phase 20.3 filter bar — multi-select per-type stages + categories.
+$filterStages     = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['stage']    ?? ''))), 'strlen'));
+$filterCategories = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['category'] ?? ''))), 'strlen'));
+$experiments   = list_experiments([
+    'stage'    => implode(',', $filterStages),
+    'category' => implode(',', $filterCategories),
+]);
+$allCategories = list_categories('experiment');
 $flash       = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
@@ -73,9 +80,17 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-experiments">
       <?php
       $title    = 'Experiments';
-      $subtitle = 'Prototypes, custom HTML, and standalone pieces. Two variants: article-format and raw HTML import.';
-      $actions  = '<a href="/cms/experiments/new" class="btn-pri">+ New Experiment</a>';
+      $subtitle = 'Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, full HTML swap.';
+      $actions  = '<a href="/experiments/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+                . '<a href="/cms/experiments/new" class="btn-pri">+ New Experiment</a>';
       require __DIR__ . '/../partials/view-header.php';
+      ?>
+
+      <?php
+      // Experiment pipeline is idea→draft→published — only Draft/Scheduled/
+      // Published render in the stage bar (no Concept/Outline).
+      $groups = build_filter_groups('experiment', '/cms/experiments', $filterStages, $filterCategories, $allCategories);
+      require __DIR__ . '/../partials/filter-bar.php';
       ?>
 
       <div class="content-area">
@@ -100,62 +115,83 @@ require __DIR__ . '/../partials/topbar.php';
             }
         }
 
-        $columns = [
-            ['label' => 'Experiment Title', 'width' => '36%'],
-            ['label' => 'Stage',            'width' => '12%'],
-            ['label' => 'Template',         'width' => '18%'],
-            ['label' => 'Updated',          'width' => '16%'],
-            ['label' => 'Actions',          'width' => '18%'],
-        ];
+        $makeColumns = static function (string $dateLabel): array {
+            return [
+                ['label' => 'Experiment Title', 'width' => '32%'],
+                ['label' => 'Stage',            'width' => '10%'],
+                ['label' => 'Category',         'width' => '13%'],
+                ['label' => 'Content Type',     'width' => '15%'],
+                ['label' => $dateLabel,         'width' => '14%'],
+                ['label' => '',                 'width' => '16%'],
+            ];
+        };
 
-        $buildRow = static function (array $x) use ($e, $csrf_token, $stagePill): array {
+        $buildRow = static function (array $x, string $dateMode) use ($e, $csrf_token, $stagePill): array {
             $id      = (int)($x['id'] ?? 0);
             $slug    = (string)($x['slug']        ?? '');
             $title2  = (string)($x['title']       ?? '');
-            $tpl     = (string)($x['template']    ?? '');
-            $srcFile = (string)($x['source_file'] ?? '');
-            $updated = (string)($x['updated_at']  ?? '');
-            $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+            $tpl      = (string)($x['template']    ?? '');
+            $bodyMode = (string)($x['body_mode']   ?? 'rtf');
+            $srcFile  = (string)($x['source_file'] ?? '');
+            $updated  = (string)($x['updated_at'] ?? '');
+            $pubAt    = (string)($x['published_at'] ?? '');
+            $dateRaw  = $dateMode === 'published' ? ($pubAt !== '' ? $pubAt : $updated) : $updated;
+            $dateShort = $dateRaw !== '' ? date('Y-m-d', strtotime($dateRaw)) : '';
 
-            $titleHtml = '<a href="/cms/experiments/edit?id=' . $id . '" class="row-title">'
+            $titleHtml = '<a href="/cms/experiments/edit?id=' . $id . '&from=experiments" class="row-title">'
                        . $e($title2 !== '' ? $title2 : '(untitled)')
                        . '</a>'
-                       . ' <span class="row-slug">/' . $e($slug) . '</span>';
+                       . '<div class="row-slug">/' . $e($slug) . '</div>';
 
-            // Template cell: surface the variant + a folder hint for html rows.
-            if ($tpl === 'experiment-html') {
-                $folderOk = $slug !== '' && folder_exists('experiment', $slug);
-                $hint = !$folderOk
-                    ? ' <span class="muted">· no folder</span>'
-                    : ($srcFile === '' ? ' <span class="muted">· no file picked</span>' : '');
-                $tplHtml = '<span class="mono">experiment-html</span>' . $hint;
-            } elseif ($tpl === 'experiment') {
-                $tplHtml = '<span class="mono">experiment</span>';
+            $catLabel  = (string)($x['category_label']  ?? '');
+            $catColour = (string)($x['category_colour'] ?? '');
+            if ($catLabel !== '') {
+                $bg = $catColour !== '' ? 'var(--c-' . $e($catColour) . ')' : 'var(--ink-30)';
+                $catHtml = '<span class="cat-chip" style="--cat-bg:' . $bg . '">' . $e($catLabel) . '</span>';
             } else {
-                $tplHtml = '<span class="muted">—</span>';
+                $catHtml = '<span class="muted">—</span>';
             }
 
-            $isPublished = (string)($x['status'] ?? '') === 'published';
-            $liveBtn = $isPublished && $slug !== ''
-                ? '<a href="/experiments/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+            // Content Type: grey pill carrying the body_mode label, with a
+            // muted hint on its own line when a file-backed mode lacks its
+            // folder or file.
+            $modeLabel = $tpl === 'experiment' ? $bodyMode : '—';
+            $hint = '';
+            if ($tpl === 'experiment' && in_array($bodyMode, ['html-body', 'html-swap'], true)) {
+                $folderOk = $slug !== '' && folder_exists('experiment', $slug);
+                $hint = !$folderOk
+                    ? '<div class="row-cell-hint">no folder</div>'
+                    : ($srcFile === '' ? '<div class="row-cell-hint">no file picked</div>' : '');
+            }
+            $tplHtml = $modeLabel === '—'
+                ? '<span class="muted">—</span>'
+                : '<span class="content-type-pill">' . $e($modeLabel) . '</span>' . $hint;
+
+            $isLiveRow = (string)($x['status'] ?? '') === 'published'
+                      && (string)($x['published_status'] ?? '') !== 'scheduled';
+            $liveBtn = $isLiveRow && $slug !== ''
+                ? '<a href="/experiments/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
-                . '<a href="/cms/experiments/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                . '<form method="post" action="/cms/experiments/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this experiment? This cannot be undone.">'
-                .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
-                . '</form>'
+                . '<span class="row-actions-hover">'
+                .   '<a href="/cms/experiments/edit?id=' . $id . '&from=experiments" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<form method="post" action="/cms/experiments/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this experiment? This cannot be undone.">'
+                .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .   '</form>'
+                . '</span>'
                 . '</div>';
 
             return [
-                'href'  => '/cms/experiments/edit?id=' . $id,
+                'href'  => '/cms/experiments/edit?id=' . $id . '&from=experiments',
                 'cells' => [
                     ['html' => $titleHtml],
                     ['html' => $stagePill(((string)($x['status'] ?? '') === 'published' && (string)($x['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($x['status'] ?? 'draft'))],
+                    ['html' => $catHtml],
                     ['html' => $tplHtml],
-                    ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
+                    ['html' => '<span class="muted">' . $e($dateShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
                 ],
             ];
@@ -171,7 +207,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $drafts);
+          $columns    = $makeColumns('Updated');
+          $rows       = array_map(static fn($x) => $buildRow($x, 'updated'), $drafts);
           $empty_text = 'No experiment drafts. Click + New Experiment to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -187,7 +224,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $scheduled);
+          $columns    = $makeColumns('Scheduled for');
+          $rows       = array_map(static fn($x) => $buildRow($x, 'published'), $scheduled);
           $empty_text = 'No scheduled experiments.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -203,7 +241,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $published);
+          $columns    = $makeColumns('Published');
+          $rows       = array_map(static fn($x) => $buildRow($x, 'published'), $published);
           $empty_text = 'No published experiments yet.';
           require __DIR__ . '/../partials/table.php';
           ?>

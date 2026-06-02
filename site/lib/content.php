@@ -99,21 +99,198 @@ function get_article(int $id): ?array
 }
 
 /**
- * List articles. Supports an optional 'status' filter
- * (e.g. ['status' => 'draft']). Ordered newest-first by updated_at.
+ * Phase 20.3 filter-bar helpers. Each list_<type> function shares the same
+ * stage + category filter shape; these by-ref mutators append the relevant
+ * WHERE clauses + params so each caller stays DRY.
  *
- * Phase 6a only renders the full list — filter UI is wired in Phase 7.
- * Keep the function open to filters now to avoid breaking callers later.
+ * Filter values are comma-separated strings — multi-select OR within a
+ * group. Empty / missing values are no-ops (no WHERE fragment added).
+ *
+ * Stage values map to status/published_status pairs:
+ *   concept|outline|draft → status = <value>
+ *   scheduled             → status='published' AND published_status='scheduled'
+ *   published             → status='published' AND published_status IN (NULL, 'live')
+ *
+ * Category is matched against `content_categories.category` (slug) — relies
+ * on the cc join the caller already declared.
+ */
+function _parse_csv_filter($value): array
+{
+    if (!is_string($value) || $value === '') return [];
+    $parts = array_map('trim', explode(',', $value));
+    return array_values(array_filter($parts, static fn($v) => $v !== ''));
+}
+
+function apply_list_stage_filter(array $filters, string &$sql, array &$params): void
+{
+    $stages = _parse_csv_filter($filters['stage'] ?? '');
+    if ($stages === []) return;
+
+    $simple   = [];
+    $clauses  = [];
+    foreach ($stages as $st) {
+        if (in_array($st, ['concept', 'outline', 'draft', 'idea'], true)) {
+            $simple[$st] = true;
+        } elseif ($st === 'scheduled') {
+            $clauses[] = "(c.status = 'published' AND c.published_status = 'scheduled')";
+        } elseif ($st === 'published') {
+            $clauses[] = "(c.status = 'published' AND (c.published_status IS NULL OR c.published_status = 'live'))";
+        }
+    }
+    if ($simple !== []) {
+        $placeholders = [];
+        $i = 0;
+        foreach (array_keys($simple) as $st) {
+            $key = ':stage_' . $i++;
+            $placeholders[] = $key;
+            $params[$key]   = $st;
+        }
+        $clauses[] = 'c.status IN (' . implode(',', $placeholders) . ')';
+    }
+    if ($clauses !== []) {
+        $sql .= ' AND (' . implode(' OR ', $clauses) . ')';
+    }
+}
+
+function apply_list_category_filter(array $filters, string &$sql, array &$params): void
+{
+    $cats = _parse_csv_filter($filters['category'] ?? '');
+    if ($cats === []) return;
+
+    $placeholders = [];
+    $i = 0;
+    foreach ($cats as $c) {
+        $key = ':catfilter_' . $i++;
+        $placeholders[] = $key;
+        $params[$key]   = $c;
+    }
+    $sql .= ' AND cc.category IN (' . implode(',', $placeholders) . ')';
+}
+
+/**
+ * Returns the stage filter-keys appropriate for a content type's pipeline,
+ * in display order. Drops 'idea' (Ideation-only) and injects 'scheduled'
+ * ahead of 'published' since scheduled is a derived published-state.
+ *
+ * Article  → [concept, outline, draft, scheduled, published]
+ * Journal / Live-Session / Experiment → [draft, scheduled, published]
+ */
+function available_stages_for_type(string $type): array
+{
+    $pipeline = stages_for_type($type);
+    $out = [];
+    foreach ($pipeline as $s) {
+        if ($s === 'idea') continue;
+        if ($s === 'published') $out[] = 'scheduled';
+        $out[] = $s;
+    }
+    return $out;
+}
+
+/**
+ * Builds the $groups array consumed by partials/filter-bar.php for any of
+ * the four post-list views. Each pill href toggles the value within its
+ * group (multi-select OR) and preserves the other group's state.
+ *
+ *   $type             'article' | 'journal' | 'live-session' | 'experiment'
+ *   $basePath         e.g. '/cms/articles' — used as the link base.
+ *   $filterStages     Currently-active stage filter-keys (parsed from URL).
+ *   $filterCategories Currently-active category slugs (parsed from URL).
+ *   $allCategories    Result of list_categories($type) — each row carries
+ *                     'value_slug', 'label', and 'colour'.
+ */
+function build_filter_groups(
+    string $type,
+    string $basePath,
+    array  $filterStages,
+    array  $filterCategories,
+    array  $allCategories
+): array {
+    $stageLabels = [
+        'concept'   => 'Concept',
+        'outline'   => 'Outline',
+        'draft'     => 'Draft',
+        'scheduled' => 'Scheduled',
+        'published' => 'Published',
+    ];
+
+    // Toggle helper: returns the comma-joined list with $value flipped in/out.
+    $toggle = static function (array $list, string $value): string {
+        $next = in_array($value, $list, true)
+            ? array_values(array_filter($list, static fn($v) => $v !== $value))
+            : array_merge($list, [$value]);
+        return implode(',', $next);
+    };
+
+    $href = static function (string $stageCsv, string $catCsv) use ($basePath): string {
+        $params = [];
+        if ($stageCsv !== '') $params['stage']    = $stageCsv;
+        if ($catCsv   !== '') $params['category'] = $catCsv;
+        return $params === [] ? $basePath : $basePath . '?' . http_build_query($params);
+    };
+
+    $catCsv = implode(',', $filterCategories);
+
+    $stagePills = [[
+        'label'  => 'All',
+        'href'   => $href('', $catCsv),
+        'all'    => true,
+        'active' => $filterStages === [],
+    ]];
+    foreach (available_stages_for_type($type) as $st) {
+        $stagePills[] = [
+            'label'  => $stageLabels[$st] ?? ucfirst($st),
+            'href'   => $href($toggle($filterStages, $st), $catCsv),
+            'active' => in_array($st, $filterStages, true),
+        ];
+    }
+
+    $stageCsv = implode(',', $filterStages);
+    $categoryPills = [[
+        'label'  => 'All',
+        'href'   => $href($stageCsv, ''),
+        'all'    => true,
+        'active' => $filterCategories === [],
+    ]];
+    foreach ($allCategories as $cat) {
+        $slug = (string)($cat['value_slug'] ?? '');
+        if ($slug === '') continue;
+        $categoryPills[] = [
+            'label'  => (string)($cat['label'] ?? $slug),
+            'href'   => $href($stageCsv, $toggle($filterCategories, $slug)),
+            'colour' => (string)($cat['colour'] ?? ''),
+            'active' => in_array($slug, $filterCategories, true),
+        ];
+    }
+
+    return [
+        ['label' => 'Stage',    'mode' => 'or', 'pills' => $stagePills],
+        ['label' => 'Category', 'mode' => 'or', 'pills' => $categoryPills],
+    ];
+}
+
+/**
+ * List articles. Supports optional 'status', 'stage', and 'category' filters.
+ * Ordered by pipeline_order ASC, updated_at DESC.
  */
 function list_articles(array $filters = []): array
 {
+    // Phase 20.3 (filter bar polish): joined the primary category so the
+    // list view can render a coloured Category column without N+1 queries.
     $sql = "SELECT c.id, c.slug, c.title, c.status, c.updated_at, c.published_at,
                    c.published_status,
                    c.special_tag, c.pipeline_order,
                    c.series_id, c.series_order,
-                   s.name AS series_name, s.slug AS series_slug
+                   s.name AS series_name, s.slug AS series_slug,
+                   cat.label  AS category_label,
+                   cat.value_slug AS category_slug,
+                   cat.colour AS category_colour
               FROM content c
          LEFT JOIN series s ON s.id = c.series_id
+         LEFT JOIN content_categories cc
+                ON cc.content_id = c.id AND cc.is_primary = 1
+         LEFT JOIN categories cat
+                ON cat.type = cc.type AND cat.value_slug = cc.category
              WHERE c.type = 'article'";
     $params = [];
 
@@ -121,6 +298,8 @@ function list_articles(array $filters = []): array
         $sql .= " AND c.status = :status";
         $params[':status'] = (string)$filters['status'];
     }
+    apply_list_stage_filter($filters, $sql, $params);
+    apply_list_category_filter($filters, $sql, $params);
 
     // Sort: pipeline_order ASC (0 first → unordered new captures at top,
     // dragged items get 1..N below), then recency as tiebreaker.
@@ -162,6 +341,10 @@ function save_article(array $data): int
     // values like 'principle'/'framework', etc. are already accepted).
     $cols = [
         'slug', 'status', 'template', 'title', 'summary', 'body',
+        // Phase 20.3: body_mode picks where the body slot reads from
+        // (rtf | html-body | html-swap). source_file pairs with the two
+        // file-backed modes.
+        'body_mode',
         'hero_image', 'hero_caption', 'hero_size',
         'show_author', 'show_author_bio',
         'show_updated', 'updated_display',
@@ -174,8 +357,8 @@ function save_article(array $data): int
         // are independently optional (see live-session-edit.php).
         'event_date', 'event_time', 'event_end_time',
         'location', 'venue', 'cost_pill', 'attendance', 'custom_pill',
-        // Experiment fields (Phase 10). source_file is just the filename
-        // inside /content/experiment/<slug>/ — the full path is derived.
+        // Experiment + article-html-body fields (Phase 10 + 20.3).
+        // source_file is just the filename inside /content/<type>/<slug>/.
         'source_file',
         'type',
         'published_at', 'published_status',
@@ -286,19 +469,30 @@ function get_journal_by_slug(string $slug): ?array
  */
 function list_journals(array $filters = []): array
 {
-    $sql = "SELECT id, slug, key_statement, title, status, updated_at, published_at,
-                   published_status,
-                   journal_number, pipeline_order
-              FROM content
-             WHERE type = 'journal'";
+    // Phase 20.3 (filter bar polish): joined primary category for the
+    // list-view Category column. Mirrors list_articles().
+    $sql = "SELECT c.id, c.slug, c.key_statement, c.title, c.status, c.updated_at, c.published_at,
+                   c.published_status,
+                   c.journal_number, c.pipeline_order,
+                   cat.label  AS category_label,
+                   cat.value_slug AS category_slug,
+                   cat.colour AS category_colour
+              FROM content c
+         LEFT JOIN content_categories cc
+                ON cc.content_id = c.id AND cc.is_primary = 1
+         LEFT JOIN categories cat
+                ON cat.type = cc.type AND cat.value_slug = cc.category
+             WHERE c.type = 'journal'";
     $params = [];
 
     if (isset($filters['status']) && $filters['status'] !== '') {
-        $sql .= " AND status = :status";
+        $sql .= " AND c.status = :status";
         $params[':status'] = (string)$filters['status'];
     }
+    apply_list_stage_filter($filters, $sql, $params);
+    apply_list_category_filter($filters, $sql, $params);
 
-    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+    $sql .= " ORDER BY c.pipeline_order ASC, c.updated_at DESC";
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -353,19 +547,27 @@ function assign_journal_number(int $id): ?int
         ? null
         : (string)$catRow['category'];
 
+    // Phase 20.3: MAX scoped to PUBLISHED rows only — leaving Published
+    // clears the number, so a draft never holds an "in-flight" slot. Gaps
+    // left by deletion are not refilled: MAX returns the highest current
+    // value regardless of holes below it.
     if ($category === null) {
         $q = db()->query(
             "SELECT COALESCE(MAX(c.journal_number), 0) + 1 AS n
                FROM content c
           LEFT JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1
-              WHERE c.type = 'journal' AND cc.category IS NULL"
+              WHERE c.type = 'journal'
+                AND c.status = 'published'
+                AND cc.category IS NULL"
         );
     } else {
         $q = db()->prepare(
             "SELECT COALESCE(MAX(c.journal_number), 0) + 1 AS n
                FROM content c
                JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1
-              WHERE c.type = 'journal' AND cc.category = :cat"
+              WHERE c.type = 'journal'
+                AND c.status = 'published'
+                AND cc.category = :cat"
         );
         $q->execute([':cat' => $category]);
     }
@@ -447,6 +649,16 @@ function transition_stage(int $id, string $to): array
         }
     }
 
+    // Phase 20.3: publishing requires a primary category. Block here so
+    // the rule is enforced regardless of which UI path (advance, publish,
+    // publish-now, schedule) routes through transition_stage.
+    if ($to === 'published' && !has_primary_category($id)) {
+        return [
+            'ok'    => false,
+            'error' => 'Pick a primary category before publishing — every public post needs one.',
+        ];
+    }
+
     $patch = ['status' => $to];
     if ($to === 'published') {
         $patch['published_status'] = 'live';
@@ -455,6 +667,12 @@ function transition_stage(int $id, string $to): array
         }
     } elseif ($from === 'published') {
         $patch['published_status'] = null;
+        // Phase 20.3: leaving Published clears the journal's entry number.
+        // Re-publish later earns a fresh number from the current MAX+1 —
+        // gaps left behind never get refilled (per CMS-STRUCTURE.md §17).
+        if ($type === 'journal') {
+            $patch['journal_number'] = null;
+        }
     }
 
     $set = [];
@@ -526,6 +744,12 @@ function schedule_content(int $id, string $datetime): array
     $type = (string)($row['type'] ?? '');
     if (!in_array($type, CONTENT_TYPES, true)) {
         return ['ok' => false, 'error' => 'Cannot schedule untyped content.'];
+    }
+
+    // Phase 20.3: scheduled rows go to status='published' (published_status=
+    // 'scheduled'), so the same require-a-primary-category rule applies.
+    if (!has_primary_category($id)) {
+        return ['ok' => false, 'error' => 'Pick a primary category before scheduling — every public post needs one.'];
     }
 
     $stmt = db()->prepare(
@@ -706,21 +930,32 @@ function get_live_session_by_slug(string $slug): ?array
  */
 function list_live_sessions(array $filters = []): array
 {
-    $sql = "SELECT id, slug, title, status, updated_at, published_at,
-                   published_status,
-                   event_date, event_time, event_end_time,
-                   location, venue, cost_pill, attendance, custom_pill,
-                   pipeline_order
-              FROM content
-             WHERE type = 'live-session'";
+    // Phase 20.3 (filter bar polish): joined primary category for the
+    // list-view Category column. Mirrors list_articles().
+    $sql = "SELECT c.id, c.slug, c.title, c.status, c.updated_at, c.published_at,
+                   c.published_status,
+                   c.event_date, c.event_time, c.event_end_time,
+                   c.location, c.venue, c.cost_pill, c.attendance, c.custom_pill,
+                   c.pipeline_order,
+                   cat.label  AS category_label,
+                   cat.value_slug AS category_slug,
+                   cat.colour AS category_colour
+              FROM content c
+         LEFT JOIN content_categories cc
+                ON cc.content_id = c.id AND cc.is_primary = 1
+         LEFT JOIN categories cat
+                ON cat.type = cc.type AND cat.value_slug = cc.category
+             WHERE c.type = 'live-session'";
     $params = [];
 
     if (isset($filters['status']) && $filters['status'] !== '') {
-        $sql .= " AND status = :status";
+        $sql .= " AND c.status = :status";
         $params[':status'] = (string)$filters['status'];
     }
+    apply_list_stage_filter($filters, $sql, $params);
+    apply_list_category_filter($filters, $sql, $params);
 
-    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+    $sql .= " ORDER BY c.pipeline_order ASC, c.updated_at DESC";
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -859,19 +1094,32 @@ function get_experiment_by_slug(string $slug): ?array
  */
 function list_experiments(array $filters = []): array
 {
-    $sql = "SELECT id, slug, title, status, updated_at, published_at,
-                   published_status,
-                   template, source_file, pipeline_order
-              FROM content
-             WHERE type = 'experiment'";
+    // Phase 20.3: body_mode included so the list view's Content Type
+    // column can show rtf / html-body / html-swap correctly.
+    // Phase 20.3 (filter bar polish): joined primary category for the
+    // list-view Category column. Mirrors list_articles().
+    $sql = "SELECT c.id, c.slug, c.title, c.status, c.updated_at, c.published_at,
+                   c.published_status,
+                   c.template, c.body_mode, c.source_file, c.pipeline_order,
+                   cat.label  AS category_label,
+                   cat.value_slug AS category_slug,
+                   cat.colour AS category_colour
+              FROM content c
+         LEFT JOIN content_categories cc
+                ON cc.content_id = c.id AND cc.is_primary = 1
+         LEFT JOIN categories cat
+                ON cat.type = cc.type AND cat.value_slug = cc.category
+             WHERE c.type = 'experiment'";
     $params = [];
 
     if (isset($filters['status']) && $filters['status'] !== '') {
-        $sql .= " AND status = :status";
+        $sql .= " AND c.status = :status";
         $params[':status'] = (string)$filters['status'];
     }
+    apply_list_stage_filter($filters, $sql, $params);
+    apply_list_category_filter($filters, $sql, $params);
 
-    $sql .= " ORDER BY pipeline_order ASC, updated_at DESC";
+    $sql .= " ORDER BY c.pipeline_order ASC, c.updated_at DESC";
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -972,6 +1220,17 @@ function get_primary_category(int $contentId): string
     $stmt->execute([':id' => $contentId]);
     $val = $stmt->fetchColumn();
     return $val === false ? '' : (string)$val;
+}
+
+/**
+ * Phase 20.3: required-on-publish guard helper. Returns true when the
+ * row has a non-empty primary category assigned. Used by transition_stage
+ * and schedule_content to block publish/schedule until the author picks
+ * one. Keeps the rule in lib/ so every UI path enforces it the same way.
+ */
+function has_primary_category(int $contentId): bool
+{
+    return get_primary_category($contentId) !== '';
 }
 
 /**

@@ -142,6 +142,7 @@ cp site/cms/_assets/tiptap-setup.js  "$STAGE/cms/_assets/"
 cp site/cms/_assets/dragdrop.js      "$STAGE/cms/_assets/"
 cp site/cms/_assets/scroll-actions.js "$STAGE/cms/_assets/"
 cp site/cms/_assets/publish-choreography.js "$STAGE/cms/_assets/"
+cp site/cms/_assets/preview-tab-guard.js "$STAGE/cms/_assets/"
 
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point
@@ -151,6 +152,11 @@ cp site/cms/_assets/publish-choreography.js "$STAGE/cms/_assets/"
 # article.html and layouts.html are design references, never deployed).
 cp site/lib/author.php             "$STAGE/lib/"
 cp site/lib/render.php             "$STAGE/lib/"
+# Phase 20.1: synthetic $ctx factory for the CMS Post Templates Preview
+# tab. lib/preview_data.php builds a fully-populated $ctx per template
+# slug so the Preview endpoint can render the real templates/<slug>.php
+# without a DB row. CMS-only; safe on prod but unused there.
+cp site/lib/preview_data.php       "$STAGE/lib/"
 # Phase 10: Custom HTML Folder System library (used by experiment-html).
 cp site/lib/folders.php            "$STAGE/lib/"
 # Phase 12: Editorial Index data layer (CRUD + feed query + series auto).

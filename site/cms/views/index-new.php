@@ -35,12 +35,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'layout' => (string)($_POST['layout'] ?? 'listing'),
             'title'  => (string)($_POST['title']  ?? ''),
         ];
-        $res = save_index($defaults);
-        if ($res['ok']) {
-            header('Location: /cms/indexes/edit?id=' . $res['id'] . '&flash=' . rawurlencode('Index created — configure below.'));
-            exit;
+        try {
+            $res = save_index($defaults);
+            if ($res['ok']) {
+                header('Location: /cms/indexes/edit?id=' . $res['id'] . '&flash=' . rawurlencode('Index created — configure below.'));
+                exit;
+            }
+            $errors[] = $res['error'];
+        } catch (\Throwable $ex) {
+            // Surface the underlying error rather than dying silently —
+            // schema mismatches or DB constraints would otherwise hit the
+            // generic 500 page and the author has no signal what failed.
+            error_log('[index-new] save_index threw: ' . $ex->getMessage());
+            $errors[] = 'Could not create index: ' . $ex->getMessage();
         }
-        $errors[] = $res['error'];
     }
 }
 

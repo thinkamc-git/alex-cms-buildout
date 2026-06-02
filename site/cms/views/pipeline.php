@@ -92,15 +92,19 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
  * type-specific editor; idea rows would route to the shared editor but
  * they don't appear in this view anymore.
  */
+// Phase 20.3: stamp ?from=draft-writing so the edit view keeps the
+// Draft Writing sidebar entry highlighted + the back link returns here,
+// regardless of post type.
 $editUrlFor = static function (array $r): string {
     $id   = (int)($r['id'] ?? 0);
     $type = (string)($r['type'] ?? 'article');
-    return match ($type) {
+    $base = match ($type) {
         'journal'      => '/cms/journals/edit?id='      . $id,
         'live-session' => '/cms/live-sessions/edit?id=' . $id,
         'experiment'   => '/cms/experiments/edit?id='   . $id,
         default        => '/cms/articles/edit?id='      . $id,
     };
+    return $base . '&from=draft-writing';
 };
 
 /**
@@ -138,13 +142,15 @@ $renderInFlightCard = static function (array $r, string $stage) use ($e, $editUr
     $variant = $stage === 'concept' ? ' concept' : '';
     [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
 
+    // Phase 20.3: drop slug from Draft Writing cards (not useful at-a-glance
+    // while drafting); type badge moves to the foot so the title gets the
+    // full head width.
     return '<a href="' . $e($editUrlFor($r)) . '" class="kcard' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
-         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
          . '</div>'
          . '<div class="kcard-foot">'
-         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
          . '<span class="kcard-date">' . $e($updated) . '</span>'
          . '</div>'
          . '</a>';
@@ -162,25 +168,26 @@ $renderScheduledCard = static function (array $r) use ($e, $editUrlFor, $display
     $display     = $displayOf($r);
     [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
 
+    // Phase 20.3: top-right gets a green date pill — that's the salient
+    // detail for a scheduled card. Type badge moves to the foot.
     return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
-         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
+         . '<span class="kcard-schedule-pill" title="Scheduled to publish">' . $e($when) . '</span>'
          . '</div>'
          . '<div class="kcard-foot">'
-         . '<span class="kcard-date" style="font-weight:600;color:var(--stage-published)">→ ' . $e($when) . '</span>'
-         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
          . '</div>'
          . '</a>';
 };
 
 /**
  * Render a recently-published card. Static (not draggable, not a drop
- * target). Shows the published date.
+ * target). Mirrors the in-flight card convention: slug dropped, type
+ * badge in the foot, with the published date sitting at the bottom-right.
  */
 $renderPublishedCard = static function (array $r) use ($e, $editUrlFor, $displayOf, $typeBadge): string {
     $id          = (int)($r['id'] ?? 0);
-    $slug        = (string)($r['slug'] ?? '');
     $publishedAt = (string)($r['published_at'] ?? '');
     $when        = $publishedAt !== '' ? date('M j', strtotime($publishedAt)) : '—';
     $display     = $displayOf($r);
@@ -189,10 +196,9 @@ $renderPublishedCard = static function (array $r) use ($e, $editUrlFor, $display
     return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
-         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
          . '</div>'
          . '<div class="kcard-foot">'
-         . '<span class="row-slug">/' . $e($slug) . '</span>'
+         . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'
          . '<span class="kcard-date">' . $e($when) . '</span>'
          . '</div>'
          . '</a>';

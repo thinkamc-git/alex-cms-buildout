@@ -357,6 +357,12 @@ $saveLabel = $status === 'published' ? 'Save changes' : 'Save ' . ucfirst($statu
 $fromStage = (string)($_GET['from_stage'] ?? '');
 $canUndo   = $fromStage !== '' && $myStatusIdx > 0;
 
+// Phase 20.2: Preview sub-tab. Live sessions render at draft + published.
+$showPreviewTab = ($status === 'draft' || $status === 'published');
+$activeTab      = (string)($_GET['tab'] ?? 'edit');
+if (!in_array($activeTab, ['edit', 'preview'], true)) $activeTab = 'edit';
+if ($activeTab === 'preview' && !$showPreviewTab) $activeTab = 'edit';
+
 // Event timing — three independent fields now (date required, times optional).
 $eventDateVal    = (string)($session['event_date']     ?? '');
 $eventTimeRaw    = (string)($session['event_time']     ?? '');
@@ -398,17 +404,41 @@ $showIdeaNotesReadOnly = $status === 'draft';
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<link rel="stylesheet" href="/_templates/style-articles.css">
 </head>
 <body>
 
 <?php
-$breadcrumb = 'Live Sessions → Edit';
+// Phase 21.x: resolve provenance BEFORE topbar renders so the breadcrumb
+// reflects where the user came from.
+$validFromKeys = ['ideation', 'draft-writing', 'articles', 'journals', 'live-sessions', 'experiments'];
+$fromKey = (string)($_GET['from'] ?? '');
+if (!in_array($fromKey, $validFromKeys, true)) {
+    if ($status === 'idea') {
+        $fromKey = 'ideation';
+    } elseif ($status === 'published') {
+        $fromKey = 'live-sessions';
+    } else {
+        $fromKey = 'draft-writing';
+    }
+}
+$navLabelMap = [
+    'ideation'      => ['Ideation',      '/cms/ideation'],
+    'draft-writing' => ['Draft Writing', '/cms/'],
+    'articles'      => ['Articles',      '/cms/articles'],
+    'journals'      => ['Journals',      '/cms/journals'],
+    'live-sessions' => ['Live Sessions', '/cms/live-sessions'],
+    'experiments'   => ['Experiments',   '/cms/experiments'],
+];
+[$_navLabel, $_navHref] = $navLabelMap[$fromKey] ?? ['Live Sessions', '/cms/live-sessions'];
+$breadcrumb      = $_navLabel . ' → Edit';
+$breadcrumb_href = $_navHref;
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'live-sessions';
+  $active_nav_id = $fromKey;
   $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
@@ -438,7 +468,16 @@ require __DIR__ . '/../partials/topbar.php';
                           . '</span>';
       }
 
-      $actions  = '<a href="/cms/live-sessions" class="btn-ghost">Back to list</a>';
+      $backMap = [
+          'ideation'      => ['/cms/ideation',      'Back to Ideation'],
+          'draft-writing' => ['/cms/',              'Back to Draft Writing'],
+          'articles'      => ['/cms/articles',      'Back to Articles'],
+          'journals'      => ['/cms/journals',      'Back to Journals'],
+          'live-sessions' => ['/cms/live-sessions', 'Back to Live Sessions'],
+          'experiments'   => ['/cms/experiments',   'Back to Experiments'],
+      ];
+      [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/live-sessions', 'Back to list'];
+      $actions  = '<a href="' . $e($backHref) . '" class="btn-ghost">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -447,12 +486,37 @@ require __DIR__ . '/../partials/topbar.php';
           $cls = '';
           if ($i < $myStatusIdx)        $cls = ' done';
           elseif ($i === $myStatusIdx)  $cls = ' current';
+          $stepLabel = ($s === 'published' && $isScheduled) ? 'Scheduled' : ucfirst($s);
         ?>
-          <div class="stage-bar-step<?= $cls ?>"><?= ucfirst($s) ?></div>
+          <div class="stage-bar-step<?= $cls ?>"><?= $e($stepLabel) ?></div>
         <?php endforeach; ?>
       </div>
 
-      <div class="content-area">
+      <?php if ($showPreviewTab): ?>
+        <div class="post-edit-tabs" role="tablist" aria-label="Live session edit and preview">
+          <a class="post-edit-tab<?= $activeTab === 'edit' ? ' active' : '' ?>"
+             role="tab" data-tab-target="edit"
+             aria-selected="<?= $activeTab === 'edit' ? 'true' : 'false' ?>"
+             href="/cms/live-sessions/edit?id=<?= (int)$id ?>&tab=edit">Edit</a>
+          <a class="post-edit-tab<?= $activeTab === 'preview' ? ' active' : '' ?>"
+             role="tab" data-tab-target="preview"
+             aria-selected="<?= $activeTab === 'preview' ? 'true' : 'false' ?>"
+             href="/cms/live-sessions/edit?id=<?= (int)$id ?>&tab=preview">Preview</a>
+        </div>
+
+        <div class="post-preview-frame<?= $activeTab === 'preview' ? '' : ' is-hidden-tab' ?>" data-tab-panel="preview">
+          <iframe
+            name="post-preview-frame-<?= (int)$id ?>"
+            src="/cms/post/preview?id=<?= (int)$id ?>"
+            title="Preview — Live session"
+            class="post-preview-iframe"
+            loading="lazy"
+            data-preview-iframe
+            data-preview-endpoint="/cms/post/preview-form?id=<?= (int)$id ?>"></iframe>
+        </div>
+      <?php endif; ?>
+
+      <div class="content-area<?= ($showPreviewTab && $activeTab === 'preview') ? ' is-hidden-tab' : '' ?>" data-tab-panel="edit">
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -466,7 +530,8 @@ require __DIR__ . '/../partials/topbar.php';
 
         <form method="post"
               action="/cms/live-sessions/edit?id=<?= (int)$id ?>"
-              class="cms-form cms-form-wide">
+              class="cms-form cms-form-wide"
+              data-preview-source-form>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <?php if ($isScheduled): ?>
@@ -476,6 +541,17 @@ require __DIR__ . '/../partials/topbar.php';
                 Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
                 · <span class="schedule-countdown" data-countdown>computing…</span>
               </span>
+            </div>
+          <?php elseif ($isLive): ?>
+            <?php $sessionSlug = (string)($session['slug'] ?? ''); ?>
+            <div class="live-banner">
+              <span class="cms-live-dot" aria-hidden="true"></span>
+              <span class="live-banner-text">
+                Published<?php if ($publishedAtRaw !== ''): ?> on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong><?php endif; ?>
+              </span>
+              <?php if ($sessionSlug !== ''): ?>
+                <a class="live-banner-link" href="/live-sessions/<?= $e($sessionSlug) ?>" target="_blank" rel="noopener">View live ↗</a>
+              <?php endif; ?>
             </div>
           <?php endif; ?>
 
@@ -682,8 +758,17 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
               <?php if ($isLive): ?>
-                <div class="cms-publish-box">
-                  <label class="field-label">Publish info</label>
+                <div class="cms-publish-box is-live">
+                  <div class="cms-publish-header">
+                    <span class="cms-live-indicator">
+                      <span class="cms-live-dot" aria-hidden="true"></span>
+                      Live
+                    </span>
+                    <a href="/live-sessions/<?= $e((string)($session['slug'] ?? '')) ?>"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn-ghost btn-tiny">View live ↗</a>
+                  </div>
                   <div class="field-group" style="margin-bottom:var(--space-12)">
                     <label class="field-sublabel" for="ls-published-at">Published</label>
                     <input type="datetime-local"
@@ -743,8 +828,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
-            <a href="/cms/live-sessions" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="save" class="btn-ghost" data-primary-save><?= $e($saveLabel) ?></button>
+            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
 
             <button type="submit" form="live-session-delete-form" class="btn-ghost btn-danger">Delete</button>
 
@@ -772,11 +857,6 @@ require __DIR__ . '/../partials/topbar.php';
                 value="unpublish"
                 class="btn-ghost"
                 data-confirm-unpublish="1">Move to draft</button>
-              <a
-                href="/live-sessions/<?= $e((string)($session['slug'] ?? '')) ?>"
-                target="_blank"
-                rel="noopener"
-                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
@@ -844,5 +924,6 @@ require __DIR__ . '/../partials/topbar.php';
 </script>
 
 <script src="/cms/_assets/publish-choreography.js" defer></script>
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
 </body>
 </html>

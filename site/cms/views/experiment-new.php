@@ -22,25 +22,27 @@ $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
-const EXPERIMENT_TEMPLATES = ['experiment', 'experiment-html'];
+// Phase 20.3: template is always 'experiment' for experiment rows; the
+// variant is encoded in body_mode (rtf | html-body | html-swap).
+const EXPERIMENT_BODY_MODES = ['rtf', 'html-body', 'html-swap'];
 
 $errors = [];
 $form   = [
-    'title'    => '',
-    'slug'     => '',
-    'template' => 'experiment',
+    'title'     => '',
+    'slug'      => '',
+    'body_mode' => 'rtf',
 ];
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
     } else {
-        $form['title']    = trim((string)($_POST['title']    ?? ''));
-        $form['slug']     = trim((string)($_POST['slug']     ?? ''));
-        $form['template'] = trim((string)($_POST['template'] ?? 'experiment'));
+        $form['title']     = trim((string)($_POST['title']     ?? ''));
+        $form['slug']      = trim((string)($_POST['slug']      ?? ''));
+        $form['body_mode'] = trim((string)($_POST['body_mode'] ?? 'rtf'));
 
-        if (!in_array($form['template'], EXPERIMENT_TEMPLATES, true)) {
-            $errors[] = 'Pick a valid template.';
+        if (!in_array($form['body_mode'], EXPERIMENT_BODY_MODES, true)) {
+            $errors[] = 'Pick a valid body source.';
         }
         if ($form['title'] === '') {
             $errors[] = 'Title is required.';
@@ -54,10 +56,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         if (count($errors) === 0) {
             $slug = unique_slug($slug);
             $id   = save_experiment([
-                'title'    => $form['title'],
-                'slug'     => $slug,
-                'status'   => 'draft',
-                'template' => $form['template'],
+                'title'     => $form['title'],
+                'slug'      => $slug,
+                'status'    => 'draft',
+                'template'  => 'experiment',
+                'body_mode' => $form['body_mode'],
             ]);
 
             header('Location: /cms/experiments/edit?id=' . $id . '&flash=' . rawurlencode('Draft created.'));
@@ -129,14 +132,17 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <div class="field-group">
-            <label class="field-label" for="ex-template">Template <span class="field-req">required</span></label>
-            <select class="field-select" id="ex-template" name="template" style="max-width:320px">
-              <option value="experiment"      <?= $form['template'] === 'experiment'      ? 'selected' : '' ?>>experiment (article-format)</option>
-              <option value="experiment-html" <?= $form['template'] === 'experiment-html' ? 'selected' : '' ?>>experiment: html (raw HTML import)</option>
+            <label class="field-label" for="ex-body-mode">Body source <span class="field-req">required</span></label>
+            <select class="field-select" id="ex-body-mode" name="body_mode" style="max-width:320px">
+              <option value="rtf"       <?= $form['body_mode'] === 'rtf'       ? 'selected' : '' ?>>Rich text body (article-format)</option>
+              <option value="html-body" <?= $form['body_mode'] === 'html-body' ? 'selected' : '' ?>>HTML body file (article chrome + html file)</option>
+              <option value="html-swap" <?= $form['body_mode'] === 'html-swap' ? 'selected' : '' ?>>HTML swap (full passthrough, no template)</option>
             </select>
             <p class="field-hint">
-              <strong>experiment</strong> uses the rich-text body — same blocks as Articles.
-              <strong>experiment: html</strong> serves a hand-built HTML file from <code>/content/experiment/&lt;slug&gt;/</code> with no template wrapper.
+              <strong>Rich text</strong> uses the TipTap editor (same blocks as Articles).
+              <strong>HTML body</strong> keeps the article chrome and replaces the body slot with a hand-built file from <code>/content/experiment/&lt;slug&gt;/</code>.
+              <strong>HTML swap</strong> serves the file directly with no template wrapper.
+              All three are switchable later from the edit screen.
             </p>
           </div>
 

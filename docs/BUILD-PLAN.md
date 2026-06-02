@@ -114,7 +114,10 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 - [x] **Phase 19** — Nav reorg + Writer's Desk · *Semi-auto* · 3h · **Staging-only**
 - [x] **Phase 20** — Pages mocks + Navigation editor · *Manual* · 6–8h · **Staging-only**
+- [x] **Phase 20.3** — HTML body variants (article-html-body, experiment-html-body) + RTF/HTML toggle · *Manual* · 4–5h · **Staging-only**
 - [ ] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
+- [ ] **Phase 21.5** — CMS copy audit (scrub "Phase X" refs, tighten labels) · *Semi-auto* · 2h · **Staging-only**
+- [ ] **Phase 21.7** — Custom Index builder polish (UI + UX rework) · *Manual* · 4–6h · **Staging-only**
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
@@ -125,6 +128,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [ ] **Phase 26** — DS-4.5: Block recipe doc · *Semi-auto* · 1.5h · **No public ship**
 - [ ] **Phase 27** — DS-5: CMS migration · *Semi-auto* · 2.5h · **Staging-only**
 - [ ] **Phase 28** — DS-6: Cleanup + sunset · *Manual* · 1.5h · **Ships:** v2.1 public
+- [ ] **Phase 28.5** — Mobile optimization (site full mobile + CMS tablet-only) · *Manual* · 4–6h · **Staging-only**
 - [ ] **Phase 29** — Public cutover (v1.0 ship, marketing nav + indexes flip) · *Manual* · 2–3h · **Ships:** v1.0 public
 
 **═══ DEFERRED ═══**
@@ -1462,6 +1466,59 @@ CREATE TABLE nav_items (
 
 ---
 
+## 23.5. Phase 20.3 — HTML body variants + RTF/HTML toggle (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Manual
+- **Ships:** Staging-only. Adds two new sub-templates, extends the folder system to articles, adds a body-source toggle to article-edit + experiment-edit.
+
+**Decisions to capture before starting**
+- **Data model**: extend the `template` enum (`article-html-body`, `experiment-html-body`) vs. add a separate `body_mode` column (`rtf | html-body | html-swap`) — the latter is more orthogonal; the former matches how `experiment` / `experiment-html` already split. Default recommendation: **extend the template enum** for consistency with existing storage, with a clear naming convention (`<chrome>-html-body` for hybrid, `<chrome>-html` for swap).
+- **Folder system scope**: extend `lib/folders.php` to accept `('article', $slug)` alongside `('experiment', $slug)`. Storage path `/content/article/<slug>/`. The `_folder_validate` whitelist gains `'article'`.
+- **Template inheritance**: `article-html-body` extends `article-standard` — same chrome (breadcrumb, topstrip, title, summary, hero, dates, byline, author bio, tags), only the Body block changes. Same for `experiment-html-body` → `experiment.php`.
+- **Body block source**: when `body_mode` (or template) indicates html-body, `block-body.php` calls `folder_file_path()` + `readfile()` instead of reading `$article['body']`. The TipTap `body` column is left intact for round-tripping.
+- **Article-edit UI**: above the rich text editor, render a toggle (RTF · HTML). Selecting HTML hides the TipTap editor and shows the same "Set up folder / pick file / refresh" UI that experiment-edit already has. Selecting RTF hides the file picker.
+- **Experiment-edit UI**: replace the binary template radio (experiment vs experiment-html) with a three-way: RTF body · HTML body · HTML swap. The first two share the experiment chrome; the third is the full passthrough.
+
+**Read at start (only):** This phase section. `docs/BLOCKS.md` (Body block contract). `docs/CMS-STRUCTURE.md` §9 (schema) and §12 (Custom HTML Folder System). `site/lib/folders.php`, `site/lib/render.php`, `site/templates/article-standard.php`, `site/templates/experiment.php`, `site/templates/experiment-html.php`, `site/templates/partials/block-body.php`, `site/cms/views/article-edit.php` (body section + form-actions), `site/cms/views/experiment-edit.php` (template radio + folder block), `site/cms/views/post-template.php` (sub-templates listing).
+
+**Touch:**
+- `site/db/migrations/00<NN>_html_body_templates.sql` — extend `template` enum to add `article-html-body`, `experiment-html-body`
+- `site/lib/folders.php` — broaden `_folder_validate` to allow `'article'`
+- `site/lib/render.php` — route the two new templates; ensure `block-body` knows whether to readfile() or echo `$article['body']`
+- `site/templates/article-html-body.php` (new) — clone of article-standard.php with body slot routed through readfile()
+- `site/templates/experiment-html-body.php` (new) — clone of experiment.php with the same body-slot swap
+- `site/templates/partials/block-body.php` — branch on body-source mode
+- `site/cms/views/article-edit.php` — RTF/HTML toggle above the body editor, folder setup UI when HTML mode
+- `site/cms/views/experiment-edit.php` — three-way body-mode selector, share the folder block with article-edit
+- `site/cms/views/post-template.php` — surface the new sub-templates in the master list
+- `site/cms/views/post-preview.php` + `post-preview-form.php` — route the new templates correctly (chrome + readfile body)
+- `site/cms/views/post-template-preview.php` — render synthetic previews for the new variants
+- `site/lib/preview_data.php` — synthetic ctx with sample HTML body file path
+- `docs/BLOCKS.md` — document the body-source modes
+- `docs/CMS-STRUCTURE.md` §12 — extend folder system spec to articles
+- `bin/deploy.sh` — verify nothing breaks (the new template files auto-ship via existing cp lines)
+
+**Don't touch:**
+- Existing TipTap editor / rich text body — keep round-trip-safe
+- The `experiment-html` passthrough template — its full-swap semantics are correct and don't change
+- Public marketing nav, indexes, anything Phase 29 ships
+
+**On exit:** Phase 20.3 checked in §3. Both new templates render correctly with chrome + readfile body. Article-edit shows the RTF/HTML toggle. Experiment-edit shows a three-way selector. Folder system supports `article` type. Preview tab shows the right output for all five sub-templates (article-standard, article-html-body, experiment, experiment-html-body, experiment-html). docs/BLOCKS.md and CMS-STRUCTURE.md updated.
+
+**Goal:** Support three body-source patterns across articles and experiments: RTF (TipTap), HTML body file (chrome stays, body swaps), HTML swap (full page passthrough — existing).
+
+**Verification:**
+1. Article draft with `template=article-html-body`, file in `/content/article/<slug>/main.html`: public route renders article chrome + the HTML file's content inline.
+2. Experiment draft with `template=experiment-html-body`: same — experiment chrome + HTML file in the body slot.
+3. Existing `article-standard` and `experiment` (RTF) still render unchanged.
+4. Existing `experiment-html` (full swap) still bypasses chrome.
+5. Article-edit form: toggling RTF↔HTML hides/shows the correct editor; saving persists the mode.
+6. Preview tab on all five variants shows the right output.
+
+---
+
 ## 24. Phase 21 — Settings (v2.0 ship)
 
 **Session brief**
@@ -1552,6 +1609,97 @@ CREATE TABLE settings (
 
 ---
 
+## 24.5. Phase 21.5 — CMS copy audit (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Semi-auto
+- **Ships:** Staging-only. Lands between Phase 21 (Settings) and the DS reorg so the DS audit doesn't have to second-guess label wording while it's also normalising CSS.
+
+**Decisions to capture before starting**
+- Output format: `docs/COPY-AUDIT.md` — one row per surfaced string with current text, recommended text, location, and a one-line reason.
+- Audit surface: every user-facing string in `cms/views/*.php`, `cms/partials/*.php`, every sidebar entry in `cms/partials/sidebar.php`, every Phase-N reference in subtitles / hints / placeholders, every CTA label across the four list views and four edit views.
+- Out of scope: `_pages/`, `_templates/`, `_design-system/` index.html (public-side strings live in their own audit, paired with Phase 28.5 Mobile).
+
+**Read at start (only):** This phase section. `cms/views/*.php`, `cms/partials/*.php`, `cms/_assets/style-cms.css` (only the comment blocks that name UI strings).
+
+**Touch:**
+- `docs/COPY-AUDIT.md` (new) — the audit ledger
+- Apply each recommended rewrite to its source file once you've batched them in `COPY-AUDIT.md`. The audit pass and the rewrite pass are the same phase — don't split.
+
+**Don't touch:**
+- HTML structure or CSS classes
+- Schema, lib code, render pipeline
+- Anything outside the CMS admin surface
+
+**On exit:** Phase 21.5 checked in §3. `docs/COPY-AUDIT.md` exists with every audited string + its rewrite. The CMS no longer mentions "Phase N" anywhere a user reads it (subtitles, hints, placeholders, button labels). Labels and descriptions read as standalone product copy, not build-plan markers.
+
+**Goal:** Remove internal build-process language from the user-facing CMS so the function of each surface is clear without context. The author shouldn't have to know what "Phase 12" did to understand what "Indexes" means.
+
+**Scope (concrete patterns to scrub):**
+- **Phase markers in subtitles**: `articles.php`'s "Pipeline + transitions land in Phase 7" → drop the Phase reference, keep the description if it adds value.
+- **Phase markers in code comments that surface as UI hints**: any `field-hint` text mentioning a Phase number.
+- **Placeholder-only language**: subtitles describing future state ("ship in Phase X") should describe present-state function or be removed.
+- **Build-internal verbs**: e.g. "wires real filtering" — replace with user-facing language ("Filters by stage and category").
+- **Inconsistent terminology**: pick one of *post / entry / article* per content type and stick to it; document the choice.
+- **Stage-bar labels**: confirm Idea / Concept / Outline / Draft / Published vs whatever surfaces in the views.
+- **Empty-state text**: every `$empty_text` across the four list views should read as a useful prompt, not boilerplate.
+- **Tooltip / title attributes**: `title="Open the live published page"` style strings — keep concise, drop redundant qualifiers.
+
+**Verification:**
+1. `grep -ri "phase " site/cms/` returns zero matches in user-facing strings (code comments are fine).
+2. Every list view's subtitle reads as a description of what the view does today, not what's planned.
+3. Every empty state reads as a helpful prompt with the next action named.
+
+---
+
+## 24.7. Phase 21.7 — Custom Index builder polish (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Manual
+- **Ships:** Staging-only. The four built-in indexes (writing / journal / live-sessions / experiments) keep working; the custom Editorial / Listing builder gets a polish pass.
+
+**Decisions to capture before starting**
+- Scope: visual + UX rework of `/cms/indexes/edit`. The data model (the `indexes` table, save_index, build_index_pills) is correct — no schema or render-pipeline changes.
+- Builder layout: decide whether to keep the single-column form or move to a two-column "form + live preview" layout matching the post-edit Preview tab pattern (Phase 20.2).
+- Hero + Featured picker: current implementation is functional but rough; pick between (a) keep current pickers + tighten labels, (b) port to the same card-picker affordance the design mockup uses, (c) defer that piece further.
+- Feed-config UI: currently four exposed knobs (types / sort / rows / filter mode). Decide whether to collapse them behind a "Configure feed" disclosure or keep flat.
+
+**Read at start (only):** This phase section. `docs/CMS-STRUCTURE.md` §16 (Indexes spec). `site/cms/views/index-edit.php`, `index-new.php`, `indexes.php`. `site/lib/indexes.php`. The /cms/post-template Preview tab as a pattern reference for live preview.
+
+**Touch:**
+- `site/cms/views/index-edit.php` — full UI rework
+- `site/cms/views/index-new.php` — smaller polish pass (layout choice, slug input)
+- `site/cms/views/indexes.php` — list view polish (probably minor)
+- `site/cms/_assets/style-cms.css` — new selectors only; reuse existing tokens
+- Possibly `site/cms/views/index-preview.php` (new) if a live preview tab gets shipped
+- `docs/CMS-STRUCTURE.md` §16 — capture any spec deltas the rework reveals
+
+**Don't touch:**
+- `site/lib/indexes.php` (data layer) — the Phase 20.3 fixes are right
+- `site/templates/index-editorial.php`, `index-listing.php` — public render is fine
+- Series indexes — those auto-generate from /cms/series and don't surface in this builder
+
+**On exit:** Phase 21.7 checked in §3. The custom index builder reads as a deliberate authoring surface — not the v1 scaffold it is now. Built-in indexes still work unchanged. Series indexes still auto-generate.
+
+**Goal:** Bring the custom index builder up to the visual + interaction polish of the rest of the CMS (post-edit, page-edit, navigation editor). Today's builder works mechanically but the form layout, picker affordances, and feedback messages are first-pass primitives — the Phase 12 brief explicitly named this as deferred polish.
+
+**Scope:**
+- Group fields semantically: Layout / Title block / Hero (editorial only) / Featured (editorial only) / Feed / Filter
+- Match the post-edit form's visual rhythm (field-label scale, field-input padding, hint styling)
+- Restore hover-reveal action affordances on list views where missing
+- Inline validation messages instead of the top-of-form error block where it makes sense
+- Optional: live preview tab that iframes `/$slug/` and re-renders on form change
+
+**Verification:**
+1. Every field in `/cms/indexes/edit` reads as a deliberate control with consistent label + hint styling.
+2. Creating, editing, and rendering a custom index works end-to-end on staging.
+3. The four built-in indexes (writing / journal / live-sessions / experiments) still render identically on the public site.
+4. Series indexes still auto-render via `/series/<slug>/` from the `series` table.
+
+---
+
 ## 25. DS Reorganization (v2.1) — project intro
 
 The next seven phases (DS-1 through DS-6, with DS-4.5 in the middle) reorganize the design system into a clean three-branch structure: **Root** (shared tokens), **Pages** (marketing-page slice), **Blocks** (article-template slice), **CMS** (admin slice). Redundancy across the three branches is intentional — the goal is *clarity*, not deduplication.
@@ -1599,9 +1747,16 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Flag selectors that span categories and propose resolution
 - Capture naming conventions: prefix scheme per slice, file naming, token-vs-class boundaries
 - Identify dead code (grep-verify before flagging)
+- **Inconsistency reconciliation (added Phase 20.2):** for every selector, compare its rendered output against the canonical DS reference. Where they drift (e.g. `.pipeline-title` was 22px but `.view-title` was 26px before Phase 20.2 unified them), flag for unification and note the proposed canonical values. The audit output must distinguish "matches DS" / "drifts from DS" / "no DS equivalent yet" so DS-2+ knows which selectors to consolidate vs. promote.
+- **Unification pass (added Phase 20.2):** beyond per-selector categorisation, look for *families* of selectors doing the same job at different scales — buttons (`.btn-pri` / `.btn-ghost` / `.btn-row-action` / `.btn-tiny` / `.btn-danger` / inline `<button>` styles in views), titles (`.view-title` / `.pipeline-title` / `.cms-page-title` / `.cat-block-title`), pills, cards. For each family, propose: (1) which variants survive, (2) which collapse into the survivors, (3) a one-line rationale. The goal is to reduce variant count, not just rename things. Cross-reference live HTML to confirm each "merge" target is visually compatible before recommending.
+- **Button-family deep-dive (called out Phase 20.3, Alex):** the buttons specifically mix multiple type systems within a single bar — `.btn-pri` and `.btn-sec` use `var(--font-cond)` uppercase, while `.btn-ghost` uses `var(--font-mono)` lowercase, so pairing `+ New Article` next to `View live ↗` reads as two visual languages. Same for `.btn-row-action` (uppercase condensed, smaller scale) inside tables that also use `.btn-ghost`. The audit should produce a single coherent button system: one font-family per scale (condensed for primary actions; ghost should pick condensed OR mono, not both), consistent padding tokens, and an explicit rule for when each variant fires (primary CTA / secondary CTA / row action / destructive). Anything currently using font-mono or hand-rolled inline styles for actions is a unification target.
+- **Repeated-element scan (added Phase 20.2):** grep the live `cms/views/*.php`, `_pages/_bodies/*`, and `_templates/*.html` for repeated HTML patterns (info boxes, sticky bars, breadcrumbs, badges, action rows, etc.). Anything that appears 3+ times with near-identical markup is a component candidate — list it with locations, suggested DS name, and which slice it belongs in (Root / Pages / Blocks / CMS).
 
 **Deliverables:**
 - `docs/DS-AUDIT.md` covering all of the above
+- A "Drift" section listing every place the live site diverges from the DS reference, with proposed unification target
+- A "Variants to collapse" section listing the button / title / pill / card families and the trim plan
+- A "Component candidates" section listing repeated-HTML patterns with frequency counts and target slice
 - "Ready for DS-2" checklist at the bottom
 
 **Verification:**
@@ -1861,15 +2016,19 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Each file `@import`s root first
 - CMS shell adds link tags
 - Screenshot every CMS view before/after
+- **In-CMS Design System viewer (added Phase 20.2):** ship a new admin view at `/cms/settings/design-system` (or `/cms/design-system` under a new Settings section in the sidebar) that renders the same showcase that `site/_design-system/index.html` shows — tokens, buttons, pills, cards, titles, status badges, the whole catalogue — so the author can monitor what's available without leaving the CMS. Reads directly from the canonical DS files so it stays current with no extra build step. Lists each component's class name, expected markup, and the slice it lives in (Root / Pages / Blocks / CMS).
 
 **Deliverables:**
 - 6 new CSS files in `_design-system/cms/`
 - Updated CMS shell loader
+- New `cms/views/design-system.php` view (or `settings/design-system.php`) that renders the in-CMS showcase
+- New `/cms/settings/` sidebar entry (if Settings doesn't exist yet) housing the DS viewer
 - Screenshot pairs (~16 views × before/after)
 - DS-AUDIT.md annotated
 
 **Verification:**
 1. Every CMS view on staging renders identically to its pre-DS-5 screenshot.
+2. `/cms/settings/design-system` lists every canonical component with live preview, class name, and slice tag — matches `site/_design-system/index.html`.
 2. Public site unaffected.
 3. Network panel shows the 6 cms slice files loading on every CMS view.
 
@@ -1943,6 +2102,54 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 3. Pre-cutover backup is last-resort fallback.
 
 **Out of scope:** New features. Deferred backlog items. Phase 18.
+
+---
+
+## 32.5. Phase 28.5 — Mobile optimization (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Manual
+- **Ships:** Staging-only. Lands alongside DS reorg (Phases 22–28) since the slice-by-slice CSS structure makes targeted breakpoint work much easier.
+
+**Decisions to capture before starting**
+- **Public site:** target *full mobile responsiveness* across marketing pages + article templates. Standard breakpoint set: ≤480 (phone), ≤768 (small tablet portrait), ≤1024 (large tablet / landscape), default desktop. Every editorial template (article-standard, article-series, journal-entry, live-session, experiment, html-body) must read cleanly at all four widths.
+- **CMS:** *tablet-only* sweep, not full mobile. The CMS is desktop-first by design; the goal at this phase is making sure a ~1024px landscape iPad doesn't fully break (no horizontal scroll, no overlapping panels). Phone widths (~390px) are explicitly out of scope.
+- **DS pairing:** runs *after* Phase 28 (DS-6 cleanup) since the per-slice CSS structure makes adding `@media` rules per slice much cleaner than retrofitting one monolithic stylesheet. If DS reorg slips, this phase slips with it.
+
+**Read at start (only):** This phase section. `docs/BUILD-PLAN.md` §1.3 (autonomy tiers). `_design-system/css/*.css`, `_templates/style-articles.css`, `_pages/_layout/style-pages.css`, `cms/_assets/style-cms.css`. Any DS-AUDIT.md sections relevant to layout.
+
+**Touch:**
+- `_design-system/css/*.css` — add `@media (max-width: …)` rules per slice
+- `_templates/style-articles.css` — article-template breakpoint work (typography scale, hero sizing, byline-row stacking, etc.)
+- `_pages/_layout/style-pages.css` — marketing-page breakpoints (hero, columns, nav)
+- `cms/_assets/style-cms.css` — tablet-width guard rails only (no phone styles)
+- `docs/MOBILE-AUDIT.md` (new) — checklist of every view × every breakpoint with pass/fail notes from the screenshot pass
+
+**Don't touch:**
+- HTML structure — this is CSS-only
+- New features
+- Schema / lib code
+- DS organization (that's Phases 22–28)
+- Phone-width CMS styles (explicitly deferred)
+
+**On exit:** Phase 28.5 checked in §3. Every public page and article template reads cleanly at 480 / 768 / 1024 / desktop. CMS at ~1024 has no horizontal scroll and no overlapping panels. `docs/MOBILE-AUDIT.md` lists every check.
+
+**Goal:** Mobile-ready public site + tablet-acceptable CMS.
+
+**Scope:**
+- Public-side full mobile pass: marketing pages, article templates, index pages, 404
+- Editorial typography scale-down per breakpoint (28/22/18/14 reads vs the 56/40/26/16 desktop scale)
+- Hero image sizing per breakpoint (default/wide/full all have to behave)
+- Byline-row stacking on phone widths
+- Article-prose left/right padding tuning per breakpoint
+- CMS tablet pass: sidebar + main two-column layout holds at 1024; ensure no horizontal scroll
+- Screenshot every view at every breakpoint, paste into MOBILE-AUDIT.md as the before/after pair
+
+**Verification:**
+1. Each public template + marketing page screenshot looks correct at 480 / 768 / 1024 / 1280.
+2. The CMS at 1024 has no horizontal scroll on any of the post-edit / list / pipeline views.
+3. MOBILE-AUDIT.md has a row per view × per breakpoint, all marked pass.
 
 ---
 

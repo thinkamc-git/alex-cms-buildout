@@ -18,8 +18,17 @@ Auth::require_login();
 $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
-$journals   = list_journals();
-$flash      = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
+
+// Phase 20.3 filter bar — multi-select per-type stages + categories.
+$filterStages     = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['stage']    ?? ''))), 'strlen'));
+$filterCategories = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['category'] ?? ''))), 'strlen'));
+$journals       = list_journals([
+    'stage'    => implode(',', $filterStages),
+    'category' => implode(',', $filterCategories),
+]);
+$allCategories  = list_categories('journal');
+
+$flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
@@ -71,8 +80,16 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Journals';
       $subtitle = 'Short, declarative entries. Each gets a per-category Entry number when published.';
-      $actions  = '<a href="/cms/journals/new" class="btn-pri">+ New Journal</a>';
+      $actions  = '<a href="/journal/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+                . '<a href="/cms/journals/new" class="btn-pri">+ New Journal</a>';
       require __DIR__ . '/../partials/view-header.php';
+      ?>
+
+      <?php
+      // Journal pipeline is idea→draft→published — only Draft/Scheduled/
+      // Published render in the stage bar (no Concept/Outline).
+      $groups = build_filter_groups('journal', '/cms/journals', $filterStages, $filterCategories, $allCategories);
+      require __DIR__ . '/../partials/filter-bar.php';
       ?>
 
       <div class="content-area">
@@ -97,15 +114,20 @@ require __DIR__ . '/../partials/topbar.php';
             }
         }
 
-        $columns = [
-            ['label' => 'Key Statement', 'width' => '52%'],
-            ['label' => 'Stage',         'width' => '12%'],
-            ['label' => 'Entry #',       'width' => '10%'],
-            ['label' => 'Updated',       'width' => '14%'],
-            ['label' => 'Actions',       'width' => '12%'],
-        ];
+        // Shared column set across Drafts / Scheduled / Published — only
+        // the Date header label changes per section.
+        $makeColumns = static function (string $dateLabel): array {
+            return [
+                ['label' => 'Key Statement', 'width' => '38%'],
+                ['label' => 'Stage',         'width' => '10%'],
+                ['label' => 'Category',      'width' => '14%'],
+                ['label' => 'Entry #',       'width' => '8%'],
+                ['label' => $dateLabel,      'width' => '14%'],
+                ['label' => '',              'width' => '14%'],
+            ];
+        };
 
-        $buildRow = static function (array $j) use ($e, $csrf_token, $stagePill): array {
+        $buildRow = static function (array $j, string $dateMode) use ($e, $csrf_token, $stagePill): array {
             $id           = (int)($j['id'] ?? 0);
             $slug         = (string)($j['slug'] ?? '');
             $keyStatement = (string)($j['key_statement'] ?? '');
@@ -114,40 +136,57 @@ require __DIR__ . '/../partials/topbar.php';
             $entryNum     = $j['journal_number'] !== null
                 ? str_pad((string)(int)$j['journal_number'], 3, '0', STR_PAD_LEFT)
                 : null;
-            $updated      = (string)($j['updated_at'] ?? '');
-            $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+            $updated = (string)($j['updated_at'] ?? '');
+            $pubAt   = (string)($j['published_at'] ?? '');
+            $dateRaw = $dateMode === 'published' ? ($pubAt !== '' ? $pubAt : $updated) : $updated;
+            $dateShort = $dateRaw !== '' ? date('Y-m-d', strtotime($dateRaw)) : '';
 
-            $titleHtml = '<a href="/cms/journals/edit?id=' . $id . '" class="row-title">'
+            $titleHtml = '<a href="/cms/journals/edit?id=' . $id . '&from=journals" class="row-title">'
                        . $e($display)
                        . '</a>'
-                       . ' <span class="row-slug">/' . $e($slug) . '</span>';
+                       . '<div class="row-slug">/' . $e($slug) . '</div>';
 
+            $catLabel  = (string)($j['category_label']  ?? '');
+            $catColour = (string)($j['category_colour'] ?? '');
+            if ($catLabel !== '') {
+                $bg      = $catColour !== '' ? 'var(--c-' . $e($catColour) . ')' : 'var(--ink-30)';
+                $catHtml = '<span class="cat-chip" style="--cat-bg:' . $bg . '">' . $e($catLabel) . '</span>';
+            } else {
+                $catHtml = '<span class="muted">—</span>';
+            }
+
+            // Entry # only renders for published rows — unpublished journals
+            // don't have a stable number yet (assigned on publish, sequential
+            // per category).
             $entryHtml = $entryNum !== null
-                ? '<span class="pill">Entry ' . $e($entryNum) . '</span>'
+                ? '<span class="val-pill">#' . $e($entryNum) . '</span>'
                 : '<span class="muted">—</span>';
 
-            $isPublished = (string)($j['status'] ?? '') === 'published';
-            $isLive      = $isPublished && (string)($j['published_status'] ?? '') !== 'scheduled';
-            $liveBtn = $isLive && $slug !== ''
-                ? '<a href="/journal/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+            $isLiveRow = (string)($j['status'] ?? '') === 'published'
+                      && (string)($j['published_status'] ?? '') !== 'scheduled';
+            $liveBtn = $isLiveRow && $slug !== ''
+                ? '<a href="/journal/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
-                . '<a href="/cms/journals/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                . '<form method="post" action="/cms/journals/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this journal? This cannot be undone.">'
-                .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
-                . '</form>'
+                . '<span class="row-actions-hover">'
+                .   '<a href="/cms/journals/edit?id=' . $id . '&from=journals" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<form method="post" action="/cms/journals/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this journal? This cannot be undone.">'
+                .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .   '</form>'
+                . '</span>'
                 . '</div>';
 
             return [
-                'href'  => '/cms/journals/edit?id=' . $id,
+                'href'  => '/cms/journals/edit?id=' . $id . '&from=journals',
                 'cells' => [
                     ['html' => $titleHtml],
                     ['html' => $stagePill(((string)($j['status'] ?? '') === 'published' && (string)($j['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($j['status'] ?? 'idea'))],
+                    ['html' => $catHtml],
                     ['html' => $entryHtml],
-                    ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
+                    ['html' => '<span class="muted">' . $e($dateShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
                 ],
             ];
@@ -163,7 +202,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($drafts) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $drafts);
+          $columns    = $makeColumns('Updated');
+          $rows       = array_map(static fn($j) => $buildRow($j, 'updated'), $drafts);
           $empty_text = 'No journal drafts. Click + New Journal to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -179,7 +219,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $scheduled);
+          $columns    = $makeColumns('Scheduled for');
+          $rows       = array_map(static fn($j) => $buildRow($j, 'published'), $scheduled);
           $empty_text = 'No scheduled journals.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -195,7 +236,8 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $published);
+          $columns    = $makeColumns('Published');
+          $rows       = array_map(static fn($j) => $buildRow($j, 'published'), $published);
           $empty_text = 'No published journals yet.';
           require __DIR__ . '/../partials/table.php';
           ?>

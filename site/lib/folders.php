@@ -55,8 +55,10 @@ function content_root(): string
  */
 function _folder_validate(string $type, string $slug): array
 {
-    if (!in_array($type, ['experiment'], true)) {
-        return ['ok' => false, 'error' => 'Custom folders are only supported for experiments.'];
+    // Phase 20.3: 'article' joined the type whitelist so the new html-body
+    // mode can reference /content/article/<slug>/ files in the body block.
+    if (!in_array($type, ['experiment', 'article'], true)) {
+        return ['ok' => false, 'error' => 'Custom folders are only supported for experiments and articles.'];
     }
     if ($slug === '') {
         return ['ok' => false, 'error' => 'Slug is required before setting up a folder.'];
@@ -102,12 +104,29 @@ function folder_setup(string $type, string $slug): array
     if (!$v['ok']) return $v;
     $path = folder_path($type, $slug);
     if ($path === '') return ['ok' => false, 'error' => 'Could not resolve folder path.'];
+    // Stale stat cache can lie about is_dir/file_exists results after a
+    // recent change — clear before checking so the answer is current.
+    clearstatcache(true, $path);
     if (is_dir($path)) return ['ok' => true, 'error' => '', 'path' => $path, 'created' => false];
     // mkdir -p (recursive) so /content/ and /content/experiment/ are created
-    // on first call. @-suppress and check the result so a permission failure
-    // surfaces a friendly message rather than a warning blob.
-    if (!@mkdir($path, 0755, true) && !is_dir($path)) {
-        return ['ok' => false, 'error' => 'Could not create folder. Check server permissions on /content/.'];
+    // on first call. Capture the underlying error so a failed mkdir surfaces
+    // a useful message + log entry rather than silently claiming success.
+    $err = null;
+    set_error_handler(function ($_n, $msg) use (&$err) { $err = $msg; return true; });
+    $ok = mkdir($path, 0755, true);
+    restore_error_handler();
+    clearstatcache(true, $path);
+    if (!$ok && !is_dir($path)) {
+        $detail = $err !== null ? ' (' . $err . ')' : '';
+        // Log so the staging server's error log captures the path + reason —
+        // helps diagnose perms / DOCUMENT_ROOT mismatches without UI noise.
+        error_log("[folder_setup] mkdir failed for $path$detail");
+        return [
+            'ok'    => false,
+            'error' => 'Could not create folder at ' . $path . $detail
+                     . '. Check server permissions on /content/.',
+            'path'  => $path,
+        ];
     }
     return ['ok' => true, 'error' => '', 'path' => $path, 'created' => true];
 }

@@ -126,6 +126,34 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $action       = (string)($_POST['action'] ?? 'save');
         $currentStage = (string)($article['status'] ?? 'idea');
 
+        // Phase 20.3: folder ops for body_mode='html-body'. Same shape as
+        // experiment-edit's setup_folder/refresh_folder actions; uses the
+        // article folder type so /content/article/<slug>/ gets created.
+        if ($action === 'setup_folder' || $action === 'refresh_folder') {
+            require_once __DIR__ . '/../../lib/folders.php';
+            $aSlug = (string)($article['slug'] ?? '');
+            if ($aSlug === '') {
+                header('Location: /cms/articles/edit?id=' . $id
+                    . '&flash=' . rawurlencode('Slug required before setting up a folder.'));
+                exit;
+            }
+            if ($action === 'setup_folder') {
+                $res = folder_setup('article', $aSlug);
+                if ($res['ok']) {
+                    $absPath = (string)($res['path'] ?? '');
+                    $msg = ($res['created'] ?? false)
+                        ? 'Folder created at: ' . $absPath
+                        : 'Folder already exists at: ' . $absPath;
+                } else {
+                    $msg = (string)($res['error'] ?? 'Could not set up folder.');
+                }
+            } else {
+                $msg = 'Refreshed.';
+            }
+            header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode($msg));
+            exit;
+        }
+
         // Undo just-advanced — revert one stage without saving form. The
         // "Undo" button only renders while ?from_stage is in the URL, which
         // any save call drops, enforcing "once saved, no going back."
@@ -238,12 +266,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'outline_text'  => trim((string)($_POST['outline_text']  ?? '')),
                 'summary'       => trim((string)($_POST['summary']       ?? '')),
                 'body_raw'      =>      (string)($_POST['body']          ?? ''),
+                'body_mode'     => trim((string)($_POST['body_mode']     ?? 'rtf')),
+                'source_file'   => trim((string)($_POST['source_file']   ?? '')),
                 'tags'          => trim((string)($_POST['tags']          ?? '')),
                 'read_time'     => trim((string)($_POST['read_time']     ?? '')),
                 'special_tag'   => trim((string)($_POST['special_tag']   ?? '')),
                 'hero_caption'  => trim((string)($_POST['hero_caption']  ?? '')),
                 'hero_size'     => trim((string)($_POST['hero_size']     ?? 'default')),
-                'remove_hero'   => isset($_POST['remove_hero']),
+                // Hidden input flipped by the trash button — value '1' means remove.
+                'remove_hero'   => (string)($_POST['remove_hero'] ?? '0') === '1',
                 'series_id'     => trim((string)($_POST['series_id']     ?? '')),
                 'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
             ];
@@ -350,7 +381,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     $saveData['summary'] = $post['summary'] !== '' ? $post['summary'] : null;
                 }
                 if ($editBody) {
+                    // Phase 20.3: body always saved (preserve TipTap content
+                    // across mode toggles). body_mode + source_file capture
+                    // which source the public render pulls from. Only touch
+                    // source_file when actively in html-body mode — that way
+                    // a stale selector in a hidden panel can't overwrite a
+                    // saved file reference.
                     $saveData['body'] = $bodyClean;
+                    $mode = $post['body_mode'] === 'html-body' ? 'html-body' : 'rtf';
+                    $saveData['body_mode'] = $mode;
+                    if ($mode === 'html-body') {
+                        $saveData['source_file'] = $post['source_file'] !== '' ? $post['source_file'] : null;
+                    }
                 }
                 if ($editHero) {
                     $saveData['hero_image']   = $heroPath !== '' ? $heroPath : null;
@@ -560,6 +602,31 @@ $showBody              = $status === 'draft' || $status === 'published';
 $showHero              = $status === 'draft' || $status === 'published';
 $showReadTime          = $status === 'draft' || $status === 'published';
 
+// Phase 20.2: Preview sub-tab is available once the post has body content
+// to render (draft + published). At earlier stages the row lacks the
+// fields the public template renders, so the preview would be empty.
+$showPreviewTab = $showBody;
+$activeTab      = (string)($_GET['tab'] ?? 'edit');
+if (!in_array($activeTab, ['edit', 'preview'], true)) $activeTab = 'edit';
+if ($activeTab === 'preview' && !$showPreviewTab) $activeTab = 'edit';
+
+// Phase 20.3: body_mode + folder state for the RTF/HTML toggle.
+$bodyMode       = (string)($article['body_mode'] ?? 'rtf');
+if (!in_array($bodyMode, ['rtf', 'html-body'], true)) $bodyMode = 'rtf';
+$sourceFileVal  = (string)($article['source_file'] ?? '');
+$slugForFolder  = (string)($article['slug'] ?? '');
+$articleFolderExists = false;
+$articleFolderFiles  = [];
+$articleFolderPath   = '';
+if ($slugForFolder !== '') {
+    require_once __DIR__ . '/../../lib/folders.php';
+    $articleFolderPath   = '/content/article/' . $slugForFolder . '/';
+    $articleFolderExists = folder_exists('article', $slugForFolder);
+    if ($articleFolderExists) {
+        $articleFolderFiles = folder_scan('article', $slugForFolder);
+    }
+}
+
 // Undo-after-advance: shown only when the URL carries ?from_stage from
 // a forward transition. The first save_article drops the query param,
 // enforcing "once saved, no going back."
@@ -587,18 +654,49 @@ $canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $myStatusIdx >
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <?php if ($showBody): ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<!-- The editor's contenteditable carries class="article-prose" so the SAME
+     stylesheet that styles the public post page also styles the editor.
+     Loaded after tiptap.css so .article-prose rules win on cascade. -->
+<link rel="stylesheet" href="/_templates/style-articles.css">
 <?php endif; ?>
 </head>
 <body>
 
 <?php
-$breadcrumb = 'Articles → Edit';
+// Phase 21.x: resolve provenance BEFORE topbar renders so the breadcrumb
+// reflects where the user actually came from (?from=ideation → "Ideation
+// → Edit") rather than always saying "Articles". Same $fromKey drives the
+// sidebar nav highlight + the back link further down.
+$validFromKeys = ['ideation', 'draft-writing', 'articles', 'journals', 'live-sessions', 'experiments'];
+$fromKey = (string)($_GET['from'] ?? '');
+if (!in_array($fromKey, $validFromKeys, true)) {
+    if ($status === 'idea') {
+        $fromKey = 'ideation';
+    } elseif ($status === 'published') {
+        $fromKey = 'articles';
+    } else {
+        $fromKey = 'draft-writing';
+    }
+}
+$navLabelMap = [
+    'ideation'      => ['Ideation',      '/cms/ideation'],
+    'draft-writing' => ['Draft Writing', '/cms/'],
+    'articles'      => ['Articles',      '/cms/articles'],
+    'journals'      => ['Journals',      '/cms/journals'],
+    'live-sessions' => ['Live Sessions', '/cms/live-sessions'],
+    'experiments'   => ['Experiments',   '/cms/experiments'],
+];
+[$_navLabel, $_navHref] = $navLabelMap[$fromKey] ?? ['Articles', '/cms/articles'];
+$breadcrumb      = $_navLabel . ' → Edit';
+$breadcrumb_href = $_navHref;
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
-  $active_nav_id = 'articles';
+  // $fromKey was resolved above (before the topbar) so the breadcrumb
+  // + back link + sidebar highlight all share the same provenance.
+  $active_nav_id = $fromKey;
   $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
@@ -628,7 +726,20 @@ require __DIR__ . '/../partials/topbar.php';
                           . '</span>';
       }
 
-      $actions  = '<a href="/cms/articles" class="btn-ghost">Back to list</a>';
+      // Phase 20.3: Back link mirrors the resolved $fromKey above so
+      // returning lands where you came from — Draft Writing for any row
+      // clicked from /cms/, Articles for any row clicked from /cms/articles,
+      // etc. Same map used in journal / live-session / experiment edit.
+      $backMap = [
+          'ideation'      => ['/cms/ideation',      'Back to Ideation'],
+          'draft-writing' => ['/cms/',              'Back to Draft Writing'],
+          'articles'      => ['/cms/articles',      'Back to Articles'],
+          'journals'      => ['/cms/journals',      'Back to Journals'],
+          'live-sessions' => ['/cms/live-sessions', 'Back to Live Sessions'],
+          'experiments'   => ['/cms/experiments',   'Back to Experiments'],
+      ];
+      [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/articles', 'Back to list'];
+      $actions  = '<a href="' . $e($backHref) . '" class="btn-ghost">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -637,12 +748,40 @@ require __DIR__ . '/../partials/topbar.php';
           $cls = '';
           if ($i < $myStatusIdx)         $cls = ' done';
           elseif ($i === $myStatusIdx)   $cls = ' current';
+          // Re-label the Published step as "Scheduled" while the row is
+          // queued for a future publish — matches the list view's stage
+          // pill and the schedule banner up top.
+          $stepLabel = ($s === 'published' && $isScheduled) ? 'Scheduled' : ucfirst($s);
         ?>
-          <div class="stage-bar-step<?= $cls ?>"><?= ucfirst($s) ?></div>
+          <div class="stage-bar-step<?= $cls ?>"><?= $e($stepLabel) ?></div>
         <?php endforeach; ?>
       </div>
 
-      <div class="content-area">
+      <?php if ($showPreviewTab): ?>
+        <div class="post-edit-tabs" role="tablist" aria-label="Article edit and preview">
+          <a class="post-edit-tab<?= $activeTab === 'edit' ? ' active' : '' ?>"
+             role="tab" data-tab-target="edit"
+             aria-selected="<?= $activeTab === 'edit' ? 'true' : 'false' ?>"
+             href="/cms/articles/edit?id=<?= (int)$id ?>&tab=edit">Edit</a>
+          <a class="post-edit-tab<?= $activeTab === 'preview' ? ' active' : '' ?>"
+             role="tab" data-tab-target="preview"
+             aria-selected="<?= $activeTab === 'preview' ? 'true' : 'false' ?>"
+             href="/cms/articles/edit?id=<?= (int)$id ?>&tab=preview">Preview</a>
+        </div>
+
+        <div class="post-preview-frame<?= $activeTab === 'preview' ? '' : ' is-hidden-tab' ?>" data-tab-panel="preview">
+          <iframe
+            name="post-preview-frame-<?= (int)$id ?>"
+            src="/cms/post/preview?id=<?= (int)$id ?>"
+            title="Preview — <?= $e($titleHdr) ?>"
+            class="post-preview-iframe"
+            loading="lazy"
+            data-preview-iframe
+            data-preview-endpoint="/cms/post/preview-form?id=<?= (int)$id ?>"></iframe>
+        </div>
+      <?php endif; ?>
+
+      <div class="content-area<?= ($showPreviewTab && $activeTab === 'preview') ? ' is-hidden-tab' : '' ?>" data-tab-panel="edit">
         <?php if (count($errors) > 0): ?>
           <div class="form-errors" role="alert">
             <strong>Couldn’t save:</strong>
@@ -708,7 +847,7 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions form-actions-sticky">
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
-            <a href="/cms" class="btn-ghost">Cancel</a>
+            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
             <button type="submit" form="article-delete-form" class="btn-ghost btn-danger">Delete</button>
             <button type="submit" name="action" value="advance" class="btn-pri" data-advance-button>
               Advance to <span data-advance-target><?= $e(ucfirst($nextStage ?? 'Concept')) ?></span> →
@@ -738,6 +877,7 @@ require __DIR__ . '/../partials/topbar.php';
         <form method="post"
               action="/cms/articles/edit?id=<?= (int)$id ?>"
               class="cms-form cms-form-wide"
+              data-preview-source-form
               enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
@@ -748,6 +888,17 @@ require __DIR__ . '/../partials/topbar.php';
                 Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
                 · <span class="schedule-countdown" data-countdown>computing…</span>
               </span>
+            </div>
+          <?php elseif ($isLive): ?>
+            <?php $articleSlug = (string)($article['slug'] ?? ''); ?>
+            <div class="live-banner">
+              <span class="cms-live-dot" aria-hidden="true"></span>
+              <span class="live-banner-text">
+                Published<?php if ($publishedAtRaw !== ''): ?> on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong><?php endif; ?>
+              </span>
+              <?php if ($articleSlug !== ''): ?>
+                <a class="live-banner-link" href="/writing/<?= $e($articleSlug) ?>" target="_blank" rel="noopener">View live ↗</a>
+              <?php endif; ?>
             </div>
           <?php endif; ?>
 
@@ -840,74 +991,175 @@ require __DIR__ . '/../partials/topbar.php';
               <?php endif; ?>
 
               <?php if ($showBody): ?>
-                <div class="field-group">
-                  <label class="field-label">Body</label>
-                  <div class="tiptap-wrap body-box">
-                    <div class="tiptap-toolbar" id="tiptap-toolbar">
-                      <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
-                      <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>
-                      <button type="button" data-cmd="h2"          title="Heading 2"       class="tt-btn">H2</button>
-                      <button type="button" data-cmd="h3"          title="Heading 3"       class="tt-btn">H3</button>
-                      <button type="button" data-cmd="ul"          title="Bullet list"     class="tt-btn">• List</button>
-                      <button type="button" data-cmd="ol"          title="Numbered list"   class="tt-btn">1. List</button>
-                      <button type="button" data-cmd="link"        title="Link"            class="tt-btn">Link</button>
-                      <button type="button" data-cmd="blockquote"  title="Blockquote"      class="tt-btn">“ Quote</button>
-                      <button type="button" data-cmd="code"        title="Inline code"     class="tt-btn">Code</button>
-                      <button type="button" data-cmd="muted"       title="Muted word (m)"  class="tt-btn">m</button>
-                      <button type="button" data-cmd="image"       title="Insert image"    class="tt-btn">Image</button>
+                <div class="field-group" data-body-source-block>
+                  <div class="body-source-header">
+                    <label class="field-label" style="margin:0">Body</label>
+                    <div class="body-source-toggle" role="radiogroup" aria-label="Body source">
+                      <label class="body-source-option<?= $bodyMode === 'rtf' ? ' is-active' : '' ?>">
+                        <input type="radio" name="body_mode" value="rtf"<?= $bodyMode === 'rtf' ? ' checked' : '' ?>>
+                        <span>Rich text</span>
+                      </label>
+                      <label class="body-source-option<?= $bodyMode === 'html-body' ? ' is-active' : '' ?>">
+                        <input type="radio" name="body_mode" value="html-body"<?= $bodyMode === 'html-body' ? ' checked' : '' ?>>
+                        <span>HTML file</span>
+                      </label>
                     </div>
-                    <div id="tiptap-editor" class="tiptap-editor"></div>
-                    <textarea
-                      id="article-body"
-                      name="body"
-                      rows="20"
-                      class="tiptap-fallback"
-                      aria-label="Article body (HTML)"><?= $e($bodyInitial) ?></textarea>
                   </div>
-                  <p class="field-hint">
-                    The editor strips any HTML outside the toolbar allowlist on save.
-                  </p>
+
+                  <!-- RTF panel — visible when body_mode='rtf' -->
+                  <div class="body-source-panel" data-body-panel="rtf"<?= $bodyMode !== 'rtf' ? ' hidden' : '' ?>>
+                    <div class="tiptap-wrap body-box">
+                      <div class="tiptap-toolbar" id="tiptap-toolbar">
+                        <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
+                        <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>
+                        <button type="button" data-cmd="h2"          title="Heading 2"       class="tt-btn">H2</button>
+                        <button type="button" data-cmd="h3"          title="Heading 3"       class="tt-btn">H3</button>
+                        <button type="button" data-cmd="ul"          title="Bullet list"     class="tt-btn">• List</button>
+                        <button type="button" data-cmd="ol"          title="Numbered list"   class="tt-btn">1. List</button>
+                        <button type="button" data-cmd="link"        title="Link"            class="tt-btn">Link</button>
+                        <button type="button" data-cmd="blockquote"  title="Blockquote"      class="tt-btn">“ Quote</button>
+                        <button type="button" data-cmd="code"        title="Inline code"     class="tt-btn">Code</button>
+                        <button type="button" data-cmd="muted"       title="Muted word (m)"  class="tt-btn">m</button>
+                        <button type="button" data-cmd="image"       title="Insert image"    class="tt-btn">Image</button>
+                      </div>
+                      <div id="tiptap-editor" class="tiptap-editor"></div>
+                      <textarea
+                        id="article-body"
+                        name="body"
+                        rows="20"
+                        class="tiptap-fallback"
+                        aria-label="Article body (HTML)"><?= $e($bodyInitial) ?></textarea>
+                    </div>
+                    <p class="field-hint">
+                      The editor strips any HTML outside the toolbar allowlist on save.
+                    </p>
+                  </div>
+
+                  <!-- HTML-file panel — visible when body_mode='html-body' -->
+                  <div class="body-source-panel" data-body-panel="html-body"<?= $bodyMode !== 'html-body' ? ' hidden' : '' ?>>
+                    <div class="folder-block">
+                      <div class="folder-block-hd">
+                        <div class="folder-path" style="font-family:var(--font-mono);font-size:var(--text-meta)"><?= $e($articleFolderPath) ?></div>
+                        <span class="folder-status">
+                          <?php if (!$articleFolderExists): ?>
+                            <span class="muted">Folder not set up yet</span>
+                          <?php elseif (count($articleFolderFiles) === 0): ?>
+                            <span class="muted">Folder is empty</span>
+                          <?php else: ?>
+                            <?= (int)count($articleFolderFiles) ?> file<?= count($articleFolderFiles) === 1 ? '' : 's' ?>
+                          <?php endif; ?>
+                        </span>
+                      </div>
+                      <div class="folder-block-bd">
+                        <?php if (!$articleFolderExists): ?>
+                          <p class="field-hint">No folder exists yet for this slug. Click <strong>Set up folder</strong> to create
+                            <code><?= $e($articleFolderPath) ?></code> on the server.
+                            Then drop your <code>.html</code> file into it via SSH/CloudMounter and click <strong>Refresh</strong>.</p>
+                          <button type="submit" name="action" value="setup_folder" class="btn-sec" formnovalidate>
+                            Set up folder
+                          </button>
+                        <?php else: ?>
+                          <div style="display:flex;gap:var(--space-8);align-items:center">
+                            <?php if (count($articleFolderFiles) === 0): ?>
+                              <select class="field-select" name="source_file" disabled style="flex:1">
+                                <option>— no .html files in folder —</option>
+                              </select>
+                            <?php else: ?>
+                              <select class="field-select" name="source_file" id="article-source-file" style="flex:1">
+                                <option value="">— Pick a file —</option>
+                                <?php foreach ($articleFolderFiles as $f): ?>
+                                  <option value="<?= $e($f) ?>"<?= $sourceFileVal === $f ? ' selected' : '' ?>><?= $e($f) ?></option>
+                                <?php endforeach; ?>
+                              </select>
+                            <?php endif; ?>
+                            <button type="submit" name="action" value="refresh_folder" class="btn-sec" formnovalidate>↺ Refresh</button>
+                          </div>
+                          <p class="field-hint">
+                            The article chrome (breadcrumb, title, byline, hero, tags) stays as edited above. Only the body
+                            slot is replaced by the contents of the selected file. The file's HTML inherits the public
+                            <code>.article-prose</code> typography rules.
+                          </p>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               <?php endif; ?>
             </div>
 
             <aside class="form-side">
               <?php if ($showHero): ?>
-                <div class="field-group">
-                  <label class="field-label">Hero image <span class="field-hint-inline">optional</span></label>
-                  <?php $hero = (string)($article['hero_image'] ?? ''); if ($hero !== ''): ?>
-                    <div class="hero-preview">
-                      <img src="<?= $e($hero) ?>" alt="" loading="lazy">
-                      <label class="hero-remove">
-                        <input type="checkbox" name="remove_hero" value="1"> Remove
-                      </label>
-                    </div>
-                  <?php endif; ?>
-                  <input type="file" class="field-input field-file" name="hero" accept="image/jpeg,image/png,image/webp,image/gif">
-                  <p class="field-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
-                </div>
+                <?php
+                  $hero            = (string)($article['hero_image'] ?? '');
+                  $heroSizeCurrent = (string)($article['hero_size'] ?? 'default');
+                  if (!in_array($heroSizeCurrent, ['default','wide','full'], true)) $heroSizeCurrent = 'default';
+                  $heroSizeLabels  = ['default' => 'Column', 'wide' => 'Wide', 'full' => 'Full'];
+                ?>
+                <div class="cms-hero-box">
+                  <div class="cms-hero-header">
+                    <label class="field-label">Hero image</label>
+                    <span class="field-hint-inline">optional</span>
+                  </div>
 
-                <div class="field-group">
-                  <label class="field-label" for="article-hero-caption">Hero caption</label>
+                  <!-- Preview (or empty placeholder). Fills the box's full width. -->
+                  <div class="cms-hero-preview<?= $hero !== '' ? ' is-loaded' : ' is-empty' ?>" data-hero-size="<?= $e($heroSizeCurrent) ?>">
+                    <?php if ($hero !== ''): ?>
+                      <img src="<?= $e($hero) ?>" alt="" loading="lazy">
+                    <?php else: ?>
+                      <div class="cms-hero-empty">No image yet</div>
+                    <?php endif; ?>
+                    <!-- Trash overlay: top-right of the preview, only visible
+                         when an image is loaded. Sets the hidden remove_hero
+                         input on click and clears the preview. -->
+                    <button type="button"
+                            class="cms-hero-trash"
+                            aria-label="Remove hero image"
+                            title="Remove hero image">
+                      <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14"><path fill="currentColor" d="M6 2h4l1 1h3v2H2V3h3l1-1zm-3 4h10l-1 9H4L3 6zm3 2v6h1V8H6zm3 0v6h1V8H9z"/></svg>
+                    </button>
+                  </div>
+
+                  <!-- Hidden remove flag — the trash overlay flips this to 1 -->
+                  <input type="hidden" name="remove_hero" value="0" class="cms-hero-remove-flag">
+
+                  <!-- File picker: native input hidden, label acts as the button. -->
+                  <input type="file"
+                         class="cms-hero-file sr-only"
+                         id="article-hero-file"
+                         name="hero"
+                         accept="image/jpeg,image/png,image/webp,image/gif">
+                  <div class="cms-hero-pick-row">
+                    <label for="article-hero-file" class="btn-ghost cms-hero-pick-btn">
+                      <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
+                    </label>
+                    <span class="cms-hero-pick-name" aria-live="polite"></span>
+                  </div>
+
+                  <!-- Size toggle pills — mirrors the figure size toggle inside the RTF -->
+                  <div class="cms-hero-controls">
+                    <span class="cms-hero-controls-label">Size</span>
+                    <div class="cms-hero-size-group" role="group" aria-label="Hero size">
+                      <?php foreach (['default','wide','full'] as $sz): ?>
+                        <button type="button"
+                                class="cms-hero-size-btn<?= $heroSizeCurrent === $sz ? ' is-active' : '' ?>"
+                                data-hero-size-btn="<?= $sz ?>"
+                                aria-pressed="<?= $heroSizeCurrent === $sz ? 'true' : 'false' ?>"><?= $e($heroSizeLabels[$sz]) ?></button>
+                      <?php endforeach; ?>
+                    </div>
+                    <input type="hidden" name="hero_size" id="article-hero-size" value="<?= $e($heroSizeCurrent) ?>">
+                  </div>
+
+                  <!-- Caption -->
                   <input
                     type="text"
-                    class="field-input"
+                    class="field-input cms-hero-caption"
                     id="article-hero-caption"
                     name="hero_caption"
+                    placeholder="Caption (optional)"
                     value="<?= $e((string)($article['hero_caption'] ?? '')) ?>"
                     maxlength="500">
-                </div>
 
-                <div class="field-group">
-                  <label class="field-label" for="article-hero-size">Hero size</label>
-                  <select class="field-select" id="article-hero-size" name="hero_size">
-                    <?php
-                    $heroSizeCurrent = (string)($article['hero_size'] ?? 'default');
-                    foreach (['default','wide','full'] as $sz):
-                    ?>
-                      <option value="<?= $sz ?>" <?= $heroSizeCurrent === $sz ? 'selected' : '' ?>><?= ucfirst($sz) ?></option>
-                    <?php endforeach; ?>
-                  </select>
+                  <p class="field-hint cms-hero-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
                 </div>
               <?php endif; ?>
 
@@ -1014,8 +1266,17 @@ require __DIR__ . '/../partials/topbar.php';
               <?php endif; ?>
 
               <?php if ($isLive): ?>
-                <div class="cms-publish-box">
-                  <label class="field-label">Publish info</label>
+                <div class="cms-publish-box is-live">
+                  <div class="cms-publish-header">
+                    <span class="cms-live-indicator">
+                      <span class="cms-live-dot" aria-hidden="true"></span>
+                      Live
+                    </span>
+                    <a href="/writing/<?= $e((string)($article['slug'] ?? '')) ?>"
+                       target="_blank"
+                       rel="noopener"
+                       class="btn-ghost btn-tiny">View live ↗</a>
+                  </div>
                   <div class="field-group" style="margin-bottom:var(--space-12)">
                     <label class="field-sublabel" for="article-published-at">Published</label>
                     <input type="datetime-local"
@@ -1075,8 +1336,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
-            <a href="/cms/articles" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="save" class="btn-ghost" data-primary-save><?= $e($saveLabel) ?></button>
+            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
 
             <button type="submit" form="article-delete-form" class="btn-ghost btn-danger">Delete</button>
 
@@ -1108,11 +1369,6 @@ require __DIR__ . '/../partials/topbar.php';
                 value="unpublish"
                 class="btn-ghost"
                 data-confirm-unpublish="1">Move to draft</button>
-              <a
-                href="/writing/<?= $e((string)($article['slug'] ?? '')) ?>"
-                target="_blank"
-                rel="noopener"
-                class="btn-ghost">View live ↗</a>
             <?php endif; ?>
           </div>
         </form>
@@ -1145,6 +1401,111 @@ require __DIR__ . '/../partials/topbar.php';
     uploadUrl:    '/cms/articles/upload-image?id=<?= (int)$id ?>',
     csrfToken:    <?= json_encode($csrf_token, JSON_UNESCAPED_SLASHES) ?>,
   });
+</script>
+<?php if ($showHero): ?>
+<script>
+  // Phase 21.x — Hero box: pill toggle writes selected size into the hidden
+  // input that the form posts, and live-previews a freshly-picked file before
+  // upload so the author sees something in the preview pane immediately.
+  (function () {
+    const box = document.querySelector('.cms-hero-box');
+    if (!box) return;
+
+    const hidden      = box.querySelector('#article-hero-size');
+    const buttons     = box.querySelectorAll('[data-hero-size-btn]');
+    const preview     = box.querySelector('.cms-hero-preview');
+    const fileInput   = box.querySelector('.cms-hero-file');
+    const nameEl      = box.querySelector('.cms-hero-pick-name');
+    const pickBtn     = box.querySelector('.cms-hero-pick-btn');
+    const removeFlag  = box.querySelector('.cms-hero-remove-flag');
+    const trash       = box.querySelector('.cms-hero-trash');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const size = btn.getAttribute('data-hero-size-btn');
+        if (!size) return;
+        if (hidden) hidden.value = size;
+        if (preview) preview.setAttribute('data-hero-size', size);
+        buttons.forEach(b => {
+          const match = b === btn;
+          b.classList.toggle('is-active', match);
+          b.setAttribute('aria-pressed', match ? 'true' : 'false');
+        });
+        // Mirror an input event so preview-tab-guard's dirty-tracker fires.
+        if (hidden) hidden.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+
+    if (fileInput && preview) {
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        const empty = preview.querySelector('.cms-hero-empty');
+        if (empty) empty.remove();
+        let img = preview.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          img.alt = '';
+          preview.appendChild(img);
+        }
+        img.src = url;
+        preview.classList.remove('is-empty');
+        preview.classList.add('is-loaded');
+        // Replacing an image cancels any pending "remove" request.
+        if (removeFlag) removeFlag.value = '0';
+        if (nameEl)  nameEl.textContent = f.name;
+        if (pickBtn) pickBtn.textContent = 'Replace image';
+      });
+    }
+
+    // Trash overlay → flips the hidden remove_hero flag + clears the preview.
+    // Confirm before destroying — the actual delete happens on Save, but the
+    // preview clears immediately so the confirm prevents accidental clicks.
+    if (trash && preview) {
+      trash.addEventListener('click', () => {
+        if (!window.confirm('Remove this hero image? You\'ll need to Save to confirm.')) return;
+        if (removeFlag) {
+          removeFlag.value = '1';
+          removeFlag.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const img = preview.querySelector('img');
+        if (img) img.remove();
+        preview.classList.remove('is-loaded');
+        preview.classList.add('is-empty');
+        if (!preview.querySelector('.cms-hero-empty')) {
+          const empty = document.createElement('div');
+          empty.className = 'cms-hero-empty';
+          empty.textContent = 'No image yet';
+          preview.appendChild(empty);
+        }
+        // Also clear any pending file pick — saving now means "remove the
+        // existing hero", not "swap to a new one".
+        if (fileInput) fileInput.value = '';
+        if (pickBtn)   pickBtn.textContent = 'Choose image';
+        if (nameEl)    nameEl.textContent  = '';
+      });
+    }
+  })();
+</script>
+<?php endif; ?>
+
+<script>
+  // Phase 20.3: body-source toggle. Clicking RTF or HTML shows the matching
+  // panel without touching the other — preserves TipTap state (DOM intact)
+  // and the file-selector state across toggles.
+  (function () {
+    const root = document.querySelector('[data-body-source-block]');
+    if (!root) return;
+    const radios = root.querySelectorAll('input[name="body_mode"]');
+    const panels = root.querySelectorAll('[data-body-panel]');
+    const options = root.querySelectorAll('.body-source-option');
+    function activate(mode) {
+      panels.forEach(p => { p.hidden = (p.getAttribute('data-body-panel') !== mode); });
+      options.forEach(o => o.classList.toggle('is-active', o.querySelector('input').value === mode));
+    }
+    radios.forEach(r => r.addEventListener('change', () => activate(r.value)));
+  })();
 </script>
 <?php endif; ?>
 
@@ -1226,5 +1587,6 @@ require __DIR__ . '/../partials/topbar.php';
 </script>
 
 <script src="/cms/_assets/publish-choreography.js" defer></script>
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
 </body>
 </html>

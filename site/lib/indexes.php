@@ -237,6 +237,9 @@ function save_index(array $data): array
                    filter_mode = :fmode
              WHERE id = :id LIMIT 1';
     $params[':id'] = $id;
+    // Slug isn't editable post-create — drop it from $params so PDO doesn't
+    // throw HY093 ("invalid parameter number") for an unbound placeholder.
+    unset($params[':slug']);
     db()->prepare($sql)->execute($params);
     return ['ok' => true, 'error' => '', 'id' => $id];
 }

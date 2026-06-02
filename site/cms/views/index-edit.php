@@ -71,12 +71,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'filter_mode'     => (string)($_POST['filter_mode']     ?? 'categories'),
         ];
 
-        $res = save_index($data);
-        if ($res['ok']) {
-            header('Location: /cms/indexes/edit?id=' . $id . '&flash=' . rawurlencode('Saved.'));
-            exit;
+        try {
+            $res = save_index($data);
+            if ($res['ok']) {
+                header('Location: /cms/indexes/edit?id=' . $id . '&flash=' . rawurlencode('Saved.'));
+                exit;
+            }
+            $errors[] = $res['error'];
+        } catch (\Throwable $ex) {
+            error_log('[index-edit] save_index threw: ' . $ex->getMessage());
+            $errors[] = 'Could not save index: ' . $ex->getMessage();
         }
-        $errors[] = $res['error'];
         // Re-load to merge user input with current row (so dropdowns
         // stay populated correctly). Take the user's POST values for
         // edited fields, but keep $index for everything else.

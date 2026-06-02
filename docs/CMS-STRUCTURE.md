@@ -507,25 +507,36 @@ Out of scope for v1. When it becomes needed: add `author_id INT` FK on `content`
 
 ## 12. Custom HTML Folder System
 
-Used by the `experiment-html` template (and the optional Custom HTML block in any future template that opts in).
+Phase 20.3 extended this from experiment-only to **any content row whose `body_mode` is `html-body` or `html-swap`**. Currently in use by articles and experiments; journals and live-sessions are RTF-only.
+
+### body_mode (Phase 20.3)
+
+A row's `body_mode` column (`rtf` / `html-body` / `html-swap`) picks where the body content comes from at render time:
+
+- `rtf` — body lives in `content.body` (TipTap output). The default.
+- `html-body` — body lives in a file under `/content/<type>/<slug>/`. The surrounding template chrome (breadcrumb, byline, hero, tags, etc.) renders exactly as in `rtf` mode; only the Body block reads from disk instead of from the column. Available for articles and experiments.
+- `html-swap` — body lives in a file. The entire page **is** the file — no master-layout, no chrome. Equivalent to the pre-Phase-20.3 `experiment-html` template. Available for experiments only.
+
+The TipTap `content.body` column is preserved across mode toggles so flipping `html-body` → `rtf` restores the in-progress draft.
 
 ### Workflow
 
 1. Slug must exist on the content row first.
 2. **Set Up Folder** button shows a confirmation modal with the exact server path.
-3. On confirm, PHP creates `/content/[type]/[slug]/` server-side.
+3. On confirm, PHP creates `/content/[type]/[slug]/` server-side. Type is one of `experiment` or `article` (whitelisted in `lib/folders.php::_folder_validate`).
 4. The folder dropdown populates with `.html` files inside.
 5. **Refresh** button re-scans (for FTP drops).
 6. **Delete Folder** requires confirmation; only allowed when the folder is empty.
-7. If the toggle is removed but the folder still exists, the picker remains visible (non-destructive).
+7. If `body_mode` is flipped back to `rtf` but the folder still exists, it remains on disk (non-destructive). The picker only renders while the row is in an HTML mode.
 
 ### Storage
 
-`content.source_file` stores **just the filename** (e.g. `main.html`). The full path is derived as `/content/[type]/[slug]/[source_file]`.
+`content.source_file` stores **just the filename** (e.g. `main.html`). The full path is derived as `/content/[type]/[slug]/[source_file]`. Type comes from `content.type` (`article` / `experiment`).
 
 ### Render
 
-The `experiment-html` template renders the file via PHP `readfile()` — no nav, no footer, no template wrapper. Raw passthrough.
+- `html-body` — the body block (`templates/partials/block-body.php`) `readfile()`s the file into the `.article-prose` wrapper. The surrounding chrome and other blocks render normally.
+- `html-swap` — `lib/render.php` short-circuits before master-layout and emits the file directly. No chrome, no nav, no template wrapper. Raw passthrough.
 
 ---
 

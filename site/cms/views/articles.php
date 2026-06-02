@@ -19,7 +19,16 @@ Auth::require_login();
 $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
-$articles   = list_articles();
+
+// Phase 20.3 filter bar — URL-driven OR filters across Stage + Category.
+// Both groups are multi-select via comma-separated values in the URL.
+$filterStages     = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['stage']    ?? ''))), 'strlen'));
+$filterCategories = array_values(array_filter(array_map('trim', explode(',', (string)($_GET['category'] ?? ''))), 'strlen'));
+$articles       = list_articles([
+    'stage'    => implode(',', $filterStages),
+    'category' => implode(',', $filterCategories),
+]);
+$allCategories  = list_categories('article');
 
 // Drained from the URL after a destructive action.
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
@@ -78,31 +87,16 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Articles';
       $subtitle = 'Long-form writing. Create, edit, and ship drafts. Pipeline + transitions land in Phase 7.';
-      $actions  = '<a href="/cms/articles/new" class="btn-pri">+ New Article</a>';
+      $actions  = '<a href="/writing/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+                . '<a href="/cms/articles/new" class="btn-pri">+ New Article</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
       <?php
-      $groups = [
-          [
-              'label' => 'Stage',
-              'mode'  => 'or',
-              'pills' => [
-                  ['label' => 'All',       'active' => true, 'all' => true],
-                  ['label' => 'Draft'],
-                  ['label' => 'Published'],
-              ],
-          ],
-          [
-              'label' => 'Special Tag',
-              'mode'  => 'or',
-              'pills' => [
-                  ['label' => 'All',       'active' => true, 'all' => true],
-                  ['label' => 'Framework'],
-                  ['label' => 'Principle'],
-              ],
-          ],
-      ];
+      // Phase 20.3 filter bar: per-type stages + categories, multi-select
+      // OR within each group. Stage set drops Idea (Ideation view only)
+      // and includes Concept/Outline only for the article pipeline.
+      $groups = build_filter_groups('article', '/cms/articles', $filterStages, $filterCategories, $allCategories);
       require __DIR__ . '/../partials/filter-bar.php';
       ?>
 
@@ -137,64 +131,97 @@ require __DIR__ . '/../partials/topbar.php';
             }
         }
 
-        $columns = [
-            ['label' => 'Article Title', 'width' => '34%'],
-            ['label' => 'Stage',         'width' => '10%'],
-            ['label' => 'Special tag',   'width' => '12%'],
-            ['label' => 'Series',        'width' => '16%'],
-            ['label' => 'Updated',       'width' => '14%'],
-            ['label' => 'Actions',       'width' => '14%'],
-        ];
+        // Column set is shared across Drafts / Scheduled / Published. The
+        // Date column's header + value depends on the section (Updated for
+        // in-progress, Published for live, Scheduled for queued).
+        $makeColumns = static function (string $dateLabel): array {
+            return [
+                ['label' => 'Article Title', 'width' => '32%'],
+                ['label' => 'Stage',         'width' => '9%'],
+                ['label' => 'Category',      'width' => '12%'],
+                ['label' => 'Special tag',   'width' => '10%'],
+                ['label' => 'Series',        'width' => '15%'],
+                ['label' => $dateLabel,      'width' => '12%'],
+                ['label' => '',              'width' => '10%'],
+            ];
+        };
 
-        $buildRow = static function (array $a) use ($e, $csrf_token, $stagePill): array {
+        $buildRow = static function (array $a, string $dateMode) use ($e, $csrf_token, $stagePill): array {
             $id      = (int)($a['id'] ?? 0);
             $slug    = (string)($a['slug'] ?? '');
             $title2  = (string)($a['title'] ?? '');
             $special = (string)($a['special_tag'] ?? '');
             $updated = (string)($a['updated_at'] ?? '');
-            $updatedShort = $updated !== '' ? date('Y-m-d', strtotime($updated)) : '';
+            $pubAt   = (string)($a['published_at'] ?? '');
+            // Date cell: published_at for the Published section (with
+            // optional Scheduled section reusing the same column), updated_at
+            // everywhere else.
+            $dateRaw = $dateMode === 'published' ? ($pubAt !== '' ? $pubAt : $updated) : $updated;
+            $dateShort = $dateRaw !== '' ? date('Y-m-d', strtotime($dateRaw)) : '';
 
-            $titleHtml = '<a href="/cms/articles/edit?id=' . $id . '" class="row-title">'
+            // Title block: title on top, slug on its own line below.
+            $titleHtml = '<a href="/cms/articles/edit?id=' . $id . '&from=articles" class="row-title">'
                        . $e($title2 !== '' ? $title2 : '(untitled)')
                        . '</a>'
-                       . ' <span class="row-slug">/' . $e($slug) . '</span>';
+                       . '<div class="row-slug">/' . $e($slug) . '</div>';
+
+            // Category pill — uses the design-system colour token via inline
+            // var() so existing palette swap works untouched.
+            $catLabel  = (string)($a['category_label']  ?? '');
+            $catColour = (string)($a['category_colour'] ?? '');
+            if ($catLabel !== '') {
+                $bg = $catColour !== '' ? 'var(--c-' . $e($catColour) . ')' : 'var(--ink-30)';
+                $catHtml = '<span class="cat-chip" style="--cat-bg:' . $bg . '">' . $e($catLabel) . '</span>';
+            } else {
+                $catHtml = '<span class="muted">—</span>';
+            }
 
             $specialHtml = $special !== ''
                 ? '<span class="pill special-' . $e($special) . '">' . $e(ucfirst($special)) . '</span>'
                 : '<span class="muted">—</span>';
 
+            // Series cell shows just the name — the part number's "Part N of M"
+            // meaning only resolves once the article is published (counted vs
+            // its published siblings), so rendering it on drafts misleads.
             $seriesName = (string)($a['series_name'] ?? '');
-            if ($seriesName !== '') {
-                $partNo = (int)($a['series_order'] ?? 0);
-                $partTxt = $partNo > 0 ? ' – ' . str_pad((string)$partNo, 2, '0', STR_PAD_LEFT) : '';
-                $seriesHtml = '<a href="/cms/series" class="val-pill" style="text-decoration:none">'
-                            . $e($seriesName . $partTxt) . '</a>';
-            } else {
-                $seriesHtml = '<span class="muted">—</span>';
-            }
+            $seriesHtml = $seriesName !== ''
+                ? '<a href="/cms/series" class="val-pill" style="text-decoration:none">' . $e($seriesName) . '</a>'
+                : '<span class="muted">—</span>';
 
-            $isPublished = (string)($a['status'] ?? '') === 'published';
-            $liveBtn = $isPublished && $slug !== ''
-                ? '<a href="/writing/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live published page">Live ↗</a>'
+            // Live ↗ only on rows that are actually live — scheduled rows
+            // have status='published' but their public URL won't resolve
+            // until the cron promotes them.
+            $isLiveRow = (string)($a['status'] ?? '') === 'published'
+                      && (string)($a['published_status'] ?? '') !== 'scheduled';
+            $liveBtn = $isLiveRow && $slug !== ''
+                ? '<a href="/writing/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
+            // Edit + Delete reveal on row hover. Live ↗ stays visible.
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
-                . '<a href="/cms/articles/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                . '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
-                .   '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .   '<button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>'
-                . '</form>'
+                . '<span class="row-actions-hover">'
+                .   '<a href="/cms/articles/edit?id=' . $id . '&from=articles" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
+                .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .   '</form>'
+                . '</span>'
                 . '</div>';
 
             return [
-                'href'  => '/cms/articles/edit?id=' . $id,
+                // Include &from=articles so whole-row clicks land with the
+                // same provenance the title/Edit links carry — keeps the
+                // sidebar pinned to Articles instead of falling back to
+                // the stage-based "Draft Writing" heuristic.
+                'href'  => '/cms/articles/edit?id=' . $id . '&from=articles',
                 'cells' => [
                     ['html' => $titleHtml],
                     ['html' => $stagePill(((string)($a['status'] ?? '') === 'published' && (string)($a['published_status'] ?? '') === 'scheduled') ? 'scheduled' : (string)($a['status'] ?? 'draft'))],
+                    ['html' => $catHtml],
                     ['html' => $specialHtml],
                     ['html' => $seriesHtml],
-                    ['html' => '<span class="muted">' . $e($updatedShort) . '</span>'],
+                    ['html' => '<span class="muted">' . $e($dateShort) . '</span>'],
                     ['html' => $actionsHtml, 'class' => 'cell-actions'],
                 ],
             ];
@@ -211,7 +238,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $drafts);
+          $columns    = $makeColumns('Updated');
+          $rows       = array_map(static fn($a) => $buildRow($a, 'updated'), $drafts);
           $empty_text = 'No drafts in progress. Click + New Article to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -228,7 +256,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $scheduled);
+          $columns    = $makeColumns('Scheduled for');
+          $rows       = array_map(static fn($a) => $buildRow($a, 'published'), $scheduled);
           $empty_text = 'No scheduled articles.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -245,7 +274,8 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php
-          $rows = array_map($buildRow, $published);
+          $columns    = $makeColumns('Published');
+          $rows       = array_map(static fn($a) => $buildRow($a, 'published'), $published);
           $empty_text = 'No published articles yet.';
           require __DIR__ . '/../partials/table.php';
           ?>

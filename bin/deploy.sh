@@ -180,7 +180,7 @@ cp site/templates/index-listing.php    "$STAGE/templates/"
 # Phase 13: themed 404 page (rendered from index.php's not-found handler
 # when no route + no redirect match). Wrapped in master-layout for nav +
 # footer chrome. Public-visible — gated to staging by APP_ENV until the
-# Phase 16 cutover.
+# Phase 29 cutover.
 cp site/templates/404.php              "$STAGE/templates/"
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
@@ -245,11 +245,11 @@ EXCLUDES=(
   --exclude='backups/**'
 )
 
-# Phase 12–15 prod freeze (see docs/BUILD-PLAN.md §3 + Phase 16 brief).
+# Phase 12–15 prod freeze (see docs/BUILD-PLAN.md §3 + Phase 29 brief).
 # While the build is in progress, the prod public surface stays frozen at
 # its pre-Phase-12 visual state. Three files would otherwise overwrite the
 # live nav + landing copy on every prod deploy — exclude them so prod
-# keeps its existing copies untouched. Phase 16 (Public Cutover) removes
+# keeps its existing copies untouched. Phase 29 (Public Cutover) removes
 # these excludes in one diff to flip the new chrome live.
 if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
   EXCLUDES+=(
@@ -258,12 +258,12 @@ if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
     --exclude='templates/partials/nav.php'
     # Phase 14 added a live POST /subscribe handler + form on staging.
     # Prod keeps the GET-to-/newsletter-confirmed/ static form until the
-    # Phase 16 cutover (consistent with the rest of the prod freeze).
+    # Phase 29 cutover (consistent with the rest of the prod freeze).
     --exclude='_bodies/newsletter.html'
   )
   echo "==> Prod-freeze active: skipping marketing nav, landing copy,"
   echo "    newsletter form body, and CMS-rendered nav.php"
-  echo "    (Phase 16 flips these)."
+  echo "    (Phase 29 flips these)."
 fi
 
 echo

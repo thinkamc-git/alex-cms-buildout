@@ -219,7 +219,7 @@ $router->get('/experiments/:slug', static function (array $p): void {
 //
 // ⚠ Staging-only during the Phase 12–15 prod-freeze (see BUILD-PLAN §3).
 // Prod requests to /writing/, /journal/, /live-sessions/, /experiments/,
-// /series/[slug]/ should fall through to 404 until Phase 16 (Public
+// /series/[slug]/ should fall through to 404 until Phase 29 (Public
 // Cutover) deletes this gate. The marketing-page nav on prod doesn't
 // link here, so visitors never see a 404 in normal flow.
 if (defined('APP_ENV') && APP_ENV === 'staging') {

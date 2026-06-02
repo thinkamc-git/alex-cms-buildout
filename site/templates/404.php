@@ -5,7 +5,7 @@ if (!defined('TEMPLATE_OK')) { http_response_code(404); exit; }
  * templates/404.php — themed 404 page (Phase 13).
  *
  * Rendered by site/index.php's not-found handler after resolve_redirect()
- * has been tried and missed. Staging-only until Phase 16 — prod still
+ * has been tried and missed. Staging-only until Phase 29 — prod still
  * serves the static /404.html. See the prod-freeze rule in BUILD-PLAN
  * §3.
  *

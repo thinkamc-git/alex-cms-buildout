@@ -135,28 +135,27 @@ function render_content(string $slug): void
         'series'   => $series,
     ];
 
-    // Pick template. Phase 6b ships article-standard; later phases add
-    // article-series (8a), journal-entry (8), live-session (9),
-    // experiment/experiment-html (10). Unknown templates 404 so the
-    // public site never renders a partially-built type.
+    // Phase 20.3: `template` picks the chrome; `body_mode` picks where the
+    // body comes from. Article-series shares article-standard's chrome.
     $template = (string)($row['template'] ?? '');
+    $bodyMode = (string)($row['body_mode'] ?? 'rtf');
     $known = [
         'article-standard' => 'article-standard.php',
+        'article-series'   => 'article-standard.php',
         'journal-entry'    => 'journal-entry.php',
         'live-session'     => 'live-session.php',
         'experiment'       => 'experiment.php',
-        'experiment-html'  => 'experiment-html.php',
     ];
     if (!isset($known[$template])) {
         render_404();
         return;
     }
 
-    // Raw HTML passthrough: experiment-html renders its source file directly
-    // with no master-layout wrapper, no CMS chrome. The template handles its
-    // own headers and exits — render_content returns immediately after.
-    // See CMS-STRUCTURE.md §12.
-    if ($template === 'experiment-html') {
+    // Raw HTML passthrough: body_mode='html-swap' renders the referenced
+    // file directly with no master-layout, no CMS chrome. See
+    // CMS-STRUCTURE.md §12. Only `experiment` rows are allowed to swap
+    // (the html-swap mode wraps experiment-html.php's existing logic).
+    if ($bodyMode === 'html-swap') {
         if (!defined('TEMPLATE_OK')) define('TEMPLATE_OK', true);
         require_once __DIR__ . '/folders.php';
         $ctx = ['article' => $row];
@@ -321,14 +320,18 @@ function render_series_index(string $slug): void
  * Themed 404 — same source the router uses for unrouted paths. Keeping
  * the two paths converged means a wrong /writing/[bad-slug] looks the
  * same as a wrong /[anything-else].
+ *
+ * Serves the deployed /404.php (speech-bubble themed page). dirname(__DIR__)
+ * from lib/ is the webroot — same path resolution site/index.php's
+ * not-found handler uses.
  */
 function render_404(): void
 {
     http_response_code(404);
-    $page = dirname(__DIR__) . '/404.html';
+    $page = dirname(__DIR__) . '/404.php';
     if (is_file($page)) {
         header('Content-Type: text/html; charset=utf-8');
-        readfile($page);
+        require $page;
         return;
     }
     header('Content-Type: text/plain; charset=utf-8');

@@ -169,9 +169,11 @@ $current_meta = [
 
 // Default tab is metadata (the always-editable side); partials don't have
 // metadata so they default to body and the metadata tab is hidden.
+// Phase 20.2: 'preview' added as a third tab, available whenever a mock
+// exists (the public-side mock-preview URL needs a version id).
 $default_tab = $is_partial ? 'body' : 'metadata';
 $tab = (string)($_GET['tab'] ?? $default_tab);
-if (!in_array($tab, ['body', 'metadata'], true)) $tab = $default_tab;
+if (!in_array($tab, ['body', 'metadata', 'preview'], true)) $tab = $default_tab;
 if ($is_partial && $tab === 'metadata') $tab = 'body';
 
 // Preview URL: partials preview against /about/; pages preview against themselves.
@@ -182,6 +184,13 @@ if (!$is_live && $current_mock !== null) {
         : '/' . rawurlencode($slug) . '/?_preview=' . (int)$current_mock['id'];
 }
 $preview_live_url = $is_partial ? '/about/' : ('/' . rawurlencode($slug) . '/');
+
+// Phase 21.x: Preview tab is always visible — no longer appears/disappears
+// based on mock presence (that was confusing UX). In Live mode the iframe
+// just points at the live URL; in Mock mode it points at the mock-preview
+// URL and gets overridden by form-driven POSTs from preview-tab-guard.js.
+$preview_iframe_src = $preview_url !== '' ? $preview_url : $preview_live_url;
+$preview_tab_available = true;
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
@@ -245,6 +254,8 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
   .pe-meta-form label { font-size:var(--text-micro); color:var(--muted); padding-top:8px; font-family:var(--font-cond); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
   .pe-meta-form input[type=text], .pe-meta-form textarea, .pe-meta-form select { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:4px; font-size:13px; background:var(--surface); color:var(--ink); font-family:var(--font-mono); }
   .pe-meta-form textarea { min-height:80px; resize:vertical; }
+  /* Client-side tab visibility — toggled by preview-tab-guard.js. */
+  .is-hidden-tab { display: none !important; }
   .pe-meta-charcount { font-size:11px; color:var(--muted); padding-top:4px; }
   .pe-unfurl { max-width:520px; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--surface); }
   .pe-unfurl-img { width:100%; height:180px; background:var(--bg-soft) center/cover no-repeat; }
@@ -307,15 +318,21 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="flash-success" role="status"><?= $e($flash) ?></div>
         <?php endif; ?>
 
-        <!-- Tabs (Metadata default for pages; partials skip Metadata) -->
-        <div class="pe-tabs">
+        <!-- Tabs. Server-rendered hrefs are graceful fallback; preview-tab-guard.js
+             intercepts clicks and toggles panel visibility client-side. -->
+        <div class="pe-tabs" role="tablist">
           <?php if (!$is_partial): ?>
-            <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
+            <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" data-tab-target="metadata" role="tab" aria-selected="<?= $tab === 'metadata' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
           <?php endif; ?>
-          <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
+          <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" data-tab-target="body" role="tab" aria-selected="<?= $tab === 'body' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
+          <?php if ($preview_tab_available): ?>
+            <a class="pe-tab <?= $tab === 'preview' ? 'is-active' : '' ?>" data-tab-target="preview" role="tab" aria-selected="<?= $tab === 'preview' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=preview<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Preview</a>
+          <?php endif; ?>
         </div>
 
-        <?php if ($tab === 'body'): ?>
+        <!-- BODY panel — always in the DOM, hidden by .is-hidden-tab when
+             another tab is active. Same for Metadata and Preview below. -->
+        <div data-tab-panel="body" class="<?= $tab !== 'body' ? 'is-hidden-tab' : '' ?>">
           <!-- Version selector + actions (only in the Body HTML tab) -->
           <div class="pe-version-row">
             <span class="pe-version-label">Version:</span>
@@ -375,7 +392,7 @@ require __DIR__ . '/../partials/topbar.php';
                     </form>
                   <?php endif; ?>
                 <?php endif; ?>
-                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save>Save</button>
+                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save data-primary-save>Save</button>
               <?php endif; ?>
             </div>
           </div>
@@ -384,7 +401,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="pe-readonly-notice">This is the on-disk file. The CMS never writes here — click <strong>+ New Mock</strong> to start editing.</div>
             <textarea id="pe-editor-live" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
           <?php else: ?>
-            <form id="pe-mock-form" method="post" action="/cms/pages/edit">
+            <form id="pe-mock-form" method="post" action="/cms/pages/edit" data-preview-source-form>
               <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
               <input type="hidden" name="slug" value="<?= $e($slug) ?>">
               <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
@@ -392,8 +409,25 @@ require __DIR__ . '/../partials/topbar.php';
               <textarea id="pe-editor-mock" name="body_html" data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
             </form>
           <?php endif; ?>
+        </div><!-- /data-tab-panel="body" -->
 
-        <?php else: /* metadata */ ?>
+        <?php if ($preview_tab_available): /* PREVIEW panel — only when a mock exists */ ?>
+        <div data-tab-panel="preview" class="<?= $tab !== 'preview' ? 'is-hidden-tab' : '' ?>">
+          <div class="post-preview-frame" style="margin-top:var(--space-16)">
+            <iframe
+              name="pe-preview-iframe"
+              src="<?= $e($preview_iframe_src) ?>"
+              title="Preview — <?= $e($file_row['filename']) ?>"
+              class="post-preview-iframe"
+              loading="lazy"
+              data-preview-iframe
+              data-preview-endpoint="/cms/pages/preview-form"></iframe>
+          </div>
+        </div><!-- /data-tab-panel="preview" -->
+        <?php endif; ?>
+
+        <?php if (!$is_partial): /* METADATA panel — pages only, partials don't have meta */ ?>
+        <div data-tab-panel="metadata" class="<?= $tab !== 'metadata' ? 'is-hidden-tab' : '' ?>">
           <?php
           // Live mode: form is visible but every field is read-only. The
           // values come from the parsed file ($title / $description) plus
@@ -453,6 +487,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
               </div>
             </form>
+        </div><!-- /data-tab-panel="metadata" -->
         <?php endif; ?>
       </div>
     </div>
@@ -481,6 +516,9 @@ require __DIR__ . '/../partials/topbar.php';
   <input type="hidden" name="new_name" id="pe-duplicate-name">
 </form>
 
+<!-- Client-side tab controller — intercepts the [data-tab-target] clicks
+     and POSTs the body form to the preview endpoint when Preview activates. -->
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
 <script src="/cms/_assets/codemirror/codemirror.min.js"></script>
 <script src="/cms/_assets/codemirror/mode/xml/xml.min.js"></script>
 <script src="/cms/_assets/codemirror/mode/javascript/javascript.min.js"></script>
@@ -522,9 +560,25 @@ require __DIR__ . '/../partials/topbar.php';
           saveBtn.classList.toggle('btn-ghost', !dirty);
           saveBtn.classList.toggle('btn-pri', dirty);
         }
+        // Mirror to the underlying textarea so listeners like
+        // preview-tab-guard (which watches input/change) detect this edit.
+        ta.value = cm.getValue();
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
       });
     }
     window._peEditor = cm;
+
+    // Body panel may start hidden (default tab is metadata). CodeMirror
+    // initialises to 0×0 when its host is display:none; refresh whenever
+    // the panel becomes visible so the editor renders correctly.
+    var bodyPanel = document.querySelector('[data-tab-panel="body"]');
+    if (bodyPanel) {
+      new MutationObserver(function () {
+        if (!bodyPanel.classList.contains('is-hidden-tab')) {
+          setTimeout(function () { cm.refresh(); }, 0);
+        }
+      }).observe(bodyPanel, { attributes: true, attributeFilter: ['class'] });
+    }
   })();
 
   function peSwitchVersion(vid) {

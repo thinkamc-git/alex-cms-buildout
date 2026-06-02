@@ -36,6 +36,7 @@ if ($_eDate !== '') {
     if ($_ts !== false && $_ts < time()) $isPast = true;
 }
 ?>
+<?php if (empty($preview_no_chrome)): ?>
 <nav class="article-breadcrumb" aria-label="Breadcrumb">
   <a class="article-breadcrumb-root" href="/live-sessions">Live Sessions</a>
   <?php if ($catLabel !== ''): ?>
@@ -43,6 +44,7 @@ if ($_eDate !== '') {
     <span class="article-breadcrumb-current"><?= htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8') ?></span>
   <?php endif; ?>
 </nav>
+<?php endif; ?>
 
 <article class="article article-live-session"<?= $catColour !== '' ? ' data-category="' . htmlspecialchars($catColour, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
 

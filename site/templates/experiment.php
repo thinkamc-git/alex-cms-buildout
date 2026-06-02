@@ -18,6 +18,7 @@ $cat       = $ctx['category'] ?? null;
 $catColour = is_array($cat) ? (string)($cat['colour'] ?? '') : '';
 $catLabel  = is_array($cat) ? (string)($cat['label']  ?? '') : '';
 ?>
+<?php if (empty($preview_no_chrome)): ?>
 <nav class="article-breadcrumb" aria-label="Breadcrumb">
   <a class="article-breadcrumb-root" href="/experiments">Experiments</a>
   <?php if ($catLabel !== ''): ?>
@@ -25,6 +26,7 @@ $catLabel  = is_array($cat) ? (string)($cat['label']  ?? '') : '';
     <span class="article-breadcrumb-current"><?= htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8') ?></span>
   <?php endif; ?>
 </nav>
+<?php endif; ?>
 
 <article class="article article-experiment"<?= $catColour !== '' ? ' data-category="' . htmlspecialchars($catColour, ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
 

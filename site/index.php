@@ -143,6 +143,18 @@ $router->post('/cms/subscribers', $cms('views/subscribers.php'));
 // POST handles the Author save action (CSRF-protected) inside the view.
 $router->get ('/cms/post-template', $cms('views/post-template.php'));
 $router->post('/cms/post-template', $cms('views/post-template.php'));
+// Phase 20.1: live preview endpoint — renders templates/<slug>.php with
+// synthetic $ctx so the Preview tab reflects any change to the actual
+// template file. Iframed from /cms/post-template's Preview tab.
+$router->get ('/cms/post-template/preview', $cms('views/post-template-preview.php'));
+// Phase 20.2: per-post live preview — reads a content row by id (any
+// status) and renders the matching public template inside master-layout.
+// Iframed from article-edit / journal-edit / etc.'s Preview tab.
+$router->get ('/cms/post/preview', $cms('views/post-preview.php'));
+// Phase 20.2: form-driven preview — overlays POST'd form values on the
+// DB row before rendering, so the iframe reflects unsaved editor changes.
+// Called by the JS controller when the user toggles to the Preview tab.
+$router->post('/cms/post/preview-form', $cms('views/post-preview-form.php'));
 
 // Phase 20: Pages CMS (mock-versioning sandbox for the marketing pages
 // and the layout partials header.php / footer.php). The editor uses
@@ -152,6 +164,9 @@ $router->post('/cms/post-template', $cms('views/post-template.php'));
 $router->get ('/cms/pages',           $cms('views/pages.php'));
 $router->get ('/cms/pages/edit',      $cms('views/page-edit.php'));
 $router->post('/cms/pages/edit',      $cms('views/page-edit.php'));
+// Phase 21.x — form-driven preview for the Pages CMS. Mirrors the
+// /cms/post/preview-form endpoint but routes through _page-shell.php.
+$router->post('/cms/pages/preview-form', $cms('views/pages-preview-form.php'));
 
 // Phase 20: Navigation editor. Replaces the hardcoded <a> lists in the
 // static header.html / footer.html with DB-managed nav_items. AJAX
@@ -262,6 +277,25 @@ $router->set_not_found(static function (string $method, string $path): void {
     if ($hit !== null) {
         emit_redirect($hit);
     }
+
+    // Phase 20.3: custom Editorial / Listing indexes resolve here. The four
+    // built-in indexes (writing / journal / live-sessions / experiments) get
+    // their own static routes above; any other single-segment slug that
+    // matches a row in the `indexes` table renders via render_index().
+    // Staging-only — see prod-freeze note below the built-in block.
+    if ($method === 'GET' && defined('APP_ENV') && APP_ENV === 'staging') {
+        $cleanPath = trim((string)strtok($path, '?'), '/');
+        if ($cleanPath !== '' && strpos($cleanPath, '/') === false && preg_match('/^[a-z0-9][a-z0-9\-]*$/', $cleanPath)) {
+            require_once __DIR__ . '/lib/indexes.php';
+            require_once __DIR__ . '/lib/render.php';
+            $idx = get_index_by_slug($cleanPath);
+            if ($idx !== null) {
+                render_index($cleanPath);
+                return;
+            }
+        }
+    }
+
     http_response_code(404);
 
     if (isset($_GET['_preview']) && defined('APP_ENV') && APP_ENV === 'staging') {

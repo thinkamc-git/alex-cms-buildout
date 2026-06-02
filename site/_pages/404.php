@@ -1,4 +1,14 @@
-<?php $_is_staging = defined('APP_ENV') && APP_ENV === 'staging'; ?><!DOCTYPE html>
+<?php
+$_is_staging = defined('APP_ENV') && APP_ENV === 'staging';
+// Phase 20.x: pull the nav from the DB on staging so the Navigation editor
+// drives the 404 chrome too. Prod stays on the hardcoded fallback below
+// (matches the rest of the Phase 20 prod-freeze cascade).
+if ($_is_staging && !function_exists('render_nav')) {
+    foreach ([__DIR__ . '/../lib/nav.php', __DIR__ . '/lib/nav.php'] as $_p) {
+        if (is_file($_p)) { require_once $_p; break; }
+    }
+}
+?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -132,10 +142,14 @@
       <img src="/_layout/logo.png" alt="Alex M. Chong" />
     </a>
     <div class="layout-nav-links">
+<?php if ($_is_staging && function_exists('render_nav')): ?>
+<?php render_nav('header'); ?>
+<?php else: ?>
       <a href="/ux2.0/how-we-got-here/" data-nav-key="ux2" style="position:relative">What's UX 2.0<span aria-hidden="true" style="position:absolute;top:-5px;right:-4px;width:10px;height:10px;background:#d63031;border-radius:50%"></span></a>
       <a href="/writing/" data-nav-key="writing">Thoughts</a>
       <a href="/live-sessions/" data-nav-key="talks">Talks</a>
       <a href="/work-with-me/" data-nav-key="work">Work with me</a>
+<?php endif; ?>
     </div>
   </nav>
 
@@ -156,10 +170,14 @@
   <footer class="layout-footer">
     <span class="layout-footer-left">© <?= date('Y') ?> alex m. chong</span>
     <div class="layout-footer-right">
+<?php if ($_is_staging && function_exists('render_nav')): ?>
+<?php render_nav('footer'); ?>
+<?php else: ?>
       <a href="/about/">About</a>
       <a href="/coaching/">Coaching</a>
       <a href="/work-with-me/">Services</a>
       <a href="/resume/">Resume</a>
+<?php endif; ?>
     </div>
   </footer>
 

@@ -4,8 +4,9 @@
 # or directory drops through to index.php for routing.
 
 # Custom 404 page (rendered by Apache when no rule below matches and no
-# file exists at the requested path). The file ships from site/_pages/404.html.
-ErrorDocument 404 /404.html
+# file exists at the requested path). Ships from site/_pages/404.php —
+# PHP so the favicon and similar can env-gate.
+ErrorDocument 404 /404.php
 
 RewriteEngine On
 

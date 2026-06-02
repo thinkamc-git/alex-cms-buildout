@@ -87,14 +87,14 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
 
   <div class="nav-section">
     <span class="nav-label">Site</span>
-    <span class="nav-item is-placeholder" data-nav-id="pages" aria-disabled="true" title="Coming soon">
+    <a class="nav-item<?= $activeClass('pages') ?>"<?= $activeAria('pages') ?> href="/cms/pages" data-nav-id="pages">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-      Pages
-    </span>
-    <span class="nav-item is-placeholder" data-nav-id="navigation" aria-disabled="true" title="Coming soon">
+      Pages<?= $count('pages') ?>
+    </a>
+    <a class="nav-item<?= $activeClass('navigation') ?>"<?= $activeAria('navigation') ?> href="/cms/navigation" data-nav-id="navigation">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Navigation
-    </span>
+      Navigation<?= $count('navigation') ?>
+    </a>
     <a class="nav-item<?= $activeClass('redirects') ?>"<?= $activeAria('redirects') ?> href="/cms/redirects" data-nav-id="redirects">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Redirects<?= $count('redirects') ?>

@@ -144,6 +144,22 @@ $router->post('/cms/subscribers', $cms('views/subscribers.php'));
 $router->get ('/cms/content-template', $cms('views/content-template.php'));
 $router->post('/cms/content-template', $cms('views/content-template.php'));
 
+// Phase 20: Pages CMS (mock-versioning sandbox for the marketing pages
+// and the layout partials header.php / footer.php). The editor uses
+// CodeMirror; mock state lives in page_mock_versions. For partials a
+// published mock is preferred over the file at runtime — see
+// _pages/_layout/_page-shell.php.
+$router->get ('/cms/pages',           $cms('views/pages.php'));
+$router->get ('/cms/pages/edit',      $cms('views/page-edit.php'));
+$router->post('/cms/pages/edit',      $cms('views/page-edit.php'));
+
+// Phase 20: Navigation editor. Replaces the hardcoded <a> lists in the
+// static header.html / footer.html with DB-managed nav_items. AJAX
+// reorder is a tiny separate endpoint.
+$router->get ('/cms/navigation',          $cms('views/navigation.php'));
+$router->post('/cms/navigation',          $cms('views/navigation.php'));
+$router->post('/cms/navigation/reorder',  $cms('views/navigation-reorder.php'));
+
 // ── Public subscribe (Phase 14) ─────────────────────────────────────
 // POST /subscribe handles the newsletter-form submission: honeypot,
 // rate-limit (1/min, 10/day per IP), email validation, upsert.
@@ -232,25 +248,39 @@ if (defined('APP_ENV') && APP_ENV === 'staging') {
     });
 }
 
-// Phase 13: route-miss handler. First check for a DB-backed redirect
-// (replaces the old .htaccess legacy block). If nothing matches and
-// we're on staging, render the themed 404; on prod, fall through to
-// the static /404.html so the pre-cutover behavior is preserved.
+// Route-miss handler. First check for a DB-backed redirect (replaces
+// the old .htaccess legacy block). If nothing matches, serve the
+// shared static /404.php — the speech-bubble "wandered off the path"
+// page is design-canonical for both prod and staging.
+//
+// Phase 20 preview integration: on staging, a logged-in CMS user
+// hitting /404/?_preview=<id> with a mock for slug='404' sees the
+// mock body instead of the file content. (404.php is a standalone
+// page — no _page-shell.php — so the preview hook can't live there.)
 $router->set_not_found(static function (string $method, string $path): void {
     $hit = resolve_redirect($path);
     if ($hit !== null) {
         emit_redirect($hit);
     }
     http_response_code(404);
-    if (defined('APP_ENV') && APP_ENV === 'staging') {
-        define('TEMPLATE_OK', true);
-        require __DIR__ . '/templates/404.php';
-        return;
+
+    if (isset($_GET['_preview']) && defined('APP_ENV') && APP_ENV === 'staging') {
+        require_once __DIR__ . '/lib/auth.php';
+        require_once __DIR__ . '/lib/pages.php';
+        if (Auth::current_user() !== null) {
+            $mock = get_page_mock((int)$_GET['_preview']);
+            if ($mock !== null && (string)$mock['slug'] === '404') {
+                header('Content-Type: text/html; charset=utf-8');
+                echo render_partial_body((string)$mock['body_html']);
+                return;
+            }
+        }
     }
-    $page = __DIR__ . '/404.html';
+
+    $page = __DIR__ . '/404.php';
     if (is_file($page)) {
         header('Content-Type: text/html; charset=utf-8');
-        readfile($page);
+        require $page;
         return;
     }
     header('Content-Type: text/plain; charset=utf-8');

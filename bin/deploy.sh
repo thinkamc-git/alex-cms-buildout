@@ -76,7 +76,7 @@ cp site/_pages/newsletter-confirmed.php  "$STAGE/"
 cp site/_pages/newsletter.php            "$STAGE/"
 cp site/_pages/resume.php                "$STAGE/"
 cp site/_pages/work-with-me.php          "$STAGE/"
-cp site/_pages/404.html                  "$STAGE/"
+cp site/_pages/404.php                   "$STAGE/"
 
 # Asset folder for marketing pages — picks up header.html, footer.html,
 # _page-shell.php, analytics.js, style-pages.css, images, etc.
@@ -165,6 +165,15 @@ cp site/lib/subscribers.php        "$STAGE/lib/"
 # matrix sourced from docs/BLOCKS.md). Read-only — consumed by the
 # /cms/content-template view.
 cp site/lib/blocks_data.php        "$STAGE/lib/"
+# Phase 20: Pages CMS (mock versions + token-substituted partial render)
+# and Navigation editor (header/footer items + resolver). Both are read by
+# _pages/_layout/_page-shell.php on staging via env-gated cascade.
+cp site/lib/pages.php              "$STAGE/lib/"
+cp site/lib/nav.php                "$STAGE/lib/"
+# Vendored CodeMirror 5 — used by the Pages editor for PHP-mode editing
+# of mock versions. ~280KB, no CDN dependency at runtime.
+mkdir -p "$STAGE/cms/_assets/codemirror"
+cp -R site/cms/_assets/codemirror/. "$STAGE/cms/_assets/codemirror/"
 mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
@@ -177,11 +186,9 @@ cp site/templates/experiment-html.php  "$STAGE/templates/"
 # index-card partial that the two templates share.
 cp site/templates/index-editorial.php  "$STAGE/templates/"
 cp site/templates/index-listing.php    "$STAGE/templates/"
-# Phase 13: themed 404 page (rendered from index.php's not-found handler
-# when no route + no redirect match). Wrapped in master-layout for nav +
-# footer chrome. Public-visible — gated to staging by APP_ENV until the
-# Phase 29 cutover.
-cp site/templates/404.php              "$STAGE/templates/"
+# 404 is served from _pages/404.php (speech-bubble design with env-gated
+# favicon) on both staging and prod. See site/index.php's not-found
+# handler + .htaccess ErrorDocument.
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 cp site/_templates/style-articles.css "$STAGE/_templates/"
 
@@ -192,6 +199,9 @@ mkdir -p "$STAGE/cron"
 cp site/cron/scheduled-publish.php "$STAGE/cron/"
 cp site/cron/backup.php            "$STAGE/cron/"
 cp site/cron/.htaccess             "$STAGE/cron/"
+# Phase 20: nightly nav-target sweep. Sets is_active=0 on nav_items whose
+# target row no longer resolves; surfaces a BROKEN badge in the editor.
+cp site/cron/nav-sweep.php         "$STAGE/cron/"
 
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
@@ -260,10 +270,19 @@ if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
     # Prod keeps the GET-to-/newsletter-confirmed/ static form until the
     # Phase 29 cutover (consistent with the rest of the prod freeze).
     --exclude='_bodies/newsletter.html'
+    # Phase 20 added the env-gated header/footer cascade in _page-shell.php
+    # and the new DB-driven header.php / footer.php partials. Prod stays on
+    # the frozen static header.html / footer.html. Excluding the new files +
+    # the new _page-shell.php keeps prod's render path unchanged until the
+    # Phase 29 cutover removes the env gate.
+    --exclude='_layout/footer.html'
+    --exclude='_layout/header.php'
+    --exclude='_layout/footer.php'
+    --exclude='_layout/_page-shell.php'
   )
   echo "==> Prod-freeze active: skipping marketing nav, landing copy,"
-  echo "    newsletter form body, and CMS-rendered nav.php"
-  echo "    (Phase 29 flips these)."
+  echo "    newsletter form body, CMS-rendered nav.php, and the Phase 20"
+  echo "    header/footer cascade (Phase 29 flips these)."
 fi
 
 echo

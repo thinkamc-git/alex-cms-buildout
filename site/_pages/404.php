@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php $_is_staging = defined('APP_ENV') && APP_ENV === 'staging'; ?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,12 +8,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/_layout/style-pages.css" />
-  <link rel="icon" type="image/png" href="/_layout/favicon.png" />
+  <link rel="icon" type="image/png" href="/_layout/favicon<?= $_is_staging ? '-stage' : '' ?>.png" />
 
   <style>
-    /* 404 is the only page in /_pages/ without the standard nav + footer.
-       Page-scoped primitives below — kept small and inline because the
-       speech-bubble shape isn't a reusable component yet. */
+    /* The 404 leads with the speech bubble alone; the nav + footer chrome
+       fades in after a 2s pause to keep "you wandered off" as the first
+       focal beat. The body itself is a column flex container so the
+       chrome animates around the centered lost-stack without shifting it. */
+
+    body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; }
+
+    .lost-stack {
+      opacity: 0;
+      animation: lost-fade-in 0.5s ease-out forwards;
+    }
+    .layout-nav, .layout-footer {
+      opacity: 0;
+      animation: lost-fade-in 1.5s ease-out 2s forwards;
+    }
+    @keyframes lost-fade-in { to { opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) {
+      .lost-stack, .layout-nav, .layout-footer { opacity: 1; animation: none; }
+    }
 
     .lost-stack {
       flex: 1;
@@ -111,6 +127,18 @@
 </head>
 <body>
 
+  <nav class="layout-nav">
+    <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+      <img src="/_layout/logo.png" alt="Alex M. Chong" />
+    </a>
+    <div class="layout-nav-links">
+      <a href="/ux2.0/how-we-got-here/" data-nav-key="ux2" style="position:relative">What's UX 2.0<span aria-hidden="true" style="position:absolute;top:-5px;right:-4px;width:10px;height:10px;background:#d63031;border-radius:50%"></span></a>
+      <a href="/writing/" data-nav-key="writing">Thoughts</a>
+      <a href="/live-sessions/" data-nav-key="talks">Talks</a>
+      <a href="/work-with-me/" data-nav-key="work">Work with me</a>
+    </div>
+  </nav>
+
   <main class="lost-stack">
     <span class="lost-code">404 · You wandered off the path</span>
 
@@ -124,6 +152,16 @@
 
     <a class="lost-back" href="/">Back to alexmchong.ca →</a>
   </main>
+
+  <footer class="layout-footer">
+    <span class="layout-footer-left">© 2026 alex m. chong</span>
+    <div class="layout-footer-right">
+      <a href="/about/">About</a>
+      <a href="/coaching/">Coaching</a>
+      <a href="/work-with-me/">Services</a>
+      <a href="/resume/">Resume</a>
+    </div>
+  </footer>
 
   <script>
     (function () {

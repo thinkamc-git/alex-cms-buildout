@@ -113,7 +113,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 **═══ PROJECT: CMS Reorganization (v2.0) — sidebar IA + new admin surfaces ═══**
 
 - [x] **Phase 19** — Nav reorg + Writer's Desk · *Semi-auto* · 3h · **Staging-only**
-- [ ] **Phase 20** — Pages mocks + Navigation editor · *Manual* · 6–8h · **Staging-only**
+- [x] **Phase 20** — Pages mocks + Navigation editor · *Manual* · 6–8h · **Staging-only**
 - [ ] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**

@@ -26,40 +26,60 @@
 (function () {
   'use strict';
 
-  // ─── Publish-box checkbox choreography ───────────────────────────────
+  // ─── Publish-box choreography (Phase 21.7 revised) ───────────────────
+  // Two buttons in the action bar: Schedule Publish (data-set-schedule,
+  // secondary) on the left, Publish (data-publish-btn, primary) on the right.
+  // When the sidebar schedule input has a future value AND the toggle is on,
+  // Schedule Publish promotes to primary. Clicking Schedule Publish while no
+  // date is set opens the sidebar input (checks the toggle, focuses input).
   const section = document.querySelector('[data-publish-section]');
   if (section) {
     const toggle        = document.querySelector('[data-publish-toggle]');
     const scheduleRow   = document.querySelector('[data-publish-schedule-row]');
     const scheduleInput = document.querySelector('[data-schedule-input]');
-    const publishBtn    = document.querySelector('[data-publish-btn]');
-    const scheduleBtn   = document.querySelector('[data-schedule-btn]');
     const setBtn        = document.querySelector('[data-set-schedule]');
+
+    function hasScheduleValue() {
+      return !!(scheduleInput && scheduleInput.value && scheduleInput.value.trim());
+    }
 
     function applyMode() {
       const isSchedule = !!(toggle && toggle.checked);
       if (scheduleRow) scheduleRow.hidden = !isSchedule;
-      if (publishBtn)  publishBtn.hidden  = isSchedule;
-      if (scheduleBtn) scheduleBtn.hidden = !isSchedule;
-      if (setBtn)      setBtn.hidden      = isSchedule;
+      if (!setBtn) return;
+      // Schedule Publish goes primary when the schedule input has a value
+      // AND the toggle is on. Otherwise it stays secondary.
+      const ready = isSchedule && hasScheduleValue();
+      setBtn.classList.toggle('btn-pri', ready);
+      setBtn.classList.toggle('btn-sec', !ready);
     }
 
     if (toggle) {
       toggle.addEventListener('change', applyMode);
     }
+    if (scheduleInput) {
+      scheduleInput.addEventListener('input', applyMode);
+      scheduleInput.addEventListener('change', applyMode);
+    }
 
     if (setBtn) {
       setBtn.addEventListener('click', function (event) {
-        event.preventDefault();
-        if (!toggle) return;
-        toggle.checked = true;
-        toggle.dispatchEvent(new Event('change', { bubbles: true }));
-        if (scheduleInput) {
-          scheduleInput.focus();
-          if (typeof scheduleInput.showPicker === 'function') {
-            try { scheduleInput.showPicker(); } catch (_) { /* ignore */ }
+        // If no date is set yet, open the sidebar schedule input instead
+        // of submitting (server would reject with no schedule_at anyway).
+        if (!hasScheduleValue()) {
+          event.preventDefault();
+          if (toggle && !toggle.checked) {
+            toggle.checked = true;
+            toggle.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          if (scheduleInput) {
+            scheduleInput.focus();
+            if (typeof scheduleInput.showPicker === 'function') {
+              try { scheduleInput.showPicker(); } catch (_) { /* ignore */ }
+            }
           }
         }
+        // If a date IS set, let the submit go through (action=schedule).
       });
     }
 

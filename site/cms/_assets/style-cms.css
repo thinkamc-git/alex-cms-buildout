@@ -353,6 +353,11 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cms-table td { padding:12px var(--space-16) 12px 0; border-bottom:1px solid var(--ink-12); font-family:var(--font); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; background:var(--surface); }
 .cms-table td:first-child { padding-left:var(--space-16); }
 .cms-table td:last-child { padding-right:var(--space-16); text-align:right; }
+/* Phase 21.7: actions cell needs enough room for Live + Edit + trash
+   without getting clipped by .table-card's overflow:hidden. Per-view
+   column percentages (e.g. articles' 10%) often under-allocate; this
+   min-width guarantees fit and overrides the inline % suggestion. */
+.cms-table td.cell-actions, .cms-table th:last-child { min-width:170px; white-space:nowrap; }
 .cms-table tr:last-child td { border-bottom:none; }
 .cms-table tr:hover td { background:var(--ink-08); }
 /* Title cell */
@@ -1059,6 +1064,16 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 .content-area > .cms-form:has(.form-actions-sticky) > .field-group,
 .content-area > .cms-form:has(.form-actions-sticky) > .info-box { max-width:720px; }
 .content-area:has(.form-actions-sticky) { padding-bottom:0; }
+
+/* Page-edit tab-panel forms aren't .cms-form, so they need their own
+   flex-column + auto-margin choreography for the sticky bar to pin
+   to the bottom of short content. Tab panel itself fills .content-area;
+   form inside it fills the panel; bar pushes to bottom with margin-top:auto. */
+.content-area > [data-tab-panel] { min-height:100%; display:flex; flex-direction:column; }
+.content-area > [data-tab-panel] > form:has(.form-actions-sticky) {
+  display:flex; flex-direction:column; flex:1; min-height:100%;
+}
+.content-area > [data-tab-panel] > form:has(.form-actions-sticky) > .form-actions-sticky { margin-top:auto; }
 
 .form-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-32); }
 .form-main { min-width:0; }

@@ -862,9 +862,8 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" form="live-session-delete-form" class="btn-sec btn-danger">Delete</button>
 
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri btn-actions-end" data-publish-btn>Publish →</button>
-              <button type="submit" name="action" value="schedule" class="btn-pri" data-schedule-btn hidden>Schedule →</button>
-              <button type="button" class="btn-sec" data-set-schedule>Schedule Publish</button>
+              <button type="submit" name="action" value="schedule" class="btn-sec btn-actions-end" data-set-schedule>Schedule Publish</button>
+              <button type="submit" name="action" value="publish" class="btn-pri" data-publish-btn>Publish →</button>
             <?php endif; ?>
 
             <?php if ($isScheduled): ?>

@@ -582,8 +582,14 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .post-edit-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
 .tpl-tab.active { background:var(--canvas-bg); }
 /* Page-edit tabs — alias to the canonical family so the page-edit inline
-   stylesheet can be slimmed later without breaking markup. */
-.pe-tabs { display:flex; gap:0; border-bottom:var(--rule-faint); margin-bottom:var(--space-16); }
+   stylesheet can be slimmed later without breaking markup.
+   Phase 21.7 #9: .pe-tabs now lives as a direct child of .view (outside
+   .content-area) so it anchors flush below the view-header, mirroring the
+   filter-bar pattern in articles.php. Horizontal padding here gives the
+   first tab its leading space; vertical breathing room comes from the
+   bg + bottom border below. */
+.pe-tabs { display:flex; gap:0; border-bottom:var(--rule-faint); padding:0 var(--space-12); background:var(--canvas-raised); flex-shrink:0; }
+.view > .pe-tabs { margin-bottom:0; }
 .pe-tab { padding:10px 18px; font-family:var(--font-cond); font-size:var(--text-micro); letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; font-weight:600; }
 .pe-tab:hover { color:var(--ink); }
 .pe-tab.is-active { color:var(--ink); border-bottom-color:var(--primary); }
@@ -669,10 +675,15 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    canonical. */
 .master-field-table,
 .cms-table--reference { width:100%; border-collapse:collapse; }
+/* Phase 21.7 #17: reference variant header now matches the canonical
+   .cms-table th typographic scale (text-label / 0.14em letter-spacing /
+   space-8 vertical padding) so post-template headers read the same as
+   articles/journals/etc., just without the canvas-raised background
+   (this variant lives borderless inside an info-box/panel). */
 .master-field-table th,
-.cms-table--reference th { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:0 0 var(--space-8); border-bottom:var(--rule-faint); }
+.cms-table--reference th { font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); text-align:left; padding:var(--space-8) var(--space-16) var(--space-8) 0; border-bottom:var(--rule-faint); white-space:nowrap; }
 .master-field-table td,
-.cms-table--reference td { padding:var(--space-16) 0; border-bottom:var(--rule-faint); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; }
+.cms-table--reference td { padding:var(--space-16) var(--space-16) var(--space-16) 0; border-bottom:var(--rule-faint); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; }
 .master-field-table tr:last-child td,
 .cms-table--reference tr:last-child td { border-bottom:none; }
 /* Reference variant: borderless card (the surrounding .tpl-panel /
@@ -714,14 +725,20 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    styling, so suppress the inner card chrome for this variant. */
 .table-card--cat { border:none; padding:0; background:transparent; box-shadow:none; }
 
-/* Subscribers variant of the shared .cms-table partial (#8). The legacy
-   .sub-table CSS used to live inline in views/subscribers.php — moved
-   here under .cms-table--sub. The is-mono cell class is preserved. */
+/* Subscribers variant of the shared .cms-table partial (#8). Brought in
+   line with .cms-table-default chrome (canvas-raised thead, ink-12 row
+   border, hover tint) so it reads identical to articles/journals/etc.
+   The is-mono cell class is preserved. */
 .cms-table--sub { width:100%; border-collapse:collapse; }
-.cms-table--sub th,
-.cms-table--sub td { padding:10px 12px; border-bottom:var(--rule-faint); vertical-align:middle; }
-.cms-table--sub th { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); text-align:left; font-weight:600; }
-.cms-table--sub td.is-mono { font-family:var(--font-mono); font-size:12px; }
+.cms-table--sub th { font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); text-align:left; padding:var(--space-8) var(--space-16) var(--space-8) 0; border-bottom:var(--rule-faint); background:var(--canvas-raised); white-space:nowrap; }
+.cms-table--sub th:first-child { padding-left:var(--space-16); }
+.cms-table--sub th:last-child { padding-right:var(--space-16); text-align:right; }
+.cms-table--sub td { padding:12px var(--space-16) 12px 0; border-bottom:1px solid var(--ink-12); font-family:var(--font); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; background:var(--surface); }
+.cms-table--sub td:first-child { padding-left:var(--space-16); }
+.cms-table--sub td:last-child { padding-right:var(--space-16); text-align:right; }
+.cms-table--sub tr:last-child td { border-bottom:none; }
+.cms-table--sub tr:hover td { background:var(--ink-08); }
+.cms-table--sub td.is-mono { font-family:var(--font-mono); font-size:var(--text-tiny); color:var(--muted); }
 .cat-input { border:none; background:transparent; font-family:var(--font); font-size:var(--text-meta); font-weight:500; color:var(--primary); outline:none; width:100%; padding:2px 0; border-bottom:1px solid transparent; transition:border-color 0.15s; }
 .cat-input:focus { border-bottom-color:var(--ink-30); }
 .cat-swatch { width:10px; height:10px; border-radius:50%; border:1px solid var(--ink-12); flex-shrink:0; display:inline-block; }
@@ -736,25 +753,60 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 /* .cat-del / .cat-del.ok rules consolidated into the canonical button block
    above (Batch 2 #37). The old block is removed here to avoid duplicate
    property overrides. */
-.cat-add-row { display:flex; gap:0; margin-top:var(--space-12); }
-.cat-add-input { flex:1; border:1px solid var(--ink-18); border-right:none; border-radius:var(--r-pill) 0 0 var(--r-pill); background:var(--surface); padding:7px var(--space-12); font-family:var(--font); font-size:var(--text-meta); color:var(--primary); outline:none; transition:border-color 0.15s; }
+
+/* Categories table: trash icon hover-reveal — same affordance as the
+   library tables. Disabled (in-use) trash stays visible since it's
+   communicating "you can't delete this". */
+.cms-table--cat .btn-icon-danger { visibility: hidden; }
+.cms-table--cat tr:hover .btn-icon-danger,
+.cms-table--cat tr:focus-within .btn-icon-danger { visibility: visible; }
+/* Phase 21.7 #3: cat-add-row is now a single horizontal line of separately-
+   bordered fields with consistent 30px heights — input | colour pill | Add.
+   All three children align via box-sizing:border-box + matching paddings. */
+.cat-add-row { display:flex; gap:var(--space-8); align-items:center; margin-top:var(--space-12); }
+.cat-add-input { flex:1; height:30px; border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); padding:0 var(--space-12); font-family:var(--font); font-size:var(--text-meta); color:var(--primary); outline:none; transition:border-color 0.15s; box-sizing:border-box; }
 .cat-add-input:focus { border-color:var(--primary); }
-.cat-add-preview { border:1px solid var(--ink-18); border-right:none; background:var(--canvas-raised); padding:7px var(--space-12); font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); min-width:110px; white-space:nowrap; }
-.cat-add-btn { border:1px solid var(--primary); border-radius:0 var(--r-pill) var(--r-pill) 0; background:var(--primary); color:var(--white); padding:7px 14px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; }
-.cat-add-btn:hover { background:var(--primary-hover); }
+.cat-add-preview { height:30px; box-sizing:border-box; display:flex; align-items:center; border:1px solid var(--ink-18); background:var(--canvas-raised); padding:0 var(--space-12); font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); min-width:110px; white-space:nowrap; border-radius:var(--r-pill); }
+/* When the add-row uses the canonical .btn-sec for "Add", align its height
+   to 30px so it sits flush with the input + colour pill. */
+.cat-add-row .cat-colour-select { height:30px; box-sizing:border-box; }
+.cat-add-row .btn-sec.cat-add-btn { height:30px; box-sizing:border-box; padding:0 var(--space-16); display:inline-flex; align-items:center; }
 
 /* ══ SERIES ══ */
 .series-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-16); padding:var(--space-20) var(--space-24); overflow-y:auto; }
 .series-card { border:var(--rule-faint); border-radius:var(--r-card); padding:var(--space-16); background:var(--surface); box-shadow:0 1px 3px var(--ink-08); }
+.series-card--new { border-style:dashed; }
 .series-card-hd { display:flex; align-items:center; gap:var(--space-8); margin-bottom:var(--space-12); }
 .series-card-title { font-family:var(--font); font-size:var(--text-meta); font-weight:600; color:var(--primary); flex:1; }
+.series-card-title--new { color:var(--muted); font-style:italic; }
+/* Series card field-row + meta row + per-card action rows — tokenised
+   versions of the inline styles that lived in views/series.php. */
+.series-meta-row { display:flex; align-items:center; gap:var(--space-8); margin-bottom:var(--space-12); }
+.series-path { color:var(--muted); font-size:var(--text-micro); font-family:var(--font-mono); }
+.series-live-btn { margin-left:auto; }
+.series-desc { min-height:48px; margin-bottom:var(--space-8); background:var(--canvas-raised); }
+.series-card-save-row { display:flex; justify-content:flex-end; margin-bottom:var(--space-4); }
+.series-card-save-row--new { margin-top:var(--space-12); margin-bottom:0; }
+.series-add-part { display:flex; gap:var(--space-8); align-items:center; margin-bottom:var(--space-12); }
+.series-add-part .field-select { flex:1; }
+.series-delete-row { display:flex; gap:var(--space-8); justify-content:flex-end; }
+.series-delete-row .is-disabled { opacity:0.5; cursor:not-allowed; }
+.series-empty { margin:var(--space-12) 0; }
+.series-new-fields { display:flex; flex-direction:column; gap:var(--space-8); }
+.series-new-slug { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--secondary); }
+.series-part-remove-form { display:inline; margin:0; padding:0; }
+/* Hover-reveal the remove-from-series trash so the row reads clean
+   until the user wants to act on it. */
+.series-part .btn-icon-danger { visibility:hidden; }
+.series-part:hover .btn-icon-danger,
+.series-part:focus-within .btn-icon-danger { visibility:visible; }
 .series-card-count { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.08em; color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-12); padding:1px 6px; border-radius:2px; }
 .series-parts { display:flex; flex-direction:column; gap:3px; }
 .series-part { display:flex; align-items:center; gap:var(--space-8); padding:7px var(--space-8); background:var(--ink-08); border:1px solid var(--ink-12); border-radius:2px; font-size:var(--text-tiny); color:var(--secondary); font-weight:500; }
 .part-num { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); width:18px; text-align:center; flex-shrink:0; }
 .part-title { flex:1; }
 .part-date { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); white-space:nowrap; }
-.part-drag { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); cursor:grab; }
+.part-drag { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); cursor:grab; user-select:none; padding-right:2px; }
 .series-add { border:1px dashed var(--ink-18); border-radius:var(--r-card); display:flex; align-items:center; justify-content:center; min-height:120px; cursor:pointer; color:var(--muted); transition:border-color 0.15s,color 0.15s; }
 .series-add:hover { border-color:var(--ink-30); color:var(--secondary); }
 .series-add-inner { text-align:center; }
@@ -797,6 +849,14 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .vis-check { display:flex; align-items:center; gap:var(--space-8); padding:5px 0; cursor:pointer; font-size:var(--text-meta); color:var(--secondary); font-weight:500; }
 .vis-check input[type="checkbox"] { accent-color:var(--primary); }
 .form-actions { display:flex; gap:var(--space-8); align-items:center; padding-top:var(--space-20); border-top:var(--rule-faint); margin-top:var(--space-20); }
+/* Right-align the stage-advance / publish family inside .form-actions so
+   the destructive/cancel buttons sit on the left and the forward-motion
+   CTA sits on the far right. The .btn-actions-end class earns
+   margin-left:auto so it (and any siblings after it) cluster on the
+   right. Use only on the LEFTMOST right-aligned button; subsequent
+   siblings inherit position naturally via the flex flow. */
+.form-actions .btn-actions-end { margin-left:auto; }
+.form-actions .btn-actions-end ~ .btn-actions-end { margin-left:0; }
 
 /* ══ EDITORIAL INDEX CONFIG ══ */
 .idx-builder { flex:1; overflow-y:auto; padding:var(--space-20) var(--space-24); }
@@ -974,7 +1034,9 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
      .pill-published                    — completes the .pill-{stage} set
      .pill.special-principle / .special-framework — special-tag pills
 */
-.cms-form { max-width:720px; padding:var(--space-24); }
+/* Phase 21.7 #18: padding removed so the form sits at the same effective
+   inset as list views — .content-area provides the single 24px padding. */
+.cms-form { max-width:720px; }
 /* Edit views (article / journal / live-session) use the wide variant so the
    form fills the main column. This lets the sticky save bar span edge-to-
    edge and gives form-main + form-side breathing room on wide screens.
@@ -989,27 +1051,33 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 .cms-form-wide > .form-actions-sticky,
 .content-area > .cms-form > .form-actions-sticky { margin-top:auto; }
 .content-area > .cms-form:has(.form-actions-sticky) { display:flex; flex-direction:column; min-height:100%; padding-bottom:0; }
+/* Phase 21.7 #7: when the (non-wide) cms-form hosts a sticky save bar,
+   drop the form's 720px max-width and instead cap each field-group so
+   inputs stay at reading width while the sticky bar can span the full
+   content-area edge-to-edge (same behaviour as cms-form-wide editors). */
+.content-area > .cms-form:has(.form-actions-sticky) { max-width:none; }
+.content-area > .cms-form:has(.form-actions-sticky) > .field-group,
+.content-area > .cms-form:has(.form-actions-sticky) > .info-box { max-width:720px; }
 .content-area:has(.form-actions-sticky) { padding-bottom:0; }
 
 .form-grid { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-32); }
 .form-main { min-width:0; }
 .form-side { display:flex; flex-direction:column; gap:var(--space-16); }
 
-/* Sticky form actions span edge-to-edge inside the main panel. The bar sits
-   inside the form, which sits inside .content-area; both have padding 24.
-   Negative margin -48 (= form padding + content-area padding) pulls the bar
-   out so its left/right edges touch the main panel boundary. Internal padding
-   keeps buttons inset from that edge.
+/* Sticky form actions span edge-to-edge inside the main panel. Since #18
+   removed .cms-form's own padding, the bar only needs to escape the single
+   24px padding on .content-area — negative margin -24 each side. Internal
+   padding keeps buttons inset from that edge.
    Shy-hide: scroll-actions.js toggles .is-hidden to slide the bar off-screen
    on scroll-down and bring it back on scroll-up. */
 .form-actions-sticky {
   position: sticky;
   bottom: 0;
   background: var(--surface);
-  margin-left: calc(var(--space-48) * -1);
-  margin-right: calc(var(--space-48) * -1);
-  padding-left: var(--space-48);
-  padding-right: var(--space-48);
+  margin-left: calc(var(--space-24) * -1);
+  margin-right: calc(var(--space-24) * -1);
+  padding-left: var(--space-24);
+  padding-right: var(--space-24);
   padding-bottom: var(--space-16);
   box-shadow: 0 -6px 12px -10px rgba(0,0,0,0.1);
   transition: transform 0.18s ease;
@@ -1156,13 +1224,18 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   white-space: nowrap;
 }
 
+/* Phase 21.7 #13: category pill mirrors the stage pill recipe
+   (10% bg / 28% border / 100% color) so cat-chip and pill-{stage} read
+   identically in default state. The token name is --cat-bg, set inline
+   from PHP per category. */
 .cat-chip {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--cat-bg, var(--ink-30)) 14%, transparent);
-  color: color-mix(in srgb, var(--cat-bg, var(--ink-30)) 75%, var(--ink));
+  background: color-mix(in srgb, var(--cat-bg, var(--ink-30)) 10%, transparent);
+  color: var(--cat-bg, var(--ink-30));
+  border: 1px solid color-mix(in srgb, var(--cat-bg, var(--ink-30)) 28%, transparent);
   font-family: var(--font-cond);
   font-size: var(--text-micro);
   font-weight: 700;
@@ -1193,7 +1266,14 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .btn-icon:hover { color: var(--ink); background: var(--ink-08); }
 .btn-icon-danger:hover { color: var(--c-terracotta); border-color: color-mix(in srgb, var(--c-terracotta) 40%, transparent); background: color-mix(in srgb, var(--c-terracotta) 8%, transparent); }
 
-.btn-tiny { padding:3px var(--space-8); font-size:var(--text-micro); }
+/* Tiny modifier — used in row-actions clusters. Lock line-height so glyphs
+   like ↗ in "Live ↗" don't push the button taller than its sibling Edit. */
+.btn-tiny { padding:3px var(--space-8); font-size:var(--text-micro); line-height:1.4; }
+
+/* Row-actions: bump inter-button gap from 6 to 8 so Live ↗ and Edit don't
+   read as one merged pill. Same gap inside the hover-revealed subgroup. */
+.row-actions,
+.row-actions-hover { gap:var(--space-8); }
 
 .muted { color:var(--muted); }
 
@@ -1543,10 +1623,14 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .rowform-row [data-save-btn] { visibility:hidden; }
 .rowform-row [data-save-btn].btn-pri { visibility:visible; }
 /* Delete: hover-reveal so it doesn't always shout. visibility, not
-   display, so the column doesn't collapse. */
-.rowform-row .btn-danger { visibility:hidden; }
+   display, so the column doesn't collapse. Applies to both the canonical
+   .btn-danger text button and the .btn-icon-danger trash variant. */
+.rowform-row .btn-danger,
+.rowform-row .btn-icon-danger { visibility:hidden; }
 .rowform-row:hover .btn-danger,
-.rowform-row:focus-within .btn-danger { visibility:visible; }
+.rowform-row:focus-within .btn-danger,
+.rowform-row:hover .btn-icon-danger,
+.rowform-row:focus-within .btn-icon-danger { visibility:visible; }
 /* Drag-affordance states (navigation only — redirects don't reorder). */
 .rowform-row.is-dragging { opacity:0.4; }
 .rowform-row.is-over-top    { box-shadow: 0 -2px 0 0 var(--c-denim); }

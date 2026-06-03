@@ -206,7 +206,7 @@ require __DIR__ . '/../partials/topbar.php';
               $slugCell    = '<span class="val-pill">' . $e((string)$cat['value_slug']) . '</span>';
               $colourCell  = $colour_select((string)$cat['colour'], $rid);
               $useCell     = (string)$use;
-              $actionsCell = '<button type="submit" name="action" value="update" form="' . $e($rid) . '" class="btn-sec btn-tiny" title="Save changes" style="margin-right:6px">Save</button>';
+              $actionsCell = '<button type="submit" name="action" value="update" form="' . $e($rid) . '" class="btn-sec btn-tiny" title="Save changes" data-save-btn style="margin-right:6px">Save</button>';
               if ($canDelete) {
                   // Batch 2 #37/#48: switch to canonical icon-button + data-confirm.
                   $catLabelAttr = $e((string)$cat['label']);
@@ -239,7 +239,7 @@ require __DIR__ . '/../partials/topbar.php';
             <input type="hidden" name="type" value="<?= $e($type) ?>">
             <input class="cat-add-input" name="label" placeholder="New label…" maxlength="255" required>
             <?= $colour_select('terracotta') ?>
-            <button type="submit" class="cat-add-btn">Add</button>
+            <button type="submit" class="btn-sec cat-add-btn">Add</button>
           </form>
         </div>
         <?php endforeach; ?>

@@ -201,7 +201,9 @@ require __DIR__ . '/../partials/topbar.php';
                 .   '<a href="/cms/articles/edit?id=' . $id . '&from=articles" class="btn-sec btn-tiny">Edit</a>'
                 .   '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">'
+                .       '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                .     '</button>'
                 .   '</form>'
                 . '</span>'
                 . '</div>';

@@ -482,14 +482,14 @@ require __DIR__ . '/../partials/topbar.php';
       }
 
       $backMap = [
-          'ideation'      => ['/cms/ideation',      'Back to Ideation'],
-          'draft-writing' => ['/cms/',              'Back to Draft Writing'],
-          'articles'      => ['/cms/articles',      'Back to Articles'],
-          'journals'      => ['/cms/journals',      'Back to Journals'],
-          'live-sessions' => ['/cms/live-sessions', 'Back to Live Sessions'],
-          'experiments'   => ['/cms/experiments',   'Back to Experiments'],
+          'ideation'      => ['/cms/ideation',      '← Back to Ideation'],
+          'draft-writing' => ['/cms/',              '← Back to Draft Writing'],
+          'articles'      => ['/cms/articles',      '← Back to Articles'],
+          'journals'      => ['/cms/journals',      '← Back to Journals'],
+          'live-sessions' => ['/cms/live-sessions', '← Back to Live Sessions'],
+          'experiments'   => ['/cms/experiments',   '← Back to Experiments'],
       ];
-      [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/experiments', 'Back to list'];
+      [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/experiments', '← Back to list'];
       $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -777,13 +777,13 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" form="experiment-delete-form" class="btn-sec btn-danger">Delete</button>
 
             <?php if ($status === 'draft'): ?>
-              <button type="submit" name="action" value="publish" class="btn-pri" data-publish-btn>Publish →</button>
+              <button type="submit" name="action" value="publish" class="btn-pri btn-actions-end" data-publish-btn>Publish →</button>
               <button type="submit" name="action" value="schedule" class="btn-pri" data-schedule-btn hidden>Schedule →</button>
               <button type="button" class="btn-sec" data-set-schedule>Schedule Publish</button>
             <?php endif; ?>
 
             <?php if ($isScheduled): ?>
-              <button type="submit" name="action" value="publish-now" class="btn-pri"
+              <button type="submit" name="action" value="publish-now" class="btn-pri btn-actions-end"
                       data-confirm="Publish this now? It will go live immediately at the current time.">Publish Now</button>
               <button
                 type="submit"

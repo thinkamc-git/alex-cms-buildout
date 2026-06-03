@@ -175,7 +175,7 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/flash.php';
       ?>
 
-      <div class="series-grid">
+      <div class="content-area series-grid">
         <?php foreach ($series as $s):
           $sid       = (int)$s['id'];
           $partsCount = (int)($s['parts_count'] ?? 0);
@@ -188,55 +188,57 @@ require __DIR__ . '/../partials/topbar.php';
             <input type="hidden" name="id" value="<?= $sid ?>">
 
             <div class="series-card-hd">
-              <input class="series-card-title cat-input" name="name" value="<?= $e((string)$s['name']) ?>" maxlength="255" required style="flex:1">
+              <input class="series-card-title cat-input" name="name" value="<?= $e((string)$s['name']) ?>" maxlength="255" required>
               <span class="series-card-count"><?= $partsCount ?> part<?= $partsCount === 1 ? '' : 's' ?></span>
             </div>
 
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-12)">
+            <div class="series-meta-row">
               <span class="val-pill"><?= $e((string)$s['slug']) ?></span>
-              <span style="color:var(--muted);font-size:var(--text-micro);font-family:var(--font-mono)">/series/<?= $e((string)$s['slug']) ?>/</span>
-              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-sec btn-tiny" style="margin-left:auto" title="Open the live series index">Live ↗</a>
+              <span class="series-path">/series/<?= $e((string)$s['slug']) ?>/</span>
+              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-sec btn-tiny series-live-btn" title="Open the live series index">Live ↗</a>
             </div>
 
             <textarea name="description" rows="2" placeholder="Optional description — shown on the series index page."
-                      style="width:100%;padding:8px;font-family:var(--font);font-size:var(--text-meta);color:var(--primary);border:1px solid var(--ink-18);border-radius:4px;background:var(--canvas-raised);resize:vertical;margin-bottom:var(--space-8)"><?= $e((string)($s['description'] ?? '')) ?></textarea>
+                      class="field-input series-desc"><?= $e((string)($s['description'] ?? '')) ?></textarea>
 
-            <div style="display:flex;justify-content:flex-end;margin-bottom:var(--space-4)">
-              <button type="submit" name="action" value="update" class="btn-sec btn-tiny">Save name &amp; description</button>
+            <div class="series-card-save-row">
+              <button type="submit" name="action" value="update" class="btn-sec btn-tiny" data-save-btn>Save</button>
             </div>
           </form>
 
           <?php if (count($parts) > 0): ?>
-            <div class="series-parts series-parts-dnd" data-series-id="<?= $sid ?>" style="margin:var(--space-12) 0">
+            <div class="series-parts series-parts-dnd" data-series-id="<?= $sid ?>">
               <?php foreach ($parts as $i => $part):
                 $num = (int)($part['series_order'] ?? 0);
                 if ($num === 0) $num = $i + 1;
                 $date = !empty($part['published_at']) ? date('M j', strtotime((string)$part['published_at'])) : '—';
               ?>
               <div class="series-part" draggable="true" data-id="<?= (int)$part['id'] ?>">
-                <div class="part-drag" style="cursor:grab;color:var(--muted);user-select:none;padding-right:2px" title="Drag to reorder">⠿</div>
+                <div class="part-drag" title="Drag to reorder">⠿</div>
                 <div class="part-num"><?= str_pad((string)$num, 2, '0', STR_PAD_LEFT) ?></div>
-                <div class="part-title" style="flex:1"><?= $e((string)$part['title']) ?></div>
+                <div class="part-title"><?= $e((string)$part['title']) ?></div>
                 <?= $stagePill((string)$part['status']) ?>
-                <span class="part-date" style="color:var(--muted);font-family:var(--font-mono);font-size:10px"><?= $e($date) ?></span>
-                <form method="post" action="/cms/series" style="display:inline;margin:0;padding:0" data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
+                <span class="part-date"><?= $e($date) ?></span>
+                <form method="post" action="/cms/series" class="series-part-remove-form" data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="action" value="remove_part">
                   <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
-                  <button type="submit" title="Remove from series" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:0 2px;font-size:14px;line-height:1">×</button>
+                  <button type="submit" class="btn-icon btn-icon-danger" title="Remove from series" aria-label="Remove">
+                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
                 </form>
               </div>
               <?php endforeach; ?>
             </div>
           <?php else: ?>
-            <div class="empty-state" style="margin:var(--space-12) 0">No parts yet — add an article below.</div>
+            <div class="empty-state series-empty">No parts yet — add an article below.</div>
           <?php endif; ?>
 
-          <form method="post" action="/cms/series" style="display:flex;gap:6px;align-items:center;margin-bottom:var(--space-12)">
+          <form method="post" action="/cms/series" class="series-add-part">
             <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
             <input type="hidden" name="action" value="add_part">
             <input type="hidden" name="id" value="<?= $sid ?>">
-            <select name="article_id" required style="flex:1;padding:5px 6px;font-family:var(--font);font-size:var(--text-tiny);color:var(--primary);border:1px solid var(--ink-18);border-radius:3px;background:var(--surface)">
+            <select name="article_id" required class="field-select">
               <option value="">+ Add article…</option>
               <?php foreach ($unassignedPicks as $ua):
                 $st = (string)($ua['status'] ?? '');
@@ -247,14 +249,14 @@ require __DIR__ . '/../partials/topbar.php';
             <button type="submit" class="btn-sec btn-tiny">Add</button>
           </form>
 
-          <form method="post" action="/cms/series" style="display:flex;gap:8px;justify-content:flex-end">
+          <form method="post" action="/cms/series" class="series-delete-row">
             <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= $sid ?>">
             <?php if ($canDelete): ?>
-              <button type="submit" class="btn-danger btn-tiny" data-confirm="Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.">Delete series</button>
+              <button type="submit" class="btn-sec btn-danger btn-tiny" data-confirm="Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.">Delete series</button>
             <?php else: ?>
-              <button type="button" class="btn-sec btn-tiny" disabled title="Cannot delete — unassign all parts first" style="opacity:0.5;cursor:not-allowed">Delete series</button>
+              <button type="button" class="btn-sec btn-tiny is-disabled" disabled title="Cannot delete — unassign all parts first">Delete series</button>
             <?php endif; ?>
           </form>
         </div>
@@ -264,25 +266,24 @@ require __DIR__ . '/../partials/topbar.php';
              grid is always populated and creation lives next to the
              existing cards (matches the dashed "+ New Series" affordance
              in docs/design-mockups/cms-ui.html). -->
-        <div class="series-card" id="new-series" style="border-style:dashed">
+        <div class="series-card series-card--new" id="new-series">
           <form method="post" action="/cms/series">
             <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
             <input type="hidden" name="action" value="add">
 
             <div class="series-card-hd">
-              <div class="series-card-title" style="color:var(--muted);font-style:italic">+ New series</div>
+              <div class="series-card-title series-card-title--new">+ New series</div>
             </div>
 
-            <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="series-new-fields">
               <input type="text" name="name" value="<?= $e($newDefaults['name']) ?>" maxlength="255" required placeholder="Series name (required)"
-                     style="padding:8px;font-family:var(--font);font-size:var(--text-meta);color:var(--primary);border:1px solid var(--ink-18);border-radius:4px;background:var(--surface)">
+                     class="field-input">
               <input type="text" name="slug" value="<?= $e($newDefaults['slug']) ?>" maxlength="200" pattern="[a-z0-9\-]*" placeholder="slug (optional — auto from name)"
-                     style="padding:8px;font-family:var(--font-mono);font-size:var(--text-micro);color:var(--secondary);border:1px solid var(--ink-18);border-radius:4px;background:var(--surface)">
-              <textarea name="description" rows="2" placeholder="Optional description"
-                        style="padding:8px;font-family:var(--font);font-size:var(--text-meta);color:var(--primary);border:1px solid var(--ink-18);border-radius:4px;background:var(--surface);resize:vertical"><?= $e($newDefaults['description']) ?></textarea>
+                     class="field-input series-new-slug">
+              <textarea name="description" rows="2" placeholder="Optional description" class="field-input"><?= $e($newDefaults['description']) ?></textarea>
             </div>
 
-            <div style="display:flex;justify-content:flex-end;margin-top:var(--space-12)">
+            <div class="series-card-save-row series-card-save-row--new">
               <button type="submit" class="btn-pri">Create series</button>
             </div>
           </form>

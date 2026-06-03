@@ -303,7 +303,9 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="series-part" draggable="true" data-id="<?= (int)$r['id'] ?>">
                   <div class="part-drag" style="cursor:grab;color:var(--muted);user-select:none;padding-right:2px" title="Drag to reorder">⠿</div>
                   <div class="part-title" style="flex:1"><?= $pickLabel($r) ?></div>
-                  <button type="button" class="featured-remove" title="Remove" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:0 4px;font-size:14px;line-height:1">×</button>
+                  <button type="button" class="featured-remove btn-icon btn-icon-danger" title="Remove" aria-label="Remove">
+                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
                 </div>
               <?php endforeach; ?>
             </div>
@@ -498,7 +500,9 @@ require __DIR__ . '/../partials/topbar.php';
       row.setAttribute('data-id', id);
       row.innerHTML = '<div class="part-drag" style="cursor:grab;color:var(--muted);user-select:none;padding-right:2px" title="Drag to reorder">⠿</div>'
                     + '<div class="part-title" style="flex:1"></div>'
-                    + '<button type="button" class="featured-remove" title="Remove" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:0 4px;font-size:14px;line-height:1">×</button>';
+                    + '<button type="button" class="featured-remove btn-icon btn-icon-danger" title="Remove" aria-label="Remove">'
+                    +   '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                    + '</button>';
       row.querySelector('.part-title').textContent = label;
       list.appendChild(row);
       addSel.value = '';

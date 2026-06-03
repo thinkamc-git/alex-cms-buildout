@@ -305,24 +305,25 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
+      <!-- Tabs — anchored flush below the view-header (positioned OUTSIDE
+           .content-area like the filter rail in articles.php so they sit at
+           the top-left edge with no padding band around them). -->
+      <div class="pe-tabs" role="tablist">
+        <?php if (!$is_partial): ?>
+          <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" data-tab-target="metadata" role="tab" aria-selected="<?= $tab === 'metadata' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
+        <?php endif; ?>
+        <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" data-tab-target="body" role="tab" aria-selected="<?= $tab === 'body' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
+        <?php if ($preview_tab_available): ?>
+          <a class="pe-tab <?= $tab === 'preview' ? 'is-active' : '' ?>" data-tab-target="preview" role="tab" aria-selected="<?= $tab === 'preview' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=preview<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Preview</a>
+        <?php endif; ?>
+      </div>
+
       <div class="content-area">
         <?php
         $heading = "Couldn't save:";
         require __DIR__ . '/../partials/form-errors.php';
         require __DIR__ . '/../partials/flash.php';
         ?>
-
-        <!-- Tabs. Server-rendered hrefs are graceful fallback; preview-tab-guard.js
-             intercepts clicks and toggles panel visibility client-side. -->
-        <div class="pe-tabs" role="tablist">
-          <?php if (!$is_partial): ?>
-            <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" data-tab-target="metadata" role="tab" aria-selected="<?= $tab === 'metadata' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
-          <?php endif; ?>
-          <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" data-tab-target="body" role="tab" aria-selected="<?= $tab === 'body' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
-          <?php if ($preview_tab_available): ?>
-            <a class="pe-tab <?= $tab === 'preview' ? 'is-active' : '' ?>" data-tab-target="preview" role="tab" aria-selected="<?= $tab === 'preview' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=preview<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Preview</a>
-          <?php endif; ?>
-        </div>
 
         <!-- BODY panel — always in the DOM, hidden by .is-hidden-tab when
              another tab is active. Same for Metadata and Preview below. -->
@@ -386,7 +387,6 @@ require __DIR__ . '/../partials/topbar.php';
                     </form>
                   <?php endif; ?>
                 <?php endif; ?>
-                <button type="submit" form="pe-mock-form" class="btn-sec" data-save-btn data-body-save>Save</button>
               <?php endif; ?>
             </div>
           </div>
@@ -402,6 +402,10 @@ require __DIR__ . '/../partials/topbar.php';
               <input type="hidden" name="action" value="save_mock">
               <textarea id="pe-editor-mock" name="body_html" data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
             </form>
+            <div class="form-actions form-actions-sticky">
+              <button type="submit" form="pe-mock-form" class="btn-sec" data-save-btn data-body-save>Save</button>
+              <a href="/cms/pages" class="btn-sec">Cancel</a>
+            </div>
           <?php endif; ?>
         </div><!-- /data-tab-panel="body" -->
 
@@ -467,8 +471,6 @@ require __DIR__ . '/../partials/topbar.php';
                 <?php endforeach; ?>
               </select>
 
-              <div></div>
-              <div><button type="submit" class="btn-sec" data-save-btn>Save metadata</button></div>
             </div>
 
             <div class="content-block-header"><span class="content-block-label">Unfurl preview</span></div>
@@ -480,6 +482,11 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="pe-meta-charcount" style="margin-top:8px;">alexmchong.ca<?= $is_partial ? '' : ('/' . $e($slug) . '/') ?></div>
               </div>
               </div>
+
+            <div class="form-actions form-actions-sticky">
+              <button type="submit" class="btn-sec" data-save-btn>Save metadata</button>
+              <a href="/cms/pages" class="btn-sec">Cancel</a>
+            </div>
             </form>
         </div><!-- /data-tab-panel="metadata" -->
         <?php endif; ?>

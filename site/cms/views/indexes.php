@@ -136,14 +136,16 @@ require __DIR__ . '/../partials/topbar.php';
 
             // Phase 20.3: same row-action pattern as the post-library tables —
             // "View live ↗" stays visible (every index is always live), Edit
-            // and × reveal on hover.
+            // and trash reveal on hover.
             $actionsHtml = '<div class="row-actions">'
                 . '<a href="/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live index page">Live ↗</a>'
                 . '<span class="row-actions-hover">'
                 .   '<a href="/cms/indexes/edit?id=' . $id . '" class="btn-sec btn-tiny">Edit</a>'
                 .   '<form method="post" action="/cms/indexes/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete index &quot;' . $e($titleStr !== '' ? $titleStr : $slug) . '&quot;? The URL /' . $e($slug) . '/ will 404 unless you re-create it.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
+                .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">'
+                .       '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                .     '</button>'
                 .   '</form>'
                 . '</span>'
                 . '</div>';

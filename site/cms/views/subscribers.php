@@ -122,22 +122,21 @@ $fmt = static function (?string $ts) use ($e): string {
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  .sub-counts { display:flex; gap:var(--space-24); padding:0 var(--space-24); margin:var(--space-16) 0; font-size:12px; color:var(--muted); }
-  .sub-counts strong { color:var(--ink); font-weight:600; font-size:14px; margin-right:4px; }
-  .sub-filters { display:flex; gap:12px; align-items:flex-end; padding:0 var(--space-24); margin:var(--space-12) 0 var(--space-16); flex-wrap:wrap; }
-  .sub-filters .field { display:flex; flex-direction:column; gap:4px; }
-  .sub-filters label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:600; }
-  .sub-filters select, .sub-filters input { padding:6px 8px; border:1px solid var(--border); border-radius:4px; font-size:12px; background:var(--surface); color:var(--ink); font-family:var(--font-sans); }
-  .sub-filters .actions { margin-left:auto; display:flex; gap:8px; align-items:center; }
-  .sub-filters .btn { padding:6px 12px; font-size:12px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--ink); cursor:pointer; text-decoration:none; }
-  .sub-filters .btn:hover { background:var(--bg-soft); }
-  .sub-filters .btn.is-primary { background:var(--ink); color:var(--surface); border-color:var(--ink); }
-  /* Sub-table is now rendered via partials/table.php with $variant='sub'.
-     Visual styling lives in style-cms.css under .cms-table--sub /
-     .table-card--sub / .sub-status / .btn-row-action / .btn-row-del. */
-  .sub-status { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; letter-spacing:0.02em; }
-  .sub-status.sub { background:var(--c-forest-soft, #d9ead7); color:var(--c-forest, #2d5a2d); }
-  .sub-status.uns { background:var(--bg-soft); color:var(--muted); }
+  /* Filter rail — kept inline since this view doesn't share the
+     filter-bar partial's pill-rail vocabulary. Uses canonical .field-input
+     / .field-select / .btn-sec / .btn-pri so it visually matches the rest
+     of the CMS. */
+  .sub-filters { display:flex; gap:var(--space-12); align-items:flex-end; padding:var(--space-12) var(--space-24); border-bottom:var(--rule-faint); background:var(--canvas-raised); flex-wrap:wrap; }
+  .sub-filters .field { display:flex; flex-direction:column; gap:4px; min-width:140px; }
+  .sub-filters label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .sub-filters select { height:30px; box-sizing:border-box; padding:0 28px 0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23818080' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+  .sub-filters input { height:30px; box-sizing:border-box; padding:0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; }
+  .sub-filters .actions { margin-left:auto; display:flex; gap:var(--space-8); align-items:center; }
+  .sub-status { display:inline-flex; align-items:center; padding:2px var(--space-8); border-radius:2px; font-family:var(--font-mono); font-size:var(--text-micro); font-weight:500; letter-spacing:0.06em; text-transform:uppercase; line-height:1.5; white-space:nowrap; }
+  .sub-status.sub { color:var(--stage-published); background:color-mix(in srgb,var(--stage-published) 10%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent); }
+  .sub-status.uns { color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-18); }
+  /* Subscribers table now uses the canonical .row-actions wrapper for
+     cell actions — no extra inline style needed. */
 </style>
 </head>
 <body>
@@ -168,10 +167,12 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/flash.php';
       ?>
 
-      <div class="sub-counts">
-        <div><strong><?= (int)$counts['subscribed'] ?></strong>subscribed</div>
-        <div><strong><?= (int)$counts['unsubscribed'] ?></strong>unsubscribed</div>
-        <div><strong><?= (int)$counts['recent'] ?></strong>new in 30d</div>
+      <div class="dash-meta">
+        <div class="dash-stat"><span class="num"><?= (int)$counts['subscribed'] ?></span><span class="lbl">Subscribed</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num"><?= (int)$counts['unsubscribed'] ?></span><span class="lbl">Unsubscribed</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl">New in 30d</span></div>
       </div>
 
       <form class="sub-filters" method="get" action="/cms/subscribers">
@@ -201,9 +202,9 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="date" name="until" id="until" value="<?= $e($activeUntil) ?>">
         </div>
         <div class="actions">
-          <button type="submit" class="btn is-primary">Apply</button>
-          <a class="btn" href="/cms/subscribers">Reset</a>
-          <a class="btn" href="<?= $e($exportHref) ?>">Export CSV</a>
+          <button type="submit" class="btn-pri">Apply</button>
+          <a class="btn-sec" href="/cms/subscribers">Reset</a>
+          <a class="btn-sec" href="<?= $e($exportHref) ?>">Export CSV</a>
         </div>
       </form>
 
@@ -218,7 +219,7 @@ require __DIR__ . '/../partials/topbar.php';
         </form>
       <?php endforeach; ?>
 
-      <div style="padding:0 var(--space-24)">
+      <div class="content-area">
       <?php
       $columns = [
           ['label' => 'Email',      'width' => '28%'],
@@ -249,7 +250,7 @@ require __DIR__ . '/../partials/topbar.php';
               ['html' => $fmt((string)($r['subscribed_at'] ?? '')), 'class' => 'is-mono'],
               ['html' => $e((string)($r['source'] ?? '')),      'class' => 'is-mono'],
               ['html' => $statusCell],
-              ['html' => $toggleBtn . $deleteBtn, 'class' => 'cell-actions'],
+              ['html' => '<div class="row-actions">' . $toggleBtn . $deleteBtn . '</div>', 'class' => 'cell-actions'],
           ];
       }
       $rowsOriginal = $rows;

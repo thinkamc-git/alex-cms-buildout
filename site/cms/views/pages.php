@@ -89,9 +89,11 @@ $buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $
 
     $modHtml = $rel_time((int)$f['modified_at']);
 
-    $actionsHtml = '<div class="row-actions row-actions-always">'
+    $actionsHtml = '<div class="row-actions">'
         . '<a href="' . $e($liveUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny" title="Open the live page">Live ↗</a>'
-        . '<a href="' . $e($editUrl) . '" class="btn-sec btn-tiny">Edit</a>'
+        . '<span class="row-actions-hover">'
+        .   '<a href="' . $e($editUrl) . '" class="btn-sec btn-tiny">Edit</a>'
+        . '</span>'
         . '</div>';
 
     return [

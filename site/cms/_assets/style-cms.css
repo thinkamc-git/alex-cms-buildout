@@ -848,9 +848,76 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-add-preview { height:30px; box-sizing:border-box; display:flex; align-items:center; border:1px solid var(--ink-18); background:var(--canvas-raised); padding:0 var(--space-12); font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); min-width:110px; white-space:nowrap; border-radius:var(--r-pill); }
 /* When the add-row uses the canonical .btn-sec for "Add", align its height
    to 30px so it sits flush with the input + colour pill. */
-.cat-add-row .cat-colour-select { height:30px; box-sizing:border-box; }
+.cat-add-row .cat-colour-select,
+.cat-add-row .cat-colour-picker .cat-colour-trigger { height:30px; box-sizing:border-box; }
 .cat-add-row .btn-sec.cat-add-btn,
 .cat-add-row .btn-pri.cat-add-btn { height:30px; box-sizing:border-box; padding:0 var(--space-16); display:inline-flex; align-items:center; }
+
+/* Phase 21.7 — custom colour dropdown for category rows. Replaces the
+   native <select> so colours actually render in the popup menu (Safari
+   ignores option background-color). Hidden input carries the value. */
+.cat-colour-picker { position: relative; display: inline-block; }
+.cat-colour-trigger {
+  appearance: none;
+  border: none;
+  height: 30px;
+  padding: 0 28px 0 14px;
+  border-radius: var(--r-pill);
+  color: #fff;
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  min-width: 110px;
+  text-align: left;
+  transition: filter 0.15s;
+}
+.cat-colour-trigger:hover { filter: brightness(1.08); }
+.cat-colour-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  opacity: 0.85;
+}
+.cat-colour-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  background: var(--surface);
+  border: 1px solid var(--ink-18);
+  border-radius: var(--r-card);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 140px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+.cat-colour-opt {
+  appearance: none;
+  border: none;
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border-radius: 3px;
+  color: #fff;
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: left;
+  transition: filter 0.1s;
+}
+.cat-colour-opt:hover { filter: brightness(1.12); }
+.cat-colour-opt.is-selected { outline: 2px solid #fff; outline-offset: -3px; }
 
 /* Phase 21.7 — categories row actions: Save always visible but disabled-
    looking (faded + pointer-events:none) until the dirty-flip promotes it
@@ -911,10 +978,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   color:var(--secondary);
   font-weight:500;
 }
-/* Phase 21.7 — series parts are draggable, so they get the same 100%
-   black hover as navigation rows. */
+/* Phase 21.7 — series parts are draggable; match navigation's 30% black
+   border hover treatment. */
 .series-part:hover, .series-part:focus-within {
-  border-color: var(--primary);
+  border-color: var(--ink-30);
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
   cursor: grab;
 }
@@ -1798,16 +1865,16 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .rowform-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
 /* Add-row uses the same grid template, distinguished by tint. */
 .rowform-add-row { background:var(--bg-soft); }
-/* Phase 21.7 — hover only on draggable rowform rows (navigation).
-   Uses outline (OUTSIDE the row's existing border) so the line
-   actually pops over the default --border colour. position+z-index
-   lifts the row so the shadow renders above its neighbours. */
-.rowform-row[draggable="true"]:hover,
-.rowform-row[draggable="true"]:focus-within {
+/* Phase 21.7 — rowform row hover applies to data rows (navigation +
+   redirects), excluding the add-row. 1px outline at 30% black + soft
+   8px shadow. Outline sits outside the existing border so it pops.
+   Draggable rows additionally get cursor:grab. */
+.rowform-row:not(.rowform-add-row):hover,
+.rowform-row:not(.rowform-add-row):focus-within {
   position: relative;
   z-index: 1;
-  outline: 1px solid var(--primary);
+  outline: 1px solid var(--ink-30);
   outline-offset: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
-  cursor: grab;
 }
+.rowform-row[draggable="true"]:hover { cursor: grab; }

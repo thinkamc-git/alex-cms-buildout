@@ -95,11 +95,11 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
  * onchange handler so the chip preview matches the picked token before
  * the form is submitted.
  */
-// Phase 21.7 — colour swatch on each <option>. Browsers detach <option>
-// elements from CSS context for style purposes, so var(--c-X) doesn't
-// resolve there — must inline the raw hex. Mirrors the palette tokens
-// in /_ds/css/tokens.css (kept in sync with lib/content.php's
-// PALETTE_COLORS list).
+// Phase 21.7 — native <select> + <option> styling is unreliable
+// cross-browser (Safari uses native macOS popups that ignore option
+// CSS). Replace with a custom dropdown component that uses real
+// HTML elements we can fully style. Hidden <input name="colour">
+// carries the value for form submission.
 $PALETTE_HEX = [
     'rust'       => '#765150', 'terracotta' => '#7d4631', 'clay'   => '#765e44',
     'amber'      => '#81642a', 'ochre'      => '#786e4a', 'olive'  => '#6e7448',
@@ -109,26 +109,22 @@ $PALETTE_HEX = [
     'plum'       => '#785071', 'mauve'      => '#6f4b61', 'rose'   => '#7a5160',
 ];
 $colour_select = static function (string $current, ?string $formId = null) use ($e, $PALETTE_HEX): string {
+    $currentHex = $PALETTE_HEX[$current] ?? '#7d7d7d';
     $opts = '';
     foreach (PALETTE_COLORS as $c) {
-        $sel  = $c === $current ? ' selected' : '';
-        $hex  = $PALETTE_HEX[$c] ?? '#7d7d7d';
-        $opts .= '<option value="' . $e($c) . '"' . $sel
-              . ' style="background-color:' . $hex . ';color:#fff;font-weight:700">'
-              . $e($c) . '</option>';
+        $hex = $PALETTE_HEX[$c] ?? '#7d7d7d';
+        $cls = 'cat-colour-opt' . ($c === $current ? ' is-selected' : '');
+        $opts .= '<button type="button" class="' . $cls . '" data-value="' . $e($c) . '" style="background-color:' . $hex . '">' . $e($c) . '</button>';
     }
-    $currentHex = $PALETTE_HEX[$current] ?? '#7d7d7d';
-    // Use the raw hex on the closed-state background too, plus update via
-    // a JS lookup table since the option-list onchange handler doesn't
-    // get to read CSS variables either.
-    $hexMapJs = htmlspecialchars(json_encode($PALETTE_HEX, JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8');
-    return '<select class="cat-colour-select" name="colour"'
-         . ($formId !== null ? ' form="' . $e($formId) . '"' : '')
-         . ' data-colour="' . $e($current) . '"'
-         . ' data-palette-hex="' . $hexMapJs . '"'
-         . ' style="background-color:' . $currentHex . '"'
-         . ' onchange="this.style.backgroundColor=(JSON.parse(this.dataset.paletteHex)[this.value]||\'#7d7d7d\')">'
-         . $opts . '</select>';
+    $formAttr = $formId !== null ? ' form="' . $e($formId) . '"' : '';
+    return '<div class="cat-colour-picker" data-value="' . $e($current) . '">'
+         . '<input type="hidden" name="colour"' . $formAttr . ' value="' . $e($current) . '" data-colour-input>'
+         . '<button type="button" class="cat-colour-trigger" style="background-color:' . $currentHex . '" data-colour-trigger>'
+         .   '<span class="cat-colour-name">' . $e($current) . '</span>'
+         .   '<span class="cat-colour-arrow" aria-hidden="true">▾</span>'
+         . '</button>'
+         . '<div class="cat-colour-menu" hidden role="listbox">' . $opts . '</div>'
+         . '</div>';
 };
 
 $block_meta = [
@@ -285,6 +281,47 @@ require __DIR__ . '/../partials/topbar.php';
     }
     input.addEventListener('input', syncBtn);
     syncBtn();
+  });
+
+  // Phase 21.7 — custom colour dropdown choreography. The trigger button
+  // opens a popup of coloured swatches; clicking a swatch updates the
+  // hidden input + trigger background, then dispatches 'change' so
+  // dirty-flip wakes the row's Save button.
+  document.querySelectorAll('.cat-colour-picker').forEach(function (picker) {
+    var trigger = picker.querySelector('[data-colour-trigger]');
+    var menu    = picker.querySelector('.cat-colour-menu');
+    var hidden  = picker.querySelector('[data-colour-input]');
+    var nameSpan = picker.querySelector('.cat-colour-name');
+    if (!trigger || !menu || !hidden) return;
+
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.querySelectorAll('.cat-colour-menu').forEach(function (m) {
+        if (m !== menu) m.hidden = true;
+      });
+      menu.hidden = !menu.hidden;
+    });
+
+    menu.querySelectorAll('.cat-colour-opt').forEach(function (opt) {
+      opt.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var value = opt.dataset.value;
+        var bg    = opt.style.backgroundColor;
+        hidden.value = value;
+        trigger.style.backgroundColor = bg;
+        if (nameSpan) nameSpan.textContent = value;
+        menu.querySelectorAll('.cat-colour-opt').forEach(function (o) {
+          o.classList.toggle('is-selected', o === opt);
+        });
+        picker.dataset.value = value;
+        menu.hidden = true;
+        // dirty-flip listens to 'change' on form inputs.
+        hidden.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    });
+  });
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.cat-colour-menu').forEach(function (m) { m.hidden = true; });
   });
 </script>
 

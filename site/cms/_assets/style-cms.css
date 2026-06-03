@@ -1891,16 +1891,16 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .rowform-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
 /* Add-row uses the same grid template, distinguished by tint. */
 .rowform-add-row { background:var(--bg-soft); }
-/* Phase 21.7 — rowform row hover applies to data rows (navigation +
-   redirects), excluding the add-row. 1px outline at 30% black + soft
-   8px shadow. Outline sits outside the existing border so it pops.
-   Draggable rows additionally get cursor:grab. */
-.rowform-row:not(.rowform-add-row):hover,
-.rowform-row:not(.rowform-add-row):focus-within {
+/* Phase 21.7 — row-level hover only on draggable rowform rows
+   (navigation). Redirects rows aren't draggable and aren't clickable
+   so they get no row-level affordance — the field-level hover on
+   the inputs is the editable affordance there. */
+.rowform-row[draggable="true"]:hover,
+.rowform-row[draggable="true"]:focus-within {
   position: relative;
   z-index: 1;
   outline: 1px solid var(--ink-30);
   outline-offset: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  cursor: grab;
 }
-.rowform-row[draggable="true"]:hover { cursor: grab; }

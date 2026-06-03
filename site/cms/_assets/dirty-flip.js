@@ -1,0 +1,116 @@
+/**
+ * dirty-flip.js — single shared module for the Save-button dirty-flip
+ * pattern used across editors, page-edit, navigation, and redirects.
+ *
+ * Behaviour:
+ *   1. Find every [data-save-btn] in the document. (Legacy alias:
+ *      [data-primary-save] is treated as data-save-btn so existing
+ *      buttons keep working until they migrate.)
+ *   2. For each button, resolve its owning form:
+ *        - if the button has a form="<id>" attribute, use that form;
+ *        - otherwise, walk up to the nearest <form>.
+ *   3. Bind input/change on every input/textarea/select inside that
+ *      form. On the first dirty event, flip the button from .btn-ghost
+ *      to .btn-pri. (Idempotent — repeated dirties are a no-op.)
+ *   4. On click of a dirty button, briefly show "Saved", disable the
+ *      button, and submit the form via .submit() after a short pulse.
+ *      Clean-state buttons fall through to the browser's normal submit
+ *      behaviour (no preventDefault).
+ *
+ * Idempotency:
+ *   The module marks each button with data-dirty-flip-bound so re-running
+ *   the script (or multiple inclusions) won't double-wire handlers.
+ *
+ * Per-row pattern compatibility (navigation, redirects):
+ *   When the button uses form="row-N" binding (cross-form), the module
+ *   reads the form id from the attribute. Programmatic .submit() does NOT
+ *   carry the submit button's name/value, so any callers that rely on a
+ *   server-side `action` discriminator must inject it as a hidden input
+ *   before invoking submit. The redirects view did this manually; we
+ *   preserve that responsibility by checking for a hidden input named
+ *   "action" and synthesizing one with value="update" if missing AND the
+ *   button itself has a name="action" + value="<x>" pair.
+ *
+ * The module self-initialises on DOMContentLoaded and is safe to load on
+ * any page — it's a no-op when no [data-save-btn] elements exist.
+ */
+(function () {
+  'use strict';
+
+  function findForm(btn) {
+    var formId = btn.getAttribute('form');
+    if (formId) {
+      var f = document.getElementById(formId);
+      if (f) return f;
+    }
+    return btn.closest('form');
+  }
+
+  function bind(btn) {
+    if (btn.hasAttribute('data-dirty-flip-bound')) return;
+    btn.setAttribute('data-dirty-flip-bound', '');
+
+    var form = findForm(btn);
+    if (!form) return;
+
+    // Legacy: ensure [data-save-btn] is set so selectors that only look
+    // for the canonical attribute still find this button.
+    if (!btn.hasAttribute('data-save-btn')) {
+      btn.setAttribute('data-save-btn', '');
+    }
+
+    function flip() {
+      if (btn.classList.contains('btn-pri')) return; // already dirty
+      btn.classList.remove('btn-ghost');
+      btn.classList.add('btn-pri');
+    }
+
+    var inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(function (el) {
+      var evt = (el.tagName === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
+      el.addEventListener(evt, flip);
+    });
+
+    btn.addEventListener('click', function (e) {
+      if (!btn.classList.contains('btn-pri')) return; // nothing to save
+      e.preventDefault();
+      var label = btn.textContent;
+      btn.textContent = 'Saved';
+      btn.disabled = true;
+
+      // Programmatic .submit() drops the submit button's name/value pair.
+      // If the button carries name="action", inject a hidden input so the
+      // server-side router still sees the action discriminator.
+      var name  = btn.getAttribute('name');
+      var value = btn.getAttribute('value');
+      if (name && value !== null) {
+        var existing = form.querySelector(
+          'input[name="' + name + '"][data-dirty-flip-injected]'
+        );
+        if (!existing) {
+          var inp = document.createElement('input');
+          inp.type  = 'hidden';
+          inp.name  = name;
+          inp.value = value;
+          inp.setAttribute('data-dirty-flip-injected', '');
+          form.appendChild(inp);
+        }
+      }
+
+      setTimeout(function () { form.submit(); }, 300);
+    });
+  }
+
+  function init() {
+    var btns = document.querySelectorAll(
+      '[data-save-btn], [data-primary-save]'
+    );
+    btns.forEach(bind);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

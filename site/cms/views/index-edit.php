@@ -205,20 +205,11 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php if (count($errors) > 0): ?>
-        <div class="form-errors" role="alert" style="margin:var(--space-16) var(--space-24) 0">
-          <strong>Couldn't save:</strong>
-          <ul>
-            <?php foreach ($errors as $err): ?>
-              <li><?= $e($err) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      <?php endif; ?>
-
-      <?php if ($flash !== ''): ?>
-        <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
-      <?php endif; ?>
+      <?php
+      $heading = "Couldn't save:";
+      require __DIR__ . '/../partials/form-errors.php';
+      require __DIR__ . '/../partials/flash.php';
+      ?>
 
       <form method="post" action="/cms/indexes/edit" class="content-area" id="index-edit-form">
         <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -406,11 +397,13 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
         </div>
 
-        <div class="content-block" style="background:transparent;border:none;padding:0">
-          <div style="display:flex;gap:8px;justify-content:flex-end;padding:var(--space-16) var(--space-20)">
-            <a href="/cms/indexes" class="btn-ghost">Cancel</a>
-            <button type="submit" class="btn-pri">Save</button>
-          </div>
+        <!-- Non-sticky form-actions bar (proposal #6 + #21): index-edit
+             flows like a list view, so its save bar is flat in-page rather
+             than viewport-pinned. The previous zero-content .content-block
+             with inline styles was a positioning workaround. -->
+        <div class="form-actions" style="justify-content:flex-end">
+          <a href="/cms/indexes" class="btn-ghost">Cancel</a>
+          <button type="submit" class="btn-pri">Save</button>
         </div>
       </form>
     </div>

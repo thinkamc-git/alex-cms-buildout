@@ -718,20 +718,16 @@ require __DIR__ . '/../partials/topbar.php';
       $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
       $subtitle = 'Article · ' . $stageLabel . ' · saved ' . (string)($article['updated_at'] ?? '');
 
-      // Flash + Undo render inline alongside the subtitle (next to "last saved").
-      $subtitle_extra = '';
-      if ($flash !== '') {
-          $undoHtml = '';
-          if ($canUndo) {
-              $undoHtml = '<form method="post" action="/cms/articles/edit?id=' . (int)$id . '">'
-                        . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
-                        . '<button type="submit" name="action" value="undo" formnovalidate'
-                        . ' title="Reverts the last advance. Unsaved changes at this stage are lost.">↶ Undo</button>'
-                        . '</form>';
-          }
-          $subtitle_extra = '<span class="view-subtitle-flash" role="status">'
-                          . $e($flash) . $undoHtml
-                          . '</span>';
+      // Flash + optional Undo render via the canonical flash-success banner
+      // above the content area (proposal #4 + #29). Undo is piped through
+      // $flash_extra as raw HTML alongside the escaped flash text.
+      $flash_extra = '';
+      if ($flash !== '' && $canUndo) {
+          $flash_extra = ' <form method="post" action="/cms/articles/edit?id=' . (int)$id . '" class="flash-undo">'
+                       . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                       . '<button type="submit" name="action" value="undo" formnovalidate class="btn-link"'
+                       . ' title="Reverts the last advance. Unsaved changes at this stage are lost.">↶ Undo</button>'
+                       . '</form>';
       }
 
       // Phase 20.3: Back link mirrors the resolved $fromKey above so
@@ -790,16 +786,11 @@ require __DIR__ . '/../partials/topbar.php';
       <?php endif; ?>
 
       <div class="content-area<?= ($showPreviewTab && $activeTab === 'preview') ? ' is-hidden-tab' : '' ?>" data-tab-panel="edit">
-        <?php if (count($errors) > 0): ?>
-          <div class="form-errors" role="alert">
-            <strong>Couldn’t save:</strong>
-            <ul>
-              <?php foreach ($errors as $err): ?>
-                <li><?= $e($err) ?></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
+        <?php
+        require __DIR__ . '/../partials/flash.php';
+        $heading = "Couldn’t save:";
+        require __DIR__ . '/../partials/form-errors.php';
+        ?>
 
       <?php if ($isIdea): ?>
         <form method="post"
@@ -1273,78 +1264,30 @@ require __DIR__ . '/../partials/topbar.php';
                 </div>
               <?php endif; ?>
 
-              <?php if ($isLive): ?>
-                <div class="cms-publish-box is-live">
-                  <div class="cms-publish-header">
-                    <span class="cms-live-indicator">
-                      <span class="cms-live-dot" aria-hidden="true"></span>
-                      Live
-                    </span>
-                    <a href="/writing/<?= $e((string)($article['slug'] ?? '')) ?>"
-                       target="_blank"
-                       rel="noopener"
-                       class="btn-ghost btn-tiny">View live ↗</a>
-                  </div>
-                  <div class="field-group" style="margin-bottom:var(--space-12)">
-                    <label class="field-sublabel" for="article-published-at">Published</label>
-                    <input type="datetime-local"
-                           name="published_at"
-                           id="article-published-at"
-                           class="field-input"
-                           value="<?= $e($publishedAtForInput) ?>">
-                    <p class="field-hint">Editable. Changes the publish date displayed on the live page.</p>
-                  </div>
-                  <div class="field-group cms-updated-group" data-updated-group style="margin-bottom:0">
-                    <label class="cms-publish-check">
-                      <input type="checkbox" name="show_updated" value="1" <?= $showUpdated ? 'checked' : '' ?> data-show-updated>
-                      <span>Show "Updated" date on the article</span>
-                    </label>
-                    <div class="cms-updated-input-row" data-updated-row>
-                      <input type="date"
-                             name="updated_display"
-                             class="field-input <?= !$updatedHasOverride ? 'is-default' : '' ?>"
-                             value="<?= $e($updatedInputValue) ?>"
-                             data-default="<?= $e($updatedAtDateOnly) ?>"
-                             data-updated-input
-                             <?= !$showUpdated ? 'disabled' : '' ?>>
-                      <button type="button"
-                              class="cms-updated-clear"
-                              data-clear-updated
-                              title="Reset to actual last update date"
-                              <?= !$updatedHasOverride ? 'hidden' : '' ?>>×</button>
-                    </div>
-                    <p class="field-hint">Default: actual last save date. Override to display a different date.</p>
-                  </div>
-                </div>
-              <?php endif; ?>
-
-              <?php if ($showPublishSection): ?>
-                <div class="cms-publish-box">
-                  <div class="field-group cms-publish-section" data-publish-section>
-                    <label class="field-label">Schedule for Publish</label>
-                    <div class="cms-publish-toggle">
-                      <label class="cms-publish-check">
-                        <input type="checkbox" name="schedule_enabled" value="1" <?= $isScheduled ? 'checked' : '' ?> data-publish-toggle>
-                        <span>Schedule for later</span>
-                      </label>
-                    </div>
-                    <div class="cms-publish-schedule" data-publish-schedule-row<?= !$isScheduled ? ' hidden' : '' ?>>
-                      <input type="datetime-local"
-                             name="schedule_at"
-                             class="field-input"
-                             value="<?= $e($scheduleAtForInput) ?>"
-                             min="<?= $e($minScheduleAt) ?>"
-                             data-schedule-input>
-                      <p class="field-hint">Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.</p>
-                    </div>
-                  </div>
-                </div>
-              <?php endif; ?>
+              <?php
+              // Publish-box: shared partial used by all 4 editors. Per-type
+              // context is set here; the partial reads $is_live / $is_scheduled
+              // / $show_publish_section to render the right variant(s).
+              $is_live              = $isLive;
+              $show_publish_section = $showPublishSection;
+              $is_scheduled         = $isScheduled;
+              $live_url             = '/writing/' . (string)($article['slug'] ?? '');
+              $published_at_id      = 'article-published-at';
+              $published_at_value   = $publishedAtForInput;
+              $updated_label        = 'article';
+              $show_updated         = $showUpdated;
+              $updated_input_value  = $updatedInputValue;
+              $updated_default      = $updatedAtDateOnly;
+              $updated_has_override = $updatedHasOverride;
+              $schedule_at_value    = $scheduleAtForInput;
+              $min_schedule_at      = $minScheduleAt;
+              require __DIR__ . '/../partials/publish-box.php';
+              ?>
             </aside>
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-ghost" data-primary-save><?= $e($saveLabel) ?></button>
+            <button type="submit" name="action" value="save" class="btn-ghost" data-save-btn><?= $e($saveLabel) ?></button>
             <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
 
             <button type="submit" form="article-delete-form" class="btn-ghost btn-danger">Delete</button>
@@ -1596,5 +1539,6 @@ require __DIR__ . '/../partials/topbar.php';
 
 <script src="/cms/_assets/publish-choreography.js" defer></script>
 <script src="/cms/_assets/preview-tab-guard.js" defer></script>
+<script src="/cms/_assets/dirty-flip.js" defer></script>
 </body>
 </html>

@@ -169,18 +169,11 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php if (count($errors) > 0): ?>
-        <div class="form-errors" role="alert" style="margin:var(--space-16) var(--space-24) 0">
-          <strong>Couldn't save:</strong>
-          <ul>
-            <?php foreach ($errors as $err): ?><li><?= $e($err) ?></li><?php endforeach; ?>
-          </ul>
-        </div>
-      <?php endif; ?>
-
-      <?php if ($flash !== ''): ?>
-        <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
-      <?php endif; ?>
+      <?php
+      $heading = "Couldn't save:";
+      require __DIR__ . '/../partials/form-errors.php';
+      require __DIR__ . '/../partials/flash.php';
+      ?>
 
       <div class="templates-layout">
         <!-- ═══ LEFT: Template list ═══ -->
@@ -219,26 +212,26 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="info-box">
                   The <strong>Master Template</strong> defines every block available across content types. Each block has a stable slug used in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">data-block</code>) and a visibility mode. <strong>Always</strong> blocks render whenever applicable. <strong>Optional</strong> blocks are toggled on or off per content type from each sub-template. <strong>Auto</strong> blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.
                 </div>
-                <table class="master-field-table" style="margin-top:var(--space-16)">
-                  <thead>
-                    <tr>
-                      <th style="width:18%">Block</th>
-                      <th style="width:14%">Slug</th>
-                      <th style="width:30%">Composition</th>
-                      <th>Purpose</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php foreach ($blocks as $slug => $b): ?>
-                      <tr>
-                        <td><?= $e($b['name']) ?></td>
-                        <td><span class="val-pill"><?= $e($slug) ?></span></td>
-                        <td style="font-family:var(--font-mono);font-size:var(--text-tiny);color:var(--secondary)"><?= $e($b['composition']) ?></td>
-                        <td style="font-size:var(--text-tiny);color:var(--muted);line-height:1.55"><?= $e($b['purpose']) ?></td>
-                      </tr>
-                    <?php endforeach; ?>
-                  </tbody>
-                </table>
+                <?php
+                $columns = [
+                    ['label' => 'Block',       'width' => '18%'],
+                    ['label' => 'Slug',        'width' => '14%'],
+                    ['label' => 'Composition', 'width' => '30%'],
+                    ['label' => 'Purpose'],
+                ];
+                $rows = [];
+                foreach ($blocks as $slug => $b) {
+                    $rows[] = [
+                        ['html' => $e($b['name'])],
+                        ['html' => '<span class="val-pill">' . $e($slug) . '</span>'],
+                        ['html' => $e($b['composition']),  'class' => 'cell-mono'],
+                        ['html' => $e($b['purpose']),      'class' => 'cell-note'],
+                    ];
+                }
+                $empty_text = 'No blocks defined.';
+                $variant    = 'reference';
+                require __DIR__ . '/../partials/table.php';
+                ?>
               </div>
 
             <?php elseif ($activeTab === 'fields'): ?>
@@ -246,24 +239,24 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="info-box">
                   Every database field that backs a block. Each row maps a field to its PHP variable. Use this tab for layout work; use the Content Blocks tab for visibility.
                 </div>
-                <table class="master-field-table" style="margin-top:var(--space-16)">
-                  <thead>
-                    <tr>
-                      <th style="width:22%">Field</th>
-                      <th style="width:30%">PHP Variable</th>
-                      <th>Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php foreach ($fields as $name => $f): ?>
-                      <tr>
-                        <td><span class="val-pill"><?= $e($name) ?></span></td>
-                        <td style="font-family:var(--font-mono);font-size:var(--text-tiny);color:var(--secondary)"><?= $e($f['php']) ?></td>
-                        <td style="font-size:var(--text-tiny);color:var(--muted);line-height:1.55"><?= $e($f['description']) ?></td>
-                      </tr>
-                    <?php endforeach; ?>
-                  </tbody>
-                </table>
+                <?php
+                $columns = [
+                    ['label' => 'Field',        'width' => '22%'],
+                    ['label' => 'PHP Variable', 'width' => '30%'],
+                    ['label' => 'Description'],
+                ];
+                $rows = [];
+                foreach ($fields as $name => $f) {
+                    $rows[] = [
+                        ['html' => '<span class="val-pill">' . $e($name) . '</span>'],
+                        ['html' => $e($f['php']),         'class' => 'cell-mono'],
+                        ['html' => $e($f['description']), 'class' => 'cell-note'],
+                    ];
+                }
+                $empty_text = 'No fields defined.';
+                $variant    = 'reference';
+                require __DIR__ . '/../partials/table.php';
+                ?>
               </div>
 
             <?php elseif ($activeTab === 'author'): ?>
@@ -361,31 +354,30 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="info-box">
                   <strong><?= $e($info['name']) ?>.</strong> <?= $e($info['desc']) ?>
                 </div>
-                <table class="master-field-table" style="margin-top:var(--space-16)">
-                  <thead>
-                    <tr>
-                      <th style="width:22%">Block</th>
-                      <th style="width:18%">Slug</th>
-                      <th style="width:18%">Visibility</th>
-                      <th>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php foreach ($blocks as $blockSlug => $b):
-                      $mode = $rowMatrix[$blockSlug] ?? '—';
-                      if ($mode === '—') continue;
-                      $pillClass = 'block-mode-pill mode-' . $mode;
-                      $pillLabel = ucfirst($mode);
-                    ?>
-                      <tr>
-                        <td><?= $e($b['name']) ?></td>
-                        <td><span class="val-pill"><?= $e($blockSlug) ?></span></td>
-                        <td><span class="<?= $e($pillClass) ?>"><?= $e($pillLabel) ?></span></td>
-                        <td style="font-size:var(--text-tiny);color:var(--muted);line-height:1.55"><?= $e($notes[$mode] ?? '') ?></td>
-                      </tr>
-                    <?php endforeach; ?>
-                  </tbody>
-                </table>
+                <?php
+                $columns = [
+                    ['label' => 'Block',      'width' => '22%'],
+                    ['label' => 'Slug',       'width' => '18%'],
+                    ['label' => 'Visibility', 'width' => '18%'],
+                    ['label' => 'Notes'],
+                ];
+                $rows = [];
+                foreach ($blocks as $blockSlug => $b) {
+                    $mode = $rowMatrix[$blockSlug] ?? '—';
+                    if ($mode === '—') continue;
+                    $pillClass = 'block-mode-pill mode-' . $mode;
+                    $pillLabel = ucfirst($mode);
+                    $rows[] = [
+                        ['html' => $e($b['name'])],
+                        ['html' => '<span class="val-pill">' . $e($blockSlug) . '</span>'],
+                        ['html' => '<span class="' . $e($pillClass) . '">' . $e($pillLabel) . '</span>'],
+                        ['html' => $e($notes[$mode] ?? ''), 'class' => 'cell-note'],
+                    ];
+                }
+                $empty_text = 'No blocks visible in this sub-template.';
+                $variant    = 'reference';
+                require __DIR__ . '/../partials/table.php';
+                ?>
                 <div class="ct-readonly-note">
                   Per-sub-template visibility toggles are read-only — the modes shown above are the matrix defaults. Editable suppression isn't available yet.
                 </div>

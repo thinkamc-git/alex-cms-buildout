@@ -102,9 +102,7 @@ require __DIR__ . '/../partials/topbar.php';
           <input class="qc-input" type="text" name="title" placeholder="What's the idea?" maxlength="500" required>
           <button class="qc-btn" type="submit">+ Add idea</button>
         </form>
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status" style="margin-top:var(--space-12);max-width:580px"><?= $e($flash) ?></div>
-        <?php endif; ?>
+        <?php require __DIR__ . '/../partials/flash.php'; ?>
       </div>
 
       <div class="kanban-board"

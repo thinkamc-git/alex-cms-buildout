@@ -132,19 +132,12 @@ $fmt = static function (?string $ts) use ($e): string {
   .sub-filters .btn { padding:6px 12px; font-size:12px; border:1px solid var(--border); border-radius:4px; background:var(--surface); color:var(--ink); cursor:pointer; text-decoration:none; }
   .sub-filters .btn:hover { background:var(--bg-soft); }
   .sub-filters .btn.is-primary { background:var(--ink); color:var(--surface); border-color:var(--ink); }
-  .sub-table { width:100%; border-collapse:collapse; }
-  .sub-table th, .sub-table td { padding:10px 12px; border-bottom:1px solid var(--border-subtle); vertical-align:middle; }
-  .sub-table th { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); text-align:left; font-weight:600; }
-  .sub-table td.is-mono { font-family:var(--font-mono); font-size:12px; }
+  /* Sub-table is now rendered via partials/table.php with $variant='sub'.
+     Visual styling lives in style-cms.css under .cms-table--sub /
+     .table-card--sub / .sub-status / .btn-row-action / .btn-row-del. */
   .sub-status { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; letter-spacing:0.02em; }
   .sub-status.sub { background:var(--c-forest-soft, #d9ead7); color:var(--c-forest, #2d5a2d); }
   .sub-status.uns { background:var(--bg-soft); color:var(--muted); }
-  .btn-row-action { padding:4px 10px; font-size:11px; border:1px solid var(--border); background:var(--surface); border-radius:4px; cursor:pointer; }
-  .btn-row-action:hover { background:var(--bg-soft); }
-  .btn-row-del { background:none; border:none; cursor:pointer; color:var(--muted); padding:4px; line-height:0; }
-  .btn-row-del:hover { color:var(--c-danger, #c44); }
-  .btn-row-del svg { width:14px; height:14px; }
-  .sub-empty { color:var(--muted); font-style:italic; padding:var(--space-12); }
 </style>
 </head>
 <body>
@@ -169,20 +162,11 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php if (count($errors) > 0): ?>
-        <div class="form-errors" role="alert" style="margin:var(--space-16) var(--space-24) 0">
-          <strong>Couldn't update:</strong>
-          <ul>
-            <?php foreach ($errors as $err): ?>
-              <li><?= $e($err) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      <?php endif; ?>
-
-      <?php if ($flash !== ''): ?>
-        <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
-      <?php endif; ?>
+      <?php
+      $heading = "Couldn't update:";
+      require __DIR__ . '/../partials/form-errors.php';
+      require __DIR__ . '/../partials/flash.php';
+      ?>
 
       <div class="sub-counts">
         <div><strong><?= (int)$counts['subscribed'] ?></strong>subscribed</div>
@@ -235,52 +219,46 @@ require __DIR__ . '/../partials/topbar.php';
       <?php endforeach; ?>
 
       <div style="padding:0 var(--space-24)">
-      <table class="sub-table">
-        <thead>
-          <tr>
-            <th style="width:28%">Email</th>
-            <th style="width:16%">Name</th>
-            <th style="width:18%">Subscribed</th>
-            <th style="width:14%">Source</th>
-            <th style="width:10%">Status</th>
-            <th style="width:14%;text-align:right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (count($rows) === 0): ?>
-            <tr><td colspan="6" class="sub-empty">No subscribers match the current filters.</td></tr>
-          <?php endif; ?>
-
-          <?php foreach ($rows as $r):
-            $rid    = 'sub-row-' . (int)$r['id'];
-            $subbed = ($r['unsubscribed_at'] === null || $r['unsubscribed_at'] === '');
-          ?>
-            <tr>
-              <td class="is-mono"><?= $e((string)$r['email']) ?></td>
-              <td><?= $e((string)($r['name'] ?? '')) ?></td>
-              <td class="is-mono"><?= $fmt((string)($r['subscribed_at'] ?? '')) ?></td>
-              <td class="is-mono"><?= $e((string)($r['source'] ?? '')) ?></td>
-              <td>
-                <?php if ($subbed): ?>
-                  <span class="sub-status sub">subscribed</span>
-                <?php else: ?>
-                  <span class="sub-status uns">unsubscribed</span>
-                <?php endif; ?>
-              </td>
-              <td style="text-align:right;white-space:nowrap">
-                <?php if ($subbed): ?>
-                  <button type="submit" name="action" value="unsubscribe" form="<?= $e($rid) ?>" class="btn-row-action" title="Mark unsubscribed">Unsubscribe</button>
-                <?php else: ?>
-                  <button type="submit" name="action" value="resubscribe" form="<?= $e($rid) ?>" class="btn-row-action" title="Mark re-subscribed">Re-subscribe</button>
-                <?php endif; ?>
-                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-row-del" title="Delete" aria-label="Delete" onclick="return confirm('Delete subscriber &quot;<?= $e((string)$r['email']) ?>&quot;? This can&#039;t be undone.');">
-                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+      <?php
+      $columns = [
+          ['label' => 'Email',      'width' => '28%'],
+          ['label' => 'Name',       'width' => '16%'],
+          ['label' => 'Subscribed', 'width' => '18%'],
+          ['label' => 'Source',     'width' => '14%'],
+          ['label' => 'Status',     'width' => '10%'],
+          ['label' => 'Actions',    'width' => '14%'],
+      ];
+      $subRows = [];
+      foreach ($rows as $r) {
+          $rid    = 'sub-row-' . (int)$r['id'];
+          $subbed = ($r['unsubscribed_at'] === null || $r['unsubscribed_at'] === '');
+          $statusCell = $subbed
+              ? '<span class="sub-status sub">subscribed</span>'
+              : '<span class="sub-status uns">unsubscribed</span>';
+          $toggleBtn = $subbed
+              ? '<button type="submit" name="action" value="unsubscribe" form="' . $e($rid) . '" class="btn-row-action" title="Mark unsubscribed">Unsubscribe</button>'
+              : '<button type="submit" name="action" value="resubscribe" form="' . $e($rid) . '" class="btn-row-action" title="Mark re-subscribed">Re-subscribe</button>';
+          $emailAttr = $e((string)$r['email']);
+          $deleteBtn = '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="btn-row-del" title="Delete" aria-label="Delete"'
+                     . ' onclick="return confirm(\'Delete subscriber &quot;' . $emailAttr . '&quot;? This can&#039;t be undone.\');">'
+                     . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                     . '</button>';
+          $subRows[] = [
+              ['html' => $e((string)$r['email']),               'class' => 'is-mono'],
+              ['html' => $e((string)($r['name'] ?? ''))],
+              ['html' => $fmt((string)($r['subscribed_at'] ?? '')), 'class' => 'is-mono'],
+              ['html' => $e((string)($r['source'] ?? '')),      'class' => 'is-mono'],
+              ['html' => $statusCell],
+              ['html' => $toggleBtn . $deleteBtn, 'class' => 'cell-actions'],
+          ];
+      }
+      $rowsOriginal = $rows;
+      $rows         = $subRows;
+      $empty_text   = 'No subscribers match the current filters.';
+      $variant      = 'sub';
+      require __DIR__ . '/../partials/table.php';
+      $rows = $rowsOriginal;
+      ?>
       </div>
     </div>
   </main>

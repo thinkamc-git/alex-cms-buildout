@@ -100,9 +100,7 @@ require __DIR__ . '/../partials/topbar.php';
       ?>
 
       <div class="content-area">
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status"><?= $e($flash) ?></div>
-        <?php endif; ?>
+        <?php require __DIR__ . '/../partials/flash.php'; ?>
 
         <?php
         $indexColumns = [
@@ -234,8 +232,11 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= count($custom) ?> indexes</span>
           </div>
           <?php
-          $columns = $indexColumns ?? $columns; // restore original if Series block clobbered it
-          $rows = array_map($buildRow, $custom);
+          // Reset $columns to the index-table template (the Series block
+          // above set it to $seriesColumns, but each table call should be
+          // explicit about its column set — see proposal #7).
+          $columns    = $indexColumns;
+          $rows       = array_map($buildRow, $custom);
           $empty_text = 'No custom indexes yet — click [+ New Index] to add one (e.g. /digital-garden, /thoughts).';
           require __DIR__ . '/../partials/table.php';
           ?>

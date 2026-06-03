@@ -307,16 +307,11 @@ require __DIR__ . '/../partials/topbar.php';
       ?>
 
       <div class="content-area">
-        <?php if (count($errors) > 0): ?>
-          <div class="form-errors" role="alert">
-            <strong>Couldn't save:</strong>
-            <ul><?php foreach ($errors as $err): ?><li><?= $e($err) ?></li><?php endforeach; ?></ul>
-          </div>
-        <?php endif; ?>
-
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status"><?= $e($flash) ?></div>
-        <?php endif; ?>
+        <?php
+        $heading = "Couldn't save:";
+        require __DIR__ . '/../partials/form-errors.php';
+        require __DIR__ . '/../partials/flash.php';
+        ?>
 
         <!-- Tabs. Server-rendered hrefs are graceful fallback; preview-tab-guard.js
              intercepts clicks and toggles panel visibility client-side. -->
@@ -392,7 +387,7 @@ require __DIR__ . '/../partials/topbar.php';
                     </form>
                   <?php endif; ?>
                 <?php endif; ?>
-                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save data-primary-save>Save</button>
+                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save>Save</button>
               <?php endif; ?>
             </div>
           </div>
@@ -519,6 +514,7 @@ require __DIR__ . '/../partials/topbar.php';
 <!-- Client-side tab controller — intercepts the [data-tab-target] clicks
      and POSTs the body form to the preview endpoint when Preview activates. -->
 <script src="/cms/_assets/preview-tab-guard.js" defer></script>
+<script src="/cms/_assets/dirty-flip.js" defer></script>
 <script src="/cms/_assets/codemirror/codemirror.min.js"></script>
 <script src="/cms/_assets/codemirror/mode/xml/xml.min.js"></script>
 <script src="/cms/_assets/codemirror/mode/javascript/javascript.min.js"></script>
@@ -549,19 +545,15 @@ require __DIR__ . '/../partials/topbar.php';
     });
     if (!isLive) {
       var initial = cm.getValue();
-      var saveBtn = document.querySelector('[data-body-save]');
       cm.on('change', function () {
         var dirty = cm.getValue() !== initial;
         var flag = document.getElementById('pe-unsaved');
         if (flag) flag.classList.toggle('is-visible', dirty);
-        // Body Save button: ghost → primary on dirty, mirroring the
-        // metadata Save and the navigation editor's universal pattern.
-        if (saveBtn) {
-          saveBtn.classList.toggle('btn-ghost', !dirty);
-          saveBtn.classList.toggle('btn-pri', dirty);
-        }
         // Mirror to the underlying textarea so listeners like
         // preview-tab-guard (which watches input/change) detect this edit.
+        // The Body Save button's btn-ghost → btn-pri flip is handled by
+        // the shared cms/_assets/dirty-flip.js module, which binds to the
+        // dispatched 'input' event below.
         ta.value = cm.getValue();
         ta.dispatchEvent(new Event('input', { bubbles: true }));
       });
@@ -609,23 +601,11 @@ require __DIR__ . '/../partials/topbar.php';
     document.getElementById('pe-duplicate-name').value = name;
     document.getElementById('pe-duplicate-form').submit();
   }
-  // Dirty-flip: Save metadata starts btn-ghost and flips to btn-pri when
-  // the user changes any field in the metadata form. Mirrors the same
-  // pattern in /cms/navigation.
-  (function () {
-    const form = document.getElementById('pe-meta-form');
-    if (!form) return;
-    const btn = form.querySelector('[data-save-btn]');
-    if (!btn) return;
-    const flip = () => {
-      btn.classList.remove('btn-ghost');
-      btn.classList.add('btn-pri');
-    };
-    form.querySelectorAll('input, textarea, select').forEach(el => {
-      const evt = (el.tagName === 'SELECT') ? 'change' : 'input';
-      el.addEventListener(evt, flip);
-    });
-  })();
+  // Save-button dirty-flip (ghost → primary on first edit) is handled by
+  // the shared cms/_assets/dirty-flip.js module loaded sitewide on
+  // page-edit. Both the Body Save (mock body form) and the Save metadata
+  // button carry data-save-btn; the module finds each one and resolves
+  // its owning form via the form= attribute or closest <form>.
 
   function peUnfurlSync() {
     var t  = document.getElementById('pe-meta-title');

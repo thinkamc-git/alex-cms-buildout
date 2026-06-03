@@ -93,9 +93,7 @@ require __DIR__ . '/../partials/topbar.php';
       ?>
 
       <div class="content-area">
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status"><?= $e($flash) ?></div>
-        <?php endif; ?>
+        <?php require __DIR__ . '/../partials/flash.php'; ?>
 
         <?php
         // Three sections: Drafts (concept + outline + draft) / Scheduled /

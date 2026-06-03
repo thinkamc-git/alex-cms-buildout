@@ -254,25 +254,25 @@ require __DIR__ . '/../partials/topbar.php';
 
   <main class="main" id="main" tabindex="-1">
     <div class="view active" id="view-draft-writing">
-      <div class="pipeline-header">
-        <div class="pipeline-title">Draft Writing</div>
-        <div class="pipeline-desc">Everything in flight and recently published — Concept through to live. Content moves left to right as it matures.</div>
-        <div class="dash-meta">
-          <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
-          <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)count($byStage['concept']) ?></span><span class="lbl">Concept</span></div>
-          <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-outline)"><?= (int)count($byStage['outline']) ?></span><span class="lbl">Outline</span></div>
-          <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-draft)"><?= (int)count($byStage['draft']) ?></span><span class="lbl">Draft</span></div>
-          <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$scheduledTotal ?></span><span class="lbl">Scheduled</span></div>
-          <div class="dash-stat-div"></div>
-          <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$liveTotal ?></span><span class="lbl">Live</span></div>
-        </div>
-        <?php if ($flash !== ''): ?>
-          <div class="flash-success" role="status" style="margin-top:var(--space-12)"><?= $e($flash) ?></div>
-        <?php endif; ?>
+      <?php
+      $title    = 'Draft Writing';
+      $subtitle = 'Everything in flight and recently published — Concept through to live. Content moves left to right as it matures.';
+      $actions  = '';
+      require __DIR__ . '/../partials/view-header.php';
+      ?>
+      <?php require __DIR__ . '/../partials/flash.php'; ?>
+      <div class="dash-meta">
+        <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)count($byStage['concept']) ?></span><span class="lbl">Concept</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-outline)"><?= (int)count($byStage['outline']) ?></span><span class="lbl">Outline</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-draft)"><?= (int)count($byStage['draft']) ?></span><span class="lbl">Draft</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)$scheduledTotal ?></span><span class="lbl">Scheduled</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-published)"><?= (int)$liveTotal ?></span><span class="lbl">Live</span></div>
       </div>
 
       <div class="kanban-board"

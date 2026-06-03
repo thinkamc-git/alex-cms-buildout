@@ -117,16 +117,10 @@ require __DIR__ . '/../partials/topbar.php';
       ?>
 
       <div class="content-area">
-        <?php if (count($errors) > 0): ?>
-          <div class="form-errors" role="alert">
-            <strong>Couldn’t save:</strong>
-            <ul>
-              <?php foreach ($errors as $err): ?>
-                <li><?= $e($err) ?></li>
-              <?php endforeach; ?>
-            </ul>
-          </div>
-        <?php endif; ?>
+        <?php
+        $heading = "Couldn’t save:";
+        require __DIR__ . '/../partials/form-errors.php';
+        ?>
 
         <form method="post" action="/cms/experiments/new" class="cms-form">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">

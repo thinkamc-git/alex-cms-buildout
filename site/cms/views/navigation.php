@@ -150,36 +150,30 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  .nav-list { display:flex; flex-direction:column; gap:6px; }
-  /* Fixed grid template — every row uses the same column widths so
-     fields line up vertically across rows. Pill-text + color stay in
-     the layout even when highlight=none (just visibility:hidden), so
-     the columns never shift. */
-  .nav-row {
-    display:grid;
-    grid-template-columns:
-      18px         /* grip          */
-      minmax(160px, 1.4fr) /* label    */
-      90px         /* nav_key       */
-      100px        /* target_type   */
-      minmax(180px, 1.6fr) /* picker  */
-      80px         /* highlight     */
-      96px         /* pill text / dot preview */
-      92px         /* color         */
-      auto         /* save          */
-      auto         /* delete        */
-      auto;        /* broken pill   */
-    gap:8px;
-    align-items:center;
-    padding:8px 10px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:4px;
+  /* Navigation row-form. Shared mechanics (grid container, save dirty-flip,
+     delete hover-reveal, drag-affordance, add-row tint) live in
+     style-cms.css under .rowform-*. View-specific bits below:
+       1. The 11-column grid template (set via --rowform-cols).
+       2. The is-broken row tint.
+       3. The grip handle, np-mark preview cell, nav-picker, color column,
+          pill-broken badge, and zone-help line.
+  */
+  .nav-list {
+    --rowform-cols:
+      18px                  /* grip                       */
+      minmax(160px, 1.4fr)  /* label                      */
+      90px                  /* nav_key                    */
+      100px                 /* target_type                */
+      minmax(180px, 1.6fr)  /* picker                     */
+      80px                  /* highlight                  */
+      96px                  /* pill text / dot preview    */
+      92px                  /* color                      */
+      auto                  /* save                       */
+      auto                  /* delete                     */
+      auto;                 /* broken pill                */
   }
-  .nav-row > form { display:contents; }
   .nav-row.is-broken { background:#fff5f5; border-color:#f5b0b0; }
   .nav-row .grip { cursor:grab; color:var(--muted); user-select:none; text-align:center; font-size:14px; }
-  .nav-row input[type=text], .nav-row select { padding:5px 7px; border:1px solid var(--border); border-radius:3px; font-size:12px; background:var(--surface); color:var(--ink); font-family:var(--font-mono); min-width:0; width:100%; box-sizing:border-box; }
   .nav-row .nav-picker { display:grid; }
   .nav-row .nav-picker > * { width:100%; box-sizing:border-box; }
   /* The color input keeps its column slot even when highlight=none. */
@@ -216,20 +210,6 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
   }
   .np-mark.hl-pill input::placeholder { color: var(--np-contrast, #fff); opacity: 0.6; }
   .np-mark.hl-none input { visibility:hidden; }
-  /* Save button: hidden until the row is dirty (the JS swaps it from
-     btn-ghost to btn-pri to signal pending changes). Add button at the
-     bottom doesn't carry data-save-btn so it stays visible. */
-  .nav-row [data-save-btn] { visibility:hidden; }
-  .nav-row [data-save-btn].btn-pri { visibility:visible; }
-  /* Delete: only on row-hover so it doesn't always shout. visibility,
-     not display, so the column doesn't collapse. */
-  .nav-row .btn-danger { visibility:hidden; }
-  .nav-row:hover .btn-danger,
-  .nav-row:focus-within .btn-danger { visibility:visible; }
-  .nav-row.is-dragging { opacity:0.4; }
-  .nav-row.is-over-top    { box-shadow: 0 -2px 0 0 var(--c-denim); }
-  .nav-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
-  .nav-add-row { background:var(--bg-soft); }
   .pill-broken { display:inline-block; font-family:var(--font-cond); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:var(--c-terracotta); color:white; font-weight:600; vertical-align:middle; margin-left:6px; }
   .nav-zone-help { font-size:11px; color:var(--muted); padding:0 var(--space-24) var(--space-12); }
 </style>
@@ -257,16 +237,11 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php if (count($errors) > 0): ?>
-        <div class="form-errors" role="alert" style="margin:var(--space-16) var(--space-24) 0">
-          <strong>Couldn't save:</strong>
-          <ul><?php foreach ($errors as $err): ?><li><?= $e($err) ?></li><?php endforeach; ?></ul>
-        </div>
-      <?php endif; ?>
-
-      <?php if ($flash !== ''): ?>
-        <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
-      <?php endif; ?>
+      <?php
+      $heading = "Couldn't save:";
+      require __DIR__ . '/../partials/form-errors.php';
+      require __DIR__ . '/../partials/flash.php';
+      ?>
 
       <div class="content-area">
       <?php
@@ -286,9 +261,9 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= count($items) ?> item<?= count($items)===1?'':'s' ?></span>
           </div>
 
-          <div class="nav-list" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
+          <div class="rowform-list nav-list" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
             <?php foreach ($items as $it): $broken = isset($broken_ids[(int)$it['id']]); ?>
-              <div class="nav-row<?= $broken ? ' is-broken' : '' ?>" draggable="true" data-id="<?= (int)$it['id'] ?>">
+              <div class="rowform-row nav-row<?= $broken ? ' is-broken' : '' ?>" draggable="true" data-id="<?= (int)$it['id'] ?>">
                 <div class="grip" title="Drag to reorder">⋮⋮</div>
                 <form method="post" action="/cms/navigation" id="nav-form-<?= (int)$it['id'] ?>" style="display:contents">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -351,7 +326,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php endforeach; ?>
 
             <!-- Add new row -->
-            <div class="nav-row nav-add-row">
+            <div class="rowform-row rowform-add-row nav-row nav-add-row">
               <div class="grip">+</div>
               <form method="post" action="/cms/navigation" style="display:contents">
                 <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -487,32 +462,9 @@ require __DIR__ . '/../partials/topbar.php';
     });
   });
 
-  // Mark a row's Save button primary when any field in that row changes.
-  // The button starts ghost (no pending changes); becomes primary on dirty;
-  // on click, shows "Saved" briefly before the form submits.
-  document.querySelectorAll('.nav-row form').forEach(form => {
-    const saveBtn = form.querySelector('[data-save-btn]');
-    if (!saveBtn) return;
-    // Track baseline values so the dirty check resets correctly after save.
-    const inputs = form.querySelectorAll('input, select, textarea');
-    inputs.forEach(el => {
-      const evt = (el.tagName === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
-      el.addEventListener(evt, () => {
-        saveBtn.classList.remove('btn-ghost');
-        saveBtn.classList.add('btn-pri');
-      });
-    });
-    // On submit, flash "Saved" then let the form post. The page redirects
-    // after POST, so the flash only shows for a moment — that's enough to
-    // confirm the click was registered.
-    saveBtn.addEventListener('click', (e) => {
-      if (!saveBtn.classList.contains('btn-pri')) return; // nothing to save
-      e.preventDefault();
-      saveBtn.textContent = 'Saved';
-      saveBtn.disabled = true;
-      setTimeout(() => form.submit(), 300);
-    });
-  });
+  // Save-button dirty-flip (ghost → primary on first edit, then "Saved"
+  // pulse on submit) lives in the shared cms/_assets/dirty-flip.js module,
+  // loaded via a sibling <script> tag below.
   function navSyncTargetId(form) {
     // Before submit, copy the visible target_id_* value into target_id.
     const type = form.querySelector('select[name=target_type]').value;
@@ -573,6 +525,7 @@ require __DIR__ . '/../partials/topbar.php';
     });
   });
 </script>
+<script src="/cms/_assets/dirty-flip.js" defer></script>
 
 </body>
 </html>

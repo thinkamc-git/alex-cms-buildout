@@ -16,19 +16,37 @@ if (!defined('CMS_PARTIAL_OK')) { http_response_code(404); exit; }
  *   $empty_text   string Shown when $rows is empty. Optional; defaults to
  *                        "No entries yet."
  *
+ *   $variant      string Optional visual sub-style: 'default' (omit),
+ *                        'cat', 'sub', or 'reference'. Applied as an
+ *                        extra class on .table-card and .cms-table for
+ *                        scoped per-view tweaks (column proportions,
+ *                        tints) — used by categories / subscribers /
+ *                        post-template's reference tables.
+ *
+ *   $table_attrs  string Optional. RAW HTML attributes string appended
+ *                        to the <table> tag — used by callers that need
+ *                        to add an id (for HTML5 form= bindings to
+ *                        external <form> elements) or data attributes.
+ *
  * The mockup pairs every <table class="cms-table"> with a wrapping
  * <div class="table-card"> for the card border + radius. This partial
  * always renders that wrapper, so callers compose by simply varying
  * $columns / $rows.
  */
 
-$columns    = (array)($columns ?? []);
-$rows       = (array)($rows ?? []);
-$empty_text = (string)($empty_text ?? 'No entries yet.');
-$colCount   = max(count($columns), 1);
+$columns     = (array)($columns ?? []);
+$rows        = (array)($rows ?? []);
+$empty_text  = (string)($empty_text ?? 'No entries yet.');
+$variant     = (string)($variant ?? '');
+$table_attrs = (string)($table_attrs ?? '');
+$colCount    = max(count($columns), 1);
+
+$variantSafe = $variant !== '' ? preg_replace('/[^a-z0-9_-]/i', '', $variant) : '';
+$cardClass   = 'table-card' . ($variantSafe !== '' ? ' table-card--' . $variantSafe : '');
+$tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantSafe : '');
 ?>
-<div class="table-card">
-  <table class="cms-table">
+<div class="<?= $cardClass ?>">
+  <table class="<?= $tableClass ?>"<?= $table_attrs !== '' ? ' ' . $table_attrs : '' ?>>
     <?php if (count($columns) > 0): ?>
       <thead>
         <tr>

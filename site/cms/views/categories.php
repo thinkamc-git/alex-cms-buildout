@@ -158,20 +158,11 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php if (count($errors) > 0): ?>
-        <div class="form-errors" role="alert" style="margin:var(--space-16) var(--space-24) 0">
-          <strong>Couldn't save:</strong>
-          <ul>
-            <?php foreach ($errors as $err): ?>
-              <li><?= $e($err) ?></li>
-            <?php endforeach; ?>
-          </ul>
-        </div>
-      <?php endif; ?>
-
-      <?php if ($flash !== ''): ?>
-        <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
-      <?php endif; ?>
+      <?php
+      $heading = "Couldn't save:";
+      require __DIR__ . '/../partials/form-errors.php';
+      require __DIR__ . '/../partials/flash.php';
+      ?>
 
       <?php
       // Render the per-row <form> elements once, before the layout grid.
@@ -188,55 +179,63 @@ require __DIR__ . '/../partials/topbar.php';
 
       <div class="categories-layout">
         <?php foreach (CATEGORY_TYPES as $type):
-          $rows = $byType[$type] ?? [];
-          $meta = $block_meta[$type];
+          $catRows = $byType[$type] ?? [];
+          $meta    = $block_meta[$type];
         ?>
         <div class="cat-block">
           <div class="cat-block-title"><?= $e($meta['title']) ?></div>
           <div class="cat-block-note"><?= $e($meta['note']) ?></div>
-          <table class="cat-table">
-            <thead><tr>
-              <th style="width:32%">Label</th>
-              <th style="width:22%">Value slug</th>
-              <th style="width:22%">Colour</th>
-              <th style="width:8%;text-align:center">Use</th>
-              <th style="width:16%;text-align:right">Actions</th>
-            </tr></thead>
-            <tbody>
-              <?php if (count($rows) === 0): ?>
-                <tr><td colspan="5" style="color:var(--muted);font-style:italic;padding:var(--space-12)">No categories yet — add one below.</td></tr>
-              <?php endif; ?>
-              <?php foreach ($rows as $cat):
-                $use = (int)($cat['usage_count'] ?? 0);
-                $canDelete = $use === 0;
-                $rid = 'cat-row-' . (int)$cat['id'];
-              ?>
-              <tr>
-                <td>
-                  <div style="display:flex;align-items:center;gap:6px">
-                    <div class="cat-swatch" style="background:var(--c-<?= $e((string)$cat['colour']) ?>)"></div>
-                    <input class="cat-input" name="label" form="<?= $e($rid) ?>" value="<?= $e((string)$cat['label']) ?>" maxlength="255" required>
-                  </div>
-                </td>
-                <td><span class="val-pill"><?= $e((string)$cat['value_slug']) ?></span></td>
-                <td><?= $colour_select((string)$cat['colour'], $rid) ?></td>
-                <td class="cat-count<?= $canDelete ? ' zero' : '' ?>"><?= $use ?></td>
-                <td style="text-align:right;white-space:nowrap">
-                  <button type="submit" name="action" value="update" form="<?= $e($rid) ?>" class="btn-row-action" title="Save changes" style="font-size:11px;margin-right:6px">Save</button>
-                  <?php if ($canDelete): ?>
-                    <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="cat-del ok" title="Delete category" aria-label="Delete" onclick="return confirm('Delete category &quot;<?= $e((string)$cat['label']) ?>&quot;? This can&#039;t be undone.');">
-                      <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                  <?php else: ?>
-                    <button class="cat-del" title="Delete (in use, cannot delete)" aria-label="Delete" disabled>
-                      <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                  <?php endif; ?>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+          <?php
+          $columns = [
+              ['label' => 'Label',     'width' => '32%'],
+              ['label' => 'Value slug','width' => '22%'],
+              ['label' => 'Colour',    'width' => '22%'],
+              ['label' => 'Use',       'width' => '8%'],
+              ['label' => 'Actions',   'width' => '16%'],
+          ];
+          $rows = [];
+          foreach ($catRows as $cat) {
+              $use       = (int)($cat['usage_count'] ?? 0);
+              $canDelete = $use === 0;
+              $rid       = 'cat-row-' . (int)$cat['id'];
+              $labelCell =
+                  '<div style="display:flex;align-items:center;gap:6px">'
+                . '<div class="cat-swatch" style="background:var(--c-' . $e((string)$cat['colour']) . ')"></div>'
+                . '<input class="cat-input" name="label" form="' . $e($rid) . '" value="' . $e((string)$cat['label']) . '" maxlength="255" required>'
+                . '</div>';
+              $slugCell    = '<span class="val-pill">' . $e((string)$cat['value_slug']) . '</span>';
+              $colourCell  = $colour_select((string)$cat['colour'], $rid);
+              $useCell     = (string)$use;
+              $actionsCell = '<button type="submit" name="action" value="update" form="' . $e($rid) . '" class="btn-row-action" title="Save changes" style="font-size:11px;margin-right:6px">Save</button>';
+              if ($canDelete) {
+                  // Preserve the original inline markup verbatim: outer JS
+                  // string uses single quotes, inner label wrapped in &quot;
+                  // for visual quotes, and can&#039;t for the apostrophe
+                  // (matches the pre-migration behaviour exactly).
+                  $catLabelAttr = $e((string)$cat['label']);
+                  $actionsCell .=
+                      '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="cat-del ok" title="Delete category" aria-label="Delete"'
+                    . ' onclick="return confirm(\'Delete category &quot;' . $catLabelAttr . '&quot;? This can&#039;t be undone.\');">'
+                    . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                    . '</button>';
+              } else {
+                  $actionsCell .=
+                      '<button class="cat-del" title="Delete (in use, cannot delete)" aria-label="Delete" disabled>'
+                    . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                    . '</button>';
+              }
+              $rows[] = [
+                  $labelCell,
+                  $slugCell,
+                  $colourCell,
+                  ['html' => $useCell, 'class' => 'cat-count' . ($canDelete ? ' zero' : '')],
+                  ['html' => $actionsCell, 'class' => 'cell-actions'],
+              ];
+          }
+          $empty_text = 'No categories yet — add one below.';
+          $variant    = 'cat';
+          require __DIR__ . '/../partials/table.php';
+          ?>
           <form method="post" action="/cms/categories" class="cat-add-row">
             <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
             <input type="hidden" name="action" value="add">

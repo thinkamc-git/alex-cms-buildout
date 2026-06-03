@@ -231,6 +231,10 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
 .btn-danger:hover { border-color:var(--c-terracotta); }
 .btn-row-action { padding:3px 10px; background:transparent; border:1px solid var(--ink-18); border-radius:2px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:border-color 0.12s,color 0.12s; white-space:nowrap; }
 .btn-row-action:hover { border-color:var(--primary); color:var(--primary); }
+/* Row delete trashcan — singleton style used by subscribers (#8 sub-table). */
+.btn-row-del { background:none; border:none; cursor:pointer; color:var(--muted); padding:4px; line-height:0; }
+.btn-row-del:hover { color:var(--c-terracotta); }
+.btn-row-del svg { width:14px; height:14px; }
 .btn-save { padding:8px 20px; background:var(--primary); border:none; border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); cursor:pointer; }
 .btn-save:hover { opacity:0.8; }
 .btn-add-dashed { width:100%; border:1px dashed var(--ink-18); background:transparent; padding:8px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:border-color 0.15s,color 0.15s; margin-top:var(--space-8); border-radius:var(--r-pill); }
@@ -409,6 +413,11 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .pipeline-header { padding:var(--space-20) var(--space-24); border-bottom:var(--rule-faint); background:var(--surface); flex-shrink:0; }
 .pipeline-desc { max-width:520px; margin-bottom:var(--space-16); }
 .dash-meta { display:flex; align-items:center; gap:var(--space-20); margin-bottom:var(--space-16); }
+/* Phase 21 — Draft Writing now uses the standard view-header partial, so
+   .dash-meta sits as a direct child of .view (between the header and the
+   kanban board below). Match the view-header's horizontal padding so the
+   stats line up with the title above. */
+.view > .dash-meta { padding:0 var(--space-24); margin-top:var(--space-12); border-bottom:var(--rule-faint); padding-bottom:var(--space-16); }
 .dash-stat { display:flex; align-items:baseline; gap:6px; }
 .dash-stat .num { font-family:var(--font-serif); font-style:italic; font-size:26px; line-height:1; letter-spacing:-0.03em; color:var(--primary); }
 .dash-stat .lbl { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
@@ -608,10 +617,24 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .fv-opt-tbl.show { background:var(--c-denim); color:var(--white); border-color:var(--c-denim); z-index:1; }
 .fv-opt-tbl.hide { background:var(--muted); color:var(--white); border-color:var(--muted); z-index:1; }
 .fv-inherited { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); font-style:italic; }
-.master-field-table { width:100%; border-collapse:collapse; }
-.master-field-table th { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:0 0 var(--space-8); border-bottom:var(--rule-faint); }
-.master-field-table td { padding:var(--space-16) 0; border-bottom:var(--rule-faint); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; }
-.master-field-table tr:last-child td { border-bottom:none; }
+/* Reference-table variant of the shared .cms-table partial (#8). The
+   legacy .master-field-table selector is preserved as an alias for any
+   inline tables that haven't migrated; .cms-table--reference is the
+   canonical. */
+.master-field-table,
+.cms-table--reference { width:100%; border-collapse:collapse; }
+.master-field-table th,
+.cms-table--reference th { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:0 0 var(--space-8); border-bottom:var(--rule-faint); }
+.master-field-table td,
+.cms-table--reference td { padding:var(--space-16) 0; border-bottom:var(--rule-faint); font-size:var(--text-meta); font-weight:500; color:var(--secondary); vertical-align:middle; }
+.master-field-table tr:last-child td,
+.cms-table--reference tr:last-child td { border-bottom:none; }
+/* Reference variant: borderless card (the surrounding .tpl-panel /
+   .info-box already provides framing). */
+.table-card--reference { background:transparent; border:none; padding:0; box-shadow:none; margin-top:var(--space-16); }
+/* Cell-class helpers used by the reference variant. */
+.cms-table--reference td.cell-mono { font-family:var(--font-mono); font-size:var(--text-tiny); color:var(--secondary); }
+.cms-table--reference td.cell-note { font-size:var(--text-tiny); color:var(--muted); line-height:1.55; }
 .field-name { font-weight:600; color:var(--primary); }
 .field-note-cell { font-size:var(--text-tiny); color:var(--muted); line-height:1.55; padding-left:var(--space-16); }
 .fv-field-sel { display:flex; }
@@ -621,14 +644,38 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-block { background:var(--surface); border:var(--rule-faint); border-radius:var(--r-card); padding:var(--space-20); box-shadow:0 1px 3px var(--ink-08); }
 .cat-block-title { font-family:var(--font-serif); font-style:italic; font-size:17px; font-weight:400; color:var(--primary); margin-bottom:2px; }
 .cat-block-note { font-size:var(--text-meta); color:var(--muted); margin-bottom:var(--space-16); line-height:1.4; }
-.cat-table { width:100%; border-collapse:collapse; }
-.cat-table th { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:var(--space-8) var(--space-12) var(--space-8) 0; border-bottom:var(--rule-faint); background:var(--canvas-raised); white-space:nowrap; }
-.cat-table th:first-child { padding-left:var(--space-12); }
-.cat-table th:last-child { text-align:right; padding-right:var(--space-12); }
-.cat-table td { padding:10px var(--space-12) 10px 0; border-bottom:1px solid var(--ink-12); vertical-align:middle; font-size:var(--text-meta); }
-.cat-table td:first-child { padding-left:var(--space-12); }
-.cat-table td:last-child { text-align:right; padding-right:var(--space-12); }
-.cat-table tr:last-child td { border-bottom:none; }
+/* Categories variant of the shared .cms-table partial (#7 + #8). The
+   legacy .cat-table selector is kept as an alias for any inline-table
+   callers that haven't migrated; .cms-table--cat is the canonical. */
+.cat-table,
+.cms-table--cat { width:100%; border-collapse:collapse; }
+.cat-table th,
+.cms-table--cat th { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); text-align:left; padding:var(--space-8) var(--space-12) var(--space-8) 0; border-bottom:var(--rule-faint); background:var(--canvas-raised); white-space:nowrap; }
+.cat-table th:first-child,
+.cms-table--cat th:first-child { padding-left:var(--space-12); }
+.cat-table th:last-child,
+.cms-table--cat th:last-child { text-align:right; padding-right:var(--space-12); }
+.cat-table td,
+.cms-table--cat td { padding:10px var(--space-12) 10px 0; border-bottom:1px solid var(--ink-12); vertical-align:middle; font-size:var(--text-meta); }
+.cat-table td:first-child,
+.cms-table--cat td:first-child { padding-left:var(--space-12); }
+.cat-table td:last-child,
+.cms-table--cat td:last-child { text-align:right; padding-right:var(--space-12); }
+.cat-table tr:last-child td,
+.cms-table--cat tr:last-child td { border-bottom:none; }
+/* The shared .table-card wrapper around the partial gives the cat
+   variant a card border; .cat-block already provides the outer surface
+   styling, so suppress the inner card chrome for this variant. */
+.table-card--cat { border:none; padding:0; background:transparent; box-shadow:none; }
+
+/* Subscribers variant of the shared .cms-table partial (#8). The legacy
+   .sub-table CSS used to live inline in views/subscribers.php — moved
+   here under .cms-table--sub. The is-mono cell class is preserved. */
+.cms-table--sub { width:100%; border-collapse:collapse; }
+.cms-table--sub th,
+.cms-table--sub td { padding:10px 12px; border-bottom:var(--rule-faint); vertical-align:middle; }
+.cms-table--sub th { font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); text-align:left; font-weight:600; }
+.cms-table--sub td.is-mono { font-family:var(--font-mono); font-size:12px; }
 .cat-input { border:none; background:transparent; font-family:var(--font); font-size:var(--text-meta); font-weight:500; color:var(--primary); outline:none; width:100%; padding:2px 0; border-bottom:1px solid transparent; transition:border-color 0.15s; }
 .cat-input:focus { border-bottom-color:var(--ink-30); }
 .cat-swatch { width:10px; height:10px; border-radius:50%; border:1px solid var(--ink-12); flex-shrink:0; display:inline-block; }
@@ -636,8 +683,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-colour-select { appearance:none; -webkit-appearance:none; border:none; padding:4px 22px 4px 10px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--white); border-radius:var(--r-pill); cursor:pointer; outline:none; background-image:url("data:image/svg+xml,%3Csvg width='8' height='5' viewBox='0 0 8 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L4 4L7 1' stroke='%23ffffff' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 7px center; transition:filter 0.15s; }
 .cat-colour-select:hover { filter:brightness(1.08); }
 .cat-colour-select:focus { outline:1px solid var(--ink-30); outline-offset:1px; }
-.cat-table td.cat-count { font-family:var(--font-mono); font-size:var(--text-label); color:var(--secondary); }
-.cat-table td.cat-count.zero { color:var(--muted); }
+.cat-table td.cat-count,
+.cms-table--cat td.cat-count { font-family:var(--font-mono); font-size:var(--text-label); color:var(--secondary); }
+.cat-table td.cat-count.zero,
+.cms-table--cat td.cat-count.zero { color:var(--muted); }
 .cat-del { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:0; background:none; border:none; color:var(--ink-30); cursor:not-allowed; transition:color 0.15s,opacity 0.15s; border-radius:2px; }
 .cat-del svg { width:13px; height:13px; }
 .cat-del.ok { color:var(--c-terracotta); cursor:pointer; }
@@ -913,6 +962,18 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 .form-errors { padding:var(--space-12) var(--space-16); margin-bottom:var(--space-20); background:color-mix(in srgb,var(--c-terracotta) 8%,transparent); border:1px solid color-mix(in srgb,var(--c-terracotta) 28%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--c-terracotta); }
 .form-errors strong { display:block; margin-bottom:var(--space-4); }
 .form-errors ul { margin:0; padding-left:var(--space-20); }
+/* When the banner sits as a direct child of .view (i.e. between view-header
+   and the .content-area below), it needs horizontal margin to mirror the
+   content-area's own padding-x. Inside .content-area it already inherits
+   that padding from the parent. */
+.view > .form-errors,
+.view > .flash-success { margin-left:var(--space-24); margin-right:var(--space-24); margin-top:var(--space-16); }
+/* Ideation capture row: the flash sits inside .ideation-capture, beneath
+   the 580px-wide capture form. Constrain it to match. */
+.ideation-capture > .flash-success { margin-top:var(--space-12); max-width:580px; }
+/* Pipeline header: flash sits inside the .pipeline-header block beneath
+   the title row. */
+.pipeline-header > .flash-success { margin-top:var(--space-12); }
 
 .flash-success { padding:var(--space-8) var(--space-16); margin-bottom:var(--space-16); background:color-mix(in srgb,var(--stage-published) 8%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 25%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--stage-published); }
 .flash-undo { display:inline; margin:0 0 0 var(--space-12); }
@@ -1336,3 +1397,53 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 }
 .pipeline-load-more:hover { color: var(--primary); border-color: var(--primary); }
 .pipeline-load-more-hidden { display: none; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   ROW-FORM PATTERN — shared mechanics for navigation + redirects + any
+   future grid-aligned bordered-row list editor (#9). Each row is its own
+   bordered card; the form spans the grid via display:contents; Save +
+   Delete sit on the right and reveal on dirty / hover.
+
+   Per-view column template is set as --rowform-cols on .rowform-list.
+   ══════════════════════════════════════════════════════════════════════ */
+.rowform-list { display:flex; flex-direction:column; gap:6px; }
+.rowform-row {
+  display:grid;
+  grid-template-columns: var(--rowform-cols, 1fr auto auto);
+  gap:8px;
+  align-items:center;
+  padding:8px 10px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:4px;
+}
+.rowform-row > form { display:contents; }
+.rowform-row input[type=text],
+.rowform-row select {
+  padding:5px 7px;
+  border:1px solid var(--border);
+  border-radius:3px;
+  font-size:12px;
+  background:var(--surface);
+  color:var(--ink);
+  font-family:var(--font-mono);
+  min-width:0;
+  width:100%;
+  box-sizing:border-box;
+}
+/* Save button: hidden until the row is dirty (dirty-flip.js swaps it
+   from btn-ghost to btn-pri to signal pending changes). The trailing
+   add-row's Save stays visible since it has no data-save-btn marker. */
+.rowform-row [data-save-btn] { visibility:hidden; }
+.rowform-row [data-save-btn].btn-pri { visibility:visible; }
+/* Delete: hover-reveal so it doesn't always shout. visibility, not
+   display, so the column doesn't collapse. */
+.rowform-row .btn-danger { visibility:hidden; }
+.rowform-row:hover .btn-danger,
+.rowform-row:focus-within .btn-danger { visibility:visible; }
+/* Drag-affordance states (navigation only — redirects don't reorder). */
+.rowform-row.is-dragging { opacity:0.4; }
+.rowform-row.is-over-top    { box-shadow: 0 -2px 0 0 var(--c-denim); }
+.rowform-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
+/* Add-row uses the same grid template, distinguished by tint. */
+.rowform-add-row { background:var(--bg-soft); }

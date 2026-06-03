@@ -60,7 +60,7 @@
   }
 
   function injectPreviewSaveBar() {
-    var sourceSave   = mainForm.querySelector('[data-primary-save]');
+    var sourceSave   = mainForm.querySelector('[data-save-btn]');
     // Cancel link from the source form-actions (first .btn-ghost <a> that
     // isn't the View-live link). Falls back to a list-route guess.
     var sourceCancel = mainForm.querySelector('.form-actions a.btn-ghost:not([target])');
@@ -92,7 +92,7 @@
     var save = document.createElement('button');
     save.type = 'button';
     save.className = sourceSave.className; // mirror btn-ghost / btn-pri
-    save.setAttribute('data-primary-save', '');
+    save.setAttribute('data-save-btn', '');
     save.setAttribute('data-preview-save-clone', '');
     save.textContent = sourceSave.textContent;
     save.addEventListener('click', function () { sourceSave.click(); });
@@ -170,11 +170,9 @@
   function flipDirty() {
     if (dirty) return;
     dirty = true;
-    // Flip primary save button(s) from ghost → primary.
-    document.querySelectorAll('[data-primary-save]').forEach(function (btn) {
-      btn.classList.remove('btn-ghost');
-      btn.classList.add('btn-pri');
-    });
+    // The btn-ghost → btn-pri class flip is handled by the shared
+    // dirty-flip module (cms/_assets/dirty-flip.js). This handler now
+    // only tracks the dirty flag for the beforeunload guard below.
   }
   // Track form submission so we don't pop a "leaving site" prompt when the
   // navigation is the user's own Save click.

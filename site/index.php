@@ -250,21 +250,13 @@ $router->get('/experiments/:slug', static function (array $p): void {
 // Single-segment paths (/writing) and two-segment paths (/writing/:slug)
 // are matched by segment count, so they coexist cleanly — declaration
 // order doesn't matter.
-//
-// ⚠ Staging-only during the Phase 12–15 prod-freeze (see BUILD-PLAN §3).
-// Prod requests to /writing/, /journal/, /live-sessions/, /experiments/,
-// /series/[slug]/ should fall through to 404 until Phase 29 (Public
-// Cutover) deletes this gate. The marketing-page nav on prod doesn't
-// link here, so visitors never see a 404 in normal flow.
-if (defined('APP_ENV') && APP_ENV === 'staging') {
-    $router->get('/writing',       static function (): void { render_index('writing'); });
-    $router->get('/journal',       static function (): void { render_index('journal'); });
-    $router->get('/live-sessions', static function (): void { render_index('live-sessions'); });
-    $router->get('/experiments',   static function (): void { render_index('experiments'); });
-    $router->get('/series/:slug',  static function (array $p): void {
-        render_series_index((string)($p['slug'] ?? ''));
-    });
-}
+$router->get('/writing',       static function (): void { render_index('writing'); });
+$router->get('/journal',       static function (): void { render_index('journal'); });
+$router->get('/live-sessions', static function (): void { render_index('live-sessions'); });
+$router->get('/experiments',   static function (): void { render_index('experiments'); });
+$router->get('/series/:slug',  static function (array $p): void {
+    render_series_index((string)($p['slug'] ?? ''));
+});
 
 // Route-miss handler. First check for a DB-backed redirect (replaces
 // the old .htaccess legacy block). If nothing matches, serve the
@@ -285,8 +277,7 @@ $router->set_not_found(static function (string $method, string $path): void {
     // built-in indexes (writing / journal / live-sessions / experiments) get
     // their own static routes above; any other single-segment slug that
     // matches a row in the `indexes` table renders via render_index().
-    // Staging-only — see prod-freeze note below the built-in block.
-    if ($method === 'GET' && defined('APP_ENV') && APP_ENV === 'staging') {
+    if ($method === 'GET') {
         $cleanPath = trim((string)strtok($path, '?'), '/');
         if ($cleanPath !== '' && strpos($cleanPath, '/') === false && preg_match('/^[a-z0-9][a-z0-9\-]*$/', $cleanPath)) {
             require_once __DIR__ . '/lib/indexes.php';

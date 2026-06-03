@@ -246,7 +246,9 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'draft-writing';
-  $nav_counts    = ['articles' => count($articles)];
+  // Counts are scoped to the active view's own nav-item (matches every
+  // other list view). Don't leak counts onto sibling items.
+  $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 

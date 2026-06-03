@@ -137,6 +137,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     . '&flash=' . rawurlencode('Slug required before setting up a folder.'));
                 exit;
             }
+            // Persist the body_mode that came in with the POST so the post-
+            // redirect render lands on the same panel the user clicked from.
+            // Without this, an unsaved toggle to HTML File is lost and the
+            // form snaps back to RTF after Setup/Refresh.
+            $postedMode = (string)($_POST['body_mode'] ?? '');
+            if (in_array($postedMode, ['rtf', 'html-body'], true)) {
+                save_article(['id' => $id, 'body_mode' => $postedMode]);
+            }
             if ($action === 'setup_folder') {
                 $res = folder_setup('article', $aSlug);
                 if ($res['ok']) {

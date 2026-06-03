@@ -174,18 +174,18 @@ if ($preview_mock !== null && ($preview_mock['slug'] ?? '') === $body) {
     if (!empty($preview_mock['meta_description'])) $description = (string)$preview_mock['meta_description'];
 }
 
-// Composite browser-tab title. If the page-set $title already contains the
-// configured site_title (legacy assemblers ship "About — Alex M. Chong"
-// hardcoded), render it as-is so updating site_title doesn't double-suffix.
-// Otherwise append the suffix so "About" becomes "About — Alex M. Chong".
+// Composite browser-tab title. Two precedence tiers:
+//   1. page_metadata.meta_title set in the CMS → render exactly as authored,
+//      no suffix. The CMS title is treated as the final intended string.
+//   2. No per-page meta_title → use the assembler's $title and auto-append
+//      ' — ' + site_title (skipped if $title already contains site_title or
+//      $title is blank).
 $_page_title_part = trim((string)$title);
-$_final_title = $_page_title_part;
-if ($_site_title !== '') {
-    if ($_page_title_part === '') {
-        $_final_title = $_site_title;
-    } elseif (stripos($_page_title_part, $_site_title) === false) {
-        $_final_title = $_page_title_part . ' — ' . $_site_title;
-    }
+$_final_title     = $_page_title_part !== '' ? $_page_title_part : $_site_title;
+$_has_pmeta_title = ($_meta_title !== null && $_meta_title !== '');
+if (!$_has_pmeta_title && $_site_title !== '' && $_page_title_part !== ''
+    && stripos($_page_title_part, $_site_title) === false) {
+    $_final_title = $_page_title_part . ' — ' . $_site_title;
 }
 ?><!DOCTYPE html>
 <html lang="en">

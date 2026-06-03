@@ -183,6 +183,9 @@ cp site/lib/pages.php              "$STAGE/lib/"
 cp site/lib/nav.php                "$STAGE/lib/"
 # Phase 21.6: pills() helper used by post-template for status pills.
 cp site/lib/pills.php              "$STAGE/lib/"
+# Phase 21: site-wide settings (key/value bag) read by _page-shell.php
+# and footer.php for title suffix, og defaults, analytics, footer copy.
+cp site/lib/settings.php           "$STAGE/lib/"
 # Vendored CodeMirror 5 — used by the Pages editor for PHP-mode editing
 # of mock versions. ~280KB, no CDN dependency at runtime.
 mkdir -p "$STAGE/cms/_assets/codemirror"

@@ -179,6 +179,13 @@ $router->get ('/cms/navigation',          $cms('views/navigation.php'));
 $router->post('/cms/navigation',          $cms('views/navigation.php'));
 $router->post('/cms/navigation/reorder',  $cms('views/navigation-reorder.php'));
 
+// Phase 21: Settings. Single-form admin for site-wide defaults
+// (title suffix, og:* defaults, footer copyright, analytics snippet).
+// Page shell reads these as the second tier in its metadata cascade:
+// per-page page_metadata → settings default → hardcoded shell fallback.
+$router->get ('/cms/settings', $cms('views/settings.php'));
+$router->post('/cms/settings', $cms('views/settings.php'));
+
 // ── Public subscribe (Phase 14) ─────────────────────────────────────
 // POST /subscribe handles the newsletter-form submission: honeypot,
 // rate-limit (1/min, 10/day per IP), email validation, upsert.

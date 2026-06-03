@@ -55,6 +55,19 @@ foreach ([__DIR__ . '/../lib/db.php', __DIR__ . '/../../lib/db.php'] as $_p) {
 foreach ([__DIR__ . '/../lib/pages.php', __DIR__ . '/../../lib/pages.php'] as $_p) {
     if (is_file($_p)) { require_once $_p; break; }
 }
+foreach ([__DIR__ . '/../lib/settings.php', __DIR__ . '/../../lib/settings.php'] as $_p) {
+    if (is_file($_p)) { require_once $_p; break; }
+}
+
+// Site-wide defaults from the settings table (Phase 21). Fallbacks match
+// the pre-settings hardcoded values so a fresh / failed DB read renders
+// the same chrome as before.
+$_site_title       = function_exists('get_setting') ? get_setting('site_title', 'Alex M. Chong')         : 'Alex M. Chong';
+$_default_og_image = function_exists('get_setting') ? get_setting('default_og_image', '')                 : '';
+$_default_og_type  = function_exists('get_setting') ? get_setting('default_og_type', 'website')           : 'website';
+$_default_tw_card  = function_exists('get_setting') ? get_setting('default_twitter_card', 'summary_large_image') : 'summary_large_image';
+$_analytics_script = function_exists('get_setting') ? get_setting('analytics_script', '')                 : '';
+
 if (function_exists('get_page_metadata') && $body !== '') {
     try {
         $_pmeta = get_page_metadata($body);
@@ -65,11 +78,18 @@ if (function_exists('get_page_metadata') && $body !== '') {
         $_meta_title    = $_pmeta['meta_title']       ?: null;
         $_meta_desc     = $_pmeta['meta_description'] ?: null;
         $_meta_og_image = $_pmeta['og_image']         ?: null;
-        $_meta_og_type  = $_pmeta['og_type']          ?: 'website';
-        $_meta_tw_card  = $_pmeta['twitter_card']     ?: 'summary_large_image';
+        $_meta_og_type  = $_pmeta['og_type']          ?: $_default_og_type;
+        $_meta_tw_card  = $_pmeta['twitter_card']     ?: $_default_tw_card;
         if ($_meta_title !== null) $title = $_meta_title;
         if ($_meta_desc  !== null) $description = $_meta_desc;
     }
+}
+
+// Settings-level og:image fallback. When the per-page page_metadata row
+// doesn't define an image, use the site-wide default. Either source is
+// enough to emit the og:* + twitter:card block below.
+if ($_meta_og_image === null && $_default_og_image !== '') {
+    $_meta_og_image = $_default_og_image;
 }
 
 // Tolerate two layouts. Post-deploy: webroot/_layout → webroot/lib
@@ -153,12 +173,26 @@ if ($preview_mock !== null && ($preview_mock['slug'] ?? '') === $body) {
     if (!empty($preview_mock['meta_title']))       $title       = (string)$preview_mock['meta_title'];
     if (!empty($preview_mock['meta_description'])) $description = (string)$preview_mock['meta_description'];
 }
+<?php
+// Composite browser-tab title. If the page-set $title already contains the
+// configured site_title (legacy assemblers ship "About — Alex M. Chong"
+// hardcoded), render it as-is so updating site_title doesn't double-suffix.
+// Otherwise append the suffix so "About" becomes "About — Alex M. Chong".
+$_page_title_part = trim((string)$title);
+$_final_title = $_page_title_part;
+if ($_site_title !== '') {
+    if ($_page_title_part === '') {
+        $_final_title = $_site_title;
+    } elseif (stripos($_page_title_part, $_site_title) === false) {
+        $_final_title = $_page_title_part . ' — ' . $_site_title;
+    }
+}
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title><?= $_e($title) ?></title>
+  <title><?= $_e($_final_title) ?></title>
 <?php if ($description !== ''): ?>
   <meta name="description" content="<?= $_e($description) ?>" />
 <?php endif; ?>
@@ -199,5 +233,8 @@ if ($_body_html_override !== null) {
 
 <?php $_render_partial('footer'); ?>
 
+<?php if ($_analytics_script !== ''): /* Phase 21: site-wide analytics injection. Raw output — admin-only trusted input. */ ?>
+<?= $_analytics_script ?>
+<?php endif; ?>
 </body>
 </html>

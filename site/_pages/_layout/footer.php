@@ -11,9 +11,15 @@ if (!function_exists('render_nav')) {
         if (is_file($_p)) { require_once $_p; break; }
     }
 }
+if (!function_exists('get_setting')) {
+    foreach ([__DIR__ . '/../lib/settings.php', __DIR__ . '/../../lib/settings.php'] as $_p) {
+        if (is_file($_p)) { require_once $_p; break; }
+    }
+}
+$_footer_copy = function_exists('get_setting') ? get_setting('footer_copyright', 'alex m. chong') : 'alex m. chong';
 ?>
 <footer class="layout-footer">
-  <span class="layout-footer-left">© <?= date('Y') ?> alex m. chong</span>
+  <span class="layout-footer-left">© <?= date('Y') ?> <?= htmlspecialchars($_footer_copy, ENT_QUOTES, 'UTF-8') ?></span>
   <div class="layout-footer-right">
 <?php render_nav('footer'); ?>
   </div>

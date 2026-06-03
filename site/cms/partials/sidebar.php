@@ -159,10 +159,10 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Post Templates
     </a>
-    <span class="nav-item is-placeholder" data-nav-id="settings" aria-disabled="true" title="Coming soon">
+    <a class="nav-item<?= $activeClass('settings') ?>"<?= $activeAria('settings') ?> href="/cms/settings" data-nav-id="settings">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l.85.6 1.05-.15.45.96.95.46-.15 1.05.6.85-.6.85.15 1.05-.95.46-.45.96-1.05-.15L7 12.5l-.85-.6-1.05.15-.45-.96-.95-.46.15-1.05-.6-.85.6-.85-.15-1.05.95-.46.45-.96 1.05.15z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg>
       Settings
-    </span>
+    </a>
   </div>
 
 </nav>

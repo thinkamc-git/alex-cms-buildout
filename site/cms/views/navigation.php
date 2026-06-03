@@ -209,6 +209,20 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
     max-width: 100%;
   }
   .np-mark.hl-pill input::placeholder { color: var(--np-contrast, #fff); opacity: 0.6; }
+  /* Phase 21.7 — the pill-styled input IS the visible pill, so the
+     generic rowform field hover (darken border + bg → canvas-bg) would
+     wipe out the pill colour and make the hover invisible. Keep the
+     pill look on hover; focus gets a subtle white inset ring instead. */
+  .rowform-row .np-mark.hl-pill input:hover {
+    background: var(--np-color, #d63031);
+    border-color: transparent;
+  }
+  .rowform-row .np-mark.hl-pill input:focus {
+    background: var(--np-color, #d63031);
+    border-color: transparent;
+    outline: none;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+  }
   .np-mark.hl-none input { visibility:hidden; }
   .pill-broken { display:inline-block; font-family:var(--font-cond); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; padding:2px 6px; border-radius:3px; background:var(--c-terracotta); color:white; font-weight:600; vertical-align:middle; margin-left:6px; }
   .nav-zone-help { font-size:11px; color:var(--muted); padding:0 var(--space-24) var(--space-12); }

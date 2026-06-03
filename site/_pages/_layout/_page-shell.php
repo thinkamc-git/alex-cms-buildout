@@ -173,7 +173,7 @@ if ($preview_mock !== null && ($preview_mock['slug'] ?? '') === $body) {
     if (!empty($preview_mock['meta_title']))       $title       = (string)$preview_mock['meta_title'];
     if (!empty($preview_mock['meta_description'])) $description = (string)$preview_mock['meta_description'];
 }
-<?php
+
 // Composite browser-tab title. If the page-set $title already contains the
 // configured site_title (legacy assemblers ship "About — Alex M. Chong"
 // hardcoded), render it as-is so updating site_title doesn't double-suffix.

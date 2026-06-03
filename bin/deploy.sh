@@ -261,36 +261,6 @@ EXCLUDES=(
   --exclude='backups/**'
 )
 
-# Phase 12–15 prod freeze (see docs/BUILD-PLAN.md §3 + Phase 29 brief).
-# While the build is in progress, the prod public surface stays frozen at
-# its pre-Phase-12 visual state. Three files would otherwise overwrite the
-# live nav + landing copy on every prod deploy — exclude them so prod
-# keeps its existing copies untouched. Phase 29 (Public Cutover) removes
-# these excludes in one diff to flip the new chrome live.
-if [ "$TARGET" = "prod" ] || [ "$TARGET" = "production" ]; then
-  EXCLUDES+=(
-    --exclude='_layout/header.html'
-    --exclude='_bodies/landing.html'
-    --exclude='templates/partials/nav.php'
-    # Phase 14 added a live POST /subscribe handler + form on staging.
-    # Prod keeps the GET-to-/newsletter-confirmed/ static form until the
-    # Phase 29 cutover (consistent with the rest of the prod freeze).
-    --exclude='_bodies/newsletter.html'
-    # Phase 20 added the env-gated header/footer cascade in _page-shell.php
-    # and the new DB-driven header.php / footer.php partials. Prod stays on
-    # the frozen static header.html / footer.html. Excluding the new files +
-    # the new _page-shell.php keeps prod's render path unchanged until the
-    # Phase 29 cutover removes the env gate.
-    --exclude='_layout/footer.html'
-    --exclude='_layout/header.php'
-    --exclude='_layout/footer.php'
-    --exclude='_layout/_page-shell.php'
-  )
-  echo "==> Prod-freeze active: skipping marketing nav, landing copy,"
-  echo "    newsletter form body, CMS-rendered nav.php, and the Phase 20"
-  echo "    header/footer cascade (Phase 29 flips these)."
-fi
-
 echo
 echo "==> Rsync to alexmchong-ca:$REMOTE_DIR"
 echo "    dry-run: ${DRY:-no}    delete-orphans: ${DELETE:-no}"

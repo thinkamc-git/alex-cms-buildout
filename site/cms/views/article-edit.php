@@ -716,7 +716,7 @@ require __DIR__ . '/../partials/topbar.php';
       if ($titleHdr === '') $titleHdr = 'Untitled';
       $title    = $titleHdr;
       $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
-      $subtitle = 'Article · ' . $stageLabel . ' · last saved ' . (string)($article['updated_at'] ?? '');
+      $subtitle = 'Article · ' . $stageLabel . ' · saved ' . (string)($article['updated_at'] ?? '');
 
       // Flash + Undo render inline alongside the subtitle (next to "last saved").
       $subtitle_extra = '';
@@ -850,7 +850,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <option value="<?= $e((string)$val) ?>" <?= $typeCur === $val ? 'selected' : '' ?>><?= $e($lbl) ?></option>
               <?php endforeach; ?>
             </select>
-            <p class="field-hint">Required before advancing. You can also drag the card into a type column in Ideation.</p>
+            <p class="field-hint">Required before you can advance.</p>
           </div>
 
           <div class="form-actions form-actions-sticky">
@@ -937,8 +937,8 @@ require __DIR__ . '/../partials/topbar.php';
                   required>
                 <p class="field-hint">
                   <?php if ($slugPublished): ?>
-                    <strong>Warning:</strong> This article is published. Changing the slug
-                    will create a 301 redirect from the old URL in Phase 11.
+                    <strong>Warning:</strong> this article is published. Changing the slug
+                    will create a 301 redirect from the old URL.
                   <?php else: ?>
                     Lowercase letters, numbers, hyphens. Becomes part of <code>/writing/&lt;slug&gt;</code>.
                   <?php endif; ?>
@@ -1039,7 +1039,7 @@ require __DIR__ . '/../partials/topbar.php';
                         aria-label="Article body (HTML)"><?= $e($bodyInitial) ?></textarea>
                     </div>
                     <p class="field-hint">
-                      The editor strips any HTML outside the toolbar allowlist on save.
+                      Any HTML outside the toolbar's allowlist is stripped on save.
                     </p>
                   </div>
 
@@ -1060,9 +1060,9 @@ require __DIR__ . '/../partials/topbar.php';
                       </div>
                       <div class="folder-block-bd">
                         <?php if (!$articleFolderExists): ?>
-                          <p class="field-hint">No folder exists yet for this slug. Click <strong>Set up folder</strong> to create
+                          <p class="field-hint">No folder exists yet for this slug. Click "Set up folder" to create
                             <code><?= $e($articleFolderPath) ?></code> on the server.
-                            Then drop your <code>.html</code> file into it via SSH/CloudMounter and click <strong>Refresh</strong>.</p>
+                            Drop your <code>.html</code> file into it via SSH or CloudMounter, then click Refresh.</p>
                           <button type="submit" name="action" value="setup_folder" class="btn-sec" formnovalidate>
                             Set up folder
                           </button>
@@ -1084,7 +1084,7 @@ require __DIR__ . '/../partials/topbar.php';
                           </div>
                           <p class="field-hint">
                             The article chrome (breadcrumb, title, byline, hero, tags) stays as edited above. Only the body
-                            slot is replaced by the contents of the selected file. The file's HTML inherits the public
+                            slot is replaced by the file. The file's HTML inherits the public
                             <code>.article-prose</code> typography rules.
                           </p>
                         <?php endif; ?>
@@ -1179,7 +1179,7 @@ require __DIR__ . '/../partials/topbar.php';
                     <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
                   <?php endforeach; ?>
                 </select>
-                <p class="field-hint">Drives card colour on /writing/ and the breadcrumb. Manage at <a href="/cms/categories">/cms/categories</a>.</p>
+                <p class="field-hint">Drives card colour on /writing/ and the breadcrumb. Manage in Collections › Categories.</p>
               </div>
 
               <div class="field-group">
@@ -1207,7 +1207,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <?php endforeach; ?>
                 </select>
                 <p class="field-hint">
-                  Manage the list at <a href="/cms/series">/cms/series</a>.
+                  Manage the list in Collections › Series.
                 </p>
               </div>
 
@@ -1221,7 +1221,7 @@ require __DIR__ . '/../partials/topbar.php';
                     <span style="color:var(--muted);font-style:italic">unset (save once to assign)</span>
                   <?php endif; ?>
                 </div>
-                <p class="field-hint">Auto-assigned. Drag-reorder parts at <a href="/cms/series">/cms/series</a>.</p>
+                <p class="field-hint">Auto-assigned. Re-order parts in Collections › Series (drag handles).</p>
               </div>
 
               <script>
@@ -1246,13 +1246,13 @@ require __DIR__ . '/../partials/topbar.php';
                   value="<?= $e((string)($article['tags'] ?? '')) ?>"
                   maxlength="500"
                   placeholder="comma, separated, list">
-                <p class="field-hint">Display only — not used for filtering yet.</p>
+                <p class="field-hint">Display only — not used for filtering.</p>
               </div>
 
               <?php if ($showReadTime): ?>
                 <div class="field-group">
                   <label class="field-label" for="article-read-time">
-                    Read time <span class="field-hint-inline">minutes<?= $readTimeDisabled ? ' · set at Draft' : '' ?></span>
+                    Read time <span class="field-hint-inline">minutes<?= $readTimeDisabled ? ' · set at Draft stage' : '' ?></span>
                   </label>
                   <input
                     type="number"
@@ -1335,7 +1335,7 @@ require __DIR__ . '/../partials/topbar.php';
                              value="<?= $e($scheduleAtForInput) ?>"
                              min="<?= $e($minScheduleAt) ?>"
                              data-schedule-input>
-                      <p class="field-hint">Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.</p>
+                      <p class="field-hint">Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.</p>
                     </div>
                   </div>
                 </div>
@@ -1575,7 +1575,7 @@ require __DIR__ . '/../partials/topbar.php';
       if (stage === 'published') {
         const typed = window.prompt(
           'Deleting a published article is permanent.\n\n' +
-          'Type the slug to confirm:\n\n  ' + slug
+          'Type the slug exactly to confirm:\n\n  ' + slug
         );
         if (typed === null) { e.preventDefault(); return; }
         if (typed.trim() !== slug) {

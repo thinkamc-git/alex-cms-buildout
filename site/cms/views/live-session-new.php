@@ -125,7 +125,7 @@ require __DIR__ . '/../partials/topbar.php';
               maxlength="500"
               required
               autofocus>
-            <p class="field-hint">e.g. "Designing for Human Agency". Shown on the public page and in /live-sessions listings.</p>
+            <p class="field-hint">e.g. "Designing for Human Agency". Shown on the public page and in /live-sessions/ listings.</p>
           </div>
 
           <div class="field-group">

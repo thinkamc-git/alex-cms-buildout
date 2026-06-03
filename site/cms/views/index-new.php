@@ -94,7 +94,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-new-index">
       <?php
       $title    = 'New Editorial Index';
-      $subtitle = 'Creates a configurable page at a custom URL. Slug is permanent — pick carefully.';
+      $subtitle = 'Creates a configurable page at a custom URL. The slug becomes the URL and is permanent — pick carefully.';
       $actions  = '<a href="/cms/indexes" class="btn-ghost">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -118,7 +118,7 @@ require __DIR__ . '/../partials/topbar.php';
             <label class="field-label" for="title-input">Title</label>
             <input id="title-input" type="text" name="title" value="<?= $e($defaults['title']) ?>" maxlength="500" placeholder="e.g. Digital Garden"
                    class="field-input" style="width:100%">
-            <p class="field-hint">Shown at the top of the index page. Also used to derive the slug if you leave that blank.</p>
+            <p class="field-hint">Shown at the top of the index page. Also used to derive the slug below if you leave it blank.</p>
           </div>
 
           <div class="field-group">
@@ -138,12 +138,12 @@ require __DIR__ . '/../partials/topbar.php';
               <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer;background:<?= $defaults['layout'] === 'listing' ? 'var(--canvas-raised)' : 'var(--surface)' ?>">
                 <input type="radio" name="layout" value="listing" <?= $defaults['layout'] === 'listing' ? 'checked' : '' ?> style="margin-right:8px">
                 <strong>Basic Listing</strong>
-                <p class="field-hint" style="margin:6px 0 0">Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal).</p>
+                <p class="field-hint" style="margin:6px 0 0">Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal/).</p>
               </label>
               <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer;background:<?= $defaults['layout'] === 'editorial' ? 'var(--canvas-raised)' : 'var(--surface)' ?>">
                 <input type="radio" name="layout" value="editorial" <?= $defaults['layout'] === 'editorial' ? 'checked' : '' ?> style="margin-right:8px">
                 <strong>Editorial Page</strong>
-                <p class="field-hint" style="margin:6px 0 0">Hero feature + curated picks + content feed. Use for curated landing pages (e.g. /digital-garden).</p>
+                <p class="field-hint" style="margin:6px 0 0">Hero feature, curated picks, and a content feed. Use for curated landing pages (e.g. /digital-garden/).</p>
               </label>
             </div>
           </div>

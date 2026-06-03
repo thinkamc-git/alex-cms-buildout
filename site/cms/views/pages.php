@@ -58,8 +58,8 @@ $rel_time = static function (int $epoch) use ($e): string {
     if ($epoch <= 0) return '<span class="muted">—</span>';
     $diff = time() - $epoch;
     if ($diff < 60)         return '<span class="muted">just now</span>';
-    if ($diff < 3600)       return '<span class="muted">' . intdiv($diff, 60)   . 'm ago</span>';
-    if ($diff < 86400)      return '<span class="muted">' . intdiv($diff, 3600) . 'h ago</span>';
+    if ($diff < 3600)       return '<span class="muted">' . intdiv($diff, 60)   . 'min ago</span>';
+    if ($diff < 86400)      return '<span class="muted">' . intdiv($diff, 3600) . 'hr ago</span>';
     if ($diff < 86400 * 30) return '<span class="muted">' . intdiv($diff, 86400) . 'd ago</span>';
     return '<span class="muted">' . $e(date('Y-m-d', $epoch)) . '</span>';
 };
@@ -84,7 +84,7 @@ $buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $
         $mockHtml = '<span class="val-pill">' . $n . ' mock' . ($n === 1 ? '' : 's') . '</span>';
     }
     if (isset($published_name[$slug])) {
-        $mockHtml .= ' <span class="pill pill-published" title="A mock is currently published — overriding the file at runtime">LIVE: ' . $e($published_name[$slug]) . '</span>';
+        $mockHtml .= ' <span class="pill pill-published" title="A mock is currently published — overriding the file on staging">LIVE: ' . $e($published_name[$slug]) . '</span>';
     }
 
     $modHtml = $rel_time((int)$f['modified_at']);
@@ -144,7 +144,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-pages">
       <?php
       $title    = 'Pages';
-      $subtitle = 'Marketing pages live on disk and ship via deploy. The CMS lets you save named mock versions for preview. For header.php / footer.php only, a mock can be published to override the file at runtime on staging.';
+      $subtitle = 'Marketing pages live as files on disk and update via deploy. Use mocks to save and preview alternate body content without touching the file. For header.php and footer.php only, you can publish a mock to override the file on staging.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -201,7 +201,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Archives</span>
-                <span class="content-block-sublabel">Snapshots of past page versions · preview-only, no public URL</span>
+                <span class="content-block-sublabel">Past page snapshots · preview-only, no public URL</span>
               </div>
               <span class="content-block-count"><?= count($archives) ?> <?= count($archives) === 1 ? 'archive' : 'archives' ?></span>
             </div>
@@ -209,7 +209,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php
             $columns = $arch_columns;
             $rows = $arch_rows;
-            $empty_text = 'No archives yet. To archive a page, insert a mock whose name starts with "Archive ".';
+            $empty_text = 'No archives yet — to archive a page, create a mock whose name starts with "Archive ".';
             require __DIR__ . '/../partials/table.php';
             ?>
           </div>
@@ -229,7 +229,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Marketing pages</span>
-                <span class="content-block-sublabel">Mock-only sandbox · files remain canonical</span>
+                <span class="content-block-sublabel">Editable as mocks · the on-disk file stays canonical</span>
               </div>
               <span class="content-block-count"><?= count($pages) ?> files</span>
             </div>
@@ -245,7 +245,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Error pages</span>
-                <span class="content-block-sublabel">Rendered when no route or file matches</span>
+                <span class="content-block-sublabel">Shown when no route or file matches a request</span>
               </div>
               <span class="content-block-count"><?= count($errors) ?> files</span>
             </div>
@@ -261,7 +261,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Layout partials</span>
-                <span class="content-block-sublabel">Shared header + footer · publish-capable on staging</span>
+                <span class="content-block-sublabel">Shared header and footer · publishable on staging</span>
               </div>
               <span class="content-block-count"><?= count($partials) ?> files</span>
             </div>

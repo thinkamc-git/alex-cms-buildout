@@ -153,8 +153,7 @@ require __DIR__ . '/../partials/topbar.php';
               pattern="[a-z0-9\-]*"
               placeholder="auto-from-title">
             <p class="field-hint">
-              Lowercase letters, numbers, hyphens. The slug becomes part of the public URL
-              (<code>/writing/&lt;slug&gt;</code>) and is permanent once published.
+              Lowercase letters, numbers, and hyphens. Becomes part of <code>/writing/&lt;slug&gt;</code> and is permanent once published.
             </p>
           </div>
 

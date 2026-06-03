@@ -80,9 +80,9 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-live-sessions">
       <?php
       $title    = 'Live Sessions';
-      $subtitle = 'Talks, workshops, conversations. Past events stay live with a PAST badge.';
-      $actions  = '<a href="/live-sessions/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
-                . '<a href="/cms/live-sessions/new" class="btn-pri">+ New Session</a>';
+      $subtitle = 'Talks, workshops, and conversations. Past events stay live with a PAST badge.';
+      $actions  = '<a href="/live-sessions/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
+                . '<a href="/cms/live-sessions/new" class="btn-pri">+ New Live Session</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -270,7 +270,7 @@ require __DIR__ . '/../partials/topbar.php';
           <?php
           $columns    = $makeColumns('Updated');
           $rows       = array_map(static fn($s) => $buildRow($s, 'updated'), $drafts);
-          $empty_text = 'No drafts. Click + New Session to add one.';
+          $empty_text = 'No live session drafts yet — click [+ New Session] to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -280,7 +280,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Scheduled</span>
-              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+              <span class="content-block-sublabel">Queued — auto-publishes at the scheduled time</span>
             </div>
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
@@ -298,7 +298,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live on /live-sessions/[slug]</span>
+              <span class="content-block-sublabel">Live at /live-sessions/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

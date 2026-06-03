@@ -40,7 +40,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'status_code' => (int)   ($_POST['status_code'] ?? 301),
             ], null);
             if ($id === null) {
-                $errors[] = 'Could not add. Check for blank fields, duplicate old path, or old = new (would loop).';
+                $errors[] = 'Could not add. Check for blank fields, a duplicate old-path, or an old-path that equals the new-path (which would loop).';
             } else {
                 $flash = 'Redirect added.';
             }
@@ -153,7 +153,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-redirects">
       <?php
       $title    = 'Redirects';
-      $subtitle = 'Map an old URL to a new one. Default is 301 (permanent, browsers cache it). Use 302 when the destination might move — third-party services, A/B tests, or anything not yet stable.';
+      $subtitle = 'Map an old URL to a new one. 301 is the default (permanent — browsers cache it). Use 302 when the destination might move — third-party links, A/B tests, anything not yet stable.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -177,7 +177,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Redirects</span>
-              <span class="content-block-sublabel">From-path → to-path · 301 permanent, 302 temporary</span>
+              <span class="content-block-sublabel">Map old paths to new ones · 301 permanent, 302 temporary</span>
             </div>
             <span class="content-block-count"><?= count($rows) ?> redirect<?= count($rows)===1?'':'s' ?></span>
           </div>
@@ -197,7 +197,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </select>
                   <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
                 </form>
-                <form method="post" action="/cms/redirects" style="display:inline" onsubmit="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;?');">
+                <form method="post" action="/cms/redirects" style="display:inline" onsubmit="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;? Anyone hitting that URL will get a 404 unless you re-add it.');">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
                   <input type="hidden" name="action" value="delete">

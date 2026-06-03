@@ -79,8 +79,8 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-journals">
       <?php
       $title    = 'Journals';
-      $subtitle = 'Short, declarative entries. Each gets a per-category Entry number when published.';
-      $actions  = '<a href="/journal/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+      $subtitle = 'Short, declarative entries. Each gets a per-category entry number on first publish.';
+      $actions  = '<a href="/journal/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
                 . '<a href="/cms/journals/new" class="btn-pri">+ New Journal</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -204,7 +204,7 @@ require __DIR__ . '/../partials/topbar.php';
           <?php
           $columns    = $makeColumns('Updated');
           $rows       = array_map(static fn($j) => $buildRow($j, 'updated'), $drafts);
-          $empty_text = 'No journal drafts. Click + New Journal to start.';
+          $empty_text = 'No journal drafts yet — click [+ New Journal] to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -214,7 +214,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Scheduled</span>
-              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+              <span class="content-block-sublabel">Queued — auto-publishes at the scheduled time</span>
             </div>
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
@@ -231,7 +231,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live on /journal/[slug]</span>
+              <span class="content-block-sublabel">Live at /journal/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

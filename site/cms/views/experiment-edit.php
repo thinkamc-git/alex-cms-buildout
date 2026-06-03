@@ -468,7 +468,7 @@ require __DIR__ . '/../partials/topbar.php';
       $title    = $titleHdr;
       $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
       $subtitle = 'Experiment · ' . $template . ' · ' . $stageLabel
-                . ' · last saved ' . (string)($experiment['updated_at'] ?? '');
+                . ' · saved ' . (string)($experiment['updated_at'] ?? '');
 
       $subtitle_extra = '';
       if ($flash !== '') {
@@ -525,7 +525,7 @@ require __DIR__ . '/../partials/topbar.php';
           <iframe
             name="post-preview-frame-<?= (int)$id ?>"
             src="/cms/post/preview?id=<?= (int)$id ?>"
-            title="Preview — Experiment"
+            title="Preview · Experiment"
             class="post-preview-iframe"
             loading="lazy"
             data-preview-iframe
@@ -587,7 +587,7 @@ require __DIR__ . '/../partials/topbar.php';
                   required>
                 <p class="field-hint">
                   <?php if ($slugPublished): ?>
-                    <strong>Warning:</strong> Changing the slug on a published experiment will create a 301 redirect (Phase 11).
+                    <strong>Warning:</strong> changing the slug on a published experiment will create a 301 redirect.
                   <?php else: ?>
                     Lowercase letters, numbers, hyphens. Becomes part of <code>/experiments/&lt;slug&gt;</code>.
                   <?php endif; ?>
@@ -667,14 +667,14 @@ require __DIR__ . '/../partials/topbar.php';
                       class="tiptap-fallback"
                       aria-label="Experiment body (HTML)"><?= $e($bodyInitial) ?></textarea>
                   </div>
-                  <p class="field-hint">Article-format body. Strips HTML outside the toolbar allowlist on save.</p>
+                  <p class="field-hint">Article-format body. Any HTML outside the toolbar's allowlist is stripped on save.</p>
                 </div>
 
                 <!-- HTML body — chrome stays, body slot reads the file -->
                 <!-- HTML swap — full passthrough (no chrome). Same folder picker drives both. -->
                 <?php
                 $folderHintBody = 'The article chrome stays; the body slot reads the selected file.';
-                $folderHintSwap = 'Full-page passthrough — readfile() serves at <code>/experiments/' . $e($slugVal) . '</code> with no template wrapper.';
+                $folderHintSwap = 'Full-page passthrough — the file is served directly at <code>/experiments/' . $e($slugVal) . '/</code> with no template wrapper.';
                 foreach (['html-body' => $folderHintBody, 'html-swap' => $folderHintSwap] as $mode => $hintHtml):
                 ?>
                   <div class="body-source-panel" data-body-panel="<?= $mode ?>"<?= $bodyMode !== $mode ? ' hidden' : '' ?>>
@@ -693,9 +693,9 @@ require __DIR__ . '/../partials/topbar.php';
                       </div>
                       <div class="folder-block-bd">
                         <?php if (!$folderExists): ?>
-                          <p class="field-hint">No folder exists yet for this slug. Click <strong>Set up folder</strong> to create
+                          <p class="field-hint">No folder exists yet for this slug. Click "Set up folder" to create
                             <code><?= $e($folderPath) ?: '/content/experiment/&lt;slug&gt;/' ?></code> on the server.
-                            Then drop your <code>.html</code> files into it via SSH/CloudMounter and click <strong>Refresh</strong>.</p>
+                            Drop your <code>.html</code> files into it via SSH or CloudMounter, then click Refresh.</p>
                           <button type="submit" name="action" value="setup_folder" class="btn-sec" formnovalidate>
                             Set up folder
                           </button>
@@ -733,7 +733,7 @@ require __DIR__ . '/../partials/topbar.php';
                     <option value="<?= $e((string)$cat['value_slug']) ?>" <?= $currentPrimaryCategory === (string)$cat['value_slug'] ? 'selected' : '' ?>><?= $e((string)$cat['label']) ?></option>
                   <?php endforeach; ?>
                 </select>
-                <p class="field-hint">Drives card colour on /experiments/ (Prototype vs Concept dark variant).</p>
+                <p class="field-hint">Drives card colour on /experiments/. The Concept category renders with the dark variant.</p>
               </div>
 
               <div class="field-group">
@@ -764,7 +764,7 @@ require __DIR__ . '/../partials/topbar.php';
                   value="<?= $e((string)($experiment['tags'] ?? '')) ?>"
                   maxlength="500"
                   placeholder="prototype, tool, …">
-                <p class="field-hint">Display only — not used for filtering yet.</p>
+                <p class="field-hint">Display only — not used for filtering.</p>
               </div>
 
               <?php if ($isLive): ?>
@@ -791,7 +791,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <div class="field-group cms-updated-group" data-updated-group style="margin-bottom:0">
                     <label class="cms-publish-check">
                       <input type="checkbox" name="show_updated" value="1" <?= $showUpdated ? 'checked' : '' ?> data-show-updated>
-                      <span>Show "Updated" date on the article</span>
+                      <span>Show "Updated" date on the experiment</span>
                     </label>
                     <div class="cms-updated-input-row" data-updated-row>
                       <input type="date"
@@ -829,7 +829,7 @@ require __DIR__ . '/../partials/topbar.php';
                              value="<?= $e($scheduleAtForInput) ?>"
                              min="<?= $e($minScheduleAt) ?>"
                              data-schedule-input>
-                      <p class="field-hint">Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.</p>
+                      <p class="field-hint">Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.</p>
                     </div>
                   </div>
                 </div>
@@ -946,7 +946,7 @@ require __DIR__ . '/../partials/topbar.php';
       const slug  = form.getAttribute('data-slug')  || '';
       if (stage === 'published') {
         const typed = window.prompt(
-          'Deleting a published experiment is permanent.\n\nType the slug to confirm:\n\n  ' + slug
+          'Deleting a published experiment is permanent.\n\nType the slug exactly to confirm:\n\n  ' + slug
         );
         if (typed === null) { e.preventDefault(); return; }
         if (typed.trim() !== slug) {

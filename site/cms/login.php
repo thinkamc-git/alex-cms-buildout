@@ -102,7 +102,7 @@ header('Content-Type: text/html; charset=utf-8');
 <?php if ($is_staging): ?>
 <div class="staging-tools">
   <h2>Staging tools</h2>
-  <p>Locked out after too many bad guesses? Clear it and try again. Staging only — the prod login never shows this button.</p>
+  <p>Locked out after too many bad guesses? Clear the lock and try again. Staging only — the production login never shows this button.</p>
   <form method="post" action="/cms/unlock-account">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
     <button type="submit">Unlock account</button>

@@ -110,7 +110,7 @@ $colour_select = static function (string $current, ?string $formId = null) use (
 };
 
 $block_meta = [
-    'article'      => ['title' => 'Articles',      'note' => 'Primary category drives colour and card display. Secondary categories expand index inclusion.'],
+    'article'      => ['title' => 'Articles',      'note' => 'Primary category drives colour and card display. Secondary categories add the article to more index pages.'],
     'journal'      => ['title' => 'Journals',      'note' => 'Single category per entry. Drives the sequential entry number within that category.'],
     'live-session' => ['title' => 'Live Sessions', 'note' => 'Single category per session. Displayed publicly as the event type.'],
     'experiment'   => ['title' => 'Experiments',   'note' => 'Single category per experiment. Drives the grid treatment on the index.'],
@@ -154,7 +154,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-categories">
       <?php
       $title    = 'Categories';
-      $subtitle = "Value slugs are permanent — they're what the database stores. Labels and colours are editable anytime. A category can only be deleted when its usage count is zero.";
+      $subtitle = "Value slugs are permanent — they're what the database stores. Labels and colours are editable any time. A category can only be deleted when nothing is using it.";
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -224,7 +224,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <td style="text-align:right;white-space:nowrap">
                   <button type="submit" name="action" value="update" form="<?= $e($rid) ?>" class="btn-row-action" title="Save changes" style="font-size:11px;margin-right:6px">Save</button>
                   <?php if ($canDelete): ?>
-                    <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="cat-del ok" title="Delete category" aria-label="Delete" onclick="return confirm('Delete category &quot;<?= $e((string)$cat['label']) ?>&quot;?');">
+                    <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="cat-del ok" title="Delete category" aria-label="Delete" onclick="return confirm('Delete category &quot;<?= $e((string)$cat['label']) ?>&quot;? This can&#039;t be undone.');">
                       <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                   <?php else: ?>

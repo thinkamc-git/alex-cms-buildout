@@ -142,7 +142,7 @@ require __DIR__ . '/../partials/topbar.php';
               <strong>Rich text</strong> uses the TipTap editor (same blocks as Articles).
               <strong>HTML body</strong> keeps the article chrome and replaces the body slot with a hand-built file from <code>/content/experiment/&lt;slug&gt;/</code>.
               <strong>HTML swap</strong> serves the file directly with no template wrapper.
-              All three are switchable later from the edit screen.
+              You can switch between modes later from the edit screen.
             </p>
           </div>
 
@@ -157,7 +157,7 @@ require __DIR__ . '/../partials/topbar.php';
               maxlength="500"
               required
               autofocus>
-            <p class="field-hint">e.g. "Decision scaffolding tool". Shown in /experiments and on the public page.</p>
+            <p class="field-hint">e.g. "Decision scaffolding tool". Shown in /experiments/ and on the public page.</p>
           </div>
 
           <div class="field-group">

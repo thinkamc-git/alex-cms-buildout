@@ -80,8 +80,8 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-experiments">
       <?php
       $title    = 'Experiments';
-      $subtitle = 'Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, full HTML swap.';
-      $actions  = '<a href="/experiments/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+      $subtitle = 'Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, or full HTML swap.';
+      $actions  = '<a href="/experiments/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
                 . '<a href="/cms/experiments/new" class="btn-pri">+ New Experiment</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -209,7 +209,7 @@ require __DIR__ . '/../partials/topbar.php';
           <?php
           $columns    = $makeColumns('Updated');
           $rows       = array_map(static fn($x) => $buildRow($x, 'updated'), $drafts);
-          $empty_text = 'No experiment drafts. Click + New Experiment to start.';
+          $empty_text = 'No experiment drafts yet — click [+ New Experiment] to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -219,7 +219,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Scheduled</span>
-              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+              <span class="content-block-sublabel">Queued — auto-publishes at the scheduled time</span>
             </div>
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
@@ -236,7 +236,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live on /experiments/[slug]</span>
+              <span class="content-block-sublabel">Live at /experiments/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

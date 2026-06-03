@@ -165,7 +165,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-post-template">
       <?php
       $title    = 'Post Templates';
-      $subtitle = "Each content type uses a PHP layout file that controls how its fields render on the live site. The Master template lists every available field and its PHP variable — it doesn't turn anything on or off. Each sub-template inherits everything and can suppress specific fields.";
+      $subtitle = "Each content type has a PHP layout file that controls how its fields render on the public site. The Master template lists every available field and its PHP variable — it's a reference, not a switchboard. Each sub-template inherits everything and can suppress specific fields.";
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -217,7 +217,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php if ($activeTab === 'blocks'): ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  The <strong>Master Template</strong> defines every block available across content types. Each block has a stable slug used in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">data-block</code>) and a visibility mode. <em>Always</em> blocks render whenever applicable. <em>Optional</em> blocks are toggled on or off per content type from each sub-template. <em>Auto</em> blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.
+                  The <strong>Master Template</strong> defines every block available across content types. Each block has a stable slug used in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">data-block</code>) and a visibility mode. <strong>Always</strong> blocks render whenever applicable. <strong>Optional</strong> blocks are toggled on or off per content type from each sub-template. <strong>Auto</strong> blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.
                 </div>
                 <table class="master-field-table" style="margin-top:var(--space-16)">
                   <thead>
@@ -244,7 +244,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php elseif ($activeTab === 'fields'): ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  Every database field underlying the blocks. Each row maps a field to its PHP variable. Blocks read these fields to populate themselves — so the field reference is for layout work, the Content Blocks tab is for visibility.
+                  Every database field that backs a block. Each row maps a field to its PHP variable. Use this tab for layout work; use the Content Blocks tab for visibility.
                 </div>
                 <table class="master-field-table" style="margin-top:var(--space-16)">
                   <thead>
@@ -319,7 +319,7 @@ require __DIR__ . '/../partials/topbar.php';
               <?php $masterCode = $readTemplate('master-layout.php'); ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  The master PHP layout file — used as the wrapper for every public-rendered article-family page. Read-only view; edits happen in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/master-layout.php</code>) and ship through deploy.
+                  The master PHP layout file — the wrapper for every public article-family page. Read-only here; edit at <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/master-layout.php</code> and deploy to ship.
                 </div>
                 <?php if ($masterCode !== null): ?>
                   <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-16) 0 var(--space-8)">site/templates/master-layout.php</div>
@@ -332,12 +332,12 @@ require __DIR__ . '/../partials/topbar.php';
             <?php elseif ($activeTab === 'preview'): ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  Comprehensive preview — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">master-layout.php</code> wrapping <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">article-standard.php</code> with every block populated. This is the live counterpart to <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/_templates/article.html</code> — a single page that exercises the full block inventory.
+                  Full-block preview — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">master-layout.php</code> wrapping <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">article-standard.php</code> with every block populated. This is the live counterpart to <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/_templates/article.html</code>.
                 </div>
                 <div style="margin-top:var(--space-16);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;background:#fff">
                   <iframe
                     src="/cms/post-template/preview?tpl=master"
-                    title="Master Template Preview — every block populated"
+                    title="Master Template preview · every block populated"
                     style="display:block;width:100%;height:820px;border:0;background:#fff"
                     loading="lazy"></iframe>
                 </div>
@@ -387,23 +387,23 @@ require __DIR__ . '/../partials/topbar.php';
                   </tbody>
                 </table>
                 <div class="ct-readonly-note">
-                  Per-sub-template visibility toggles are read-only in v1.0 (modes shown above are the BLOCKS.md matrix defaults). Editable per-sub-template suppression is deferred to a future phase — see <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">docs/BUILD-PLAN.md</code> §19.5.
+                  Per-sub-template visibility toggles are read-only — the modes shown above are the matrix defaults. Editable suppression isn't available yet.
                 </div>
               </div>
 
             <?php elseif ($activeTab === 'php'): ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  The PHP layout file for <strong><?= $e($info['name']) ?></strong>. Read-only view; edits happen in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code>) and ship through deploy.
+                  The PHP layout file for <strong><?= $e($info['name']) ?></strong>. Read-only here; edit at <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> and deploy to ship.
                 </div>
                 <?php if ($subCode !== null): ?>
                   <div style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin:var(--space-16) 0 var(--space-8)">site/templates/<?= $e($info['php_file']) ?></div>
                   <textarea class="ct-code-editor" data-ct-code readonly><?= $e($subCode) ?></textarea>
                 <?php else: ?>
                   <div class="ct-code-missing">
-                    <strong style="color:var(--secondary)"><?= $e($info['php_file']) ?></strong> not found in <code>site/templates/</code>.
+                    <strong style="color:var(--secondary)"><?= $e($info['php_file']) ?></strong> not found in <code>site/templates/</code>. Check the deploy.
                     <?php if ($selected === 'article-series'): ?>
-                      <div style="margin-top:var(--space-8)">Likely folded into <code>article-standard.php</code> via a conditional, or pending creation. Flagged in Phase 14.5 brief.</div>
+                      <div style="margin-top:var(--space-8)">Likely folded into <code>article-standard.php</code> via a conditional, or not yet created.</div>
                     <?php endif; ?>
                   </div>
                 <?php endif; ?>
@@ -412,17 +412,17 @@ require __DIR__ . '/../partials/topbar.php';
             <?php elseif ($activeTab === 'preview'): ?>
               <div class="tpl-panel is-server-active">
                 <div class="info-box">
-                  Live preview of <strong><?= $e($info['name']) ?></strong> — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> against synthetic content. Edits to the template file show up here immediately.
+                  Live preview of <strong><?= $e($info['name']) ?></strong> — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> against sample content. Edits to the template file show up here immediately.
                   <?php if ($selected === 'article-series'): ?>
                     <div style="margin-top:var(--space-8);color:var(--muted);font-style:italic">Article-series renders via <code>article-standard.php</code> (series detail folds into the topstrip).</div>
                   <?php elseif ($selected === 'experiment-html'): ?>
-                    <div style="margin-top:var(--space-8);color:var(--muted);font-style:italic">Experiment-html bypasses master-layout in production and <code>readfile()</code>s a folder we don't have in preview — so the chrome shown here is <code>experiment.php</code>'s.</div>
+                    <div style="margin-top:var(--space-8);color:var(--muted);font-style:italic">Experiment-html bypasses master-layout in production and serves a folder we don't have in preview — so the chrome shown here is <code>experiment.php</code>'s.</div>
                   <?php endif; ?>
                 </div>
                 <div style="margin-top:var(--space-16);border:1px solid var(--border);border-radius:var(--r-card);overflow:hidden;background:#fff">
                   <iframe
                     src="/cms/post-template/preview?tpl=<?= $e($selected) ?>"
-                    title="Preview — <?= $e($info['name']) ?>"
+                    title="Preview · <?= $e($info['name']) ?>"
                     style="display:block;width:100%;height:820px;border:0;background:#fff"
                     loading="lazy"></iframe>
                 </div>

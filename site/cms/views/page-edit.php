@@ -202,8 +202,8 @@ $rel_time = static function (string $ts) use ($e): string {
     if (!$epoch) return '';
     $diff = time() - $epoch;
     if ($diff < 60)    return 'just now';
-    if ($diff < 3600)  return intdiv($diff, 60)   . 'm ago';
-    if ($diff < 86400) return intdiv($diff, 3600) . 'h ago';
+    if ($diff < 3600)  return intdiv($diff, 60)   . 'min ago';
+    if ($diff < 86400) return intdiv($diff, 3600) . 'hr ago';
     if ($diff < 86400*30) return intdiv($diff, 86400) . 'd ago';
     return date('Y-m-d', $epoch);
 };
@@ -300,8 +300,8 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = $file_row['filename'];
       $subtitle = $is_partial
-        ? 'Layout partial. Mocks can be published to override the file on staging — file remains canonical until you publish.'
-        : 'Marketing page. Mock-only sandbox: the CMS never writes to disk. Files remain canonical.';
+        ? 'Layout partial. Publish a mock to override the file on staging — the file stays canonical until you do.'
+        : 'Marketing page. Edit as mocks for preview — the CMS never writes to disk, so the file stays canonical.';
       $actions  = '<a href="/cms/pages" class="btn-ghost">← Back to Pages</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -354,7 +354,7 @@ require __DIR__ . '/../partials/topbar.php';
               <?php if ($is_live): ?>
                 <a class="btn-ghost" href="<?= $e($preview_live_url) ?>" target="_blank" rel="noopener">Preview Live ↗</a>
                 <?php if ($published_mock !== null && $is_publishable): ?>
-                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Revert to file? This un-publishes all mocks for this slug.');">
+                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Revert to file? This un-publishes the active mock and falls back to the on-disk file.');">
                     <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                     <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                     <input type="hidden" name="action" value="revert_to_file">
@@ -366,7 +366,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <button type="button" class="btn-ghost" onclick="peRenameMock()">Rename</button>
                 <button type="button" class="btn-ghost" onclick="peDuplicateMock()">Duplicate</button>
                 <a class="btn-ghost" href="<?= $e($preview_url) ?>" target="_blank" rel="noopener">Preview ↗</a>
-                <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This cannot be undone.');">
+                <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This can&#039;t be undone.');">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                   <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
@@ -383,7 +383,7 @@ require __DIR__ . '/../partials/topbar.php';
                       <button type="submit" class="btn-ghost">Un-publish</button>
                     </form>
                   <?php else: ?>
-                    <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This will override <?= $e($file_row['filename']) ?> on staging.');">
+                    <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This overrides <?= $e($file_row['filename']) ?> on staging until you un-publish or revert.');">
                       <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                       <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                       <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
@@ -398,7 +398,7 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <?php if ($is_live): ?>
-            <div class="pe-readonly-notice">This is the on-disk file. The CMS never writes here — click <strong>+ New Mock</strong> to start editing.</div>
+            <div class="pe-readonly-notice">This is the on-disk file. The CMS never writes here — click [+ New Mock] to start editing.</div>
             <textarea id="pe-editor-live" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
           <?php else: ?>
             <form id="pe-mock-form" method="post" action="/cms/pages/edit" data-preview-source-form>
@@ -417,7 +417,7 @@ require __DIR__ . '/../partials/topbar.php';
             <iframe
               name="pe-preview-iframe"
               src="<?= $e($preview_iframe_src) ?>"
-              title="Preview — <?= $e($file_row['filename']) ?>"
+              title="Preview · <?= $e($file_row['filename']) ?>"
               class="post-preview-iframe"
               loading="lazy"
               data-preview-iframe
@@ -590,7 +590,7 @@ require __DIR__ . '/../partials/topbar.php';
     location.href = '/cms/pages/edit?' + qs;
   }
   function peCreateMock() {
-    var name = prompt('Name this mock (e.g. "Tighter intro"):', '');
+    var name = prompt('Name this mock (e.g. "Tighter intro")', '');
     if (!name) return;
     document.getElementById('pe-create-name').value = name;
     document.getElementById('pe-create-form').submit();

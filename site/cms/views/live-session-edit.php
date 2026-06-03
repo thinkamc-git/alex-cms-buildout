@@ -480,7 +480,7 @@ require __DIR__ . '/../partials/topbar.php';
       $title    = $titleHdr;
       $pastTag  = $isPast && $status === 'published' ? ' · PAST' : '';
       $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
-      $subtitle = 'Live Session · ' . $stageLabel . $pastTag . ' · last saved ' . (string)($session['updated_at'] ?? '');
+      $subtitle = 'Live Session · ' . $stageLabel . $pastTag . ' · saved ' . (string)($session['updated_at'] ?? '');
 
       $subtitle_extra = '';
       if ($flash !== '') {
@@ -537,7 +537,7 @@ require __DIR__ . '/../partials/topbar.php';
           <iframe
             name="post-preview-frame-<?= (int)$id ?>"
             src="/cms/post/preview?id=<?= (int)$id ?>"
-            title="Preview — Live session"
+            title="Preview · Live session"
             class="post-preview-iframe"
             loading="lazy"
             data-preview-iframe
@@ -600,7 +600,7 @@ require __DIR__ . '/../partials/topbar.php';
                   required>
                 <p class="field-hint">
                   <?php if ($slugPublished): ?>
-                    <strong>Warning:</strong> Changing the slug on a published live-session will create a 301 redirect (Phase 11).
+                    <strong>Warning:</strong> changing the slug on a published live session will create a 301 redirect.
                   <?php else: ?>
                     Lowercase letters, numbers, hyphens. Becomes part of <code>/live-sessions/&lt;slug&gt;</code>.
                   <?php endif; ?>
@@ -639,7 +639,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
               <div class="field-group">
-                <label class="field-label">Event Details <span class="field-hint-inline">date required · times optional · Eastern (Toronto) timezone</span></label>
+                <label class="field-label">Event Details <span class="field-hint-inline">date required · times optional · Toronto (ET) timezone</span></label>
                 <div class="event-grid">
                   <div>
                     <label class="field-sublabel" for="ls-event-date">Date <span class="field-req">required</span></label>
@@ -694,7 +694,7 @@ require __DIR__ . '/../partials/topbar.php';
                       placeholder="e.g. Centre for Social Innovation · 16 seats">
                   </div>
                 </div>
-                <p class="field-hint">Publish Date is separate — that's stamped when the session goes live. Past events stay live with a PAST badge.</p>
+                <p class="field-hint">Publish Date is separate — it's stamped when the session is published. Past events stay live with a PAST badge.</p>
               </div>
 
               <div class="field-group">
@@ -825,7 +825,7 @@ require __DIR__ . '/../partials/topbar.php';
                   value="<?= $e((string)($session['hero_caption'] ?? '')) ?>"
                   maxlength="500">
 
-                <p class="field-hint cms-hero-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
+                <p class="field-hint cms-hero-hint">JPEG, PNG, WebP, or GIF · max 5 MB</p>
               </div>
 
               <div class="field-group">
@@ -849,7 +849,7 @@ require __DIR__ . '/../partials/topbar.php';
                   value="<?= $e((string)($session['tags'] ?? '')) ?>"
                   maxlength="500"
                   placeholder="workshop, talk, …">
-                <p class="field-hint">Display only — not used for filtering yet.</p>
+                <p class="field-hint">Display only — not used for filtering.</p>
               </div>
 
               <?php if ($isLive): ?>
@@ -876,7 +876,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <div class="field-group cms-updated-group" data-updated-group style="margin-bottom:0">
                     <label class="cms-publish-check">
                       <input type="checkbox" name="show_updated" value="1" <?= $showUpdated ? 'checked' : '' ?> data-show-updated>
-                      <span>Show "Updated" date on the article</span>
+                      <span>Show "Updated" date on the live session</span>
                     </label>
                     <div class="cms-updated-input-row" data-updated-row>
                       <input type="date"
@@ -914,7 +914,7 @@ require __DIR__ . '/../partials/topbar.php';
                              value="<?= $e($scheduleAtForInput) ?>"
                              min="<?= $e($minScheduleAt) ?>"
                              data-schedule-input>
-                      <p class="field-hint">Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.</p>
+                      <p class="field-hint">Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.</p>
                     </div>
                   </div>
                 </div>
@@ -989,7 +989,7 @@ require __DIR__ . '/../partials/topbar.php';
 <script>
   for (const btn of document.querySelectorAll('[data-confirm-unpublish]')) {
     btn.addEventListener('click', (e) => {
-      const ok = window.confirm("Move this session back to draft? It will be removed from the public site immediately.");
+      const ok = window.confirm("Move this live session back to draft? It will be removed from the public site immediately.");
       if (!ok) e.preventDefault();
     });
   }
@@ -999,7 +999,7 @@ require __DIR__ . '/../partials/topbar.php';
       const slug  = form.getAttribute('data-slug')  || '';
       if (stage === 'published') {
         const typed = window.prompt(
-          'Deleting a published live session is permanent.\n\nType the slug to confirm:\n\n  ' + slug
+          'Deleting a published live session is permanent.\n\nType the slug exactly to confirm:\n\n  ' + slug
         );
         if (typed === null) { e.preventDefault(); return; }
         if (typed.trim() !== slug) {

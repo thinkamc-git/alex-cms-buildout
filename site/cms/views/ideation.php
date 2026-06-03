@@ -90,7 +90,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-ideation">
       <?php
       $title    = 'Ideation';
-      $subtitle = 'Capture raw ideas. Drag a card into a type column to assign it; drag within a column to reorder.';
+      $subtitle = 'Capture raw ideas. Drag a card into a type column to assign it. Drag within a column to reorder.';
       $actions  = '';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -100,7 +100,7 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <input type="hidden" name="from" value="ideation">
           <input class="qc-input" type="text" name="title" placeholder="What's the idea?" maxlength="500" required>
-          <button class="qc-btn" type="submit">+ Add</button>
+          <button class="qc-btn" type="submit">+ Add idea</button>
         </form>
         <?php if ($flash !== ''): ?>
           <div class="flash-success" role="status" style="margin-top:var(--space-12);max-width:580px"><?= $e($flash) ?></div>

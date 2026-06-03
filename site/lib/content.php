@@ -75,8 +75,8 @@ function relative_time(string $datetime): string
     if ($ts === false) return '';
     $diff = time() - $ts;
     if ($diff < 60)     return 'just now';
-    if ($diff < 3600)   return (int)floor($diff / 60) . 'm ago';
-    if ($diff < 86400)  return (int)floor($diff / 3600) . 'h ago';
+    if ($diff < 3600)   return (int)floor($diff / 60) . 'min ago';
+    if ($diff < 86400)  return (int)floor($diff / 3600) . 'hr ago';
     if ($diff < 604800) return (int)floor($diff / 86400) . 'd ago';
     return date('M j', $ts);
 }

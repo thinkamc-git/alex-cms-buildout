@@ -198,8 +198,8 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = '/' . (string)$index['slug'] . '/';
       $subtitle = $isEditorial
-          ? 'Editorial Page — configure the hero feature, curated picks, and content feed for this page.'
-          : 'Basic Listing — title, optional description, and a content feed.';
+          ? 'Editorial Page · configure the hero feature, curated picks, and content feed for this page.'
+          : 'Basic Listing · title, optional description, and a content feed.';
       $actions  = '<a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-ghost">View</a>'
                 . '<a href="/cms/indexes" class="btn-ghost">All indexes</a>';
       require __DIR__ . '/../partials/view-header.php';
@@ -230,7 +230,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Layout</span>
-              <span class="content-block-sublabel">Flip between the two layout types. Hero + featured config is preserved when switched off.</span>
+              <span class="content-block-sublabel">Switch between the two layout types. Hero and featured settings are preserved when you switch back.</span>
             </div>
           </div>
           <div style="padding:var(--space-16) var(--space-20);display:flex;gap:8px">
@@ -333,7 +333,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Content feed</span>
-              <span class="content-block-sublabel">The main grid of cards. Type chips are OR — pick any combination. Empty = all types.</span>
+              <span class="content-block-sublabel">The main grid of cards. Type chips are OR'd — pick any combination, or leave empty to include all types.</span>
             </div>
           </div>
           <div style="padding:var(--space-16) var(--space-20)">
@@ -366,7 +366,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </label>
                 <?php endforeach; ?>
               </div>
-              <p class="field-hint">Manual sort is reserved for a later phase — choose Newest or Oldest for now.</p>
+              <p class="field-hint">Manual sort isn't available yet — choose Newest or Oldest for now.</p>
             </div>
 
             <div class="field-group">
@@ -381,7 +381,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </label>
                 <?php endforeach; ?>
               </div>
-              <p class="field-hint">One row ≈ 4 cards. Beyond the cap, items are simply hidden.</p>
+              <p class="field-hint">One row is about 4 cards. Items beyond the cap are hidden.</p>
             </div>
 
             <div class="field-group" style="margin-bottom:0">
@@ -389,7 +389,7 @@ require __DIR__ . '/../partials/topbar.php';
               <div style="display:flex;gap:6px">
                 <?php foreach ([
                     'categories' => ['Categories', 'One pill per category appearing in the feed.'],
-                    'types'      => ['Content types', 'One pill per feed type (Articles · Journals · Talks · Experiments).'],
+                    'types'      => ['Content types', 'One pill per feed type (Articles · Journals · Live Sessions · Experiments).'],
                     'none'       => ['None', 'No filter row.'],
                 ] as $val => $meta):
                   $on = $filterMode === $val;
@@ -401,7 +401,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </label>
                 <?php endforeach; ?>
               </div>
-              <p class="field-hint">Filtering is client-side — pills hide/show cards without reloading. The "All" pill is rendered automatically.</p>
+              <p class="field-hint">Pills hide and show cards without reloading the page. The "All" pill is added automatically.</p>
             </div>
           </div>
         </div>

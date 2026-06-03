@@ -160,7 +160,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-series">
       <?php
       $title    = 'Series';
-      $subtitle = 'Ordered groups of articles. Slugs are permanent — set on creation and used in /series/[slug]/ URLs. Phase 12 generates the matching editorial index page.';
+      $subtitle = 'Ordered groups of articles. Slugs are permanent — set on creation and used in /series/<slug>/ URLs. Each series gets a matching editorial index page automatically.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -199,7 +199,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-12)">
               <span class="val-pill"><?= $e((string)$s['slug']) ?></span>
               <span style="color:var(--muted);font-size:var(--text-micro);font-family:var(--font-mono)">/series/<?= $e((string)$s['slug']) ?>/</span>
-              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-ghost btn-tiny" style="margin-left:auto" title="Open the live series index">Launch ↗</a>
+              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-ghost btn-tiny" style="margin-left:auto" title="Open the live series index">Live ↗</a>
             </div>
 
             <textarea name="description" rows="2" placeholder="Optional description — shown on the series index page."
@@ -223,7 +223,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="part-title" style="flex:1"><?= $e((string)$part['title']) ?></div>
                 <?= $stagePill((string)$part['status']) ?>
                 <span class="part-date" style="color:var(--muted);font-family:var(--font-mono);font-size:10px"><?= $e($date) ?></span>
-                <form method="post" action="/cms/series" style="display:inline;margin:0;padding:0" onsubmit="return confirm('Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series?');">
+                <form method="post" action="/cms/series" style="display:inline;margin:0;padding:0" onsubmit="return confirm('Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.');">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="action" value="remove_part">
                   <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
@@ -256,7 +256,7 @@ require __DIR__ . '/../partials/topbar.php';
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= $sid ?>">
             <?php if ($canDelete): ?>
-              <button type="submit" class="btn-row-action" style="color:var(--c-terracotta)" onclick="return confirm('Delete series &quot;<?= $e((string)$s['name']) ?>&quot;?');">Delete series</button>
+              <button type="submit" class="btn-row-action" style="color:var(--c-terracotta)" onclick="return confirm('Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.');">Delete series</button>
             <?php else: ?>
               <button type="button" class="btn-row-action" disabled title="Cannot delete — unassign all parts first" style="opacity:0.5;cursor:not-allowed">Delete series</button>
             <?php endif; ?>

@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CMS Copy Audit — review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --bg-elev: #ffffff;
+    --bg-row-alt: #f5f4ef;
+    --text: #1f1d18;
+    --text-muted: #6b675f;
+    --text-faint: #999489;
+    --border: #e3dfd5;
+    --border-soft: #efece4;
+    --accent: #5a5347;
+    --accept: #4a7c3a;
+    --accept-bg: #eef5e8;
+    --accept-bg-soft: #f5fbf5;
+    --accept-border: #b8d4ab;
+    --reject: #a83a3a;
+    --reject-bg: #f6e9e8;
+    --reject-bg-soft: #fef5f5;
+    --reject-border: #d4b0ad;
+    --alt: #3a6a8a;
+    --alt-bg: #e8f0f6;
+    --alt-border: #afc7d8;
+    --shadow-header: 0 2px 6px rgba(31, 29, 24, 0.06);
+    --shadow-card: 0 4px 14px rgba(31, 29, 24, 0.06), 0 1px 3px rgba(31, 29, 24, 0.04);
+    --radius: 8px;
+    --radius-sm: 4px;
+    --radius-pill: 999px;
+    --font-sans: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; }
+  button { font-family: inherit; }
+  textarea { font-family: inherit; }
+
+  header.app-header {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-header);
+  }
+  .header-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; gap: 20px;
+    padding: 12px 28px;
+  }
+  .app-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0; flex-shrink: 0; }
+  .header-counter { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; flex: 1; }
+  .header-counter strong { color: var(--text); font-weight: 600; }
+  .header-buttons { display: flex; gap: 8px; flex-shrink: 0; }
+  button.btn-primary, button.btn-ghost, button.btn-icon {
+    appearance: none; border: 1px solid var(--text); padding: 7px 14px;
+    border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.12s ease;
+  }
+  button.btn-primary { background: var(--text); color: var(--bg-elev); }
+  button.btn-primary:hover { background: #000; }
+  button.btn-ghost { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  button.btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+  button.btn-icon {
+    background: transparent; color: var(--text-muted); border-color: var(--border);
+    width: 32px; height: 32px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  button.btn-icon:hover { color: var(--text); border-color: var(--text-muted); }
+
+  main { max-width: 820px; margin: 0 auto; padding: 36px 28px 80px; }
+
+  .card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 28px 32px;
+  }
+
+  .card-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .phase-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--bg-row-alt); color: var(--text);
+    padding: 5px 12px; border-radius: var(--radius-pill);
+    font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border-soft);
+  }
+  .phase-chip .num { color: var(--text-muted); font-weight: 600; }
+  .global-step { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+  .progress-bar {
+    flex: 1; height: 4px; background: var(--bg-row-alt);
+    border-radius: var(--radius-pill); overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--accent);
+    border-radius: var(--radius-pill);
+    transition: width 0.25s ease;
+  }
+  .progress-label { font-size: 12px; color: var(--text-faint); font-variant-numeric: tabular-nums; min-width: 50px; text-align: right; }
+
+  .location-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; gap: 12px;
+  }
+  .location {
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text-muted);
+    word-break: break-all;
+  }
+  .surface-chip {
+    display: inline-block; flex-shrink: 0;
+    background: var(--bg-row-alt); color: var(--text-muted);
+    padding: 3px 10px; border-radius: var(--radius-pill);
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    border: 1px solid var(--border-soft);
+  }
+  .chip-cluster {
+    display: inline-flex; align-items: center; gap: 8px;
+    flex-shrink: 0;
+  }
+  .impact-badge {
+    font-size: 11px;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  .intro-note {
+    max-width: 820px; margin: 0 auto;
+    padding: 14px 28px 0;
+    font-size: 13px; color: var(--text-muted);
+    line-height: 1.55;
+  }
+  .intro-note strong { color: var(--text); font-weight: 600; }
+
+  .ba-block {
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    border: 1px solid;
+    position: relative;
+  }
+  .ba-label {
+    position: absolute; top: -9px; left: 14px;
+    background: var(--bg-elev);
+    padding: 0 8px;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .before { background: var(--reject-bg-soft); border-color: var(--reject-border); }
+  .before .ba-label { color: var(--reject); }
+  .after { background: var(--accept-bg-soft); border-color: var(--accept-border); }
+  .after .ba-label { color: var(--accept); }
+  .ba-content {
+    font-size: 15px; line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .ba-content .diff-removed {
+    color: var(--reject);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+  .ba-content .diff-added {
+    background: #d3ecc9;
+    color: #2a4d20;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  .ba-content code, .ba-content .placeholder {
+    font-family: var(--font-mono); font-size: 13px;
+    background: rgba(31, 29, 24, 0.06); color: var(--text);
+    padding: 1px 5px; border-radius: 3px;
+  }
+  .ba-content .diff-removed .placeholder,
+  .ba-content .diff-removed code { background: rgba(168, 58, 58, 0.1); color: var(--reject); }
+  .ba-content .diff-added .placeholder,
+  .ba-content .diff-added code { background: rgba(74, 124, 58, 0.15); color: #2a4d20; }
+
+  .reason {
+    font-style: italic; color: var(--text-muted);
+    font-size: 14px; margin: 22px 0; line-height: 1.55;
+  }
+  .reason code, .reason .placeholder {
+    font-family: var(--font-mono); font-style: normal;
+    font-size: 12.5px; background: rgba(31, 29, 24, 0.06);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  .body-block { margin-bottom: 16px; }
+  .body-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-faint); margin-bottom: 6px;
+  }
+  .body-content { font-size: 15px; line-height: 1.6; }
+  .body-content code, .body-content .placeholder {
+    font-family: var(--font-mono); font-size: 13px;
+    background: rgba(31, 29, 24, 0.06); padding: 1px 5px; border-radius: 3px;
+  }
+  .example-block {
+    background: var(--bg-row-alt);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: var(--font-mono); font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+
+  .alt-wrap { margin: 22px 0 18px; }
+  .alt-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+  textarea.alt-input, textarea.openq-input {
+    width: 100%; min-height: 70px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px; line-height: 1.5;
+    background: var(--bg-elev); color: var(--text);
+    resize: vertical;
+    transition: border-color 0.12s ease;
+  }
+  textarea.alt-input:focus, textarea.openq-input:focus {
+    outline: none; border-color: var(--accent);
+  }
+  textarea.openq-input { min-height: 140px; }
+  .alt-warning {
+    color: var(--reject); font-size: 12.5px;
+    margin-top: 6px; display: none;
+  }
+  .alt-warning.visible { display: block; }
+
+  .actions {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin-bottom: 18px;
+  }
+  .btn-action {
+    appearance: none;
+    border: 1.5px solid;
+    background: var(--bg-elev);
+    padding: 14px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    color: var(--text);
+  }
+  .btn-action .icon { font-size: 16px; line-height: 1; }
+  .btn-action .key { font-size: 10px; font-weight: 700; opacity: 0.55; margin-left: 4px; }
+  .btn-accept { border-color: var(--accept-border); color: var(--accept); }
+  .btn-accept:hover { background: var(--accept-bg-soft); }
+  .btn-accept.selected { background: var(--accept-bg); border-color: var(--accept); }
+  .btn-reject { border-color: var(--reject-border); color: var(--reject); }
+  .btn-reject:hover { background: var(--reject-bg-soft); }
+  .btn-reject.selected { background: var(--reject-bg); border-color: var(--reject); }
+  .btn-alt { border-color: var(--alt-border); color: var(--alt); }
+  .btn-alt:hover { background: var(--alt-bg); }
+  .btn-alt.selected { background: var(--alt-bg); border-color: var(--alt); }
+
+  .actions.openq { grid-template-columns: 2fr 1fr; }
+  .btn-save-next {
+    border-color: var(--text); color: var(--bg-elev); background: var(--text);
+  }
+  .btn-save-next:hover { background: #000; }
+
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .card-footer button {
+    appearance: none; background: transparent;
+    border: none; padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .card-footer button:hover:not(:disabled) { color: var(--text); background: var(--bg-row-alt); }
+  .card-footer button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .phase-nav-wrap { display: flex; flex-direction: column; align-items: center; margin-top: 36px; }
+  .phase-nav { display: flex; align-items: center; gap: 6px; }
+  .label-current {
+    text-align: center; color: var(--text-muted);
+    font-size: 12px; margin-top: 12px; letter-spacing: 0.02em;
+  }
+  .phase-circle {
+    appearance: none;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--bg-elev);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: all 0.12s ease;
+  }
+  .phase-circle:hover { border-color: var(--text-muted); color: var(--text); }
+  .phase-circle.partial { background: var(--bg-row-alt); color: var(--text); }
+  .phase-circle.complete { background: var(--accept); border-color: var(--accept); color: white; font-size: 0; }
+  .phase-circle.complete::after { content: "✓"; font-size: 14px; }
+  .phase-circle.current {
+    box-shadow: 0 0 0 3px var(--bg-row-alt);
+    border-color: var(--text);
+    color: var(--text);
+  }
+  .phase-circle.current.complete { color: white; }
+
+  .phase-circle .tip {
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: var(--text); color: var(--bg-elev);
+    padding: 5px 10px; border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap; pointer-events: none; opacity: 0;
+    transition: opacity 0.12s ease;
+    z-index: 10;
+  }
+  .phase-circle:hover .tip { opacity: 1; }
+
+  .interstitial, .done-view {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .interstitial h2, .done-view h2 { margin: 0 0 8px; font-size: 22px; font-weight: 600; }
+  .interstitial p, .done-view p { margin: 0 0 24px; color: var(--text-muted); }
+  .interstitial-actions { display: flex; justify-content: center; align-items: center; gap: 14px; }
+  .interstitial-actions a {
+    color: var(--text-muted); text-decoration: none; font-size: 13px;
+  }
+  .interstitial-actions a:hover { color: var(--text); }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(31, 29, 24, 0.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 28px;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal {
+    background: var(--bg-elev);
+    border-radius: var(--radius);
+    max-width: 900px; width: 100%; max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 12px 40px rgba(31, 29, 24, 0.25);
+    overflow: hidden;
+  }
+  .modal-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-body textarea {
+    width: 100%; min-height: 380px;
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5;
+    padding: 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg); resize: vertical;
+  }
+  .modal-foot {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border-soft);
+    display: flex; justify-content: flex-end; gap: 8px;
+  }
+
+  .help-popup {
+    position: fixed; top: 60px; right: 28px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 18px 22px;
+    z-index: 60; display: none;
+    width: 270px;
+  }
+  .help-popup.visible { display: block; }
+  .help-popup h4 {
+    margin: 0 0 12px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+  .help-popup dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; }
+  .help-popup dt { font-family: var(--font-mono); font-size: 12px; color: var(--accent); font-weight: 600; }
+  .help-popup dd { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+  .card.flipping { animation: cardFlip 200ms ease; }
+  @keyframes cardFlip {
+    0% { opacity: 1; transform: translateY(0); }
+    50% { opacity: 0.25; transform: translateY(-4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <h1 class="app-title">CMS Copy Audit</h1>
+    <div class="header-counter"><strong id="globalDecisionsCount">0</strong> of <span id="globalRewriteTotal">140</span> rewrite decisions made</div>
+    <div class="header-buttons">
+      <button class="btn-icon" id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button class="btn-ghost" id="resetBtn">Reset all</button>
+      <button class="btn-primary" id="exportBtn">Export decisions</button>
+    </div>
+  </div>
+</header>
+
+<div class="intro-note">
+  <strong>Phases 3–9 are rewrites ordered by impact (highest first).</strong> Phases 1–2 cascade into all rewrites and should be reviewed first. Skip to Phase 10 for open questions.
+</div>
+
+<div class="help-popup" id="helpPopup">
+  <h4>Keyboard shortcuts</h4>
+  <dl>
+    <dt>A</dt><dd>Accept</dd>
+    <dt>R</dt><dd>Reject</dd>
+    <dt>T</dt><dd>Use alternative</dd>
+    <dt>S</dt><dd>Skip for now</dd>
+    <dt>←</dt><dd>Previous card</dd>
+    <dt>→</dt><dd>Next (if decided)</dd>
+    <dt>1–9, 0</dt><dd>Jump to phase</dd>
+    <dt>?</dt><dd>Toggle this</dd>
+  </dl>
+</div>
+
+<main>
+  <div id="cardMount"></div>
+  <div class="phase-nav-wrap">
+    <div class="phase-nav" id="phaseNav"></div>
+    <div class="label-current" id="phaseCurrentLabel"></div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>COPY-ACCEPTANCE.md</h3>
+      <button class="btn-icon" id="closeExportBtn">×</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="exportText" readonly></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="copyExportBtn">Copy to clipboard</button>
+      <button class="btn-primary" id="downloadExportBtn">Download .md</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"cards":[{"phase":1,"kind":"vocab","idxInKind":0,"term":"Generic noun for \"a row in the content table\"","decision":"**entry**","rationale":"Already in heavy use as a count suffix (\"3 entries\"). Reads cleaner than \"post\" (loaded with blog connotations), \"item\" (too generic), or \"record\" (database language). Lets us write \"No entries yet\" as the table default without choosing between four content types. The four content type names (Article / Journal / Live Session / Experiment) stay as-is for type-specific surfaces."},{"phase":1,"kind":"vocab","idxInKind":1,"term":"\"Journal\" vs \"Journal entry\"","decision":"Sidebar/section/breadcrumb stays **Journals** (collection). A single row is **a journal entry** in confirm dialogs, empty states, and prose. The button is **+ New Journal** (consistent with + New Article, + New Live Session, + New Experiment).","rationale":"Matches existing pattern. Each journal IS structurally a numbered entry, so \"journal entry\" reads naturally where a singular noun is needed; \"Journals\" reads naturally as a section."},{"phase":1,"kind":"vocab","idxInKind":2,"term":"\"Live Session\" vs \"Live event\"","decision":"**Live Session** everywhere user-facing.","rationale":"Sidebar, list, edit, breadcrumb, and column headers all already say Live Session. Switching to \"Live event\" would require eight rewrites for no functional gain. The DB table, route (`/live-sessions/`), and `live_session_id` foreign keys all reinforce \"session\". \"Event\" stays as a sub-word inside Live Session surfaces (Event Date, Event Title, Event Details) since that names the calendar attribute, not the content type."},{"phase":1,"kind":"vocab","idxInKind":3,"term":"Action verbs","decision":"**Save** (commit current form state) · **Publish** (push live now) · **Schedule** (publish later, cron-driven) · **Unpublish** / **Move to draft** (remove from public site) · **Refresh** (re-scan, re-read, re-fetch from server) · **Add** (create a sub-row inline) · **+ New X** (create a top-level entry) · **Edit** (open edit view) · **Delete** (destroy permanently) · **Advance to / Move back to** (pipeline stage transitions).","rationale":"None of these are build-language. The only verb to scrub is \"ship\" — replace with \"publish\". Drop \"fold in\", \"wires\", \"lands\", \"land in Phase X\" everywhere."},{"phase":1,"kind":"vocab","idxInKind":4,"term":"\"Mock\" vs \"version\" vs \"preview\" (Pages CMS)","decision":"**Mock** = stored body variant (db row). **Live version** = file on disk. **Preview** = iframe render of either. **Publish a mock** = staging-only file override. Drop the word \"version\" except in the dropdown label \"Live Version (file on disk)\" which reads naturally.","rationale":"These are three distinct concepts and need three distinct words. Standardising clarifies the page-edit toolbar."},{"phase":1,"kind":"vocab","idxInKind":5,"term":"\"Card\" vs \"row\" vs \"item\"","decision":"**Card** = ideation tile (visual grid). **Row** = table row (lists, navigation, redirects). **Item** = navigation menu entry (already in flash messages: \"Item saved\"). No change needed — current usage is already consistent.","rationale":"Each word maps to a distinct visual treatment; conflating them would lose clarity."},{"phase":1,"kind":"vocab","idxInKind":6,"term":"\"Published\" vs \"Live\"","decision":"**Published** is the stage name (status pill, column header, button \"Publish\"). **Live** is the public-site visibility state (status banner \"Published on X · live now\", button \"View live\", LIVE pill on overridden pages).","rationale":"Already consistent. Don't merge — \"Live\" answers \"is the public seeing it?\" while \"Published\" answers \"what stage is this in?\". They coincide today but the words pull on different axes."},{"phase":1,"kind":"vocab","idxInKind":7,"term":"\"Stage\" vs \"Status\"","decision":"**Stage** for pipeline position (Idea → Concept → Outline → Draft → Published). **Status** for binary state (subscribed/unsubscribed).","rationale":"Already consistent."},{"phase":1,"kind":"vocab","idxInKind":8,"term":"\"Idea Notes\" capitalization","decision":"**Idea notes** (sentence case)","rationale":"Field labels elsewhere are sentence case (Primary category, Read time, Hero image). \"Idea Notes\" is the outlier."},{"phase":1,"kind":"vocab","idxInKind":9,"term":"\"Key Statement\" capitalization","decision":"**Key statement** (sentence case)","rationale":"Same rationale. The Key Statement is a journal-specific field name; the lowercase form still reads as a defined term thanks to position."},{"phase":1,"kind":"vocab","idxInKind":10,"term":"\"Schedule for Publish\"","decision":"**Schedule publish** (button) / **Schedule** (field label)","rationale":"\"for Publish\" is awkward; matches \"Publish\" / \"Schedule →\" button language elsewhere."},{"phase":2,"kind":"pattern","idxInKind":0,"pattern":"View subtitle","rule":"1–2 sentences, present tense, describes function. No build language. No future tense. No \"Phase X\". No \"land in\", \"ship in\", \"wires\".","example":"\"Long-form writing. Create, edit, and publish drafts.\""},{"phase":2,"kind":"pattern","idxInKind":1,"pattern":"Field hint (below input)","rule":"Short imperative or noun phrase. Sentence case. Period at end if it's a full sentence; no period on fragments.","example":"\"Lowercase letters, numbers, hyphens. Becomes part of /writing/<slug>.\""},{"phase":2,"kind":"pattern","idxInKind":2,"pattern":"Field hint inline (next to label)","rule":"Single word or short fragment. Lowercase. No period. Use for `optional`, `required`, `manual`, `in series`.","example":"`optional`"},{"phase":2,"kind":"pattern","idxInKind":3,"pattern":"Field placeholder","rule":"Example value or short prompt. Lowercase unless it's a proper noun example. No trailing period.","example":"`auto-from-title` · `e.g. Toronto, ON`"},{"phase":2,"kind":"pattern","idxInKind":4,"pattern":"Button label","rule":"Verb in Title Case. No \"Click to\". Tiny utility buttons can be one word (Save, Edit, Delete, Cancel, Add). Action + object only when ambiguous (Save Author, Save metadata, Create draft).","example":"`Publish Now`, `Move to draft`, `Save`, `+ New Article`"},{"phase":2,"kind":"pattern","idxInKind":5,"pattern":"Confirm dialog","rule":"`Verb subject? Consequence.` — name the thing being acted on; state the consequence in plain English.","example":"`Delete article \"<title>\"? This can't be undone.`"},{"phase":2,"kind":"pattern","idxInKind":6,"pattern":"Empty state","rule":"`No X yet.` standalone, or `No X yet — [next action].` with a prompt. Period at end.","example":"`No drafts yet — click + New Article to start.`"},{"phase":2,"kind":"pattern","idxInKind":7,"pattern":"Modal/dialog heading","rule":"Present-tense action verb + object.","example":"`Publish article`, `Delete journal entry`."},{"phase":2,"kind":"pattern","idxInKind":8,"pattern":"Block sublabel","rule":"Descriptor (not full sentence). Period-less.","example":"`Concept · Outline · Draft`"},{"phase":2,"kind":"pattern","idxInKind":9,"pattern":"Tooltip / `title` attr","rule":"Short, present tense, no period. Drop if redundant with visible label.","example":"`Drag to reorder`"},{"phase":2,"kind":"pattern","idxInKind":10,"pattern":"Flash message","rule":"Past-tense success (\"Saved.\", \"Published.\", \"Renamed.\"). Imperative for error (\"Reload the page and try again.\"). Single sentence.","example":"`Saved.` · `Mock created.`"},{"phase":2,"kind":"pattern","idxInKind":11,"pattern":"Stale build-language floor","rule":"Zero \"Phase N\" references in user-facing copy. Zero \"ship\", \"land in\", \"wires\", \"fold in\", \"Phase X brief\". Zero TODO-style language (\"not yet\", \"deferred to\") except where it correctly describes current limitation as a function.","example":"—"},{"phase":3,"kind":"rewrite","n":429,"section":"Redirects view (views/redirects.php)","surface":"Redirects","location":"views/redirects.php:200","before":"Delete redirect \"<old_slug>\"?","after":"Delete redirect \"<old_slug>\"? Anyone hitting that URL will get a 404 unless you re-add it.","reason":"Add the consequence — matches confirm-dialog pattern.","_impact":22},{"phase":3,"kind":"rewrite","n":597,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:390","before":"Per-sub-template visibility toggles are read-only in v1.0 (modes shown above are the BLOCKS.md matrix defaults). Editable per-sub-template suppression is deferred to a future phase — see docs/BUILD-PLAN.md §19.5.","after":"Per-sub-template visibility toggles are read-only — the modes shown above are the BLOCKS.md matrix defaults. Editable suppression isn't available yet.","reason":"Drop \"v1.0\", \"deferred to a future phase\", and the BUILD-PLAN cross-reference (all build-language). The user just needs to know they can't edit it yet.","_impact":21},{"phase":3,"kind":"rewrite","n":275,"section":"Navigation editor (views/navigation.php)","surface":"Navigation","location":"views/navigation.php:343","before":"Delete \"<label>\"?","after":"Delete \"<label>\"? This removes the link from the public site.","reason":"Add consequence to match confirm-dialog pattern.","_impact":20},{"phase":3,"kind":"rewrite","n":83,"section":"Articles list view (views/articles.php)","surface":"Articles list","location":"views/articles.php:89","before":"Long-form writing. Create, edit, and ship drafts. Pipeline + transitions land in Phase 7.","after":"Long-form writing. Create, edit, and publish drafts.","reason":"Remove stale Phase 7 reference. Replace \"ship\" (build verb) with \"publish\" (user verb). Pipeline + transitions exist now — no need to forecast them.","_impact":18},{"phase":3,"kind":"rewrite","n":601,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:406","before":"Likely folded into article-standard.php via a conditional, or pending creation. Flagged in Phase 14.5 brief.","after":"Likely folded into article-standard.php via a conditional, or not yet created.","reason":"Drop \"Phase 14.5 brief\" (build language). \"Pending creation\" → \"not yet created\" (clearer).","_impact":18},{"phase":3,"kind":"rewrite","n":494,"section":"Series view (views/series.php)","surface":"Series","location":"views/series.php:259","before":"Delete series \"<name>\"?","after":"Delete series \"<name>\"? This can't be undone. The articles in it are not deleted.","reason":"Add consequence. Clarify that articles survive.","_impact":16},{"phase":3,"kind":"rewrite","n":488,"section":"Series view (views/series.php)","surface":"Series","location":"views/series.php:226","before":"Remove \"<title>\" from this series?","after":"Remove \"<title>\" from this series? The article stays — only the series link is removed.","reason":"Add consequence so user knows the article isn't being deleted.","_impact":16},{"phase":3,"kind":"rewrite","n":471,"section":"Series view (views/series.php)","surface":"Series","location":"views/series.php:163","before":"Ordered groups of articles. Slugs are permanent — set on creation and used in /series/[slug]/ URLs. Phase 12 generates the matching editorial index page.","after":"Ordered groups of articles. Slugs are permanent — set on creation and used in /series/<slug>/ URLs. Each series gets a matching editorial index page automatically.","reason":"Drop \"Phase 12\" reference (build language, and it's already shipped). Replace `[slug]` brackets with `<slug>`. Make the auto-generation fact present-tense.","_impact":16},{"phase":3,"kind":"rewrite","n":1157,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:939","before":"Move this experiment back to draft? It will be removed from the public site immediately.","after":"Move this experiment back to draft? It is removed from the public site immediately.","reason":"Pattern.","_impact":16},{"phase":3,"kind":"rewrite","n":889,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:740","before":"Move this journal back to draft? It will be removed from the public site immediately.","after":"Move this journal back to draft? It is removed from the public site immediately.","reason":"Pattern from #772.","_impact":16},{"phase":3,"kind":"rewrite","n":1033,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:992","before":"Move this session back to draft? It will be removed from the public site immediately.","after":"Move this live session back to draft? It is removed from the public site immediately.","reason":"Match the noun the user sees in the rest of the UI (\"session\" alone is ambiguous now that \"Session\" is also the security/login term). Pattern from #772.","_impact":16},{"phase":3,"kind":"rewrite","n":463,"section":"Categories view (views/categories.php)","surface":"Categories","location":"views/categories.php:227","before":"Delete category \"<label>\"?","after":"Delete category \"<label>\"? This can't be undone.","reason":"Add consequence (already in use elsewhere).","_impact":13},{"phase":3,"kind":"rewrite","n":772,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1565","before":"Move this article back to draft? It will be removed from the public site immediately.","after":"Move this article back to draft? It is removed from the public site immediately.","reason":"Tense agreement — drop the future \"will\" so it reads as a present-tense consequence (matches the publish-now confirm).","_impact":11},{"phase":3,"kind":"rewrite","n":307,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:146","before":"Delete this index? The URL /<slug>/ will 404 unless you re-create it.","after":"Delete index \"<title>\"? The URL /<slug>/ will 404 unless you re-create it.","reason":"Name the thing being deleted (matches navigation, redirects, categories, series confirm dialogs).","_impact":11},{"phase":3,"kind":"rewrite","n":706,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1042","before":"The editor strips any HTML outside the toolbar allowlist on save.","after":"Any HTML outside the toolbar's allowlist is stripped on save.","reason":"Cleaner — passive voice here puts the consequence first.","_impact":11},{"phase":3,"kind":"rewrite","n":1226,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:369","before":"Delete mock \"<name>\"? This cannot be undone.","after":"Delete mock \"<name>\"? This can't be undone.","reason":"Standardise contraction.","_impact":11},{"phase":3,"kind":"rewrite","n":543,"section":"Subscribers view (views/subscribers.php)","surface":"Subscribers","location":"views/subscribers.php:276","before":"Delete subscriber \"<email>\"? This cannot be undone.","after":"Delete subscriber \"<email>\"? This can't be undone.","reason":"Standardise contraction across all confirm dialogs (replace \"cannot\" with \"can't\" everywhere — see global note in Open questions).","_impact":11},{"phase":3,"kind":"rewrite","n":746,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1249","before":"Display only — not used for filtering yet.","after":"Display only — not used for filtering.","reason":"Drop \"yet\" (the filtering use was scoped out, not deferred). Apply to all four edit views (articles, journals, live-sessions, experiments).","_impact":10},{"phase":3,"kind":"rewrite","n":41,"section":"Pipeline / Draft Writing view (views/pipeline.php)","surface":"Pipeline view","location":"views/pipeline.php:259","before":"All work in progress and recently shipped — Concept through Recently Published. Capture quickly, develop deliberately. Content moves left to right as it matures.","after":"Everything in flight and recently published — Concept through to live. Content moves left to right as it matures.","reason":"Replace \"shipped\" (build verb) with \"published\". Tightens the second sentence.","_impact":9},{"phase":3,"kind":"rewrite","n":165,"section":"Live sessions list view (views/live-sessions.php)","surface":"Live sessions list","location":"views/live-sessions.php:273","before":"No drafts. Click + New Session to add one.","after":"No session drafts yet — click + New Session to start.","reason":"Match empty-state pattern + verb (\"start\" matches articles/journals/experiments).","_impact":9},{"phase":4,"kind":"rewrite","n":106,"section":"Articles list view (views/articles.php)","surface":"Articles list","location":"views/articles.php:253","before":"Queued for future publish — cron promotes to Live","after":"Queued — auto-publishes at the scheduled time","reason":"\"Cron promotes to Live\" is implementation language. The user just needs to know it auto-publishes.","_impact":9},{"phase":4,"kind":"rewrite","n":199,"section":"Experiments list view (views/experiments.php)","surface":"Experiments list","location":"views/experiments.php:222","before":"Queued for future publish — cron promotes to Live","after":"Queued — auto-publishes at the scheduled time","reason":"Apply pattern.","_impact":9},{"phase":4,"kind":"rewrite","n":136,"section":"Journals list view (views/journals.php)","surface":"Journals list","location":"views/journals.php:217","before":"Queued for future publish — cron promotes to Live","after":"Queued — auto-publishes at the scheduled time","reason":"Apply pattern from articles.","_impact":9},{"phase":4,"kind":"rewrite","n":167,"section":"Live sessions list view (views/live-sessions.php)","surface":"Live sessions list","location":"views/live-sessions.php:283","before":"Queued for future publish — cron promotes to Live","after":"Queued — auto-publishes at the scheduled time","reason":"Apply pattern.","_impact":9},{"phase":4,"kind":"rewrite","n":760,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1338","before":"Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.","after":"Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.","reason":"\"Cron promotes scheduled rows to Live\" is database/sysadmin language; \"auto-publishes scheduled entries\" is plain. Apply to all four edit views.","_impact":9},{"phase":4,"kind":"rewrite","n":1146,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:832","before":"Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.","after":"Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.","reason":"Pattern.","_impact":9},{"phase":4,"kind":"rewrite","n":878,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:663","before":"Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.","after":"Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.","reason":"Pattern from #760.","_impact":9},{"phase":4,"kind":"rewrite","n":1022,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:917","before":"Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.","after":"Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.","reason":"Pattern.","_impact":9},{"phase":4,"kind":"rewrite","n":359,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:201","before":"Editorial Page — configure the hero feature, curated picks, and content feed for this page.","after":"Editorial Page · hero feature, curated picks, and content feed.","reason":"Tighter; matches the pipe-separated sublabel style already in use in other view subtitles.","_impact":8},{"phase":4,"kind":"rewrite","n":670,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:940","before":"Warning: This article is published. Changing the slug will create a 301 redirect from the old URL in Phase 11.","after":"Warning: this article is published. Changing the slug will create a 301 redirect from the old URL.","reason":"Drop Phase 11 reference (it's shipped). Sentence-case after the colon.","_impact":8},{"phase":4,"kind":"rewrite","n":1099,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:590","before":"Warning: Changing the slug on a published experiment will create a 301 redirect (Phase 11).","after":"Warning: changing the slug on a published experiment will create a 301 redirect.","reason":"Drop Phase 11. Sentence-case.","_impact":8},{"phase":4,"kind":"rewrite","n":837,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:512","before":"Warning: Changing the slug on a published journal will create a 301 redirect (Phase 11).","after":"Warning: changing the slug on a published journal will create a 301 redirect.","reason":"Drop Phase 11 reference (shipped). Sentence-case after colon.","_impact":8},{"phase":4,"kind":"rewrite","n":958,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:603","before":"Warning: Changing the slug on a published live-session will create a 301 redirect (Phase 11).","after":"Warning: changing the slug on a published live session will create a 301 redirect.","reason":"Drop Phase 11 + hyphen in \"live-session\" (the canonical term is unhyphenated). Sentence-case after colon.","_impact":8},{"phase":4,"kind":"rewrite","n":197,"section":"Experiments list view (views/experiments.php)","surface":"Experiments list","location":"views/experiments.php:212","before":"No experiment drafts. Click + New Experiment to start.","after":"No experiment drafts yet — click + New Experiment to start.","reason":"Match pattern.","_impact":8},{"phase":4,"kind":"rewrite","n":134,"section":"Journals list view (views/journals.php)","surface":"Journals list","location":"views/journals.php:207","before":"No journal drafts. Click + New Journal to start.","after":"No journal drafts yet — click + New Journal to start.","reason":"Match empty-state pattern.","_impact":8},{"phase":4,"kind":"rewrite","n":710,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1063","before":"No folder exists yet for this slug. Click Set up folder to create <path> on the server. Then drop your .html file into it via SSH/CloudMounter and click Refresh.","after":"No folder exists yet for this slug. Click \"Set up folder\" to create <path> on the server. Drop your .html file into it via SSH or CloudMounter, then click Refresh.","reason":"Quote the button label so it reads as a UI reference. Split the run-on. \"/\" between SSH and CloudMounter is code-style; use \"or\".","_impact":8},{"phase":4,"kind":"rewrite","n":1120,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:696","before":"No folder exists yet for this slug. Click Set up folder to create <path> on the server. Then drop your .html files into it via SSH/CloudMounter and click Refresh.","after":"No folder exists yet for this slug. Click \"Set up folder\" to create <path> on the server. Drop your .html files into it via SSH or CloudMounter, then click Refresh.","reason":"Pattern from #710.","_impact":8},{"phase":4,"kind":"rewrite","n":104,"section":"Articles list view (views/articles.php)","surface":"Articles list","location":"views/articles.php:243","before":"No drafts in progress. Click + New Article to start.","after":"No article drafts yet — click + New Article to start.","reason":"Matches the empty-state pattern. \"In progress\" is redundant with \"drafts\".","_impact":8},{"phase":4,"kind":"rewrite","n":328,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:239","before":"No custom indexes yet. Click + New Index to add one (e.g. /digital-garden, /thoughts).","after":"No custom indexes yet — click + New Index to add one (e.g. /digital-garden, /thoughts).","reason":"Match empty-state pattern.","_impact":8},{"phase":4,"kind":"rewrite","n":227,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:212","before":"No archives yet. To archive a page, insert a mock whose name starts with \"Archive \".","after":"No archives yet — to archive a page, create a mock whose name starts with \"Archive \".","reason":"Match empty-state pattern. \"Insert\" reads like a code term; \"create\" matches the actual button label.","_impact":8},{"phase":5,"kind":"rewrite","n":1279,"section":"Cross-cutting / partials (partials/table.php)","surface":"Shared partial","location":"partials/table.php:27","before":"No entries yet.","after":"No entries yet.","reason":"Kept as-is — already matches the chosen \"entry\" vocabulary and empty-state pattern. (Listed only to confirm decision; no rewrite needed.)","_impact":8},{"phase":5,"kind":"rewrite","n":801,"section":"Article new view (views/article-new.php)","surface":"Article new","location":"views/article-new.php:155","before":"Lowercase letters, numbers, hyphens. The slug becomes part of the public URL (/writing/<slug>) and is permanent once published.","after":"Lowercase letters, numbers, and hyphens. Becomes part of /writing/<slug> and is permanent once published.","reason":"Tighter; \"the public URL\" is redundant when you've shown the URL pattern. Apply matching brevity in journal-new and experiment-new where the variant has more words.","_impact":7},{"phase":5,"kind":"rewrite","n":294,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:97","before":"Configure the public index pages for each section of the site. Editorial Page adds hero + featured + multi-section layout; Basic Listing is title + feed.","after":"Configure the public index pages for each section of the site. Editorial Page adds a hero, featured picks, and multi-section layout. Basic Listing is title plus content feed.","reason":"Replace `+` (code-flavoured) with prose. Split the semicolon — two sentences are easier to skim.","_impact":7},{"phase":5,"kind":"rewrite","n":742,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1224","before":"Auto-assigned. Drag-reorder parts at /cms/series.","after":"Auto-assigned. Re-order parts in Collections › Series (drag handles).","reason":"Same pattern, and \"drag-reorder\" reads as a compound verb that doesn't exist.","_impact":7},{"phase":5,"kind":"rewrite","n":598,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:397","before":"The PHP layout file for <sub-template name>. Read-only view; edits happen in code (site/templates/<filename>) and ship through deploy.","after":"The PHP layout file for <sub-template name>. Read-only here; edit at site/templates/<filename> and deploy to ship.","reason":"Apply the pattern from #585.","_impact":7},{"phase":5,"kind":"rewrite","n":872,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:625","before":"Show \"Updated\" date on the article","after":"Show \"Updated\" date on the journal entry","reason":"The hint says \"on the article\" inside the journal editor — wrong noun. Same fix needed in live-session-edit (#1016) and experiment-edit (#1140).","_impact":7},{"phase":5,"kind":"rewrite","n":567,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:247","before":"Every database field underlying the blocks. Each row maps a field to its PHP variable. Blocks read these fields to populate themselves — so the field reference is for layout work, the Content Blocks tab is for visibility.","after":"Every database field that backs a block. Each row maps a field to its PHP variable. Use this tab for layout work; use the Content Blocks tab for visibility.","reason":"\"Underlying the blocks\" is awkward; \"backs a block\" is clearer. Replace the \"so… —\" connective with a direct contrast — easier to skim.","_impact":6},{"phase":5,"kind":"rewrite","n":408,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:404","before":"Filtering is client-side — pills hide/show cards without reloading. The \"All\" pill is rendered automatically.","after":"Pills hide and show cards without reloading the page. The \"All\" pill is added automatically.","reason":"\"Client-side\" is dev jargon. \"Rendered\" → \"added\".","_impact":6},{"phase":5,"kind":"rewrite","n":1208,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:303","before":"Marketing page. Mock-only sandbox: the CMS never writes to disk. Files remain canonical.","after":"Marketing page. Edit as mocks for preview — the CMS never writes to disk, so the file stays canonical.","reason":"\"Mock-only sandbox\" is internal language; replace with what the user can do and why.","_impact":6},{"phase":5,"kind":"rewrite","n":397,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:369","before":"Manual sort is reserved for a later phase — choose Newest or Oldest for now.","after":"Manual sort isn't available yet — choose Newest or Oldest for now.","reason":"Drop \"reserved for a later phase\" (build language). Same meaning, no internal calendar reference.","_impact":6},{"phase":5,"kind":"rewrite","n":234,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:232","before":"Mock-only sandbox · files remain canonical","after":"Editable as mocks · the on-disk file stays canonical","reason":"\"Mock-only sandbox\" reads as build-language. Tells the user what they can do (edit as mocks) and what the constraint is (file is source of truth).","_impact":6},{"phase":5,"kind":"rewrite","n":902,"section":"Journal new view (views/journal-new.php)","surface":"Journal new","location":"views/journal-new.php:100","before":"Set a working title and slug. The Key Statement and body are on the next screen.","after":"Set a working title and slug. Write the Key Statement and body on the next screen.","reason":"More imperative; matches the article-new subtitle voice.","_impact":6},{"phase":5,"kind":"rewrite","n":588,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:334","before":"Comprehensive preview — renders master-layout.php wrapping article-standard.php with every block populated. This is the live counterpart to site/_templates/article.html — a single page that exercises the full block inventory.","after":"Full-block preview — renders master-layout.php wrapping article-standard.php with every block populated. This is the live counterpart to site/_templates/article.html.","reason":"\"Comprehensive\" → \"Full-block\" (says what's comprehensive). Drop the trailing redundant clause.","_impact":5},{"phase":5,"kind":"rewrite","n":1220,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:357","before":"Revert to file? This un-publishes all mocks for this slug.","after":"Revert to file? This un-publishes the active mock and falls back to the on-disk file.","reason":"\"All mocks for this slug\" is misleading (only one mock can be published at a time). Reword to match what actually happens.","_impact":5},{"phase":5,"kind":"rewrite","n":738,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1209","before":"Manage the list at /cms/series.","after":"Manage the list in Collections › Series.","reason":"Same pattern.","_impact":5},{"phase":5,"kind":"rewrite","n":1158,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:949","before":"Deleting a published experiment is permanent.\\n\\nType the slug to confirm:\\n\\n  <slug>","after":"Deleting a published experiment is permanent.\\n\\nType the slug exactly to confirm:\\n\\n  <slug>","reason":"Pattern.","_impact":5},{"phase":5,"kind":"rewrite","n":890,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:750","before":"Deleting a published journal is permanent.\\n\\nType the slug to confirm:\\n\\n  <slug>","after":"Deleting a published journal is permanent.\\n\\nType the slug exactly to confirm:\\n\\n  <slug>","reason":"Pattern from #773.","_impact":5},{"phase":5,"kind":"rewrite","n":1034,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:1002","before":"Deleting a published live session is permanent.\\n\\nType the slug to confirm:\\n\\n  <slug>","after":"Deleting a published live session is permanent.\\n\\nType the slug exactly to confirm:\\n\\n  <slug>","reason":"Pattern.","_impact":5},{"phase":5,"kind":"rewrite","n":238,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:248","before":"Rendered when no route or file matches","after":"Shown when no route or file matches a request","reason":"\"Rendered\" is dev-speak; \"shown\" reads at user altitude.","_impact":5},{"phase":5,"kind":"rewrite","n":252,"section":"Navigation editor (views/navigation.php)","surface":"Navigation","location":"views/navigation.php:255","before":"Header and footer link lists. Drag to reorder. Items whose target row no longer resolves are flagged BROKEN and hidden from the public site until you fix them.","after":"Header and footer link lists. Drag to reorder. Items whose target no longer exists are flagged BROKEN and hidden from the public site until you fix them.","reason":"\"Target row no longer resolves\" is database language. \"Target no longer exists\" is direct and equally accurate.","_impact":5},{"phase":6,"kind":"rewrite","n":424,"section":"Redirects view (views/redirects.php)","surface":"Redirects","location":"views/redirects.php:180","before":"From-path → to-path · 301 permanent, 302 temporary","after":"Map old paths to new ones · 301 permanent, 302 temporary","reason":"\"From-path → to-path\" is technical shorthand; reads as developer doc.","_impact":5},{"phase":6,"kind":"rewrite","n":604,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:419","before":"Experiment-html bypasses master-layout in production and readfile()s a folder we don't have in preview — so the chrome shown here is experiment.php's.","after":"Experiment-html bypasses master-layout in production and serves a folder we don't have in preview — so the chrome shown here is experiment.php's.","reason":"`readfile()` is implementation language. \"Serves\" reads at user altitude.","_impact":5},{"phase":6,"kind":"rewrite","n":1135,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:767","before":"Display only — not used for filtering yet.","after":"Display only — not used for filtering.","reason":"Pattern.","_impact":5},{"phase":6,"kind":"rewrite","n":864,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:590","before":"Display only — not used for filtering yet.","after":"Display only — not used for filtering.","reason":"Pattern from #746.","_impact":5},{"phase":6,"kind":"rewrite","n":1011,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:852","before":"Display only — not used for filtering yet.","after":"Display only — not used for filtering.","reason":"Pattern.","_impact":5},{"phase":6,"kind":"rewrite","n":202,"section":"Experiments list view (views/experiments.php)","surface":"Experiments list","location":"views/experiments.php:239","before":"Live on /experiments/[slug]","after":"Live at /experiments/<slug>","reason":"Apply pattern.","_impact":5},{"phase":6,"kind":"rewrite","n":360,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:202","before":"Basic Listing — title, optional description, and a content feed.","after":"Basic Listing · title, optional description, and a content feed.","reason":"Same pattern.","_impact":5},{"phase":6,"kind":"rewrite","n":139,"section":"Journals list view (views/journals.php)","surface":"Journals list","location":"views/journals.php:234","before":"Live on /journal/[slug]","after":"Live at /journal/<slug>","reason":"Apply pattern from articles.","_impact":5},{"phase":6,"kind":"rewrite","n":170,"section":"Live sessions list view (views/live-sessions.php)","surface":"Live sessions list","location":"views/live-sessions.php:301","before":"Live on /live-sessions/[slug]","after":"Live at /live-sessions/<slug>","reason":"Apply pattern.","_impact":5},{"phase":6,"kind":"rewrite","n":215,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:87","before":"A mock is currently published — overriding the file at runtime","after":"A mock is currently published — overriding the file on staging","reason":"\"At runtime\" is implementation language; \"on staging\" tells the user the actual scope.","_impact":5},{"phase":6,"kind":"rewrite","n":1004,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:828","before":"JPEG, PNG, WebP, GIF · max 5 MB.","after":"JPEG, PNG, WebP, or GIF · max 5 MB","reason":"Add \"or\" before last item; drop trailing period (pattern with other hints).","_impact":4},{"phase":6,"kind":"rewrite","n":585,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:321","before":"The master PHP layout file — used as the wrapper for every public-rendered article-family page. Read-only view; edits happen in code (site/templates/master-layout.php) and ship through deploy.","after":"The master PHP layout file — the wrapper for every public article-family page. Read-only here; edit at site/templates/master-layout.php and deploy to ship.","reason":"\"Ship through deploy\" is awkward; \"deploy to ship\" is what actually happens.","_impact":3},{"phase":6,"kind":"rewrite","n":416,"section":"Redirects view (views/redirects.php)","surface":"Redirects","location":"views/redirects.php:44","before":"Could not add. Check for blank fields, duplicate old path, or old = new (would loop).","after":"Could not add. Check for blank fields, a duplicate old-path, or an old-path that equals the new-path (which would loop).","reason":"\"Old = new\" reads as code; spell it out.","_impact":3},{"phase":6,"kind":"rewrite","n":312,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:170","before":"The four built-in type pages","after":"The four built-in content-type indexes (one per content type)","reason":"\"Type pages\" is ambiguous if you haven't read BLOCKS.md. Spell out that there's one per content type.","_impact":3},{"phase":6,"kind":"rewrite","n":98,"section":"Articles list view (views/articles.php)","surface":"Articles list","location":"views/articles.php:142","before":"Special tag","after":"Tag","reason":"\"Special tag\" is internal jargon. The column shows Principle / Framework — calling it \"Tag\" matches the singular field label users actually pick from.","_impact":3},{"phase":6,"kind":"rewrite","n":61,"section":"Pipeline / Draft Writing view (views/pipeline.php)","surface":"Pipeline view","location":"views/pipeline.php:295","before":"Nothing here yet","after":"No drafts yet","reason":"Bare \"Nothing here yet\" doesn't say what's missing. With three stacked stage columns, \"drafts\" makes the empty state self-describing.","_impact":3},{"phase":6,"kind":"rewrite","n":1229,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:386","before":"Publish \"<name>\"? This will override <filename> on staging.","after":"Publish \"<name>\"? This overrides <filename> on staging until you un-publish or revert.","reason":"Tense; clarify the duration.","_impact":2},{"phase":6,"kind":"rewrite","n":207,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:147","before":"Marketing pages live on disk and ship via deploy. The CMS lets you save named mock versions for preview. For header.php / footer.php only, a mock can be published to override the file at runtime on staging.","after":"Marketing pages live as files on disk and update via deploy. Use mocks to save and preview alternate body content without touching the file. For header.php and footer.php only, you can publish a mock to override the file on staging.","reason":"\"Ship via deploy\" is build-internal. Tighten the second sentence to describe function. Replace `/` separator with `and` for natural reading. Drop \"at runtime\" — implementation detail.","_impact":2},{"phase":6,"kind":"rewrite","n":715,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1086","before":"The article chrome (breadcrumb, title, byline, hero, tags) stays as edited above. Only the body slot is replaced by the contents of the selected file. The file's HTML inherits the public .article-prose typography rules.","after":"The article chrome (breadcrumb, title, byline, hero, tags) stays as edited above. Only the body slot is replaced by the file. The file's HTML inherits the public .article-prose typography rules.","reason":"\"Replaced by the contents of the selected file\" is wordy; \"replaced by the file\" suffices given the dropdown context.","_impact":2},{"phase":6,"kind":"rewrite","n":332,"section":"Index new view (views/index-new.php)","surface":"Index new","location":"views/index-new.php:97","before":"Creates a configurable page at a custom URL. Slug is permanent — pick carefully.","after":"Creates a configurable page at a custom URL. The slug becomes the URL and is permanent — pick carefully.","reason":"Spell out what \"slug is permanent\" implies (it's part of the URL); first-time users may not know.","_impact":2},{"phase":7,"kind":"rewrite","n":1277,"section":"Auth views (login.php, account.php)","surface":"Auth","location":"account.php:83","before":"At least 12 characters, with one uppercase, one lowercase, and one digit.","after":"At least 12 characters, with at least one uppercase letter, one lowercase letter, and one digit.","reason":"Add \"letter\" — \"one uppercase\" alone reads as ambiguous units. Adding \"at least\" mirrors the leading requirement.","_impact":2},{"phase":7,"kind":"rewrite","n":388,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:336","before":"The main grid of cards. Type chips are OR — pick any combination. Empty = all types.","after":"The main grid of cards. Type chips are OR'd — pick any combination, or leave empty to include all types.","reason":"Spell out the all-types fallback in prose; \"Empty = all types\" reads as code.","_impact":2},{"phase":7,"kind":"rewrite","n":748,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1255","before":"minutes / minutes · set at Draft","after":"minutes · set at Draft stage","reason":"\"Minutes / minutes\" is a JS singular/plural hint that surfaces here as duplicate text. Just say \"minutes\".","_impact":2},{"phase":7,"kind":"rewrite","n":346,"section":"Index new view (views/index-new.php)","surface":"Index new","location":"views/index-new.php:141","before":"Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal).","after":"Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal/).","reason":"Trailing slash matches the actual URL pattern.","_impact":2},{"phase":7,"kind":"rewrite","n":109,"section":"Articles list view (views/articles.php)","surface":"Articles list","location":"views/articles.php:271","before":"Live on /writing/[slug]","after":"Live at /writing/<slug>","reason":"Replace [slug] brackets with `<slug>` to match every other slug-template reference in the CMS (article hints, journal hints, etc.).","_impact":2},{"phase":7,"kind":"rewrite","n":857,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:563","before":"Key Statement alone is enough — body is for expansion.","after":"The Key Statement alone is enough — the body is optional, for expansion.","reason":"Adds articles; clarifies that body is optional.","_impact":1},{"phase":7,"kind":"rewrite","n":1127,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:736","before":"Drives card colour on /experiments/ (Prototype vs Concept dark variant).","after":"Drives card colour on /experiments/. The Concept category renders with the dark variant.","reason":"\"Prototype vs Concept dark variant\" is too compressed — splits two facts into one.","_impact":1},{"phase":7,"kind":"rewrite","n":600,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:404","before":"<filename> not found in `site/templates/`.","after":"<filename> not found in site/templates/. Check the deploy.","reason":"Add the same actionable note as #587 (master-layout's parallel error already has it).","_impact":1},{"phase":7,"kind":"rewrite","n":446,"section":"Categories view (views/categories.php)","surface":"Categories","location":"views/categories.php:113","before":"Primary category drives colour and card display. Secondary categories expand index inclusion.","after":"Primary category drives colour and card display. Secondary categories add the article to more index pages.","reason":"\"Expand index inclusion\" is internal phrasing; \"add to more index pages\" is direct.","_impact":1},{"phase":7,"kind":"rewrite","n":316,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:186","before":"Auto-generated from /cms/series — not editable here","after":"Auto-generated from Series — manage them in Collections › Series","reason":"Use sidebar nav-path instead of URL fragment; reads as instruction not implementation.","_impact":1},{"phase":7,"kind":"rewrite","n":1263,"section":"Auth views (login.php, account.php)","surface":"Auth","location":"login.php:105","before":"Locked out after too many bad guesses? Clear it and try again. Staging only — the prod login never shows this button.","after":"Locked out after too many bad guesses? Clear the lock and try again. Staging only — the production login never shows this button.","reason":"\"Clear it\" is vague (clear what?); \"clear the lock\" is concrete. \"Prod\" → \"production\" (full word; this is user-facing copy, not internal).","_impact":1},{"phase":7,"kind":"rewrite","n":225,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:204","before":"Snapshots of past page versions · preview-only, no public URL","after":"Past page snapshots · preview-only, no public URL","reason":"\"Snapshots of past page versions\" is wordy. \"Past page snapshots\" is direct.","_impact":1},{"phase":7,"kind":"rewrite","n":562,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:220","before":"The Master Template defines every block available across content types. Each block has a stable slug used in code (data-block) and a visibility mode. Always blocks render whenever applicable. Optional blocks are toggled on or off per content type from each sub-template. Auto blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.","after":"The Master Template defines every block available across content types. Each block has a stable slug used in code (data-block) and a visibility mode. **Always** blocks render whenever applicable. **Optional** blocks are toggled on or off per content type from each sub-template. **Auto** blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.","reason":"Bold the three mode names so they read as terms, not adjectives. No content change.","_impact":1},{"phase":7,"kind":"rewrite","n":1114,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:670","before":"Article-format body. Strips HTML outside the toolbar allowlist on save.","after":"Article-format body. Any HTML outside the toolbar's allowlist is stripped on save.","reason":"Match #706.","_impact":1},{"phase":7,"kind":"rewrite","n":1207,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:302","before":"Layout partial. Mocks can be published to override the file on staging — file remains canonical until you publish.","after":"Layout partial. Publish a mock to override the file on staging — the file stays canonical until you do.","reason":"More active. \"Until you publish\" → \"until you do\" (avoids the awkward repetition of \"publish\").","_impact":1},{"phase":7,"kind":"rewrite","n":365,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:233","before":"Flip between the two layout types. Hero + featured config is preserved when switched off.","after":"Switch between the two layout types. Hero and featured settings are preserved when you switch back.","reason":"\"Flip\" is colloquial; \"switch\" matches the rest of the CMS. Replace `+` with prose. \"When switched off\" is ambiguous; \"when you switch back\" tells the user what they get.","_impact":1},{"phase":7,"kind":"rewrite","n":314,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:176","before":"Seed missing. Run migration 0007 to restore the four built-in Post Type indexes.","after":"Seed missing. Run migration 0007 to restore the four built-in indexes.","reason":"Sentence-case \"post type indexes\" → drop \"Post Type\" (matches updated block label above).","_impact":1},{"phase":7,"kind":"rewrite","n":729,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1182","before":"Drives card colour on /writing/ and the breadcrumb. Manage at /cms/categories.","after":"Drives card colour on /writing/ and the breadcrumb. Manage in Collections › Categories.","reason":"Use sidebar nav-path instead of a URL — reads as navigation, not implementation.","_impact":0},{"phase":7,"kind":"rewrite","n":773,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:1578","before":"Deleting a published article is permanent.\\n\\nType the slug to confirm:\\n\\n  <slug>","after":"Deleting a published article is permanent.\\n\\nType the slug exactly to confirm:\\n\\n  <slug>","reason":"Add \"exactly\" — makes it obvious that whitespace/case must match.","_impact":0},{"phase":7,"kind":"rewrite","n":657,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:853","before":"Required before advancing. You can also drag the card into a type column in Ideation.","after":"Required before you can advance. You can also assign a type by dragging the card in Ideation.","reason":"Direct second-person; \"advancing\" alone is ambiguous about what advances.","_impact":0},{"phase":8,"kind":"rewrite","n":405,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:392","before":"One pill per feed type (Articles · Journals · Talks · Experiments).","after":"One pill per feed type (Articles · Journals · Live Sessions · Experiments).","reason":"\"Talks\" appears once here as a synonym for Live Sessions — confusing. Use the canonical name.","_impact":0},{"phase":8,"kind":"rewrite","n":9,"section":"Sidebar (partials/sidebar.php)","surface":"Sidebar","location":"partials/sidebar.php:60","before":"Ideation Board","after":"Ideation","reason":"Drop \"Board\" — UI implementation detail. Matches breadcrumb and view title which already say \"Ideation\".","_impact":0},{"phase":8,"kind":"rewrite","n":507,"section":"Subscribers view (views/subscribers.php)","surface":"Subscribers","location":"views/subscribers.php:168","before":"Captured from the public newsletter form. Re-subscribers update in place — every row here is a unique email address.","after":"Captured from the public newsletter form. Re-subscribers update the existing row — every email here is unique.","reason":"\"Update in place\" is technical; \"update the existing row\" is clearer. \"Every row is a unique email address\" reads awkwardly.","_impact":0},{"phase":8,"kind":"rewrite","n":634,"section":"Article edit view (views/article-edit.php)","surface":"Article edit","location":"views/article-edit.php:719","before":"Article · <stageLabel> · last saved <updated_at>","after":"Article · <stageLabel> · saved <updated_at>","reason":"\"Last saved\" is redundant — it's always the last save.","_impact":0},{"phase":8,"kind":"rewrite","n":1082,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:470","before":"Experiment · <template> · <stageLabel> · last saved <updated_at>","after":"Experiment · <template> · <stageLabel> · saved <updated_at>","reason":"Drop \"last\".","_impact":0},{"phase":8,"kind":"rewrite","n":822,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:393","before":"Journal · <stageLabel> · Entry <entry#> · last saved <updated_at>","after":"Journal · <stageLabel> · Entry <entry#> · saved <updated_at>","reason":"Drop \"last\" (see #634).","_impact":0},{"phase":8,"kind":"rewrite","n":940,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:483","before":"Live Session · <stageLabel>(· PAST) · last saved <updated_at>","after":"Live Session · <stageLabel>(· PAST) · saved <updated_at>","reason":"Drop \"last\" (see #634).","_impact":0},{"phase":8,"kind":"rewrite","n":968,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:642","before":"date required · times optional · Eastern (Toronto) timezone","after":"date required · times optional · Toronto (ET) timezone","reason":"The label name first, abbreviation in parens — matches how dates are read in headers and reduces ambiguity (\"Eastern\" is regional for non-NA audiences but redundant here since Toronto IS Eastern).","_impact":0},{"phase":8,"kind":"rewrite","n":1016,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:879","before":"Show \"Updated\" date on the article","after":"Show \"Updated\" date on the live session","reason":"Wrong noun (see #872).","_impact":0},{"phase":8,"kind":"rewrite","n":1177,"section":"Experiment new view (views/experiment-new.php)","surface":"Experiment new","location":"views/experiment-new.php:141","before":"Rich text uses the TipTap editor (same blocks as Articles). HTML body keeps the article chrome and replaces the body slot with a hand-built file from /content/experiment/<slug>/. HTML swap serves the file directly with no template wrapper. All three are switchable later from the edit screen.","after":"Rich text uses the TipTap editor (same blocks as Articles). HTML body keeps the article chrome and replaces the body slot with a hand-built file from /content/experiment/<slug>/. HTML swap serves the file directly with no template wrapper. You can switch between modes later from the edit screen.","reason":"Last sentence reads as system documentation; second-person makes it instructional.","_impact":0},{"phase":8,"kind":"rewrite","n":339,"section":"Index new view (views/index-new.php)","surface":"Index new","location":"views/index-new.php:121","before":"Shown at the top of the index page. Also used to derive the slug if you leave that blank.","after":"Shown at the top of the index page. Also used to derive the slug below if you leave it blank.","reason":"\"That\" is vague; \"the slug below\" is concrete.","_impact":0},{"phase":8,"kind":"rewrite","n":899,"section":"Journal new view (views/journal-new.php)","surface":"Journal new","location":"views/journal-new.php:52","before":"Draft created — write your Key Statement.","after":"Draft created — write the Key Statement next.","reason":"\"Your\" is fine but \"the Key Statement next\" reads more like a system prompt.","_impact":0},{"phase":8,"kind":"rewrite","n":144,"section":"Live sessions list view (views/live-sessions.php)","surface":"Live sessions list","location":"views/live-sessions.php:83","before":"Talks, workshops, conversations. Past events stay live with a PAST badge.","after":"Talks, workshops, and conversations. Past events stay live with a PAST badge.","reason":"Oxford-comma fix.","_impact":0},{"phase":8,"kind":"rewrite","n":438,"section":"Categories view (views/categories.php)","surface":"Categories","location":"views/categories.php:157","before":"Value slugs are permanent — they're what the database stores. Labels and colours are editable anytime. A category can only be deleted when its usage count is zero.","after":"Value slugs are permanent — they're what the database stores. Labels and colours are editable any time. A category can only be deleted when nothing is using it.","reason":"\"Usage count is zero\" is database-shaped; \"nothing is using it\" is plain. \"Anytime\" → \"any time\" (correct two-word form for adverb phrase here).","_impact":0},{"phase":8,"kind":"rewrite","n":1140,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:794","before":"Show \"Updated\" date on the article","after":"Show \"Updated\" date on the experiment","reason":"Wrong noun (#872).","_impact":0},{"phase":8,"kind":"rewrite","n":175,"section":"Experiments list view (views/experiments.php)","surface":"Experiments list","location":"views/experiments.php:83","before":"Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, full HTML swap.","after":"Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, or full HTML swap.","reason":"Add \"or\" before the third item — reads as a list, not a fragment.","_impact":0},{"phase":8,"kind":"rewrite","n":260,"section":"Navigation editor (views/navigation.php)","surface":"Navigation","location":"views/navigation.php:277","before":"Top nav rendered above every public page","after":"Top nav shown above every public page","reason":"\"Rendered\" → \"shown\" (user altitude).","_impact":0},{"phase":8,"kind":"rewrite","n":261,"section":"Navigation editor (views/navigation.php)","surface":"Navigation","location":"views/navigation.php:278","before":"Bottom links rendered in the page footer","after":"Bottom links shown in the page footer","reason":"Same.","_impact":0},{"phase":8,"kind":"rewrite","n":602,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:415","before":"Live preview of <sub-template name> — renders site/templates/<filename> against synthetic content. Edits to the template file show up here immediately.","after":"Live preview of <sub-template name> — renders site/templates/<filename> against sample content. Edits to the template file show up here immediately.","reason":"\"Synthetic content\" is technical; \"sample content\" is clearer and equally accurate.","_impact":0},{"phase":8,"kind":"rewrite","n":1232,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:401","before":"This is the on-disk file. The CMS never writes here — click + New Mock to start editing.","after":"This is the on-disk file. The CMS never writes here — click \"+ New Mock\" to start editing.","reason":"Quote the button label so it reads as a UI reference.","_impact":0},{"phase":9,"kind":"rewrite","n":242,"section":"Pages list view (views/pages.php)","surface":"Pages list","location":"views/pages.php:264","before":"Shared header + footer · publish-capable on staging","after":"Shared header and footer · publishable on staging","reason":"\"+\" reads as code. \"Publish-capable\" is awkward — \"publishable\" is shorter and clearer.","_impact":0},{"phase":9,"kind":"rewrite","n":548,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:168","before":"Each content type uses a PHP layout file that controls how its fields render on the live site. The Master template lists every available field and its PHP variable — it doesn't turn anything on or off. Each sub-template inherits everything and can suppress specific fields.","after":"Each content type has a PHP layout file that controls how its fields render on the public site. The Master template lists every available field and its PHP variable — it's a reference, not a switchboard. Each sub-template inherits everything and can suppress specific fields.","reason":"\"Live site\" → \"public site\" (matches the rest of the CMS). \"Doesn't turn anything on or off\" is awkward; \"reference, not a switchboard\" is more vivid and shorter.","_impact":0},{"phase":9,"kind":"rewrite","n":482,"section":"Series view (views/series.php)","surface":"Series","location":"views/series.php:202","before":"Launch ↗","after":"Live ↗","reason":"Match every other \"go to public site\" button in the CMS (every list view uses Live ↗).","_impact":0},{"phase":9,"kind":"rewrite","n":400,"section":"Index edit view (views/index-edit.php)","surface":"Index edit","location":"views/index-edit.php:384","before":"One row ≈ 4 cards. Beyond the cap, items are simply hidden.","after":"One row is about 4 cards. Items beyond the cap are hidden.","reason":"Replace `≈` (math symbol) with prose. Drop \"simply\" (filler word).","_impact":0},{"phase":9,"kind":"rewrite","n":979,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:697","before":"Publish Date is separate — that's stamped when the session goes live. Past events stay live with a PAST badge.","after":"Publish Date is separate — it's stamped when the session is published. Past events stay live with a PAST badge.","reason":"\"That's stamped when the session goes live\" is awkward (live = state, publish = action); \"stamped when the session is published\" is precise.","_impact":0},{"phase":9,"kind":"rewrite","n":414,"section":"Redirects view (views/redirects.php)","surface":"Redirects","location":"views/redirects.php:156","before":"Map an old URL to a new one. Default is 301 (permanent, browsers cache it). Use 302 when the destination might move — third-party services, A/B tests, or anything not yet stable.","after":"Map an old URL to a new one. 301 is the default (permanent — browsers cache it). Use 302 when the destination might move — third-party links, A/B tests, anything not yet stable.","reason":"Tighter phrasing; \"third-party services\" is jargon — \"third-party links\" is more concrete.","_impact":0},{"phase":9,"kind":"rewrite","n":69,"section":"Ideation view (views/ideation.php)","surface":"Ideation view","location":"views/ideation.php:93","before":"Capture raw ideas. Drag a card into a type column to assign it; drag within a column to reorder.","after":"Capture raw ideas. Drag a card into a type column to assign it. Drag within a column to reorder.","reason":"Two actions; split the run-on with a period for scannability.","_impact":0},{"phase":9,"kind":"rewrite","n":326,"section":"Indexes list view (views/indexes.php)","surface":"Indexes list","location":"views/indexes.php:232","before":"Author-created Editorial Pages and additional Basic Listings","after":"Editorial Pages and additional Basic Listings you've created","reason":"\"Author-created\" is meta-language (we know the user is the author). Re-cast as second person.","_impact":0},{"phase":9,"kind":"rewrite","n":1116,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:677","before":"Full-page passthrough — readfile() serves at /experiments/<slug> with no template wrapper.","after":"Full-page passthrough — the file is served directly at /experiments/<slug>/ with no template wrapper.","reason":"`readfile()` is implementation; \"served directly\" is plain. Add trailing slash.","_impact":-2},{"phase":9,"kind":"rewrite","n":348,"section":"Index new view (views/index-new.php)","surface":"Index new","location":"views/index-new.php:146","before":"Hero feature + curated picks + content feed. Use for curated landing pages (e.g. /digital-garden).","after":"Hero feature, curated picks, and a content feed. Use for curated landing pages (e.g. /digital-garden/).","reason":"Replace `+` with prose. Trailing slash.","_impact":-3},{"phase":9,"kind":"rewrite","n":114,"section":"Journals list view (views/journals.php)","surface":"Journals list","location":"views/journals.php:82","before":"Short, declarative entries. Each gets a per-category Entry number when published.","after":"Short, declarative entries. Each gets a per-category entry number on first publish.","reason":"Sentence-case \"entry number\" (it's not a proper noun). \"On first publish\" is more precise — the number doesn't change on re-publish.","_impact":-3},{"phase":9,"kind":"rewrite","n":1180,"section":"Experiment new view (views/experiment-new.php)","surface":"Experiment new","location":"views/experiment-new.php:160","before":"e.g. \"Decision scaffolding tool\". Shown in /experiments and on the public page.","after":"e.g. \"Decision scaffolding tool\". Shown in /experiments/ and on the public page.","reason":"Trailing slash.","_impact":-3},{"phase":9,"kind":"rewrite","n":1050,"section":"Live session new view (views/live-session-new.php)","surface":"Live session new","location":"views/live-session-new.php:128","before":"e.g. \"Designing for Human Agency\". Shown on the public page and in /live-sessions listings.","after":"e.g. \"Designing for Human Agency\". Shown on the public page and in /live-sessions/ listings.","reason":"Trailing slash matches the actual route.","_impact":-3},{"phase":9,"kind":"rewrite","n":1245,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:593","before":"Name this mock (e.g. \"Tighter intro\"):","after":"Name this mock (e.g. \"Tighter intro\")","reason":"Drop trailing colon — JS prompt() already adds visual separation.","_impact":-3},{"phase":9,"kind":"rewrite","n":1091,"section":"Experiment edit view (views/experiment-edit.php)","surface":"Experiment edit","location":"views/experiment-edit.php:528","before":"Preview — Experiment","after":"Preview · Experiment","reason":"Pipe separator.","_impact":-3},{"phase":9,"kind":"rewrite","n":829,"section":"Journal edit view (views/journal-edit.php)","surface":"Journal edit","location":"views/journal-edit.php:450","before":"Preview — Journal entry","after":"Preview · Journal entry","reason":"Pipe separator (consistent).","_impact":-3},{"phase":9,"kind":"rewrite","n":950,"section":"Live session edit view (views/live-session-edit.php)","surface":"Live session edit","location":"views/live-session-edit.php:540","before":"Preview — Live session","after":"Preview · Live session","reason":"Pipe separator.","_impact":-3},{"phase":9,"kind":"rewrite","n":1233,"section":"Page edit view (views/page-edit.php)","surface":"Page edit","location":"views/page-edit.php:420","before":"Preview — <filename>","after":"Preview · <filename>","reason":"Pipe separator.","_impact":-3},{"phase":9,"kind":"rewrite","n":589,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:340","before":"Master Template Preview — every block populated","after":"Master Template preview · every block populated","reason":"Sentence-case \"preview\" (it's not a proper noun); pipe separator matches other CMS sublabels.","_impact":-3},{"phase":9,"kind":"rewrite","n":605,"section":"Post Templates view (views/post-template.php)","surface":"Post Templates","location":"views/post-template.php:425","before":"Preview — <sub-template name>","after":"Preview · <sub-template name>","reason":"Use the consistent pipe separator (matches #589).","_impact":-3},{"phase":10,"kind":"openq","idxInKind":0,"ctx":"Sidebar items 2/4/6/28 (Dashboard, Analytics, Post History, Settings)","current":"All show tooltip \"Coming soon\"","question":"Are these placeholders staying as visible nav items? If yes, \"Coming soon\" is fine. If they should be hidden until built, that's a behaviour change (out of scope for this audit) but worth flagging."},{"phase":10,"kind":"openq","idxInKind":1,"ctx":"32–34 Topbar logo","current":"\"alexmchong\" + italic \"cms\" + status pill \"staging\"","question":"The pill says \"staging\" on the staging environment. Confirm: on production, is the pill hidden entirely, or replaced with something else (e.g. \"prod\")? If the latter, the prod label needs a copy decision."},{"phase":10,"kind":"openq","idxInKind":2,"ctx":"76 (Ideation), 85/116/146/177 (list New buttons)","current":"Mixed: \"+ Add\", \"+ New Article\", \"+ New Journal\", \"+ New Session\", \"+ New Experiment\"","question":"The four list-view buttons say \"+ New <Type>\"; ideation's inline-create says \"+ Add\". Should we align ideation to \"+ Add idea\" so the verb is consistent (always specifying object)? Lean: yes, \"+ Add idea\" — but flagging because it's a tiny UI shift not strictly a copy fix."},{"phase":10,"kind":"openq","idxInKind":3,"ctx":"84/115/145/176","current":"\"View Index ↗\" appears next to \"+ New <Type>\" on every list view","question":"Strong: this button takes the author to the live index page for that type. Should it be labelled \"View live index ↗\" to disambiguate from the CMS Indexes page (which is a different surface)? Lean: yes — author confusion risk between Library › Articles and Collections › Indexes."},{"phase":10,"kind":"openq","idxInKind":4,"ctx":"146","current":"+ New Session","question":"Sidebar and list view say \"Live Sessions\" — should this button say \"+ New Live Session\" for consistency? Lean: yes, but it's longer."},{"phase":10,"kind":"openq","idxInKind":5,"ctx":"211 (Pages filter pills \"All / Archives\")","current":"The All pill is unlabelled in the inventory but the filter pattern elsewhere uses category + content-type filtering","question":"Confirm that \"Archives\" filter is the only non-All filter on Pages. If more filters land, this label set will need re-audit."},{"phase":10,"kind":"openq","idxInKind":6,"ctx":"246–248 / 1249–1251","current":"\"Nm ago\", \"Nh ago\", \"Nd ago\"","question":"Standard relative-time format. Keep, or change \"m\" / \"h\" / \"d\" to \"min\" / \"hr\" / \"d\" for legibility? Lean: keep — single-letter units match common conventions (GitHub, Linear, etc.). Flagging only because Alex may have a preference."},{"phase":10,"kind":"openq","idxInKind":7,"ctx":"638 / 893 / 945 / 1086","current":"Mixed \"Back to <list>\" / \"Back to list\" / \"Back to Ideation\" / \"Back to Draft Writing\"","question":"The back-button cascade is dynamic based on referrer. Generally good. One concern: \"Back to Draft Writing\" — is the Draft Writing view still called that, or did the rename to \"Pipeline / Draft Writing\" happen? Confirm canonical name to use in the back button."},{"phase":10,"kind":"openq","idxInKind":8,"ctx":"657","current":"\"Required before advancing. You can also drag the card into a type column in Ideation.\"","question":"This appears on a Type select that's required to leave the Idea stage. Lean to keeping the recommendation rewrite, but flagging because some authors prefer dragging vs the type dropdown and the second sentence may be unnecessary noise for daily use."},{"phase":10,"kind":"openq","idxInKind":9,"ctx":"671","current":"\"Lowercase letters, numbers, hyphens. Becomes part of /writing/<slug>.\"","question":"Currently has no period after \"hyphens\" but does after `<slug>`. Should every list-of-allowed-chars hint use the same punctuation? Lean: yes, use \"Lowercase letters, numbers, and hyphens.\" (oxford comma + period) everywhere."},{"phase":10,"kind":"openq","idxInKind":10,"ctx":"750 / 868 / 1012 / 1136","current":"\"Live\" indicator badge on edit views","question":"Currently just the word \"Live\". On a published-and-live entry, this is the visible state. Consider whether to add a green dot or keep text-only. (Out of copy-audit scope but flagging since the design system may have a published-state token unused here.)"},{"phase":10,"kind":"openq","idxInKind":11,"ctx":"1245 / 1246 / 1247","current":"Browser-native `prompt()` dialogs for naming mocks (\"Name this mock…\", \"Rename to:\", \"Name the duplicate:\")","question":"These are JS prompts, capped by the browser's prompt() UI. The current strings are functionally clear. Flagging because the entire prompt() pattern is a UX weak spot — a real modal would let us improve the copy more substantially, but that's out of scope."},{"phase":10,"kind":"openq","idxInKind":12,"ctx":"Pipeline view #58/59/60 \"This Week / Next Week / Future\"","current":"\"Future\" is broad — does it include weeks 3+, or specifically \"more than 2 weeks out\"?","question":"Copy is fine if the bucket definition matches user intuition. If \"Future\" actually means \"next 30 days\" or similar, consider a more precise label. Flagging for author confirmation."},{"phase":10,"kind":"openq","idxInKind":13,"ctx":"597","current":"\"Per-sub-template visibility toggles are read-only — the modes shown above are the BLOCKS.md matrix defaults.\"","question":"The rewrite drops the BUILD-PLAN reference but keeps \"BLOCKS.md\" (a developer doc). Should this also drop \"BLOCKS.md\" and just say \"the matrix defaults\"? Lean: yes — most surfaces shouldn't name docs at all."}],"phaseNames":["Foundations — Vocabulary","Foundations — Patterns","Rewrites — batch 1 of 7","Rewrites — batch 2 of 7","Rewrites — batch 3 of 7","Rewrites — batch 4 of 7","Rewrites — batch 5 of 7","Rewrites — batch 6 of 7","Rewrites — batch 7 of 7","Open questions"],"phaseCounts":{"1":11,"2":12,"3":20,"4":20,"5":20,"6":20,"7":20,"8":20,"9":20,"10":14},"rewriteTotal":140};
+const STORAGE_KEY = "copy-audit-decisions-v3";
+
+// ----- state -----
+let state = loadState();
+
+function freshState() {
+  return {
+    rewrites: {},
+    vocab: {},
+    pattern: {},
+    openQuestions: {},
+    skipped: {},
+    currentCard: 0,
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return freshState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(freshState(), parsed);
+  } catch (e) {
+    return freshState();
+  }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+// ----- decision accessors -----
+function getDecision(card) {
+  if (card.kind === "rewrite") return state.rewrites[String(card.n)];
+  if (card.kind === "vocab") return state.vocab[String(card.idxInKind)];
+  if (card.kind === "pattern") return state.pattern[String(card.idxInKind)];
+  if (card.kind === "openq") {
+    const a = state.openQuestions[String(card.idxInKind)];
+    if (a) return { decision: "answered", answer: a };
+    if (state.skipped["openq_" + card.idxInKind]) return { decision: "no-opinion" };
+    return undefined;
+  }
+}
+
+function setDecision(card, decision, extra) {
+  extra = extra || {};
+  if (card.kind === "rewrite") {
+    state.rewrites[String(card.n)] = Object.assign({ decision }, extra);
+  } else if (card.kind === "vocab") {
+    state.vocab[String(card.idxInKind)] = Object.assign({ decision }, extra);
+  } else if (card.kind === "pattern") {
+    state.pattern[String(card.idxInKind)] = Object.assign({ decision }, extra);
+  }
+  saveState();
+}
+
+function setOpenQuestion(card, answer) {
+  if (answer && answer.trim()) {
+    state.openQuestions[String(card.idxInKind)] = answer.trim();
+    delete state.skipped["openq_" + card.idxInKind];
+  } else {
+    delete state.openQuestions[String(card.idxInKind)];
+  }
+  saveState();
+}
+
+function noOpinionOpenQuestion(card) {
+  state.skipped["openq_" + card.idxInKind] = true;
+  delete state.openQuestions[String(card.idxInKind)];
+  saveState();
+}
+
+// ----- phase utilities -----
+function cardsInPhase(phaseNum) {
+  return DATA.cards.filter(c => c.phase === phaseNum);
+}
+
+function decidedCountInPhase(phaseNum) {
+  let n = 0;
+  for (const c of cardsInPhase(phaseNum)) {
+    const d = getDecision(c);
+    if (d) n++;
+  }
+  return n;
+}
+
+function phaseFirstUndecidedIdx(phaseNum) {
+  for (let i = 0; i < DATA.cards.length; i++) {
+    if (DATA.cards[i].phase !== phaseNum) continue;
+    if (!getDecision(DATA.cards[i])) return i;
+  }
+  for (let i = 0; i < DATA.cards.length; i++) {
+    if (DATA.cards[i].phase === phaseNum) return i;
+  }
+  return 0;
+}
+
+function totalRewriteDecisions() {
+  let n = 0;
+  for (const c of DATA.cards) {
+    if (c.kind !== "rewrite") continue;
+    if (getDecision(c)) n++;
+  }
+  return n;
+}
+
+// ----- placeholder + diff -----
+const PLACEHOLDER_RE = /(<\?=[\s\S]*?\?>|<\?[\s\S]*?\?>|`[^`]+`|<[a-zA-Z_][a-zA-Z0-9_#-]*>|\[[a-z_]+\]|\\n)/g;
+
+function tokenize(s) {
+  if (!s) return [];
+  const tokens = [];
+  let last = 0;
+  PLACEHOLDER_RE.lastIndex = 0;
+  let m;
+  while ((m = PLACEHOLDER_RE.exec(s)) !== null) {
+    if (m.index > last) tokens.push(...subTokenize(s.slice(last, m.index)));
+    tokens.push({ kind: "placeholder", text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < s.length) tokens.push(...subTokenize(s.slice(last)));
+  return tokens;
+}
+
+function subTokenize(s) {
+  const out = [];
+  const re = /(\s+)|([A-Za-z0-9]+(?:[’']?[A-Za-z0-9]+)*)|([^\sA-Za-z0-9])/g;
+  let m;
+  while ((m = re.exec(s)) !== null) {
+    if (m[1]) out.push({ kind: "ws", text: m[1] });
+    else if (m[2]) out.push({ kind: "word", text: m[2] });
+    else if (m[3]) out.push({ kind: "punct", text: m[3] });
+  }
+  return out;
+}
+
+function diffTokens(beforeTokens, afterTokens) {
+  const sig = (toks) => {
+    const arr = [];
+    toks.forEach((t, i) => { if (t.kind !== "ws") arr.push({ t, i }); });
+    return arr;
+  };
+  const A = sig(beforeTokens);
+  const B = sig(afterTokens);
+  const n = A.length, m = B.length;
+  const cmp = (a, b) => a.t.text === b.t.text && a.t.kind === b.t.kind;
+
+  const dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (cmp(A[i - 1], B[j - 1])) dp[i][j] = dp[i - 1][j - 1] + 1;
+      else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  const lcsLen = dp[n][m];
+  const maxLen = Math.max(n, m);
+  if (maxLen > 0 && lcsLen / maxLen < 0.25) {
+    return {
+      before: beforeTokens.map(t => ({ ...t, mark: t.kind === "ws" ? null : "removed" })),
+      after: afterTokens.map(t => ({ ...t, mark: t.kind === "ws" ? null : "added" })),
+    };
+  }
+
+  const matchedA = new Set();
+  const matchedB = new Set();
+  let i = n, j = m;
+  while (i > 0 && j > 0) {
+    if (cmp(A[i - 1], B[j - 1])) {
+      matchedA.add(A[i - 1].i); matchedB.add(B[j - 1].i);
+      i--; j--;
+    } else if (dp[i - 1][j] >= dp[i][j - 1]) i--;
+    else j--;
+  }
+
+  const beforeOut = beforeTokens.map((t, idx) => ({
+    ...t,
+    mark: t.kind === "ws" ? null : (matchedA.has(idx) ? null : "removed"),
+  }));
+  const afterOut = afterTokens.map((t, idx) => ({
+    ...t,
+    mark: t.kind === "ws" ? null : (matchedB.has(idx) ? null : "added"),
+  }));
+  return { before: beforeOut, after: afterOut };
+}
+
+function renderTokens(tokens, side) {
+  let html = "";
+  for (const t of tokens) {
+    if (t.kind === "ws") { html += escapeHtml(t.text); continue; }
+    const inner = t.kind === "placeholder"
+      ? (/^`.*`$/.test(t.text)
+          ? `<code>${escapeHtml(t.text.slice(1, -1))}</code>`
+          : `<span class="placeholder">${escapeHtml(t.text)}</span>`)
+      : escapeHtml(t.text);
+    if (t.mark === "removed" && side === "before") {
+      html += `<span class="diff-removed">${inner}</span>`;
+    } else if (t.mark === "added" && side === "after") {
+      html += `<span class="diff-added">${inner}</span>`;
+    } else {
+      html += inner;
+    }
+  }
+  return html;
+}
+
+function renderInline(s) {
+  if (!s) return "";
+  s = s.replace(/\\n/g, "\n");
+  const toks = tokenize(s);
+  let html = "";
+  for (const t of toks) {
+    if (t.kind === "ws") html += escapeHtml(t.text);
+    else if (t.kind === "placeholder") {
+      if (/^`.*`$/.test(t.text)) {
+        html += `<code>${escapeHtml(t.text.slice(1, -1))}</code>`;
+      } else {
+        html += `<span class="placeholder">${escapeHtml(t.text)}</span>`;
+      }
+    } else html += escapeHtml(t.text);
+  }
+  return html;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// ----- rendering -----
+const mount = document.getElementById("cardMount");
+const phaseNav = document.getElementById("phaseNav");
+const phaseCurrentLabel = document.getElementById("phaseCurrentLabel");
+
+function render() {
+  if (state.currentCard < 0) state.currentCard = 0;
+  if (state.currentCard >= DATA.cards.length) {
+    renderDone(); renderPhaseNav(); updateHeader();
+    return;
+  }
+  const card = DATA.cards[state.currentCard];
+  if (card.kind === "rewrite") renderRewriteCard(card, state.currentCard);
+  else if (card.kind === "vocab") renderVocabCard(card, state.currentCard);
+  else if (card.kind === "pattern") renderPatternCard(card, state.currentCard);
+  else if (card.kind === "openq") renderOpenQCard(card, state.currentCard);
+
+  renderPhaseNav();
+  updateHeader();
+  saveState();
+}
+
+function updateHeader() {
+  document.getElementById("globalDecisionsCount").textContent = totalRewriteDecisions();
+  document.getElementById("globalRewriteTotal").textContent = DATA.rewriteTotal;
+}
+
+function renderPhaseNav() {
+  const currentPhase = state.currentCard < DATA.cards.length ? DATA.cards[state.currentCard].phase : null;
+  phaseNav.innerHTML = "";
+  for (let p = 1; p <= 10; p++) {
+    const total = DATA.phaseCounts[p];
+    const done = decidedCountInPhase(p);
+    const classes = ["phase-circle"];
+    if (done === 0) {}
+    else if (done < total) classes.push("partial");
+    else classes.push("complete");
+    if (p === currentPhase) classes.push("current");
+    const btn = document.createElement("button");
+    btn.className = classes.join(" ");
+    btn.textContent = p;
+    btn.addEventListener("click", () => jumpToPhase(p));
+    const tip = document.createElement("span");
+    tip.className = "tip";
+    tip.textContent = `${DATA.phaseNames[p - 1]} — ${done}/${total}`;
+    btn.appendChild(tip);
+    phaseNav.appendChild(btn);
+  }
+  phaseCurrentLabel.textContent = currentPhase
+    ? `Phase ${currentPhase} of 10 · ${DATA.phaseNames[currentPhase - 1]}`
+    : "All phases reviewed";
+}
+
+function jumpToPhase(phaseNum) {
+  state.currentCard = phaseFirstUndecidedIdx(phaseNum);
+  saveState();
+  render();
+}
+
+function phaseProgressBits(card) {
+  const phase = card.phase;
+  const cardsP = cardsInPhase(phase);
+  const positionInPhase = cardsP.indexOf(card) + 1;
+  const totalInPhase = cardsP.length;
+  const decidedInPhase = decidedCountInPhase(phase);
+  return { positionInPhase, totalInPhase, decidedInPhase };
+}
+
+function actionButtonsHtml(decValue) {
+  return `
+    <div class="actions">
+      <button class="btn-action btn-accept ${decValue === 'accept' ? 'selected' : ''}" data-act="accept">
+        <span class="icon">✓</span> Accept <span class="key">A</span>
+      </button>
+      <button class="btn-action btn-reject ${decValue === 'reject' ? 'selected' : ''}" data-act="reject">
+        <span class="icon">✗</span> Reject <span class="key">R</span>
+      </button>
+      <button class="btn-action btn-alt ${decValue === 'alternative' ? 'selected' : ''}" data-act="alternative">
+        <span class="icon">✎</span> Use alt <span class="key">T</span>
+      </button>
+    </div>
+  `;
+}
+
+function footerHtml(idx) {
+  return `
+    <div class="card-footer">
+      <button id="prevBtn" ${idx === 0 ? 'disabled' : ''}>← Previous</button>
+      <button id="skipBtn">Skip for now (S)</button>
+    </div>
+  `;
+}
+
+function topBarHtml(card, globalLabel) {
+  return `
+    <div class="card-top">
+      <span class="phase-chip"><span class="num">Phase ${card.phase}</span> · ${escapeHtml(DATA.phaseNames[card.phase - 1])}</span>
+      <span class="global-step">${escapeHtml(globalLabel)}</span>
+    </div>
+  `;
+}
+
+function progressBarHtml(decidedInPhase, totalInPhase) {
+  const pct = totalInPhase ? Math.round(100 * decidedInPhase / totalInPhase) : 0;
+  return `
+    <div class="progress-row">
+      <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%;"></div></div>
+      <div class="progress-label">${decidedInPhase} / ${totalInPhase}</div>
+    </div>
+  `;
+}
+
+function altWrapHtml(altValue) {
+  return `
+    <div class="alt-wrap">
+      <div class="alt-label">Alternative (only if you want to override)</div>
+      <textarea class="alt-input" id="altInput" placeholder="Type your own version…">${escapeHtml(altValue)}</textarea>
+      <div class="alt-warning" id="altWarning">Type your alternative first.</div>
+    </div>
+  `;
+}
+
+function renderRewriteCard(card, idx) {
+  const { positionInPhase, totalInPhase, decidedInPhase } = phaseProgressBits(card);
+  const dec = getDecision(card) || {};
+  const altValue = dec.alt || "";
+  const beforeTokens = tokenize(card.before || "");
+  const afterTokens = tokenize(card.after || "");
+  const diffed = diffTokens(beforeTokens, afterTokens);
+  const beforeHtml = renderTokens(diffed.before, "before");
+  const afterHtml = renderTokens(diffed.after, "after");
+  const globalIdx = DATA.cards.slice(0, idx + 1).filter(c => c.kind === "rewrite").length;
+  const globalTotal = DATA.rewriteTotal;
+
+  mount.innerHTML = `
+    <div class="card" id="card">
+      ${topBarHtml(card, `Rewrite ${globalIdx} of ${globalTotal}`)}
+      ${progressBarHtml(decidedInPhase, totalInPhase)}
+      <div class="location-row">
+        <span class="location">#${card.n} · ${escapeHtml(card.location)}</span>
+        <span class="chip-cluster">
+          <span class="surface-chip">${escapeHtml(card.surface)}</span>
+          <span class="impact-badge" title="Impact score — higher means higher-priority rewrite">· impact ${card._impact != null ? card._impact : 0}</span>
+        </span>
+      </div>
+      <div class="ba-block before">
+        <span class="ba-label">BEFORE</span>
+        <div class="ba-content">${beforeHtml}</div>
+      </div>
+      <div class="ba-block after">
+        <span class="ba-label">AFTER</span>
+        <div class="ba-content">${afterHtml}</div>
+      </div>
+      <div class="reason">${renderInline(card.reason)}</div>
+      ${altWrapHtml(altValue)}
+      ${actionButtonsHtml(dec.decision)}
+      ${footerHtml(idx)}
+    </div>
+  `;
+  attachActions(card);
+}
+
+function renderVocabCard(card, idx) {
+  const { positionInPhase, totalInPhase, decidedInPhase } = phaseProgressBits(card);
+  const dec = getDecision(card) || {};
+  const altValue = dec.alt || "";
+
+  mount.innerHTML = `
+    <div class="card" id="card">
+      ${topBarHtml(card, `${positionInPhase} of ${totalInPhase} in phase`)}
+      ${progressBarHtml(decidedInPhase, totalInPhase)}
+      <div class="location-row">
+        <span class="location">Vocabulary decision</span>
+        <span class="surface-chip">Foundation</span>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Term</div>
+        <div class="body-content">${renderInline(card.term)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Decision</div>
+        <div class="body-content">${renderInline(card.decision)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Rationale</div>
+        <div class="body-content">${renderInline(card.rationale)}</div>
+      </div>
+      ${altWrapHtml(altValue)}
+      ${actionButtonsHtml(dec.decision)}
+      ${footerHtml(idx)}
+    </div>
+  `;
+  attachActions(card);
+}
+
+function renderPatternCard(card, idx) {
+  const { positionInPhase, totalInPhase, decidedInPhase } = phaseProgressBits(card);
+  const dec = getDecision(card) || {};
+  const altValue = dec.alt || "";
+
+  mount.innerHTML = `
+    <div class="card" id="card">
+      ${topBarHtml(card, `${positionInPhase} of ${totalInPhase} in phase`)}
+      ${progressBarHtml(decidedInPhase, totalInPhase)}
+      <div class="location-row">
+        <span class="location">Pattern decision</span>
+        <span class="surface-chip">Foundation</span>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Pattern</div>
+        <div class="body-content">${renderInline(card.pattern)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Rule</div>
+        <div class="body-content">${renderInline(card.rule)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Example</div>
+        <div class="example-block">${renderInline(card.example)}</div>
+      </div>
+      ${altWrapHtml(altValue)}
+      ${actionButtonsHtml(dec.decision)}
+      ${footerHtml(idx)}
+    </div>
+  `;
+  attachActions(card);
+}
+
+function renderOpenQCard(card, idx) {
+  const { positionInPhase, totalInPhase, decidedInPhase } = phaseProgressBits(card);
+  const existing = state.openQuestions[String(card.idxInKind)] || "";
+
+  mount.innerHTML = `
+    <div class="card" id="card">
+      ${topBarHtml(card, `${positionInPhase} of ${totalInPhase} in phase`)}
+      ${progressBarHtml(decidedInPhase, totalInPhase)}
+      <div class="location-row">
+        <span class="location">Open question</span>
+        <span class="surface-chip">Needs author input</span>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Context</div>
+        <div class="body-content">${renderInline(card.ctx)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Current</div>
+        <div class="body-content">${renderInline(card.current)}</div>
+      </div>
+      <div class="body-block">
+        <div class="body-label">Question</div>
+        <div class="body-content">${renderInline(card.question)}</div>
+      </div>
+      <div class="alt-wrap">
+        <div class="alt-label">Your answer</div>
+        <textarea class="openq-input" id="openqInput" placeholder="Write your decision here…">${escapeHtml(existing)}</textarea>
+      </div>
+      <div class="actions openq">
+        <button class="btn-action btn-save-next" id="saveNextBtn">Save and next</button>
+        <button class="btn-action btn-reject" id="noOpinionBtn">No opinion</button>
+      </div>
+      ${footerHtml(idx)}
+    </div>
+  `;
+
+  document.getElementById("saveNextBtn").addEventListener("click", () => {
+    const v = document.getElementById("openqInput").value;
+    setOpenQuestion(card, v);
+    advance();
+  });
+  document.getElementById("noOpinionBtn").addEventListener("click", () => {
+    noOpinionOpenQuestion(card);
+    advance();
+  });
+  document.getElementById("prevBtn").addEventListener("click", () => goPrev());
+  document.getElementById("skipBtn").addEventListener("click", () => doSkip(card));
+}
+
+function attachActions(card) {
+  const buttons = mount.querySelectorAll(".btn-action[data-act]");
+  buttons.forEach(b => b.addEventListener("click", () => doAction(card, b.dataset.act)));
+  document.getElementById("prevBtn").addEventListener("click", () => goPrev());
+  document.getElementById("skipBtn").addEventListener("click", () => doSkip(card));
+}
+
+function doAction(card, act) {
+  if (act === "alternative") {
+    const input = document.getElementById("altInput");
+    const val = (input.value || "").trim();
+    if (!val) {
+      document.getElementById("altWarning").classList.add("visible");
+      input.focus();
+      return;
+    }
+    setDecision(card, "alternative", { alt: val });
+    advance();
+    return;
+  }
+  const altInput = document.getElementById("altInput");
+  const altVal = altInput ? (altInput.value || "").trim() : "";
+  const extra = altVal ? { alt: altVal } : {};
+  setDecision(card, act, extra);
+  advance();
+}
+
+function doSkip(card) {
+  if (card.kind === "rewrite") delete state.rewrites[String(card.n)];
+  else if (card.kind === "vocab") delete state.vocab[String(card.idxInKind)];
+  else if (card.kind === "pattern") delete state.pattern[String(card.idxInKind)];
+  else if (card.kind === "openq") noOpinionOpenQuestion(card);
+  saveState();
+  advance(true);
+}
+
+function advance(skipping) {
+  const oldPhase = DATA.cards[state.currentCard]?.phase;
+  state.currentCard++;
+  const newCard = DATA.cards[state.currentCard];
+  const newPhase = newCard?.phase;
+
+  if (!skipping && oldPhase && newPhase && newPhase !== oldPhase) {
+    const done = decidedCountInPhase(oldPhase);
+    const total = DATA.phaseCounts[oldPhase];
+    if (done === total && total > 0) {
+      showInterstitial(oldPhase, done, newPhase);
+      return;
+    }
+  }
+
+  if (state.currentCard >= DATA.cards.length) {
+    saveState();
+    renderDone(); renderPhaseNav(); updateHeader();
+    return;
+  }
+
+  const c = document.getElementById("card");
+  if (c) c.classList.add("flipping");
+  setTimeout(() => render(), 180);
+}
+
+function goPrev() {
+  if (state.currentCard <= 0) return;
+  state.currentCard--;
+  saveState();
+  render();
+}
+
+function showInterstitial(phaseNum, decisionsMade, nextPhase) {
+  const nextPhaseName = nextPhase ? DATA.phaseNames[nextPhase - 1] : "";
+  mount.innerHTML = `
+    <div class="interstitial">
+      <h2>Phase ${phaseNum} done</h2>
+      <p>${decisionsMade} decision${decisionsMade === 1 ? '' : 's'} made in ${escapeHtml(DATA.phaseNames[phaseNum - 1])}.${nextPhase ? ' Next up: <strong>' + escapeHtml(nextPhaseName) + '</strong>.' : ''}</p>
+      <div class="interstitial-actions">
+        <button class="btn-primary" id="nextPhaseBtn">Next phase →</button>
+        <a href="#" id="stayHere">Stay and revise this phase</a>
+      </div>
+    </div>
+  `;
+  renderPhaseNav();
+  updateHeader();
+  document.getElementById("nextPhaseBtn").addEventListener("click", () => render());
+  document.getElementById("stayHere").addEventListener("click", (e) => {
+    e.preventDefault();
+    for (let i = 0; i < DATA.cards.length; i++) {
+      if (DATA.cards[i].phase === phaseNum) { state.currentCard = i; break; }
+    }
+    saveState();
+    render();
+  });
+  setTimeout(() => {
+    if (mount.querySelector(".interstitial")) render();
+  }, 1500);
+}
+
+function renderDone() {
+  mount.innerHTML = `
+    <div class="done-view">
+      <h2>All cards reviewed.</h2>
+      <p>${totalRewriteDecisions()} of ${DATA.rewriteTotal} rewrite decisions made. Export your decisions, or jump back to revise.</p>
+      <div style="display: flex; justify-content: center; gap: 10px;">
+        <button class="btn-primary" id="doneExport">Export decisions</button>
+        <button class="btn-ghost" id="doneBack">Back to start</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("doneExport").addEventListener("click", () => document.getElementById("exportBtn").click());
+  document.getElementById("doneBack").addEventListener("click", () => {
+    state.currentCard = 0; saveState(); render();
+  });
+}
+
+// ----- export -----
+function escMd(s) { return String(s || "").replace(/\|/g, "\\|").replace(/\n/g, " "); }
+
+function generateMarkdown() {
+  const L = [];
+  L.push("# COPY-ACCEPTANCE");
+  L.push("");
+  L.push("Generated from COPY-AUDIT.html. Source: docs/COPY-AUDIT.md.");
+  L.push("");
+
+  L.push("## Vocabulary decisions");
+  L.push("");
+  L.push("| Decision | Status | Note |");
+  L.push("|---|---|---|");
+  for (const c of DATA.cards.filter(c => c.kind === "vocab")) {
+    const d = state.vocab[String(c.idxInKind)];
+    const status = d ? d.decision : "undecided";
+    const note = d && d.alt ? `"${escMd(d.alt)}"` : "";
+    L.push(`| ${escMd(c.term)} | ${status} | ${note} |`);
+  }
+  L.push("");
+
+  L.push("## Pattern decisions");
+  L.push("");
+  L.push("| Pattern | Status | Note |");
+  L.push("|---|---|---|");
+  for (const c of DATA.cards.filter(c => c.kind === "pattern")) {
+    const d = state.pattern[String(c.idxInKind)];
+    const status = d ? d.decision : "undecided";
+    const note = d && d.alt ? `"${escMd(d.alt)}"` : "";
+    L.push(`| ${escMd(c.pattern)} | ${status} | ${note} |`);
+  }
+  L.push("");
+
+  L.push("## Rewrites");
+  L.push("");
+  L.push("Ordered by impact score (highest first). Apply in this order to land the biggest wins first.");
+  L.push("");
+  L.push("| Impact | # | Location | Decision | Final text |");
+  L.push("|---|---|---|---|---|");
+  // Preserve impact-sorted document order (rewrites in DATA.cards are already in impact order)
+  const rewriteCards = DATA.cards.filter(c => c.kind === "rewrite");
+  for (const c of rewriteCards) {
+    const d = state.rewrites[String(c.n)];
+    let dec = "undecided";
+    let final = "";
+    if (d) {
+      dec = d.decision;
+      if (d.decision === "accept") final = c.after;
+      else if (d.decision === "reject") final = "(keep current)";
+      else if (d.decision === "alternative") final = d.alt || "";
+    }
+    const impact = c._impact != null ? c._impact : 0;
+    L.push(`| ${impact} | ${c.n} | ${escMd(c.location)} | ${dec} | ${escMd(final)} |`);
+  }
+  L.push("");
+
+  L.push("## Open questions");
+  L.push("");
+  const oqs = DATA.cards.filter(c => c.kind === "openq");
+  oqs.forEach((c, i) => {
+    L.push(`### Q${i + 1}: ${(c.question || "").replace(/\n/g, " ")}`);
+    L.push("");
+    L.push(`Context: ${c.ctx}`);
+    L.push("");
+    const ans = state.openQuestions[String(c.idxInKind)];
+    L.push(`A: ${ans || "no answer"}`);
+    L.push("");
+  });
+
+  return L.join("\n");
+}
+
+// ----- events -----
+document.getElementById("exportBtn").addEventListener("click", () => {
+  document.getElementById("exportText").value = generateMarkdown();
+  document.getElementById("exportModal").classList.add("visible");
+});
+document.getElementById("closeExportBtn").addEventListener("click", () => {
+  document.getElementById("exportModal").classList.remove("visible");
+});
+document.getElementById("exportModal").addEventListener("click", (e) => {
+  if (e.target.id === "exportModal") document.getElementById("exportModal").classList.remove("visible");
+});
+document.getElementById("copyExportBtn").addEventListener("click", () => {
+  const ta = document.getElementById("exportText");
+  ta.select();
+  document.execCommand("copy");
+  const b = document.getElementById("copyExportBtn");
+  const t = b.textContent;
+  b.textContent = "Copied";
+  setTimeout(() => b.textContent = t, 1200);
+});
+document.getElementById("downloadExportBtn").addEventListener("click", () => {
+  const blob = new Blob([generateMarkdown()], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "COPY-ACCEPTANCE.md";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  if (confirm("Reset all decisions and start over? This cannot be undone.")) {
+    state = freshState(); saveState(); render();
+  }
+});
+
+document.getElementById("helpBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  document.getElementById("helpPopup").classList.toggle("visible");
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".help-popup") && !e.target.closest("#helpBtn")) {
+    document.getElementById("helpPopup").classList.remove("visible");
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "textarea" || tag === "input") return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+  const card = DATA.cards[state.currentCard];
+  if (!card) return;
+
+  const key = e.key;
+  if (key === "?" || (e.shiftKey && key === "/")) {
+    document.getElementById("helpPopup").classList.toggle("visible");
+    e.preventDefault();
+    return;
+  }
+
+  if (card.kind === "openq") {
+    if (key === "ArrowLeft") { goPrev(); e.preventDefault(); }
+    else if (key === "s" || key === "S") { doSkip(card); e.preventDefault(); }
+    else if (key === "ArrowRight") {
+      if (getDecision(card)) advance();
+      e.preventDefault();
+    }
+  } else {
+    if (key === "a" || key === "A") { doAction(card, "accept"); e.preventDefault(); }
+    else if (key === "r" || key === "R") { doAction(card, "reject"); e.preventDefault(); }
+    else if (key === "t" || key === "T") { doAction(card, "alternative"); e.preventDefault(); }
+    else if (key === "s" || key === "S") { doSkip(card); e.preventDefault(); }
+    else if (key === "ArrowLeft") { goPrev(); e.preventDefault(); }
+    else if (key === "ArrowRight") {
+      if (getDecision(card)) advance();
+      e.preventDefault();
+    }
+  }
+
+  const numMap = { "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "0": 10 };
+  if (numMap[key]) { jumpToPhase(numMap[key]); e.preventDefault(); }
+});
+
+render();
+</script>
+</body>
+</html>

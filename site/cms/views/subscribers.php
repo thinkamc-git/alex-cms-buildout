@@ -165,7 +165,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-subscribers">
       <?php
       $title    = 'Subscribers';
-      $subtitle = 'Captured from the public newsletter form. Re-subscribers update in place — every row here is a unique email address.';
+      $subtitle = 'Captured from the public newsletter form. Re-subscribers update the existing row — every email here is unique.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -273,7 +273,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <?php else: ?>
                   <button type="submit" name="action" value="resubscribe" form="<?= $e($rid) ?>" class="btn-row-action" title="Mark re-subscribed">Re-subscribe</button>
                 <?php endif; ?>
-                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-row-del" title="Delete" aria-label="Delete" onclick="return confirm('Delete subscriber &quot;<?= $e((string)$r['email']) ?>&quot;? This cannot be undone.');">
+                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-row-del" title="Delete" aria-label="Delete" onclick="return confirm('Delete subscriber &quot;<?= $e((string)$r['email']) ?>&quot;? This can&#039;t be undone.');">
                   <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
               </td>

@@ -86,8 +86,8 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-articles">
       <?php
       $title    = 'Articles';
-      $subtitle = 'Long-form writing. Create, edit, and ship drafts. Pipeline + transitions land in Phase 7.';
-      $actions  = '<a href="/writing/" target="_blank" rel="noopener" class="btn-sec">View Index ↗</a>'
+      $subtitle = 'Long-form writing. Create, edit, and publish drafts.';
+      $actions  = '<a href="/writing/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
                 . '<a href="/cms/articles/new" class="btn-pri">+ New Article</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -240,7 +240,7 @@ require __DIR__ . '/../partials/topbar.php';
           <?php
           $columns    = $makeColumns('Updated');
           $rows       = array_map(static fn($a) => $buildRow($a, 'updated'), $drafts);
-          $empty_text = 'No drafts in progress. Click + New Article to start.';
+          $empty_text = 'No article drafts yet — click [+ New Article] to start.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -250,7 +250,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Scheduled</span>
-              <span class="content-block-sublabel">Queued for future publish — cron promotes to Live</span>
+              <span class="content-block-sublabel">Queued — auto-publishes at the scheduled time</span>
             </div>
             <span class="content-block-count"><?= (int)count($scheduled) ?> entries</span>
           </div>
@@ -268,7 +268,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live on /writing/[slug]</span>
+              <span class="content-block-sublabel">Live at /writing/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

@@ -390,7 +390,7 @@ require __DIR__ . '/../partials/topbar.php';
       $title    = $titleHdr;
       $entryHdr = $entryNumPadded !== null ? ' · Entry ' . $entryNumPadded : '';
       $stageLabel = $isScheduled ? 'Scheduled for Publish' : ucfirst($status);
-      $subtitle = 'Journal · ' . $stageLabel . $entryHdr . ' · last saved ' . (string)($journal['updated_at'] ?? '');
+      $subtitle = 'Journal · ' . $stageLabel . $entryHdr . ' · saved ' . (string)($journal['updated_at'] ?? '');
 
       $subtitle_extra = '';
       if ($flash !== '') {
@@ -447,7 +447,7 @@ require __DIR__ . '/../partials/topbar.php';
           <iframe
             name="post-preview-frame-<?= (int)$id ?>"
             src="/cms/post/preview?id=<?= (int)$id ?>"
-            title="Preview — Journal entry"
+            title="Preview · Journal entry"
             class="post-preview-iframe"
             loading="lazy"
             data-preview-iframe
@@ -509,7 +509,7 @@ require __DIR__ . '/../partials/topbar.php';
                   required>
                 <p class="field-hint">
                   <?php if ($slugPublished): ?>
-                    <strong>Warning:</strong> Changing the slug on a published journal will create a 301 redirect (Phase 11).
+                    <strong>Warning:</strong> changing the slug on a published journal will create a 301 redirect.
                   <?php else: ?>
                     Lowercase letters, numbers, hyphens. Becomes part of <code>/journal/&lt;slug&gt;</code>.
                   <?php endif; ?>
@@ -560,7 +560,7 @@ require __DIR__ . '/../partials/topbar.php';
                       class="tiptap-fallback"
                       aria-label="Journal body (HTML)"><?= $e($bodyInitial) ?></textarea>
                   </div>
-                  <p class="field-hint">Key Statement alone is enough — body is for expansion.</p>
+                  <p class="field-hint">The Key Statement alone is enough — the body is optional, for expansion.</p>
                 </div>
               <?php endif; ?>
             </div>
@@ -587,7 +587,7 @@ require __DIR__ . '/../partials/topbar.php';
                   value="<?= $e((string)($journal['tags'] ?? '')) ?>"
                   maxlength="500"
                   placeholder="comma, separated, list">
-                <p class="field-hint">Display only — not used for filtering yet.</p>
+                <p class="field-hint">Display only — not used for filtering.</p>
               </div>
 
               <?php if ($entryNumPadded !== null): ?>
@@ -622,7 +622,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <div class="field-group cms-updated-group" data-updated-group style="margin-bottom:0">
                     <label class="cms-publish-check">
                       <input type="checkbox" name="show_updated" value="1" <?= $showUpdated ? 'checked' : '' ?> data-show-updated>
-                      <span>Show "Updated" date on the article</span>
+                      <span>Show "Updated" date on the journal entry</span>
                     </label>
                     <div class="cms-updated-input-row" data-updated-row>
                       <input type="date"
@@ -660,7 +660,7 @@ require __DIR__ . '/../partials/topbar.php';
                              value="<?= $e($scheduleAtForInput) ?>"
                              min="<?= $e($minScheduleAt) ?>"
                              data-schedule-input>
-                      <p class="field-hint">Must be at least one minute in the future. The cron promotes scheduled rows to Live at this time.</p>
+                      <p class="field-hint">Must be at least one minute in the future. The system auto-publishes scheduled entries at this time.</p>
                     </div>
                   </div>
                 </div>
@@ -747,7 +747,7 @@ require __DIR__ . '/../partials/topbar.php';
       const slug  = form.getAttribute('data-slug')  || '';
       if (stage === 'published') {
         const typed = window.prompt(
-          'Deleting a published journal is permanent.\n\nType the slug to confirm:\n\n  ' + slug
+          'Deleting a published journal is permanent.\n\nType the slug exactly to confirm:\n\n  ' + slug
         );
         if (typed === null) { e.preventDefault(); return; }
         if (typed.trim() !== slug) {

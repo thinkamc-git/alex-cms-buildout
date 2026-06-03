@@ -252,7 +252,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-navigation">
       <?php
       $title    = 'Navigation';
-      $subtitle = 'Header and footer link lists. Drag to reorder. Items whose target row no longer resolves are flagged BROKEN and hidden from the public site until you fix them.';
+      $subtitle = 'Header and footer link lists. Drag to reorder. Items whose target no longer exists are flagged BROKEN and hidden from the public site until you fix them.';
       $actions  = '<a href="/" target="_blank" rel="noopener" class="btn-ghost">Open homepage ↗</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -274,8 +274,8 @@ require __DIR__ . '/../partials/topbar.php';
       $renderZone = function (string $zone, array $items) use ($e, $csrf_token, $broken_ids,
           $indexes, $categories, $series_rows, $content_rows, $page_files, $renderMarkCell): void {
       $zone_sub = $zone === 'header'
-        ? 'Top nav rendered above every public page'
-        : 'Bottom links rendered in the page footer';
+        ? 'Top nav shown above every public page'
+        : 'Bottom links shown in the page footer';
       ?>
         <div class="content-block">
           <div class="content-block-header">
@@ -340,7 +340,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <input type="text" name="highlight_color" value="<?= $e((string)$it['highlight_color']) ?>" placeholder="#d63031" data-color<?= $it['highlight']==='none' ? ' class="is-off"' : '' ?>>
                   <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
                 </form>
-                <form method="post" action="/cms/navigation" style="display:inline" onsubmit="return confirm('Delete &quot;<?= $e((string)$it['label']) ?>&quot;?');">
+                <form method="post" action="/cms/navigation" style="display:inline" onsubmit="return confirm('Delete &quot;<?= $e((string)$it['label']) ?>&quot;? This removes the link from the public site.');">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
                   <input type="hidden" name="action" value="delete_item">

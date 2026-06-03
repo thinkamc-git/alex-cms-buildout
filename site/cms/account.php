@@ -80,7 +80,7 @@ header('Content-Type: text/html; charset=utf-8');
   <label>Confirm new password
     <input type="password" name="new_password_confirm" autocomplete="new-password" required minlength="12">
   </label>
-  <p class="rules">At least 12 characters, with one uppercase, one lowercase, and one digit.</p>
+  <p class="rules">At least 12 characters, with at least one uppercase letter, one lowercase letter, and one digit.</p>
   <button type="submit">Change password</button>
 </form>
 </body>

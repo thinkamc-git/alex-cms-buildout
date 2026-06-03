@@ -94,7 +94,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-indexes">
       <?php
       $title    = 'Indexes';
-      $subtitle = 'Configure the public index pages for each section of the site. Editorial Page adds hero + featured + multi-section layout; Basic Listing is title + feed.';
+      $subtitle = 'Configure the public index pages for each section of the site. Editorial Page adds a hero, featured picks, and multi-section layout. Basic Listing is title plus content feed.';
       $actions  = '<a href="/cms/indexes/new" class="btn-pri">+ New Index</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -143,7 +143,7 @@ require __DIR__ . '/../partials/topbar.php';
                 . '<a href="/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live index page">Live ↗</a>'
                 . '<span class="row-actions-hover">'
                 .   '<a href="/cms/indexes/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
-                .   '<form method="post" action="/cms/indexes/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this index? The URL /' . $e($slug) . '/ will 404 unless you re-create it.">'
+                .   '<form method="post" action="/cms/indexes/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete index &quot;' . $e($titleStr !== '' ? $titleStr : $slug) . '&quot;? The URL /' . $e($slug) . '/ will 404 unless you re-create it.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
                 .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
                 .   '</form>'
@@ -167,13 +167,13 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Post Type indexes</span>
-              <span class="content-block-sublabel">The four built-in type pages</span>
+              <span class="content-block-sublabel">The four built-in content-type indexes (one per content type)</span>
             </div>
             <span class="content-block-count"><?= count($builtIn) ?> indexes</span>
           </div>
           <?php
           $rows = array_map($buildRow, $builtIn);
-          $empty_text = 'Seed missing. Run migration 0007 to restore the four built-in Post Type indexes.';
+          $empty_text = 'Seed missing. Run migration 0007 to restore the four built-in indexes.';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>
@@ -183,7 +183,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Series indexes</span>
-              <span class="content-block-sublabel">Auto-generated from /cms/series — not editable here</span>
+              <span class="content-block-sublabel">Auto-generated from Series — manage them in Collections › Series</span>
             </div>
             <span class="content-block-count"><?= count($seriesRows) ?> series</span>
           </div>
@@ -229,14 +229,14 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Custom indexes</span>
-              <span class="content-block-sublabel">Author-created Editorial Pages and additional Basic Listings</span>
+              <span class="content-block-sublabel">Editorial Pages and additional Basic Listings you've created</span>
             </div>
             <span class="content-block-count"><?= count($custom) ?> indexes</span>
           </div>
           <?php
           $columns = $indexColumns ?? $columns; // restore original if Series block clobbered it
           $rows = array_map($buildRow, $custom);
-          $empty_text = 'No custom indexes yet. Click + New Index to add one (e.g. /digital-garden, /thoughts).';
+          $empty_text = 'No custom indexes yet — click [+ New Index] to add one (e.g. /digital-garden, /thoughts).';
           require __DIR__ . '/../partials/table.php';
           ?>
         </div>

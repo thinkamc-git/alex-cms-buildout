@@ -256,7 +256,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-draft-writing">
       <div class="pipeline-header">
         <div class="pipeline-title">Draft Writing</div>
-        <div class="pipeline-desc">All work in progress and recently shipped — Concept through Recently Published. Capture quickly, develop deliberately. Content moves left to right as it matures.</div>
+        <div class="pipeline-desc">Everything in flight and recently published — Concept through to live. Content moves left to right as it matures.</div>
         <div class="dash-meta">
           <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
           <div class="dash-stat-div"></div>
@@ -292,7 +292,7 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
             <div class="lane-cards">
               <?php if (count($cards) === 0): ?>
-                <div class="idea-lane-empty">Nothing here yet</div>
+                <div class="idea-lane-empty">No drafts yet</div>
               <?php else:
                 foreach ($cards as $card):
                   echo $renderInFlightCard($card, $stage);

@@ -49,7 +49,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'template' => 'journal-entry',
             ]);
 
-            header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode('Draft created — write your Key Statement.'));
+            header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode('Draft created — write the Key Statement next.'));
             exit;
         }
     }
@@ -97,7 +97,7 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-journal-new">
       <?php
       $title    = 'New journal';
-      $subtitle = 'Set a working title and slug. The Key Statement and body are on the next screen.';
+      $subtitle = 'Set a working title and slug. Write the Key Statement and body on the next screen.';
       $actions  = '<a href="/cms/journals" class="btn-ghost">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>

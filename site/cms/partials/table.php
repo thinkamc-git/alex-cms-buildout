@@ -75,15 +75,24 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
             // a small JS hook downstream listens for clicks anywhere on
             // the row except inside .cell-actions (Edit/Delete buttons).
             if (isset($row['cells']) && is_array($row['cells'])) {
-                $cells   = $row['cells'];
-                $rowHref = (string)($row['href'] ?? '');
+                $cells    = $row['cells'];
+                $rowHref  = (string)($row['href']  ?? '');
+                $rowClass = (string)($row['class'] ?? '');
             } else {
-                $cells   = (array)$row;
-                $rowHref = '';
+                $cells    = (array)$row;
+                $rowHref  = '';
+                $rowClass = '';
             }
-            $trAttr = $rowHref !== ''
-                ? ' class="row-clickable" data-row-href="' . htmlspecialchars($rowHref, ENT_QUOTES, 'UTF-8') . '"'
-                : '';
+            $classParts = [];
+            if ($rowHref !== '')  $classParts[] = 'row-clickable';
+            if ($rowClass !== '') $classParts[] = $rowClass;
+            $trAttr = '';
+            if (!empty($classParts)) {
+                $trAttr .= ' class="' . htmlspecialchars(implode(' ', $classParts), ENT_QUOTES, 'UTF-8') . '"';
+            }
+            if ($rowHref !== '') {
+                $trAttr .= ' data-row-href="' . htmlspecialchars($rowHref, ENT_QUOTES, 'UTF-8') . '"';
+            }
         ?>
           <tr<?= $trAttr ?>>
             <?php foreach ($cells as $cell):

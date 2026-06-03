@@ -72,6 +72,18 @@ $activeSource = (string)($_GET['source'] ?? '');
 $activeSince  = (string)($_GET['since']  ?? '');
 $activeUntil  = (string)($_GET['until']  ?? '');
 
+// Phase 21.7 — "new since last visit" tracking via cms_subs_last_seen
+// cookie. Read old value BEFORE setting the new one, so the current
+// render can highlight rows that arrived since the previous visit.
+$subsLastSeen = (string)($_COOKIE['cms_subs_last_seen'] ?? '');
+$nowTs        = date('Y-m-d H:i:s');
+setcookie('cms_subs_last_seen', $nowTs, [
+    'expires'  => time() + 60 * 60 * 24 * 365,
+    'path'     => '/cms/',
+    'samesite' => 'Lax',
+    'httponly' => true,
+]);
+
 $rows    = list_subscribers([
     'status' => $activeStatus ?: null,
     'source' => $activeSource ?: null,
@@ -231,12 +243,23 @@ require __DIR__ . '/../partials/topbar.php';
           ['label' => 'Subscribed', 'width' => '18%'],
           ['label' => 'Source',     'width' => '14%'],
           ['label' => 'Status',     'width' => '10%'],
-          ['label' => 'Actions',    'width' => '14%'],
+          ['label' => '',           'width' => '14%'],
       ];
       $subRows = [];
+      // Threshold for the "NEW" badge (matches the "New in last 30 days" stat).
+      $thirtyDaysAgo = date('Y-m-d H:i:s', strtotime('-30 days') ?: time());
       foreach ($rows as $r) {
           $rid    = 'row-form-sub-' . (int)$r['id'];
           $subbed = ($r['unsubscribed_at'] === null || $r['unsubscribed_at'] === '');
+          $subbedAt = (string)($r['subscribed_at'] ?? '');
+          // Two distinct flags:
+          //   is_recent  → within 30 days → small "NEW" badge in the table
+          //   is_unseen  → newer than the cookie's last-seen timestamp → row
+          //                gets a one-shot highlight on this render only.
+          $isRecent = $subbedAt !== '' && $subbedAt > $thirtyDaysAgo;
+          $isUnseen = $subbedAt !== '' && $subsLastSeen !== '' && $subbedAt > $subsLastSeen;
+          $newBadge = $isRecent ? ' <span class="pill-new" title="Subscribed in the last 30 days">NEW</span>' : '';
+
           $statusCell = $subbed
               ? '<span class="sub-status sub">subscribed</span>'
               : '<span class="sub-status uns">unsubscribed</span>';
@@ -249,12 +272,15 @@ require __DIR__ . '/../partials/topbar.php';
                      . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                      . '</button>';
           $subRows[] = [
-              ['html' => $e((string)$r['email']),               'class' => 'is-mono'],
-              ['html' => $e((string)($r['name'] ?? ''))],
-              ['html' => $fmt((string)($r['subscribed_at'] ?? '')), 'class' => 'is-mono'],
-              ['html' => $e((string)($r['source'] ?? '')),      'class' => 'is-mono'],
-              ['html' => $statusCell],
-              ['html' => '<div class="row-actions">' . $toggleBtn . $deleteBtn . '</div>', 'class' => 'cell-actions'],
+              'class' => $isUnseen ? 'sub-row-unseen' : '',
+              'cells' => [
+                  ['html' => $e((string)$r['email']) . $newBadge, 'class' => 'is-mono'],
+                  ['html' => $e((string)($r['name'] ?? ''))],
+                  ['html' => $fmt((string)($r['subscribed_at'] ?? '')), 'class' => 'is-mono'],
+                  ['html' => $e((string)($r['source'] ?? '')),      'class' => 'is-mono'],
+                  ['html' => $statusCell],
+                  ['html' => '<div class="row-actions">' . $toggleBtn . $deleteBtn . '</div>', 'class' => 'cell-actions'],
+              ],
           ];
       }
       $rowsOriginal = $rows;

@@ -70,7 +70,7 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'journals';
-  $nav_counts    = ['journals' => count($journals)];
+  $nav_counts    = ['journals' => count(array_filter($journals, fn($j) => ($j['status'] ?? '') === 'published'))];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 

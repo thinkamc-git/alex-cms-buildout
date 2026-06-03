@@ -95,11 +95,17 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
  * onchange handler so the chip preview matches the picked token before
  * the form is submitted.
  */
+// Phase 21.7 — colour swatch on each <option> so the dropdown menu
+// shows actual palette colours (not just names). Native <option> styling
+// is partially supported (Firefox + Chrome render background-color in
+// the open menu), which is enough for visual scanning.
 $colour_select = static function (string $current, ?string $formId = null) use ($e): string {
     $opts = '';
     foreach (PALETTE_COLORS as $c) {
-        $sel = $c === $current ? ' selected' : '';
-        $opts .= '<option value="' . $e($c) . '"' . $sel . '>' . $e($c) . '</option>';
+        $sel  = $c === $current ? ' selected' : '';
+        $opts .= '<option value="' . $e($c) . '"' . $sel
+              . ' style="background-color:var(--c-' . $e($c) . ');color:#fff;font-weight:700">'
+              . $e($c) . '</option>';
     }
     return '<select class="cat-colour-select" name="colour"'
          . ($formId !== null ? ' form="' . $e($formId) . '"' : '')
@@ -191,7 +197,7 @@ require __DIR__ . '/../partials/topbar.php';
               ['label' => 'Value slug','width' => '22%'],
               ['label' => 'Colour',    'width' => '22%'],
               ['label' => 'Use',       'width' => '8%'],
-              ['label' => 'Actions',   'width' => '16%'],
+              ['label' => '',          'width' => '16%'],
           ];
           $rows = [];
           foreach ($catRows as $cat) {

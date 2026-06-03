@@ -71,7 +71,7 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'experiments';
-  $nav_counts    = ['experiments' => count($experiments)];
+  $nav_counts    = ['experiments' => count(array_filter($experiments, fn($x) => ($x['status'] ?? '') === 'published'))];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 

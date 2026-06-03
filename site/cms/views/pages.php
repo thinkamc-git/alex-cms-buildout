@@ -176,7 +176,7 @@ require __DIR__ . '/../partials/topbar.php';
               ['label' => 'Archive name', 'width' => '40%'],
               ['label' => 'Page',         'width' => '20%'],
               ['label' => 'Captured',     'width' => '20%'],
-              ['label' => 'Actions',      'width' => '20%'],
+              ['label' => '',             'width' => '20%'],
           ];
 
           $arch_rows = [];
@@ -221,7 +221,7 @@ require __DIR__ . '/../partials/topbar.php';
               ['label' => 'Meta title',    'width' => '35%'],
               ['label' => 'Mocks',         'width' => '13%'],
               ['label' => 'Last modified', 'width' => '12%'],
-              ['label' => 'Actions',       'width' => '18%'],
+              ['label' => '',              'width' => '18%'],
           ];
           ?>
 

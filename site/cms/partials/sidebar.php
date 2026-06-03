@@ -23,9 +23,33 @@ if (!defined('CMS_PARTIAL_OK')) { http_response_code(404); exit; }
 $active_nav_id = (string)($active_nav_id ?? 'draft-writing');
 $nav_counts    = (array)($nav_counts ?? []);
 
-$count = static function (string $id) use ($nav_counts): string {
+/* Phase 21.7 — only these nav items render counts. Posts show their
+   published-count (callers compute); series shows total; subscribers
+   shows "new since last visit" derived from the cms_subs_last_seen
+   cookie (so it acts as an unread badge). Everything else is suppressed. */
+$count_allowed = ['articles','journals','live-sessions','experiments','series','subscribers'];
+
+/* Subscribers: compute the new-since-last-visit count and override any
+   caller-supplied value. Suppressed when the user is already on the
+   subscribers page (no badge against the page you're viewing). */
+if ($active_nav_id !== 'subscribers') {
+    require_once __DIR__ . '/../../lib/subscribers.php';
+    $_subsLastSeen = (string)($_COOKIE['cms_subs_last_seen'] ?? '');
+    $_subsNew      = subscribers_count_since($_subsLastSeen);
+    if ($_subsNew > 0) {
+        $nav_counts['subscribers'] = $_subsNew;
+    } else {
+        unset($nav_counts['subscribers']);
+    }
+} else {
+    unset($nav_counts['subscribers']);
+}
+
+$count = static function (string $id) use ($nav_counts, $count_allowed): string {
+    if (!in_array($id, $count_allowed, true)) return '';
     if (!array_key_exists($id, $nav_counts)) return '';
     $n = (int)$nav_counts[$id];
+    if ($n === 0) return '';
     return ' <span class="nav-count">' . htmlspecialchars((string)$n, ENT_QUOTES, 'UTF-8') . '</span>';
 };
 $activeClass = static function (string $id) use ($active_nav_id): string {

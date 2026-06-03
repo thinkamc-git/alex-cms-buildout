@@ -104,6 +104,23 @@ function list_subscriber_sources(): array
 /**
  * Aggregate counts shown in the view header.
  */
+/**
+ * Count subscribed-and-not-unsubscribed subscribers whose subscribed_at
+ * is strictly newer than the given ISO timestamp. Empty/invalid → counts
+ * every active subscriber (treats the caller as never having visited).
+ * Used by the sidebar to render a "new subscribers since last visit" badge.
+ */
+function subscribers_count_since(string $isoTimestamp): int
+{
+    if ($isoTimestamp === '') $isoTimestamp = '1970-01-01 00:00:00';
+    $stmt = db()->prepare(
+        "SELECT COUNT(*) FROM subscribers
+          WHERE subscribed_at > ? AND unsubscribed_at IS NULL"
+    );
+    $stmt->execute([$isoTimestamp]);
+    return (int)$stmt->fetchColumn();
+}
+
 function subscriber_counts(): array
 {
     $row = db()->query(

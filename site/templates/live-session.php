@@ -70,6 +70,7 @@ if ($_eDate !== '') {
     <?php render_block('author', $ctx); ?>
   </div>
 
+  <?php render_block('hero-image', $ctx); ?>
   <?php render_block('body', $ctx); ?>
   <?php render_block('author-bio', $ctx); ?>
 

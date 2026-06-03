@@ -28,6 +28,7 @@ require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/csrf.php';
 require_once __DIR__ . '/../../lib/content.php';
 require_once __DIR__ . '/../../lib/sanitize.php';
+require_once __DIR__ . '/../../lib/uploads.php';
 
 Auth::require_login();
 $user       = Auth::current_user();
@@ -133,6 +134,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'body_raw'       =>      (string)($_POST['body']           ?? ''),
             'tags'           => trim((string)($_POST['tags']           ?? '')),
             'primary_category' => trim((string)($_POST['primary_category'] ?? '')),
+            'hero_caption'   => trim((string)($_POST['hero_caption']   ?? '')),
+            'hero_size'      => trim((string)($_POST['hero_size']      ?? 'default')),
+            // Hidden input flipped by the trash button — value '1' means remove.
+            'remove_hero'    => (string)($_POST['remove_hero'] ?? '0') === '1',
         ];
 
         $allowedCatSlugs = array_map(static fn($c) => (string)$c['value_slug'], $allLiveSessionCategories);
@@ -192,6 +197,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
         $bodyClean = sanitize_html($post['body_raw']);
 
+        // Hero size: validate against the allowlist, default if invalid.
+        $heroSize = in_array($post['hero_size'], ['default', 'wide', 'full'], true)
+            ? $post['hero_size']
+            : 'default';
+
+        // Hero image: existing path is the baseline; remove flag clears it,
+        // an uploaded file replaces it. accept_upload stores under
+        // /content/live-session/<slug>/ to mirror the article pattern.
+        $heroPath = (string)($session['hero_image'] ?? '');
+        if ($post['remove_hero']) {
+            $heroPath = '';
+        }
+        if (isset($_FILES['hero']) && is_array($_FILES['hero']) && (int)$_FILES['hero']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $up = accept_upload($_FILES['hero'], 'content/live-session/' . $slug);
+            if (!$up['ok']) {
+                $errors[] = 'Hero image: ' . $up['error'];
+            } else {
+                $heroPath = $up['url'];
+            }
+        }
+
         if (count($errors) === 0) {
             $saveData = [
                 'id'             => $id,
@@ -209,6 +235,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'custom_pill'    => $post['custom_pill'] !== '' ? $post['custom_pill'] : null,
                 'body'           => $bodyClean,
                 'tags'           => $post['tags']        !== '' ? $post['tags']        : null,
+                'hero_image'     => $heroPath !== '' ? $heroPath : null,
+                'hero_caption'   => $post['hero_caption'] !== '' ? $post['hero_caption'] : null,
+                'hero_size'      => $heroSize,
             ];
 
             // Phase 14.6 — published_at editable on live rows.
@@ -530,6 +559,7 @@ require __DIR__ . '/../partials/topbar.php';
 
         <form method="post"
               action="/cms/live-sessions/edit?id=<?= (int)$id ?>"
+              enctype="multipart/form-data"
               class="cms-form cms-form-wide"
               data-preview-source-form>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -733,6 +763,71 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <aside class="form-side">
+              <?php
+                $hero            = (string)($session['hero_image'] ?? '');
+                $heroSizeCurrent = (string)($session['hero_size'] ?? 'default');
+                if (!in_array($heroSizeCurrent, ['default','wide','full'], true)) $heroSizeCurrent = 'default';
+                $heroSizeLabels  = ['default' => 'Column', 'wide' => 'Wide', 'full' => 'Full'];
+              ?>
+              <div class="cms-hero-box">
+                <div class="cms-hero-header">
+                  <label class="field-label">Hero image</label>
+                  <span class="field-hint-inline">optional</span>
+                </div>
+
+                <div class="cms-hero-preview<?= $hero !== '' ? ' is-loaded' : ' is-empty' ?>" data-hero-size="<?= $e($heroSizeCurrent) ?>">
+                  <?php if ($hero !== ''): ?>
+                    <img src="<?= $e($hero) ?>" alt="" loading="lazy">
+                  <?php else: ?>
+                    <div class="cms-hero-empty">No image yet</div>
+                  <?php endif; ?>
+                  <button type="button"
+                          class="cms-hero-trash"
+                          aria-label="Remove hero image"
+                          title="Remove hero image">
+                    <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14"><path fill="currentColor" d="M6 2h4l1 1h3v2H2V3h3l1-1zm-3 4h10l-1 9H4L3 6zm3 2v6h1V8H6zm3 0v6h1V8H9z"/></svg>
+                  </button>
+                </div>
+
+                <input type="hidden" name="remove_hero" value="0" class="cms-hero-remove-flag">
+
+                <input type="file"
+                       class="cms-hero-file sr-only"
+                       id="ls-hero-file"
+                       name="hero"
+                       accept="image/jpeg,image/png,image/webp,image/gif">
+                <div class="cms-hero-pick-row">
+                  <label for="ls-hero-file" class="btn-ghost cms-hero-pick-btn">
+                    <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
+                  </label>
+                  <span class="cms-hero-pick-name" aria-live="polite"></span>
+                </div>
+
+                <div class="cms-hero-controls">
+                  <span class="cms-hero-controls-label">Size</span>
+                  <div class="cms-hero-size-group" role="group" aria-label="Hero size">
+                    <?php foreach (['default','wide','full'] as $sz): ?>
+                      <button type="button"
+                              class="cms-hero-size-btn<?= $heroSizeCurrent === $sz ? ' is-active' : '' ?>"
+                              data-hero-size-btn="<?= $sz ?>"
+                              aria-pressed="<?= $heroSizeCurrent === $sz ? 'true' : 'false' ?>"><?= $e($heroSizeLabels[$sz]) ?></button>
+                    <?php endforeach; ?>
+                  </div>
+                  <input type="hidden" name="hero_size" id="ls-hero-size" value="<?= $e($heroSizeCurrent) ?>">
+                </div>
+
+                <input
+                  type="text"
+                  class="field-input cms-hero-caption"
+                  id="ls-hero-caption"
+                  name="hero_caption"
+                  placeholder="Caption (optional)"
+                  value="<?= $e((string)($session['hero_caption'] ?? '')) ?>"
+                  maxlength="500">
+
+                <p class="field-hint cms-hero-hint">JPEG, PNG, WebP, GIF · max 5 MB.</p>
+              </div>
+
               <div class="field-group">
                 <label class="field-label" for="ls-primary-category">Primary category</label>
                 <select class="field-select" id="ls-primary-category" name="primary_category">
@@ -921,6 +1016,87 @@ require __DIR__ . '/../partials/topbar.php';
       }
     });
   }
+</script>
+
+<script>
+  // Hero box: pill toggle writes selected size into the hidden input the
+  // form posts, and live-previews a freshly-picked file before upload so
+  // the author sees something in the preview pane immediately. Trash
+  // overlay flips the remove flag + clears the preview. Mirrors the
+  // controller in article-edit.php (same DOM contract, generic selector).
+  (function () {
+    const box = document.querySelector('.cms-hero-box');
+    if (!box) return;
+
+    const hidden      = box.querySelector('[name="hero_size"]');
+    const buttons     = box.querySelectorAll('[data-hero-size-btn]');
+    const preview     = box.querySelector('.cms-hero-preview');
+    const fileInput   = box.querySelector('.cms-hero-file');
+    const nameEl      = box.querySelector('.cms-hero-pick-name');
+    const pickBtn     = box.querySelector('.cms-hero-pick-btn');
+    const removeFlag  = box.querySelector('.cms-hero-remove-flag');
+    const trash       = box.querySelector('.cms-hero-trash');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const size = btn.getAttribute('data-hero-size-btn');
+        if (!size) return;
+        if (hidden) hidden.value = size;
+        if (preview) preview.setAttribute('data-hero-size', size);
+        buttons.forEach(b => {
+          const match = b === btn;
+          b.classList.toggle('is-active', match);
+          b.setAttribute('aria-pressed', match ? 'true' : 'false');
+        });
+        if (hidden) hidden.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+
+    if (fileInput && preview) {
+      fileInput.addEventListener('change', () => {
+        const f = fileInput.files && fileInput.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        const empty = preview.querySelector('.cms-hero-empty');
+        if (empty) empty.remove();
+        let img = preview.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          img.alt = '';
+          preview.appendChild(img);
+        }
+        img.src = url;
+        preview.classList.remove('is-empty');
+        preview.classList.add('is-loaded');
+        if (removeFlag) removeFlag.value = '0';
+        if (nameEl)  nameEl.textContent = f.name;
+        if (pickBtn) pickBtn.textContent = 'Replace image';
+      });
+    }
+
+    if (trash && preview) {
+      trash.addEventListener('click', () => {
+        if (!window.confirm('Remove this hero image? You\'ll need to Save to confirm.')) return;
+        if (removeFlag) {
+          removeFlag.value = '1';
+          removeFlag.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        const img = preview.querySelector('img');
+        if (img) img.remove();
+        preview.classList.remove('is-loaded');
+        preview.classList.add('is-empty');
+        if (!preview.querySelector('.cms-hero-empty')) {
+          const empty = document.createElement('div');
+          empty.className = 'cms-hero-empty';
+          empty.textContent = 'No image yet';
+          preview.appendChild(empty);
+        }
+        if (fileInput) fileInput.value = '';
+        if (pickBtn)   pickBtn.textContent = 'Choose image';
+        if (nameEl)    nameEl.textContent  = '';
+      });
+    }
+  })();
 </script>
 
 <script src="/cms/_assets/publish-choreography.js" defer></script>

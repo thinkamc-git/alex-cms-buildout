@@ -95,23 +95,39 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
  * onchange handler so the chip preview matches the picked token before
  * the form is submitted.
  */
-// Phase 21.7 — colour swatch on each <option> so the dropdown menu
-// shows actual palette colours (not just names). Native <option> styling
-// is partially supported (Firefox + Chrome render background-color in
-// the open menu), which is enough for visual scanning.
-$colour_select = static function (string $current, ?string $formId = null) use ($e): string {
+// Phase 21.7 — colour swatch on each <option>. Browsers detach <option>
+// elements from CSS context for style purposes, so var(--c-X) doesn't
+// resolve there — must inline the raw hex. Mirrors the palette tokens
+// in /_ds/css/tokens.css (kept in sync with lib/content.php's
+// PALETTE_COLORS list).
+$PALETTE_HEX = [
+    'rust'       => '#765150', 'terracotta' => '#7d4631', 'clay'   => '#765e44',
+    'amber'      => '#81642a', 'ochre'      => '#786e4a', 'olive'  => '#6e7448',
+    'moss'       => '#607549', 'forest'     => '#49634b', 'sage'   => '#4d705a',
+    'teal'       => '#4a716e', 'ocean'      => '#4a6677', 'denim'  => '#46556a',
+    'indigo'     => '#4d567a', 'purple'     => '#5d5376', 'violet' => '#6c4d7a',
+    'plum'       => '#785071', 'mauve'      => '#6f4b61', 'rose'   => '#7a5160',
+];
+$colour_select = static function (string $current, ?string $formId = null) use ($e, $PALETTE_HEX): string {
     $opts = '';
     foreach (PALETTE_COLORS as $c) {
         $sel  = $c === $current ? ' selected' : '';
+        $hex  = $PALETTE_HEX[$c] ?? '#7d7d7d';
         $opts .= '<option value="' . $e($c) . '"' . $sel
-              . ' style="background-color:var(--c-' . $e($c) . ');color:#fff;font-weight:700">'
+              . ' style="background-color:' . $hex . ';color:#fff;font-weight:700">'
               . $e($c) . '</option>';
     }
+    $currentHex = $PALETTE_HEX[$current] ?? '#7d7d7d';
+    // Use the raw hex on the closed-state background too, plus update via
+    // a JS lookup table since the option-list onchange handler doesn't
+    // get to read CSS variables either.
+    $hexMapJs = htmlspecialchars(json_encode($PALETTE_HEX, JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8');
     return '<select class="cat-colour-select" name="colour"'
          . ($formId !== null ? ' form="' . $e($formId) . '"' : '')
          . ' data-colour="' . $e($current) . '"'
-         . ' style="background-color:var(--c-' . $e($current) . ')"'
-         . ' onchange="this.style.backgroundColor=\'var(--c-\'+this.value+\')\'">'
+         . ' data-palette-hex="' . $hexMapJs . '"'
+         . ' style="background-color:' . $currentHex . '"'
+         . ' onchange="this.style.backgroundColor=(JSON.parse(this.dataset.paletteHex)[this.value]||\'#7d7d7d\')">'
          . $opts . '</select>';
 };
 

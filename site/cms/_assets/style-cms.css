@@ -679,10 +679,11 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 /* Focus ring for keyboard users — visible because input is sr-only. */
 .body-source-option:focus-within { outline: 2px solid var(--primary); outline-offset: 2px; }
 
-/* Drop the surrounding margin on the post-edit Edit/Preview tab strip —
-   it sits directly under the stage-bar and over the panels, no breathing
-   room needed. */
-.post-edit-tabs { margin-top:0; margin-bottom:0; }
+/* Phase 21.7 — the Edit/Preview tab strip used to be flush-stacked,
+   but the form fields need breathing room below. Restore the canonical
+   16/24 vertical rhythm; top margin keeps the strip clear of the
+   stage-bar above, bottom margin gives a proper gap before the form. */
+.post-edit-tabs { margin-top:var(--space-16); margin-bottom:var(--space-16); }
 
 /* Preview-side Save bar (cloned into the preview panel by preview-tab-guard.js).
    Mirrors the Edit-side form-actions-sticky so the visual is identical.
@@ -906,7 +907,13 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   color:var(--secondary);
   font-weight:500;
 }
-.series-part:hover, .series-part:focus-within { border-color: var(--ink-30); }
+/* Phase 21.7 — match the cms-table row hover spec (12% black border +
+   8px ambient shadow at <8% opacity) so all bordered-row patterns feel
+   the same on hover. */
+.series-part:hover, .series-part:focus-within {
+  border-color: var(--ink-12);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
 /* Save button on each series card: hidden until the dirty-flip promotes it
    to .btn-pri (matches rowform + categories). */
 .series-card-save-row [data-save-btn] { visibility:hidden; }

@@ -1,19 +1,14 @@
 <?php
 /**
- * cms/views/series.php — Series admin (Phase 11).
+ * cms/views/series.php — Series list (Phase 22 redesign).
  *
- * Card grid of every series. Each card is one form with two submit
- * buttons (Save / Delete). Slug is permanent — set on creation and
- * never editable here (it's part of /series/[slug]/ public URLs).
+ * Replaces the original card-grid layout with the canonical list-view
+ * shape used by Articles / Journals / Live Sessions: view-header →
+ * content-block → cms-table via the partials/table.php primitive.
  *
- * Phase 12 will iterate over `series` to auto-create matching
- * Editorial Page indexes at /series/[slug]/. Phase 11 just stores
- * the row — no index side-effect.
- *
- * POST actions:
- *   add     → INSERT (name + optional slug + description)
- *   update  → UPDATE name + description for existing id
- *   delete  → DELETE (blocked at the DB layer if parts_count > 0)
+ * GET-only. Create/edit/delete/add-part/remove-part live on the
+ * dedicated edit page at /cms/series/edit. The drag-reorder POST
+ * endpoint at /cms/series/reorder is unchanged.
  */
 
 declare(strict_types=1);
@@ -28,103 +23,53 @@ $user       = Auth::current_user();
 $email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
-$errors = [];
-$flash  = '';
-$showNew = false;  // re-show the +New form on error so the user doesn't lose input
-$newDefaults = ['name' => '', 'slug' => '', 'description' => ''];
+$series = list_series();
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
-        $errors[] = 'Session expired. Reload the page and try again.';
-    } else {
-        $action = (string)($_POST['action'] ?? '');
-        if ($action === 'add') {
-            $newDefaults = [
-                'name'        => (string)($_POST['name']        ?? ''),
-                'slug'        => (string)($_POST['slug']        ?? ''),
-                'description' => (string)($_POST['description'] ?? ''),
-            ];
-            $res = save_series($newDefaults);
-            if ($res['ok']) {
-                $flash = 'Series created.';
-            } else {
-                $errors[] = $res['error'];
-                $showNew = true;
-            }
-        } elseif ($action === 'update') {
-            $res = save_series([
-                'id'          => (int)($_POST['id']          ?? 0),
-                'name'        => (string)($_POST['name']        ?? ''),
-                'description' => (string)($_POST['description'] ?? ''),
-            ]);
-            $flash = $res['ok'] ? 'Series updated.' : '';
-            if (!$res['ok']) $errors[] = $res['error'];
-        } elseif ($action === 'delete') {
-            $res = delete_series((int)($_POST['id'] ?? 0));
-            $flash = $res['ok'] ? 'Series deleted.' : '';
-            if (!$res['ok']) $errors[] = $res['error'];
-        } elseif ($action === 'add_part') {
-            $res = add_article_to_series(
-                (int)($_POST['article_id'] ?? 0),
-                (int)($_POST['id']         ?? 0)
-            );
-            $flash = $res['ok'] ? 'Article added to series.' : '';
-            if (!$res['ok']) $errors[] = $res['error'];
-        } elseif ($action === 'remove_part') {
-            $res = remove_article_from_series((int)($_POST['article_id'] ?? 0));
-            $flash = $res['ok'] ? 'Article removed from series.' : '';
-            if (!$res['ok']) $errors[] = $res['error'];
-        } else {
-            $errors[] = 'Unknown action.';
-        }
-
-        if (count($errors) === 0) {
-            header('Location: /cms/series?flash=' . rawurlencode($flash));
-            exit;
-        }
-    }
-}
-
-if ($flash === '' && isset($_GET['flash'])) {
-    $flash = (string)$_GET['flash'];
-}
-
-// Pull parts list per series so each card shows what's inside without
-// the author having to click through. Includes drafts/concepts/etc. so
-// the in-progress weight of each series is visible.
-$series           = list_series();
-$unassignedPicks  = list_unassigned_articles();
-$partsByID = [];
+// Published-part counts per series. The "Parts" column reflects what's
+// actually live, not the total — matches what the public /series/<slug>/
+// page renders.
+$publishedCounts = [];
 if (count($series) > 0) {
     $ids = array_map(static fn($s) => (int)$s['id'], $series);
-    // Query is small (single-author CMS); listing all parts in one shot.
     $stmt = db()->prepare(
-        "SELECT id, slug, title, type, status, series_id, series_order, published_at
+        "SELECT series_id, COUNT(*) AS n
            FROM content
           WHERE series_id IN (" . implode(',', array_fill(0, count($ids), '?')) . ")
-          ORDER BY series_id ASC, series_order ASC, updated_at DESC"
+            AND status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')
+          GROUP BY series_id"
     );
     $stmt->execute($ids);
-    foreach ($stmt->fetchAll() as $part) {
-        $partsByID[(int)$part['series_id']][] = $part;
+    foreach ($stmt->fetchAll() as $r) {
+        $publishedCounts[(int)$r['series_id']] = (int)$r['n'];
     }
 }
+
+// Drained from the URL after a destructive action on the edit page.
+$flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
 define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-require_once __DIR__ . '/../../lib/pills.php';
-$stagePill = static function (string $status) use ($e): string {
-    // Series cards run small and the published row gets the dot+Live label.
-    $status = strtolower($status);
-    if ($status === 'published') {
-        return '<span class="pill pill-published" style="font-size:10px;padding:1px 5px">'
-             . '<span class="live-dot"></span>Live'
-             . '</span>';
+/**
+ * Server-side truncate that prefers word boundaries when cheap. Hard-cuts
+ * if the next space is too far away. Always appends an ellipsis when the
+ * original exceeded $max chars.
+ */
+$truncate = static function (string $text, int $max = 40) use ($e): string {
+    $text = trim($text);
+    if ($text === '') return '<span class="muted">—</span>';
+    if (mb_strlen($text) <= $max) return $e($text);
+    $cut = mb_substr($text, 0, $max);
+    $lastSpace = mb_strrpos($cut, ' ');
+    // Only honour the word boundary if it's reasonably close to the end —
+    // otherwise the truncation looks arbitrary.
+    if ($lastSpace !== false && $lastSpace >= (int)floor($max * 0.6)) {
+        $cut = mb_substr($cut, 0, $lastSpace);
     }
-    return cms_pill_stage($status, 'small');
+    return $e(rtrim($cut)) . '…';
 };
 ?><!doctype html>
 <html lang="en">
@@ -165,242 +110,78 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-series">
       <?php
       $title    = 'Series';
-      $subtitle = 'Ordered groups of articles. Slugs are permanent — set on creation and used in /series/<slug>/ URLs. Each series gets a matching editorial index page automatically.';
+      $subtitle = 'Ordered groups of articles. Each series gets a matching index page at /series/<slug>/.';
+      $actions  = '<a href="/cms/series/edit?id=new" class="btn-pri">+ New Series</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <?php
-      $heading = "Couldn't save:";
-      require __DIR__ . '/../partials/form-errors.php';
-      require __DIR__ . '/../partials/flash.php';
-      ?>
+      <div class="content-area">
+        <?php require __DIR__ . '/../partials/flash.php'; ?>
 
-      <div class="content-area series-grid">
-        <?php foreach ($series as $s):
-          $sid       = (int)$s['id'];
-          $partsCount = (int)($s['parts_count'] ?? 0);
-          $parts     = $partsByID[$sid] ?? [];
-          $canDelete = $partsCount === 0;
-        ?>
-        <div class="series-card">
-          <form method="post" action="/cms/series">
-            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-            <input type="hidden" name="id" value="<?= $sid ?>">
-
-            <div class="series-card-hd">
-              <input class="series-card-title cat-input" name="name" value="<?= $e((string)$s['name']) ?>" maxlength="255" required>
-              <span class="series-card-count"><?= $partsCount ?> part<?= $partsCount === 1 ? '' : 's' ?></span>
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">All series</span>
             </div>
+            <span class="content-block-count"><?= count($series) ?> <?= count($series) === 1 ? 'series' : 'series' ?></span>
+          </div>
 
-            <div class="series-meta-row">
-              <span class="val-pill"><?= $e((string)$s['slug']) ?></span>
-              <span class="series-path">/series/<?= $e((string)$s['slug']) ?>/</span>
-              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-sec btn-tiny series-live-btn" title="Open the live series index">Live ↗</a>
-            </div>
+          <?php
+          $columns = [
+            ['label' => 'Name',        'width' => '22%'],
+            ['label' => 'Description', 'width' => '34%'],
+            ['label' => 'Slug',        'width' => '20%'],
+            ['label' => 'Parts',       'width' => '8%'],
+            ['label' => '',            'width' => '16%'],
+          ];
 
-            <textarea name="description" rows="2" placeholder="Optional description — shown on the series index page."
-                      class="field-input series-desc"><?= $e((string)($s['description'] ?? '')) ?></textarea>
+          $rows = [];
+          foreach ($series as $s) {
+              $sid      = (int)$s['id'];
+              $name     = (string)$s['name'];
+              $slug     = (string)$s['slug'];
+              $desc     = (string)($s['description'] ?? '');
+              $pubCount = $publishedCounts[$sid] ?? 0;
 
-            <div class="series-card-save-row">
-              <button type="submit" name="action" value="update" class="btn-sec btn-tiny" data-save-btn>Save</button>
-            </div>
-          </form>
+              $editHref = '/cms/series/edit?id=' . $sid;
 
-          <?php if (count($parts) > 0): ?>
-            <div class="series-parts series-parts-dnd" data-series-id="<?= $sid ?>">
-              <?php foreach ($parts as $i => $part):
-                $num = (int)($part['series_order'] ?? 0);
-                if ($num === 0) $num = $i + 1;
-                $date = !empty($part['published_at']) ? date('M j', strtotime((string)$part['published_at'])) : '—';
-              ?>
-              <div class="series-part" draggable="true" data-id="<?= (int)$part['id'] ?>">
-                <div class="part-drag" title="Drag to reorder">⠿</div>
-                <div class="part-num"><?= str_pad((string)$num, 2, '0', STR_PAD_LEFT) ?></div>
-                <div class="part-title"><?= $e((string)$part['title']) ?></div>
-                <?= $stagePill((string)$part['status']) ?>
-                <span class="part-date"><?= $e($date) ?></span>
-                <form method="post" action="/cms/series" class="series-part-remove-form" data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
-                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                  <input type="hidden" name="action" value="remove_part">
-                  <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
-                  <button type="submit" class="btn-icon btn-icon-danger" title="Remove from series" aria-label="Remove">
-                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                </form>
-              </div>
-              <?php endforeach; ?>
-            </div>
-          <?php else: ?>
-            <div class="empty-state series-empty">No parts yet — add an article below.</div>
-          <?php endif; ?>
+              $nameHtml = '<a href="' . $e($editHref) . '" class="row-title">'
+                        . $e($name !== '' ? $name : '(untitled)')
+                        . '</a>';
 
-          <form method="post" action="/cms/series" class="series-add-part">
-            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-            <input type="hidden" name="action" value="add_part">
-            <input type="hidden" name="id" value="<?= $sid ?>">
-            <select name="article_id" required class="field-select">
-              <option value="">+ Add article…</option>
-              <?php foreach ($unassignedPicks as $ua):
-                $st = (string)($ua['status'] ?? '');
-              ?>
-                <option value="<?= (int)$ua['id'] ?>"><?= $e((string)$ua['title']) ?> · <?= $e(ucfirst($st)) ?></option>
-              <?php endforeach; ?>
-            </select>
-            <button type="submit" class="btn-sec btn-tiny">Add</button>
-          </form>
+              $descHtml = $truncate($desc, 40);
+              $slugHtml = '<span class="val-pill">' . $e($slug) . '</span>';
+              $partsHtml = '<span class="muted">' . (int)$pubCount . '</span>';
 
-          <form method="post" action="/cms/series" class="series-delete-row">
-            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-            <input type="hidden" name="action" value="delete">
-            <input type="hidden" name="id" value="<?= $sid ?>">
-            <?php if ($canDelete): ?>
-              <button type="submit" class="btn-sec btn-danger btn-tiny" data-confirm="Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.">Delete series</button>
-            <?php else: ?>
-              <button type="button" class="btn-sec btn-tiny is-disabled" disabled title="Cannot delete — unassign all parts first">Delete series</button>
-            <?php endif; ?>
-          </form>
-        </div>
-        <?php endforeach; ?>
+              // Live ↗ always visible — even empty series have an index page
+              // at /series/<slug>/ (it just shows the "no parts yet" state).
+              // Edit hover-reveals via .row-actions-hover, same as Pages list.
+              $actionsHtml = '<div class="row-actions">'
+                  . '<a href="/series/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live series index">Live ↗</a>'
+                  . '<span class="row-actions-hover">'
+                  .   '<a href="' . $e($editHref) . '" class="btn-sec btn-tiny">Edit</a>'
+                  . '</span>'
+                  . '</div>';
 
-        <!-- New series form rendered as the last card in the grid so the
-             grid is always populated and creation lives next to the
-             existing cards (matches the dashed "+ New Series" affordance
-             in docs/design-mockups/cms-ui.html). -->
-        <div class="series-card series-card--new" id="new-series">
-          <form method="post" action="/cms/series">
-            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-            <input type="hidden" name="action" value="add">
-
-            <div class="series-card-hd">
-              <div class="series-card-title series-card-title--new">+ New series</div>
-            </div>
-
-            <div class="series-new-fields">
-              <input type="text" name="name" value="<?= $e($newDefaults['name']) ?>" maxlength="255" required placeholder="Series name (required)"
-                     class="field-input">
-              <input type="text" name="slug" value="<?= $e($newDefaults['slug']) ?>" maxlength="200" pattern="[a-z0-9\-]*" placeholder="slug (optional — auto from name)"
-                     class="field-input series-new-slug">
-              <textarea name="description" rows="2" placeholder="Optional description" class="field-input"><?= $e($newDefaults['description']) ?></textarea>
-            </div>
-
-            <div class="series-card-save-row series-card-save-row--new">
-              <button type="submit" class="btn-pri">Create series</button>
-            </div>
-          </form>
+              $rows[] = [
+                  'href'  => $editHref,
+                  'cells' => [
+                      ['html' => $nameHtml],
+                      ['html' => $descHtml],
+                      ['html' => $slugHtml],
+                      ['html' => $partsHtml],
+                      ['html' => $actionsHtml, 'class' => 'cell-actions'],
+                  ],
+              ];
+          }
+          $empty_text = 'No series yet — click [+ New Series] to start.';
+          require __DIR__ . '/../partials/table.php';
+          ?>
         </div>
       </div>
     </div>
   </main>
 </div>
-
-<script>
-(function () {
-  'use strict';
-  var csrf = '<?= $e($csrf_token) ?>';
-
-  // Each .series-parts-dnd container is its own independent list. Re-init
-  // per container so dragging within one card never crosses into another.
-  document.querySelectorAll('.series-parts-dnd').forEach(function (list) {
-    var seriesId = list.getAttribute('data-series-id');
-    if (!seriesId) return;
-
-    function snapshot() {
-      return Array.prototype.slice.call(list.querySelectorAll('.series-part'));
-    }
-    var prevOrder = snapshot();
-
-    function renumber() {
-      // Rewrite the visible "01 / 02 / 03…" labels client-side after a
-      // successful drop so the user sees the new numbering immediately.
-      list.querySelectorAll('.series-part').forEach(function (el, i) {
-        var num = el.querySelector('.part-num');
-        if (num) num.textContent = String(i + 1).padStart(2, '0');
-      });
-    }
-
-    function persist() {
-      var ids = Array.prototype.map.call(
-        list.querySelectorAll('.series-part'),
-        function (el) { return el.getAttribute('data-id'); }
-      );
-      var body = new FormData();
-      body.append('csrf_token', csrf);
-      body.append('series_id', seriesId);
-      ids.forEach(function (id) { body.append('article_ids[]', id); });
-      return fetch('/cms/series/reorder', {
-        method: 'POST',
-        body: body,
-        credentials: 'same-origin'
-      }).then(function (r) {
-        return r.json().then(function (j) {
-          if (!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status));
-          return j;
-        });
-      });
-    }
-
-    list.addEventListener('dragstart', function (e) {
-      var part = e.target.closest('.series-part');
-      if (!part) return;
-      prevOrder = snapshot();
-      part.classList.add('dragging');
-      if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
-    });
-
-    list.addEventListener('dragend', function (e) {
-      var part = e.target.closest('.series-part');
-      if (part) part.classList.remove('dragging');
-    });
-
-    list.addEventListener('dragover', function (e) {
-      e.preventDefault();
-      var dragging = list.querySelector('.series-part.dragging');
-      if (!dragging) return;
-
-      // Find the closest sibling under the cursor and insert before it
-      // (or at the end if past the last sibling). Standard pattern.
-      var siblings = Array.prototype.slice.call(
-        list.querySelectorAll('.series-part:not(.dragging)')
-      );
-      var after = siblings.find(function (sib) {
-        var box = sib.getBoundingClientRect();
-        return e.clientY < box.top + box.height / 2;
-      });
-      if (after) {
-        list.insertBefore(dragging, after);
-      } else {
-        list.appendChild(dragging);
-      }
-    });
-
-    list.addEventListener('drop', function (e) {
-      e.preventDefault();
-      renumber();
-      persist().catch(function (err) {
-        // Revert DOM on failure so the displayed order matches the DB.
-        prevOrder.forEach(function (el) { list.appendChild(el); });
-        renumber();
-        alert('Reorder failed: ' + (err && err.message ? err.message : 'unknown error'));
-      });
-    });
-  });
-
-  // Phase 21.7 — Add-part button promotes to primary once an article is
-  // picked from the select, mirroring the categories add-row pattern.
-  document.querySelectorAll('.series-add-part').forEach(function (form) {
-    var sel = form.querySelector('select[name="article_id"]');
-    var btn = form.querySelector('button[type="submit"]');
-    if (!sel || !btn) return;
-    function syncBtn() {
-      var ready = !!sel.value;
-      btn.classList.toggle('btn-pri', ready);
-      btn.classList.toggle('btn-sec', !ready);
-    }
-    sel.addEventListener('change', syncBtn);
-    syncBtn();
-  });
-})();
-</script>
 
 </body>
 </html>

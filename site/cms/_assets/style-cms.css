@@ -1908,3 +1908,10 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
   cursor: grab;
 }
+
+/* Phase 22 — Series edit parts list. Published rows get the full white
+   surface; non-published rows sit on a 55% translucent white so they
+   read as "in progress" without dropping out of the layout entirely. */
+.parts-list .rowform-row { background: color-mix(in srgb, var(--surface) 55%, var(--canvas-bg)); }
+.parts-list .rowform-row.is-published { background: var(--surface); }
+.part-date { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); white-space: nowrap; }

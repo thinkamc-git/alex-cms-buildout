@@ -115,7 +115,8 @@ $router->post('/cms/experiments/upload-image', $cms('views/experiment-upload-ima
 $router->get ('/cms/categories',     $cms('views/categories.php'));
 $router->post('/cms/categories',     $cms('views/categories.php'));
 $router->get ('/cms/series',         $cms('views/series.php'));
-$router->post('/cms/series',         $cms('views/series.php'));
+$router->get ('/cms/series/edit',    $cms('views/series-edit.php'));
+$router->post('/cms/series/edit',    $cms('views/series-edit.php'));
 $router->post('/cms/series/reorder', $cms('views/series-reorder.php'));
 
 // Phase 12: Editorial Index admin (list / new / edit / delete).

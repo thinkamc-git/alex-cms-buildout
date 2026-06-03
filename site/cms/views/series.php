@@ -384,6 +384,21 @@ require __DIR__ . '/../partials/topbar.php';
       });
     });
   });
+
+  // Phase 21.7 — Add-part button promotes to primary once an article is
+  // picked from the select, mirroring the categories add-row pattern.
+  document.querySelectorAll('.series-add-part').forEach(function (form) {
+    var sel = form.querySelector('select[name="article_id"]');
+    var btn = form.querySelector('button[type="submit"]');
+    if (!sel || !btn) return;
+    function syncBtn() {
+      var ready = !!sel.value;
+      btn.classList.toggle('btn-pri', ready);
+      btn.classList.toggle('btn-sec', !ready);
+    }
+    sel.addEventListener('change', syncBtn);
+    syncBtn();
+  });
 })();
 </script>
 

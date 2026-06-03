@@ -69,11 +69,18 @@
       btn.classList.add('btn-pri');
     }
 
-    var inputs = form.querySelectorAll('input, textarea, select');
-    inputs.forEach(function (el) {
-      var evt = (el.tagName === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
+    // Use form.elements (not querySelectorAll) so inputs cross-bound via
+    // the HTML5 form="<id>" attribute also wire up. This is what makes
+    // categories' Save button respond to changes in the row's inputs
+    // (the form is hidden; the inputs sit in the table row).
+    var elements = form.elements;
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+      var tag = el.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') continue;
+      var evt = (tag === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
       el.addEventListener(evt, flip);
-    });
+    }
 
     btn.addEventListener('click', function (e) {
       if (!btn.classList.contains('btn-pri')) return; // nothing to save

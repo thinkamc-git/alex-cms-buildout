@@ -248,5 +248,23 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<script>
+  // Phase 21.7 — make the Add button turn primary once a label is typed,
+  // signalling the form is ready to submit. Mirrors dirty-flip's promote
+  // pattern but for the "filled" rather than "changed" state.
+  document.querySelectorAll('.cat-add-row').forEach(function (form) {
+    var input = form.querySelector('.cat-add-input');
+    var btn   = form.querySelector('.cat-add-btn');
+    if (!input || !btn) return;
+    function syncBtn() {
+      var ready = input.value.trim().length > 0;
+      btn.classList.toggle('btn-pri', ready);
+      btn.classList.toggle('btn-sec', !ready);
+    }
+    input.addEventListener('input', syncBtn);
+    syncBtn();
+  });
+</script>
+
 </body>
 </html>

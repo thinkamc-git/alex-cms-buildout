@@ -126,12 +126,15 @@ $fmt = static function (?string $ts) use ($e): string {
      filter-bar partial's pill-rail vocabulary. Uses canonical .field-input
      / .field-select / .btn-sec / .btn-pri so it visually matches the rest
      of the CMS. */
-  .sub-filters { display:flex; gap:var(--space-12); align-items:flex-end; padding:var(--space-12) var(--space-24); border-bottom:var(--rule-faint); background:var(--canvas-raised); flex-wrap:wrap; }
-  .sub-filters .field { display:flex; flex-direction:column; gap:4px; min-width:140px; }
+  /* Phase 21.7 — short single-row layout: leading "Filter:" caption,
+     inline label+control pairs, actions trail the filters (left-aligned). */
+  .sub-filters { display:flex; gap:var(--space-12); align-items:center; padding:var(--space-8) var(--space-24); border-bottom:var(--rule-faint); background:var(--canvas-raised); flex-wrap:wrap; }
+  .sub-filters .filter-caption { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .sub-filters .field { display:flex; flex-direction:row; align-items:center; gap:var(--space-6); }
   .sub-filters label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
-  .sub-filters select { height:30px; box-sizing:border-box; padding:0 28px 0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23818080' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
-  .sub-filters input { height:30px; box-sizing:border-box; padding:0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; }
-  .sub-filters .actions { margin-left:auto; display:flex; gap:var(--space-8); align-items:center; }
+  .sub-filters select { height:28px; box-sizing:border-box; padding:0 28px 0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23818080' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; }
+  .sub-filters input { height:28px; box-sizing:border-box; padding:0 var(--space-12); border:1px solid var(--ink-18); border-radius:var(--r-pill); background:var(--surface); font-family:var(--font-mono); font-size:var(--text-meta); color:var(--primary); outline:none; }
+  .sub-filters .actions { display:flex; gap:var(--space-8); align-items:center; }
   .sub-status { display:inline-flex; align-items:center; padding:2px var(--space-8); border-radius:2px; font-family:var(--font-mono); font-size:var(--text-micro); font-weight:500; letter-spacing:0.06em; text-transform:uppercase; line-height:1.5; white-space:nowrap; }
   .sub-status.sub { color:var(--stage-published); background:color-mix(in srgb,var(--stage-published) 10%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent); }
   .sub-status.uns { color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-18); }
@@ -172,10 +175,11 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="dash-stat-div"></div>
         <div class="dash-stat"><span class="num"><?= (int)$counts['unsubscribed'] ?></span><span class="lbl">Unsubscribed</span></div>
         <div class="dash-stat-div"></div>
-        <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl">New in 30d</span></div>
+        <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl" style="text-transform:none;letter-spacing:0">New in last 30 days</span></div>
       </div>
 
       <form class="sub-filters" method="get" action="/cms/subscribers">
+        <span class="filter-caption">Filter:</span>
         <div class="field">
           <label for="status">Status</label>
           <select name="status" id="status">
@@ -202,7 +206,7 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="date" name="until" id="until" value="<?= $e($activeUntil) ?>">
         </div>
         <div class="actions">
-          <button type="submit" class="btn-pri">Apply</button>
+          <button type="submit" class="btn-pri">Apply filter</button>
           <a class="btn-sec" href="/cms/subscribers">Reset</a>
           <a class="btn-sec" href="<?= $e($exportHref) ?>">Export CSV</a>
         </div>

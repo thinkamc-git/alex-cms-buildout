@@ -848,7 +848,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-add-preview { height:30px; box-sizing:border-box; display:flex; align-items:center; border:1px solid var(--ink-18); background:var(--canvas-raised); padding:0 var(--space-12); font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); min-width:110px; white-space:nowrap; border-radius:var(--r-pill); }
 /* When the add-row uses the canonical .btn-sec for "Add", align its height
    to 30px so it sits flush with the input + colour pill. */
-.cat-add-row .cat-colour-select,
+.cat-add-row .cat-colour-select { height:30px; box-sizing:border-box; }
 .cat-add-row .cat-colour-picker .cat-colour-trigger { height:30px; box-sizing:border-box; }
 .cat-add-row .btn-sec.cat-add-btn,
 .cat-add-row .btn-pri.cat-add-btn { height:30px; box-sizing:border-box; padding:0 var(--space-16); display:inline-flex; align-items:center; }
@@ -860,8 +860,8 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-colour-trigger {
   appearance: none;
   border: none;
-  height: 30px;
-  padding: 0 28px 0 14px;
+  height: 24px;
+  padding: 0 26px 0 12px;
   border-radius: var(--r-pill);
   color: #fff;
   font-family: var(--font-cond);
@@ -871,14 +871,14 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
-  min-width: 110px;
+  min-width: 100px;
   text-align: left;
   transition: filter 0.15s;
 }
 .cat-colour-trigger:hover { filter: brightness(1.08); }
 .cat-colour-arrow {
   position: absolute;
-  right: 10px;
+  right: 9px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 10px;
@@ -899,6 +899,9 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   min-width: 140px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 }
+/* HTML's hidden attribute would normally apply display:none, but the
+   display:flex above overrides it. Re-assert hidden as none. */
+.cat-colour-menu[hidden] { display: none; }
 .cat-colour-opt {
   appearance: none;
   border: none;

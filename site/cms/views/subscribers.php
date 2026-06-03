@@ -173,6 +173,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Subscribers';
       $subtitle = 'Captured from the public newsletter form. Re-subscribers update the existing row — every email here is unique.';
+      $actions  = '<a href="' . $e($exportHref) . '" class="btn-sec">Export CSV</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -190,39 +191,38 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl">New in last 30 days</span></div>
       </div>
 
-      <form class="sub-filters" method="get" action="/cms/subscribers">
-        <span class="filter-caption">Filter:</span>
-        <div class="field">
-          <label for="status">Status</label>
-          <select name="status" id="status">
-            <option value="">All</option>
-            <option value="subscribed"<?= $activeStatus === 'subscribed' ? ' selected' : '' ?>>Subscribed</option>
-            <option value="unsubscribed"<?= $activeStatus === 'unsubscribed' ? ' selected' : '' ?>>Unsubscribed</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="source">Source</label>
-          <select name="source" id="source">
-            <option value="">All</option>
-            <?php foreach ($sources as $src): ?>
-              <option value="<?= $e($src) ?>"<?= $activeSource === $src ? ' selected' : '' ?>><?= $e($src) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="field">
-          <label for="since">From</label>
-          <input type="date" name="since" id="since" value="<?= $e($activeSince) ?>">
-        </div>
-        <div class="field">
-          <label for="until">To</label>
-          <input type="date" name="until" id="until" value="<?= $e($activeUntil) ?>">
-        </div>
-        <div class="actions">
-          <button type="submit" class="btn-pri">Apply filter</button>
-          <a class="btn-sec" href="/cms/subscribers">Reset</a>
-          <a class="btn-sec" href="<?= $e($exportHref) ?>">Export CSV</a>
-        </div>
-      </form>
+      <?php
+      // Phase 21.7 — pill filter bar to match every other list view.
+      // Status has just two values; Source is rendered only when there's
+      // more than one to choose from (single-source case = redundant
+      // filter). Date range dropped — never used; can come back as a
+      // sidebar panel if needed.
+      $qs = static function (array $params) use ($activeStatus, $activeSource): string {
+          $base = ['status' => $activeStatus ?: null, 'source' => $activeSource ?: null];
+          foreach ($params as $k => $v) {
+              if ($v === null || $v === '') unset($base[$k]); else $base[$k] = $v;
+          }
+          $base = array_filter($base, static fn($v) => $v !== null && $v !== '');
+          return '/cms/subscribers' . ($base ? '?' . http_build_query($base) : '');
+      };
+      $groups = [[
+          'label' => 'Status',
+          'mode'  => 'or',
+          'pills' => [
+              ['label' => 'All',          'href' => $qs(['status' => null]), 'active' => $activeStatus === '',             'all' => true],
+              ['label' => 'Subscribed',   'href' => $qs(['status' => 'subscribed']),   'active' => $activeStatus === 'subscribed'],
+              ['label' => 'Unsubscribed', 'href' => $qs(['status' => 'unsubscribed']), 'active' => $activeStatus === 'unsubscribed'],
+          ],
+      ]];
+      if (count($sources) > 1) {
+          $sourcePills = [['label' => 'All', 'href' => $qs(['source' => null]), 'active' => $activeSource === '', 'all' => true]];
+          foreach ($sources as $src) {
+              $sourcePills[] = ['label' => $src, 'href' => $qs(['source' => $src]), 'active' => $activeSource === $src];
+          }
+          $groups[] = ['label' => 'Source', 'mode' => 'or', 'pills' => $sourcePills];
+      }
+      require __DIR__ . '/../partials/filter-bar.php';
+      ?>
 
       <?php
       // Per-row forms — one per existing row, rendered before the table.

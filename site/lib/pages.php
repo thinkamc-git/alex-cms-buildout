@@ -260,6 +260,38 @@ function delete_page_mock(int $id): void
     db()->prepare('DELETE FROM page_mock_versions WHERE id = ?')->execute([$id]);
 }
 
+// ── Archives (convention-based) ───────────────────────────────────────
+//
+// An "archive" is any mock whose name starts with "Archive " (space). The
+// convention lets us snapshot the live page at a point in time without
+// adding a schema column. Archives are preview-only — they live in
+// page_mock_versions like any other mock, but the Pages list surfaces
+// them under a dedicated "Archives" filter and the preview path serves
+// the body raw (the body is expected to be a self-contained HTML doc).
+const PAGES_ARCHIVE_PREFIX = 'Archive ';
+
+function is_archive_mock_name(string $name): bool
+{
+    return str_starts_with(ltrim($name), PAGES_ARCHIVE_PREFIX);
+}
+
+/**
+ * All archive mocks across every slug, newest-named first.
+ */
+function list_archive_mocks(): array
+{
+    $stmt = db()->prepare(
+        'SELECT id, slug, name, body_html, meta_title, meta_description,
+                og_image, og_type, twitter_card, is_published,
+                created_at, updated_at
+           FROM page_mock_versions
+          WHERE name LIKE ?
+          ORDER BY name DESC, id DESC'
+    );
+    $stmt->execute([PAGES_ARCHIVE_PREFIX . '%']);
+    return $stmt->fetchAll();
+}
+
 /**
  * Mark a mock as published. Only allowed for slugs in
  * PAGES_PUBLISHABLE_SLUGS (header / footer). Atomically un-publishes any

@@ -23,7 +23,12 @@ $csrf_token = Csrf::token();
 
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
-$files = list_pages_files();
+// Filter mode: 'all' (default) shows the 3 file sections;
+// 'archives' shows a flat list of mocks whose name starts with "Archive ".
+$filter = ($_GET['filter'] ?? '') === 'archives' ? 'archives' : 'all';
+
+$files    = list_pages_files();
+$archives = list_archive_mocks();
 
 // Sidecar: mock count + published-mock name + page metadata per slug.
 $mock_counts    = [];
@@ -143,68 +148,131 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
+      <?php
+      // Filter rail — same partial/styling as the Articles list, and
+      // positioned outside the content-area like Articles does so it
+      // sits flush under the view-header with no extra padding band.
+      $groups = [
+          [
+              'label' => 'View',
+              'mode'  => 'or',
+              'pills' => [
+                  ['label' => 'All',      'href' => '/cms/pages',                 'active' => $filter === 'all',      'all' => true],
+                  ['label' => 'Archives', 'href' => '/cms/pages?filter=archives', 'active' => $filter === 'archives'],
+              ],
+          ],
+      ];
+      require __DIR__ . '/../partials/filter-bar.php';
+      ?>
+
       <div class="content-area">
         <?php if ($flash !== ''): ?>
           <div class="flash-success" role="status"><?= $e($flash) ?></div>
         <?php endif; ?>
 
-        <?php
-        $columns = [
-            ['label' => 'File',          'width' => '22%'],
-            ['label' => 'Meta title',    'width' => '35%'],
-            ['label' => 'Mocks',         'width' => '13%'],
-            ['label' => 'Last modified', 'width' => '12%'],
-            ['label' => 'Actions',       'width' => '18%'],
-        ];
-        ?>
+        <?php if ($filter === 'archives'): ?>
+          <?php
+          $arch_columns = [
+              ['label' => 'Archive name', 'width' => '40%'],
+              ['label' => 'Page',         'width' => '20%'],
+              ['label' => 'Captured',     'width' => '20%'],
+              ['label' => 'Actions',      'width' => '20%'],
+          ];
 
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Marketing pages</span>
-              <span class="content-block-sublabel">Mock-only sandbox · files remain canonical</span>
+          $arch_rows = [];
+          foreach ($archives as $a) {
+              $previewUrl = '/cms/pages/archive-preview?id=' . (int)$a['id'];
+              $captured   = !empty($a['created_at']) ? strtotime((string)$a['created_at']) : 0;
+              $arch_rows[] = [
+                  'href'  => $previewUrl,
+                  'cells' => [
+                      ['html' => '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="row-title">' . $e((string)$a['name']) . '</a>'],
+                      ['html' => $e((string)$a['slug'])],
+                      ['html' => $rel_time((int)$captured)],
+                      ['html' => '<div class="row-actions">'
+                          . '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny">Preview ↗</a>'
+                          . '</div>', 'class' => 'cell-actions'],
+                  ],
+              ];
+          }
+          ?>
+
+          <div class="content-block">
+            <div class="content-block-header">
+              <div>
+                <span class="content-block-label">Archives</span>
+                <span class="content-block-sublabel">Snapshots of past page versions · preview-only, no public URL</span>
+              </div>
+              <span class="content-block-count"><?= count($archives) ?> <?= count($archives) === 1 ? 'archive' : 'archives' ?></span>
             </div>
-            <span class="content-block-count"><?= count($pages) ?> files</span>
+
+            <?php
+            $columns = $arch_columns;
+            $rows = $arch_rows;
+            $empty_text = 'No archives yet. To archive a page, insert a mock whose name starts with "Archive ".';
+            require __DIR__ . '/../partials/table.php';
+            ?>
           </div>
 
+        <?php else: ?>
           <?php
-          $rows = array_map($buildRow, $pages);
-          $empty_text = 'No marketing pages found.';
-          require __DIR__ . '/../partials/table.php';
+          $columns = [
+              ['label' => 'File',          'width' => '22%'],
+              ['label' => 'Meta title',    'width' => '35%'],
+              ['label' => 'Mocks',         'width' => '13%'],
+              ['label' => 'Last modified', 'width' => '12%'],
+              ['label' => 'Actions',       'width' => '18%'],
+          ];
           ?>
-        </div>
 
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Error pages</span>
-              <span class="content-block-sublabel">Rendered when no route or file matches</span>
+          <div class="content-block">
+            <div class="content-block-header">
+              <div>
+                <span class="content-block-label">Marketing pages</span>
+                <span class="content-block-sublabel">Mock-only sandbox · files remain canonical</span>
+              </div>
+              <span class="content-block-count"><?= count($pages) ?> files</span>
             </div>
-            <span class="content-block-count"><?= count($errors) ?> files</span>
+
+            <?php
+            $rows = array_map($buildRow, $pages);
+            $empty_text = 'No marketing pages found.';
+            require __DIR__ . '/../partials/table.php';
+            ?>
           </div>
 
-          <?php
-          $rows = array_map($buildRow, $errors);
-          $empty_text = 'No error pages found.';
-          require __DIR__ . '/../partials/table.php';
-          ?>
-        </div>
-
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Layout partials</span>
-              <span class="content-block-sublabel">Shared header + footer · publish-capable on staging</span>
+          <div class="content-block">
+            <div class="content-block-header">
+              <div>
+                <span class="content-block-label">Error pages</span>
+                <span class="content-block-sublabel">Rendered when no route or file matches</span>
+              </div>
+              <span class="content-block-count"><?= count($errors) ?> files</span>
             </div>
-            <span class="content-block-count"><?= count($partials) ?> files</span>
+
+            <?php
+            $rows = array_map($buildRow, $errors);
+            $empty_text = 'No error pages found.';
+            require __DIR__ . '/../partials/table.php';
+            ?>
           </div>
 
-          <?php
-          $rows = array_map($buildRow, $partials);
-          $empty_text = 'No layout partials found.';
-          require __DIR__ . '/../partials/table.php';
-          ?>
-        </div>
+          <div class="content-block">
+            <div class="content-block-header">
+              <div>
+                <span class="content-block-label">Layout partials</span>
+                <span class="content-block-sublabel">Shared header + footer · publish-capable on staging</span>
+              </div>
+              <span class="content-block-count"><?= count($partials) ?> files</span>
+            </div>
+
+            <?php
+            $rows = array_map($buildRow, $partials);
+            $empty_text = 'No layout partials found.';
+            require __DIR__ . '/../partials/table.php';
+            ?>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
   </main>

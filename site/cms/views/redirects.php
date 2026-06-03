@@ -100,23 +100,39 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  /* Match the design-system .cms-table look used by articles/pages so
-     the redirects table reads as part of the same family. */
-  .red-table { width: 100%; border-collapse: collapse; }
-  .red-table th { padding: 12px 14px; border-bottom: 1px solid var(--border); font-family: var(--font-cond); font-size: var(--text-micro); text-transform: uppercase; letter-spacing: 0.10em; color: var(--muted); text-align: left; font-weight: 700; background: var(--bg-soft); }
-  .red-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
-  .red-table input[type="text"] { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-family: var(--font-mono); font-size: 12px; background: var(--surface); color: var(--ink); }
-  .red-table select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 12px; background: var(--surface); color: var(--ink); }
-  .red-add { background: var(--bg-soft); }
-  .red-add td { padding-top: 14px; padding-bottom: 14px; }
-  /* Save: ghost-by-default, hidden when not dirty (matches the universal
-     CMS pattern from /cms/navigation + /cms/pages/edit). */
-  .red-table [data-save-btn] { visibility:hidden; }
-  .red-table [data-save-btn].btn-pri { visibility:visible; }
-  /* Delete: visible only on row hover (or when a child input is focused). */
-  .red-table tr:not(.red-add) .btn-danger { visibility:hidden; }
-  .red-table tr:hover .btn-danger,
-  .red-table tr:focus-within .btn-danger { visibility:visible; }
+  /* Row-form pattern — same visual family as /cms/navigation. Each
+     redirect is its own bordered box with grid-aligned columns. No
+     drag-handle (redirects don't reorder). */
+  .red-list { display:flex; flex-direction:column; gap:6px; }
+  .red-row {
+    display:grid;
+    grid-template-columns:
+      minmax(220px, 1.4fr)   /* from         */
+      minmax(240px, 1.6fr)   /* to           */
+      90px                   /* status       */
+      auto                   /* save         */
+      auto;                  /* delete       */
+    gap:8px;
+    align-items:center;
+    padding:8px 10px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:4px;
+  }
+  .red-row > form { display:contents; }
+  .red-row input[type=text], .red-row select {
+    padding:5px 7px; border:1px solid var(--border); border-radius:3px;
+    font-size:12px; background:var(--surface); color:var(--ink);
+    font-family:var(--font-mono); min-width:0; width:100%; box-sizing:border-box;
+  }
+  /* Save: hidden until dirty (universal CMS pattern). */
+  .red-row [data-save-btn] { visibility:hidden; }
+  .red-row [data-save-btn].btn-pri { visibility:visible; }
+  /* Delete: only on row-hover so it doesn't always shout. */
+  .red-row .btn-danger { visibility:hidden; }
+  .red-row:hover .btn-danger,
+  .red-row:focus-within .btn-danger { visibility:visible; }
+  .red-add-row { background:var(--bg-soft); }
 </style>
 </head>
 <body>
@@ -156,71 +172,57 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="flash-success" role="status" style="margin:var(--space-16) var(--space-24) 0"><?= $e($flash) ?></div>
       <?php endif; ?>
 
-      <?php
-      // Per-row forms (one per existing row), rendered before the table.
-      foreach ($rows as $r):
-        $rid = 'red-row-' . (int)$r['id'];
-      ?>
-        <form id="<?= $e($rid) ?>" method="post" action="/cms/redirects" style="display:none">
-          <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-          <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
-        </form>
-      <?php endforeach; ?>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Redirects</span>
+              <span class="content-block-sublabel">From-path → to-path · 301 permanent, 302 temporary</span>
+            </div>
+            <span class="content-block-count"><?= count($rows) ?> redirect<?= count($rows)===1?'':'s' ?></span>
+          </div>
 
-      <div style="padding:0 var(--space-24)">
-      <table class="red-table">
-        <thead>
-          <tr>
-            <th style="width:36%">From (path on this site)</th>
-            <th style="width:42%">To (path or absolute URL)</th>
-            <th style="width:8%">Status</th>
-            <th style="width:14%;text-align:right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php if (count($rows) === 0): ?>
-            <tr><td colspan="4" style="color:var(--muted);font-style:italic;padding:var(--space-12)">No redirects yet — add one below.</td></tr>
-          <?php endif; ?>
+          <div class="red-list">
+            <?php foreach ($rows as $r): $code = (int)($r['status_code'] ?? 301); ?>
+              <div class="red-row">
+                <form method="post" action="/cms/redirects" style="display:contents">
+                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                  <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                  <input type="hidden" name="action" value="update">
+                  <input type="text" name="old_slug" value="<?= $e((string)$r['old_slug']) ?>" placeholder="/old-path" required>
+                  <input type="text" name="new_slug" value="<?= $e((string)$r['new_slug']) ?>" placeholder="/new-path or https://…" required>
+                  <select name="status_code">
+                    <option value="301"<?= $code === 301 ? ' selected' : '' ?>>301</option>
+                    <option value="302"<?= $code === 302 ? ' selected' : '' ?>>302</option>
+                  </select>
+                  <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
+                </form>
+                <form method="post" action="/cms/redirects" style="display:inline" onsubmit="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;?');">
+                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                  <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
+                  <input type="hidden" name="action" value="delete">
+                  <button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>
+                </form>
+              </div>
+            <?php endforeach; ?>
 
-          <?php foreach ($rows as $r):
-            $rid = 'red-row-' . (int)$r['id'];
-            $code = (int)($r['status_code'] ?? 301);
-          ?>
-            <tr>
-              <td><input type="text" name="old_slug" form="<?= $e($rid) ?>" value="<?= $e((string)$r['old_slug']) ?>" required></td>
-              <td><input type="text" name="new_slug" form="<?= $e($rid) ?>" value="<?= $e((string)$r['new_slug']) ?>" required></td>
-              <td>
-                <select name="status_code" form="<?= $e($rid) ?>">
-                  <option value="301"<?= $code === 301 ? ' selected' : '' ?>>301</option>
-                  <option value="302"<?= $code === 302 ? ' selected' : '' ?>>302</option>
+            <!-- Add new redirect -->
+            <div class="red-row red-add-row">
+              <form method="post" action="/cms/redirects" style="display:contents">
+                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                <input type="hidden" name="action" value="add">
+                <input type="text" name="old_slug" placeholder="/old-path" required>
+                <input type="text" name="new_slug" placeholder="/new-path or https://example.com/foo" required>
+                <select name="status_code">
+                  <option value="301" selected>301</option>
+                  <option value="302">302</option>
                 </select>
-              </td>
-              <td style="text-align:right;white-space:nowrap">
-                <button type="submit" name="action" value="update" form="<?= $e($rid) ?>" class="btn-ghost btn-tiny" data-save-btn>Save</button>
-                <button type="submit" name="action" value="delete" form="<?= $e($rid) ?>" class="btn-ghost btn-tiny btn-danger" onclick="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;?');">Delete</button>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-
-          <tr class="red-add">
-            <form method="post" action="/cms/redirects" id="red-add-form" style="display:none">
-              <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-              <input type="hidden" name="action" value="add">
-            </form>
-            <td><input type="text" name="old_slug" form="red-add-form" placeholder="/old-path" required></td>
-            <td><input type="text" name="new_slug" form="red-add-form" placeholder="/new-path or https://example.com/foo" required></td>
-            <td>
-              <select name="status_code" form="red-add-form">
-                <option value="301" selected>301</option>
-                <option value="302">302</option>
-              </select>
-            </td>
-            <td style="text-align:right">
-              <button type="submit" form="red-add-form" class="btn-ghost btn-tiny">Add</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                <button type="submit" class="btn-ghost btn-tiny">Add</button>
+                <span></span><!-- delete-column placeholder so grid stays aligned -->
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>

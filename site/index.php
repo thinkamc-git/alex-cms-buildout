@@ -167,6 +167,9 @@ $router->post('/cms/pages/edit',      $cms('views/page-edit.php'));
 // Phase 21.x — form-driven preview for the Pages CMS. Mirrors the
 // /cms/post/preview-form endpoint but routes through _page-shell.php.
 $router->post('/cms/pages/preview-form', $cms('views/pages-preview-form.php'));
+// Archive preview — streams the stored mock body raw (bypasses page-shell)
+// so old self-contained snapshots render with their original chrome.
+$router->get ('/cms/pages/archive-preview', $cms('views/pages-archive-preview.php'));
 
 // Phase 20: Navigation editor. Replaces the hardcoded <a> lists in the
 // static header.html / footer.html with DB-managed nav_items. AJAX

@@ -255,9 +255,9 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
 .filter-pill:hover { border-color:var(--ink-30); color:var(--primary); }
 .filter-pill.active { background:var(--primary); border-color:var(--primary); color:var(--white); }
 .filter-pill.all-btn.active { background:var(--ink-mid); border-color:var(--ink-mid); color:var(--white); }
-/* Phase 20.3: category pills carry their category colour via --pill-cat.
-   Inactive: muted text with a tinted left dot. Active: filled background. */
-.filter-pill[style*="--pill-cat"] { color: color-mix(in srgb, var(--pill-cat) 80%, var(--ink)); border-color: color-mix(in srgb, var(--pill-cat) 30%, transparent); }
+/* Category pills carry their colour via --pill-cat. Default matches the
+   stage pills (neutral) so the rail reads as a uniform filter; the
+   category colour only asserts on hover (accent) and active (filled). */
 .filter-pill[style*="--pill-cat"]:hover { border-color: var(--pill-cat); color: var(--pill-cat); }
 .filter-pill[style*="--pill-cat"].active { background: var(--pill-cat); border-color: var(--pill-cat); color: #fff; }
 .filter-sep { width:1px; height:18px; background:var(--ink-18); margin:0 var(--space-4); }

@@ -1854,6 +1854,22 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   min-width:0;
   width:100%;
   box-sizing:border-box;
+  transition: border-color 0.1s, background-color 0.1s;
+}
+/* Phase 21.7 — field-level editable affordance. Hover darkens the
+   border so the user knows the input is interactive. Focus matches
+   the canonical "active edit" look (100% black border) — same as
+   when actually typing in the field. */
+.rowform-row input[type=text]:hover,
+.rowform-row select:hover {
+  border-color: var(--ink-30);
+  background: var(--canvas-bg);
+}
+.rowform-row input[type=text]:focus,
+.rowform-row select:focus {
+  border-color: var(--primary);
+  background: var(--surface);
+  outline: none;
 }
 /* Save button: hidden until the row is dirty (dirty-flip.js swaps it
    from btn-ghost to btn-pri to signal pending changes). The trailing

@@ -262,6 +262,19 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="rowform-list nav-list" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
+            <div class="rowform-headers">
+              <span></span>
+              <span>Label</span>
+              <span>Key</span>
+              <span>Type</span>
+              <span>Target</span>
+              <span>Style</span>
+              <span>Mark</span>
+              <span>Color</span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
             <?php foreach ($items as $it): $broken = isset($broken_ids[(int)$it['id']]); ?>
               <div class="rowform-row nav-row<?= $broken ? ' is-broken' : '' ?>" draggable="true" data-id="<?= (int)$it['id'] ?>">
                 <div class="grip" title="Drag to reorder">⋮⋮</div>

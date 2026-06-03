@@ -153,6 +153,13 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="rowform-list red-list">
+            <div class="rowform-headers">
+              <span>From URL</span>
+              <span>New URL</span>
+              <span>Code</span>
+              <span></span>
+              <span></span>
+            </div>
             <?php foreach ($rows as $r): $code = (int)($r['status_code'] ?? 301); ?>
               <div class="rowform-row red-row">
                 <form method="post" action="/cms/redirects" style="display:contents">

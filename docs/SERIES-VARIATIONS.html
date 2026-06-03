@@ -2,640 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Series — 6 design variations</title>
+<title>Series — list mockup</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  /* ============ DESIGN TOKENS (mirrored from /_ds/css/tokens.css) ============ */
-  :root {
-    --primary:    #191715;
-    --secondary:  #494846;
-    --muted:      #818080;
-    --surface:    #ffffff;
-    --canvas-bg:  #F3F2F1;
-    --canvas-raised: #ECEAE8;
-    --ink-08:  rgba(25,23,21,0.08);
-    --ink-12:  rgba(25,23,21,0.12);
-    --ink-16:  rgba(25,23,21,0.16);
-    --ink-18:  rgba(25,23,21,0.18);
-    --ink-20:  rgba(25,23,21,0.20);
-    --ink-30:  rgba(25,23,21,0.30);
-    --border:  rgba(25,23,21,0.16);
-    --rule-faint: 1px solid rgba(25,23,21,0.12);
-    --c-terracotta: #7d4631;
-    --c-forest:     #49634b;
-    --c-denim:      #46556a;
-    --c-amber:      #81642a;
-    --stage-published: #4a7c4a;
-    --stage-draft:   #7a5d2c;
-    --stage-concept: #5d4d76;
-    --space-4: 4px; --space-6: 6px; --space-8: 8px; --space-12: 12px;
-    --space-16: 16px; --space-20: 20px; --space-24: 24px; --space-32: 32px;
-    --r-card: 6px; --r-pill: 12px;
-    --text-micro: 10px; --text-label: 11px; --text-meta: 13px; --text-body: 14px;
-    --font: 'Barlow', sans-serif;
-    --font-cond: 'Barlow Condensed', sans-serif;
-    --font-serif: 'Instrument Serif', serif;
-    --font-mono: 'JetBrains Mono', monospace;
-  }
 
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: var(--font);
-    color: var(--primary);
-    background: var(--canvas-bg);
-    font-size: var(--text-meta);
-    line-height: 1.5;
-  }
-
-  /* ============ CHROME ============ */
-  .doc-header {
-    background: var(--surface);
-    border-bottom: var(--rule-faint);
-    padding: 24px 32px;
-  }
-  .doc-header h1 { margin: 0; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 32px; }
-  .doc-header p { margin: 4px 0 0; color: var(--muted); font-size: var(--text-meta); max-width: 720px; }
-
-  .variant {
-    padding: 32px;
-    border-bottom: 1px solid var(--ink-12);
-  }
-  .variant-header {
-    max-width: 1100px; margin: 0 auto 18px;
-  }
-  .variant-label {
-    display: inline-block; padding: 4px 10px;
-    background: var(--primary); color: #fff;
-    font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    border-radius: 2px;
-  }
-  .variant-title {
-    font-family: var(--font-serif); font-style: italic; font-weight: 400;
-    font-size: 24px; margin: 8px 0 4px;
-  }
-  .variant-pitch {
-    color: var(--secondary); font-size: var(--text-meta); margin: 0 0 4px;
-  }
-  .variant-refs {
-    color: var(--muted); font-size: var(--text-micro); font-family: var(--font-mono);
-    letter-spacing: 0.04em; text-transform: uppercase;
-  }
-  .variant-frame {
-    max-width: 1100px; margin: 0 auto;
-    background: var(--canvas-bg);
-    padding: 20px;
-    border: 1px dashed var(--ink-18);
-    border-radius: var(--r-card);
-  }
-
-  /* ============ CANONICAL CMS COMPONENTS (mirrored from style-cms.css) ============ */
-
-  /* view-header */
-  .view-header {
-    padding: var(--space-24) var(--space-24) var(--space-20);
-    border-bottom: var(--rule-faint);
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: var(--space-16);
-    background: var(--surface);
-  }
-  .view-header h2 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 28px; margin: 0; }
-  .view-subtitle { color: var(--muted); font-size: var(--text-meta); margin: 2px 0 0; max-width: 720px; }
-  .view-header-actions { display: flex; gap: var(--space-8); flex-shrink: 0; padding-top: 4px; }
-
-  /* content-block */
-  .content-block { background: var(--surface); border-radius: var(--r-card); border: var(--rule-faint); margin-bottom: var(--space-16); overflow: hidden; }
-  .content-block-header { display: flex; align-items: baseline; justify-content: space-between; padding: var(--space-16) var(--space-20); border-bottom: var(--rule-faint); background: var(--canvas-raised); gap: var(--space-12); }
-  .content-block-label { font-family: var(--font-cond); font-size: var(--text-body); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--primary); }
-  .content-block-sublabel { color: var(--muted); font-size: var(--text-micro); font-family: var(--font-mono); letter-spacing: 0.04em; margin-left: var(--space-8); }
-  .content-block-count { font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.08em; color: var(--muted); background: var(--ink-08); border: 1px solid var(--ink-12); padding: 1px 6px; border-radius: 2px; text-transform: uppercase; }
-
-  /* cms-table */
-  .table-card { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; }
-  .cms-table { width: 100%; border-collapse: collapse; }
-  .cms-table th { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: left; padding: var(--space-8) var(--space-16); border-bottom: var(--rule-faint); background: var(--canvas-raised); white-space: nowrap; }
-  .cms-table th:last-child { text-align: right; }
-  .cms-table td { padding: 12px var(--space-16); border-bottom: 1px solid var(--ink-12); font-size: var(--text-meta); color: var(--secondary); vertical-align: middle; }
-  .cms-table td:last-child { text-align: right; }
-  .cms-table tr:last-child td { border-bottom: none; }
-  .cms-table tbody tr.row-clickable:hover { outline: 1px solid var(--ink-20); position: relative; z-index: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.07); cursor: pointer; }
-
-  /* rowform */
-  .rowform-list { display: flex; flex-direction: column; gap: 6px; padding: 12px; }
-  .rowform-headers { display: grid; grid-template-columns: var(--rowform-cols, 1fr auto auto); gap: 8px; padding: 6px 10px 4px; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); align-items: center; }
-  .rowform-headers > span { padding: 0 8px; }
-  .rowform-row { display: grid; grid-template-columns: var(--rowform-cols, 1fr auto auto); gap: 8px; align-items: center; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
-  .rowform-row:hover { outline: 1px solid var(--ink-30); position: relative; z-index: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.07); cursor: grab; }
-  .rowform-row input, .rowform-row select { padding: 5px 7px; border: 1px solid var(--border); border-radius: 3px; font-size: 12px; background: var(--surface); color: var(--primary); font-family: var(--font-mono); min-width: 0; width: 100%; box-sizing: border-box; }
-  .grip { cursor: grab; color: var(--muted); user-select: none; text-align: center; font-size: 14px; }
-  .rowform-add-row { background: var(--canvas-raised); }
-
-  /* pills */
-  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-8); border-radius: 2px; font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; line-height: 1.5; }
-  .pill-published { color: var(--stage-published); background: color-mix(in srgb, var(--stage-published) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-published) 28%, transparent); }
-  .pill-draft { color: var(--stage-draft); background: color-mix(in srgb, var(--stage-draft) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-draft) 28%, transparent); }
-  .pill-concept { color: var(--stage-concept); background: color-mix(in srgb, var(--stage-concept) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-concept) 28%, transparent); }
-  .val-pill { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); background: var(--ink-08); border: 1px solid var(--ink-12); padding: 2px 7px; border-radius: 2px; display: inline-block; }
-  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--stage-published); display: inline-block; }
-
-  /* buttons */
-  .btn-pri, .btn-sec, .btn-danger { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 7px 14px; border-radius: var(--r-pill); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; border: 1px solid transparent; }
-  .btn-pri { background: var(--primary); color: #fff; border-color: var(--primary); }
-  .btn-sec { background: var(--surface); color: var(--primary); border-color: var(--ink-30); }
-  .btn-danger { background: var(--surface); color: var(--c-terracotta); border-color: color-mix(in srgb, var(--c-terracotta) 50%, transparent); }
-  .btn-tiny { padding: 4px 10px; font-size: var(--text-micro); }
-  .btn-icon { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--ink-18); border-radius: 4px; cursor: pointer; color: var(--secondary); }
-  .btn-icon-danger { color: var(--c-terracotta); border-color: color-mix(in srgb, var(--c-terracotta) 30%, transparent); }
-  .btn-icon svg { width: 14px; height: 14px; }
-
-  /* form bits */
-  .field-label { font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-4); display: block; }
-  .field-input { width: 100%; padding: 8px 12px; border: 1px solid var(--ink-18); border-radius: 4px; font-family: var(--font); font-size: var(--text-meta); color: var(--primary); background: var(--surface); box-sizing: border-box; }
-  .field-hint { color: var(--muted); font-size: var(--text-micro); margin-top: 4px; }
-
-  /* row-actions */
-  .row-actions { display: inline-flex; align-items: center; gap: var(--space-6); justify-content: flex-end; }
-
-  /* ============ V-SPECIFIC OVERRIDES ============ */
-
-  /* V1: table */
-  .v1-row-link { color: var(--primary); font-weight: 600; text-decoration: none; }
-
-  /* V2: stacked blocks */
-  .v2-block-header-extra { display: flex; gap: var(--space-8); align-items: center; }
-  .v2-block-body { padding: var(--space-16) var(--space-20); }
-  .v2-meta-row { display: flex; align-items: center; gap: var(--space-12); margin-bottom: var(--space-12); flex-wrap: wrap; }
-  .v2-meta-row a { color: var(--secondary); text-decoration: none; font-size: var(--text-micro); font-family: var(--font-mono); }
-  .v2-description { color: var(--secondary); font-size: var(--text-meta); line-height: 1.6; margin-bottom: var(--space-16); }
-
-  /* V3: master-detail */
-  .v3-layout { display: grid; grid-template-columns: 280px 1fr; gap: var(--space-20); }
-  .v3-list { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: 8px; }
-  .v3-list-item { padding: 10px 12px; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; }
-  .v3-list-item:hover { background: var(--ink-08); }
-  .v3-list-item.is-active { background: var(--primary); color: #fff; }
-  .v3-list-item.is-active .v3-list-count { background: rgba(255,255,255,0.2); color: #fff; }
-  .v3-list-name { font-weight: 600; font-size: var(--text-meta); }
-  .v3-list-count { font-family: var(--font-mono); font-size: var(--text-micro); background: var(--ink-08); padding: 1px 6px; border-radius: 2px; color: var(--muted); }
-  .v3-detail { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
-  .v3-detail-hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-16); }
-
-  /* V4: card grid w/ content-block chrome */
-  .v4-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
-  .v4-card { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; display: flex; flex-direction: column; }
-  .v4-card-hd { padding: var(--space-12) var(--space-16); border-bottom: var(--rule-faint); background: var(--canvas-raised); }
-  .v4-card-title { font-family: var(--font); font-size: var(--text-body); font-weight: 600; color: var(--primary); margin: 0 0 2px; }
-  .v4-card-meta { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); display: flex; gap: var(--space-8); align-items: center; }
-  .v4-card-body { padding: var(--space-12) var(--space-16); flex: 1; }
-  .v4-card-desc { color: var(--secondary); font-size: var(--text-meta); line-height: 1.5; margin-bottom: var(--space-12); }
-  .v4-parts-mini { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--space-12); }
-  .v4-part-mini { display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center; padding: 6px 8px; background: var(--canvas-bg); border-radius: 3px; font-size: var(--text-micro); }
-  .v4-part-num { font-family: var(--font-mono); font-weight: 700; color: var(--muted); font-size: 10px; }
-  .v4-part-title { color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .v4-card-foot { padding: var(--space-12) var(--space-16); border-top: var(--rule-faint); display: flex; justify-content: space-between; align-items: center; }
-
-  /* V5: rowform with expand */
-  .v5-row { display: grid; grid-template-columns: 28px minmax(160px, 1.4fr) 80px minmax(180px, 1fr) auto auto; gap: 8px; align-items: center; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
-  .v5-row-name { font-weight: 600; color: var(--primary); }
-  .v5-row-slug { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); }
-  .v5-row-chevron { color: var(--muted); cursor: pointer; }
-  .v5-row.is-open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-  .v5-expand { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; padding: var(--space-12) var(--space-16); margin-top: -2px; }
-  .v5-expand-desc { color: var(--secondary); font-size: var(--text-meta); margin-bottom: var(--space-12); }
-  .v5-parts-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: var(--space-12); }
-  .v5-part { display: grid; grid-template-columns: 18px 28px 1fr auto auto; gap: 8px; align-items: center; padding: 6px 8px; background: var(--canvas-bg); border-radius: 3px; font-size: var(--text-meta); }
-
-  /* V6: list view (same as articles list pattern) */
-  /* Uses .cms-table and .content-block */
-</style>
+<link rel="stylesheet" href="../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../site/_design-system/css/tables.css">
+<link rel="stylesheet" href="../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../site/_design-system/css/views.css">
+<link rel="stylesheet" href="../site/cms/_assets/style-cms.css">
 </head>
-<body>
+<body class="dot-surface">
 
-<header class="doc-header">
-  <h1>Series — 6 design variations</h1>
-  <p>Each variation is built from existing CMS components (view-header, content-block, cms-table, rowform-row, pill, button family) so they read as the same software. Same sample data across all six: three series with mixed counts and a mix of stages.</p>
-</header>
+<div class="layout">
 
-<!-- =================== V1 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V1 — Table list</span>
-    <div class="variant-title">Series as rows in the canonical list table</div>
-    <p class="variant-pitch">Treat each series like an article: a row in <code>.cms-table</code>. Click a row to navigate to a per-series edit page (separate route). Matches the Articles / Journals / Live Sessions list pattern exactly.</p>
-    <p class="variant-refs">Refs: .cms-table · .content-block · row-clickable hover · .pill · .val-pill</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
+  <main class="main">
+    <div class="view active">
+
       <div class="view-header">
         <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Ordered groups of articles. Each series gets its own /series/&lt;slug&gt;/ index page.</p>
+          <h2 class="view-title">Series</h2>
+          <p class="view-subtitle">Ordered groups of articles. Each series gets its own /series/&lt;slug&gt;/ index page. Click a row to edit its parts.</p>
         </div>
         <div class="view-header-actions">
-          <a href="#" class="btn-sec">View live ↗</a>
           <a href="#" class="btn-pri">+ New Series</a>
         </div>
       </div>
-      <div style="padding:var(--space-24)">
+
+      <div class="content-area">
         <div class="content-block">
           <div class="content-block-header">
-            <div><span class="content-block-label">All series</span><span class="content-block-sublabel">3 series · 7 parts total</span></div>
+            <div>
+              <span class="content-block-label">All series</span>
+            </div>
             <span class="content-block-count">3</span>
           </div>
-          <table class="cms-table">
-            <thead><tr><th style="width:32%">Name</th><th style="width:18%">Slug</th><th style="width:10%">Parts</th><th style="width:20%">Live URL</th><th style="width:10%">Status</th><th style="width:10%"></th></tr></thead>
-            <tbody>
-              <tr class="row-clickable">
-                <td><a href="#" class="v1-row-link">UX 2.0</a></td>
-                <td><span class="val-pill">ux-2-0</span></td>
-                <td>4 parts</td>
-                <td><a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/ux-2-0/</a></td>
-                <td><span class="pill pill-published"><span class="live-dot"></span>Live</span></td>
-                <td><div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div></td>
-              </tr>
-              <tr class="row-clickable">
-                <td><a href="#" class="v1-row-link">Leading Design</a></td>
-                <td><span class="val-pill">leading-design</span></td>
-                <td>2 parts</td>
-                <td><a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/leading-design/</a></td>
-                <td><span class="pill pill-draft">Draft</span></td>
-                <td><div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div></td>
-              </tr>
-              <tr class="row-clickable">
-                <td><a href="#" class="v1-row-link">On Coaching</a></td>
-                <td><span class="val-pill">on-coaching</span></td>
-                <td>1 part</td>
-                <td><a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/on-coaching/</a></td>
-                <td><span class="pill pill-concept">Concept</span></td>
-                <td><div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div></td>
-              </tr>
-            </tbody>
-          </table>
+
+          <div class="table-card">
+            <table class="cms-table">
+              <thead>
+                <tr>
+                  <th style="width:32%">Name</th>
+                  <th style="width:22%">Slug</th>
+                  <th style="width:10%">Parts</th>
+                  <th style="width:14%">Status</th>
+                  <th style="width:22%"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="row-clickable" data-row-href="SERIES-EDIT-MOCKUP.html" onclick="location.href='SERIES-EDIT-MOCKUP.html'">
+                  <td><a href="SERIES-EDIT-MOCKUP.html" class="row-title" style="color:var(--primary);text-decoration:none;font-weight:600">UX 2.0</a></td>
+                  <td><span class="val-pill">ux-2-0</span></td>
+                  <td>4</td>
+                  <td><span class="pill pill-published"><span class="live-dot"></span>Live</span></td>
+                  <td class="cell-actions">
+                    <div class="row-actions">
+                      <a href="#" class="btn-sec btn-tiny">Live ↗</a>
+                      <a href="SERIES-EDIT-MOCKUP.html" class="btn-sec btn-tiny">Edit</a>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="row-clickable">
+                  <td><a href="#" class="row-title" style="color:var(--primary);text-decoration:none;font-weight:600">Leading Design</a></td>
+                  <td><span class="val-pill">leading-design</span></td>
+                  <td>2</td>
+                  <td><span class="pill pill-draft">Draft</span></td>
+                  <td class="cell-actions">
+                    <div class="row-actions">
+                      <a href="#" class="btn-sec btn-tiny">Live ↗</a>
+                      <a href="#" class="btn-sec btn-tiny">Edit</a>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="row-clickable">
+                  <td><a href="#" class="row-title" style="color:var(--primary);text-decoration:none;font-weight:600">On Coaching</a></td>
+                  <td><span class="val-pill">on-coaching</span></td>
+                  <td>1</td>
+                  <td><span class="pill pill-concept">Concept</span></td>
+                  <td class="cell-actions">
+                    <div class="row-actions">
+                      <a href="#" class="btn-sec btn-tiny">Live ↗</a>
+                      <a href="#" class="btn-sec btn-tiny">Edit</a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+
     </div>
-  </div>
-</section>
+  </main>
 
-<!-- =================== V2 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V2 — Stacked content-blocks</span>
-    <div class="variant-title">Each series is its own content-block with parts inline</div>
-    <p class="variant-pitch">Series stack vertically as <code>.content-block</code>s. Block header carries name + parts count + Live button. Body shows description, then a rowform list of parts (same chrome as Navigation). Add-part row at the bottom. Everything visible at a glance, no extra navigation.</p>
-    <p class="variant-refs">Refs: .content-block · .rowform-row · .pill · .btn-sec · .btn-icon-danger</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
-      <div class="view-header">
-        <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Ordered groups of articles. Each series gets its own /series/&lt;slug&gt;/ index page.</p>
-        </div>
-        <div class="view-header-actions">
-          <a href="#" class="btn-pri">+ New Series</a>
-        </div>
-      </div>
-      <div style="padding:var(--space-24)">
-
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">UX 2.0</span>
-              <span class="content-block-sublabel">/series/ux-2-0/</span>
-            </div>
-            <div class="v2-block-header-extra">
-              <span class="pill pill-published"><span class="live-dot"></span>Live</span>
-              <span class="content-block-count">4 parts</span>
-              <a href="#" class="btn-sec btn-tiny">Live ↗</a>
-              <a href="#" class="btn-sec btn-tiny">Edit details</a>
-            </div>
-          </div>
-          <div class="v2-block-body">
-            <p class="v2-description">A four-part series rethinking the design process post-AI. Started as a single article, expanded as the through-line became clearer.</p>
-            <div class="rowform-list" style="--rowform-cols: 18px 28px 1fr auto auto;padding:0">
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">01</div><div>How we got here</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">02</div><div>What's changed</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">03</div><div>The new substrate</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">04</div><div>What we owe each other</div><span class="pill pill-concept">Concept</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row rowform-add-row" style="grid-template-columns:1fr auto"><select class="field-input"><option>+ Add article…</option></select><button class="btn-sec btn-tiny">Add</button></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Leading Design</span>
-              <span class="content-block-sublabel">/series/leading-design/</span>
-            </div>
-            <div class="v2-block-header-extra">
-              <span class="pill pill-draft">Draft</span>
-              <span class="content-block-count">2 parts</span>
-              <a href="#" class="btn-sec btn-tiny">Live ↗</a>
-              <a href="#" class="btn-sec btn-tiny">Edit details</a>
-            </div>
-          </div>
-          <div class="v2-block-body">
-            <p class="v2-description">Notes from a decade of design leadership — what worked, what didn't, what I'd do differently.</p>
-            <div class="rowform-list" style="--rowform-cols: 18px 28px 1fr auto auto;padding:0">
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">01</div><div>Hiring senior designers</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">02</div><div>The org-design loop</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger" title="Remove"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-              <div class="rowform-row rowform-add-row" style="grid-template-columns:1fr auto"><select class="field-input"><option>+ Add article…</option></select><button class="btn-sec btn-tiny">Add</button></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== V3 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V3 — Master-detail (two-pane)</span>
-    <div class="variant-title">Sidebar list + detail panel</div>
-    <p class="variant-pitch">Left rail shows all series as a compact list. Click one to open it in the right panel — same affordance as Post Templates view (the only existing two-pane in the CMS). Scales well when there are 10+ series.</p>
-    <p class="variant-refs">Refs: Post Templates two-pane · .content-block · .rowform-row</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
-      <div class="view-header">
-        <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Ordered groups of articles. Click a series to edit its parts and metadata.</p>
-        </div>
-        <div class="view-header-actions"><a href="#" class="btn-pri">+ New Series</a></div>
-      </div>
-      <div style="padding:var(--space-24)">
-        <div class="v3-layout">
-          <div class="v3-list">
-            <div class="v3-list-item is-active">
-              <span class="v3-list-name">UX 2.0</span>
-              <span class="v3-list-count">4</span>
-            </div>
-            <div class="v3-list-item">
-              <span class="v3-list-name">Leading Design</span>
-              <span class="v3-list-count">2</span>
-            </div>
-            <div class="v3-list-item">
-              <span class="v3-list-name">On Coaching</span>
-              <span class="v3-list-count">1</span>
-            </div>
-          </div>
-          <div class="v3-detail">
-            <div class="v3-detail-hd">
-              <div>
-                <h3 style="margin:0;font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:22px">UX 2.0</h3>
-                <div style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);margin-top:2px">/series/ux-2-0/ · <span class="pill pill-published" style="vertical-align:middle"><span class="live-dot"></span>Live</span></div>
-              </div>
-              <div style="display:flex;gap:8px"><a href="#" class="btn-sec btn-tiny">Live ↗</a><button class="btn-danger btn-tiny">Delete</button></div>
-            </div>
-            <div style="margin-bottom:var(--space-16)">
-              <label class="field-label">Description</label>
-              <textarea class="field-input" rows="2">A four-part series rethinking the design process post-AI.</textarea>
-            </div>
-            <div>
-              <label class="field-label">Parts (4) — drag to reorder</label>
-              <div class="rowform-list" style="--rowform-cols: 18px 28px 1fr auto auto;padding:0">
-                <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">01</div><div>How we got here</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-                <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">02</div><div>What's changed</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-                <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">03</div><div>The new substrate</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-                <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">04</div><div>What we owe each other</div><span class="pill pill-concept">Concept</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
-                <div class="rowform-row rowform-add-row" style="grid-template-columns:1fr auto"><select class="field-input"><option>+ Add article…</option></select><button class="btn-sec btn-tiny">Add</button></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== V4 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V4 — Restructured card grid</span>
-    <div class="variant-title">Card grid, but each card uses the canonical block chrome</div>
-    <p class="variant-pitch">Keeps the at-a-glance grid format but rebuilds each card to look like a mini content-block: bordered header (label + sublabel), body with description + parts preview, footer with actions. Fixes the "feels different" complaint while preserving the dashboard energy.</p>
-    <p class="variant-refs">Refs: .content-block header/body/foot · mini-rowform · .pill</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
-      <div class="view-header">
-        <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Ordered groups of articles. Each card is a series.</p>
-        </div>
-        <div class="view-header-actions"><a href="#" class="btn-pri">+ New Series</a></div>
-      </div>
-      <div style="padding:var(--space-24)">
-        <div class="v4-grid">
-          <div class="v4-card">
-            <div class="v4-card-hd">
-              <div class="v4-card-title">UX 2.0</div>
-              <div class="v4-card-meta">/series/ux-2-0/ · <span class="pill pill-published"><span class="live-dot"></span>Live</span></div>
-            </div>
-            <div class="v4-card-body">
-              <p class="v4-card-desc">Four-part series rethinking the design process post-AI.</p>
-              <div class="v4-parts-mini">
-                <div class="v4-part-mini"><span class="v4-part-num">01</span><span class="v4-part-title">How we got here</span><span class="pill pill-published">Live</span></div>
-                <div class="v4-part-mini"><span class="v4-part-num">02</span><span class="v4-part-title">What's changed</span><span class="pill pill-published">Live</span></div>
-                <div class="v4-part-mini"><span class="v4-part-num">03</span><span class="v4-part-title">The new substrate</span><span class="pill pill-draft">Draft</span></div>
-                <div class="v4-part-mini"><span class="v4-part-num">04</span><span class="v4-part-title">What we owe each other</span><span class="pill pill-concept">Conc.</span></div>
-              </div>
-            </div>
-            <div class="v4-card-foot">
-              <span class="content-block-count">4 parts</span>
-              <div style="display:flex;gap:6px"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div>
-            </div>
-          </div>
-
-          <div class="v4-card">
-            <div class="v4-card-hd">
-              <div class="v4-card-title">Leading Design</div>
-              <div class="v4-card-meta">/series/leading-design/ · <span class="pill pill-draft">Draft</span></div>
-            </div>
-            <div class="v4-card-body">
-              <p class="v4-card-desc">Notes from a decade of design leadership.</p>
-              <div class="v4-parts-mini">
-                <div class="v4-part-mini"><span class="v4-part-num">01</span><span class="v4-part-title">Hiring senior designers</span><span class="pill pill-draft">Draft</span></div>
-                <div class="v4-part-mini"><span class="v4-part-num">02</span><span class="v4-part-title">The org-design loop</span><span class="pill pill-draft">Draft</span></div>
-              </div>
-            </div>
-            <div class="v4-card-foot">
-              <span class="content-block-count">2 parts</span>
-              <div style="display:flex;gap:6px"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div>
-            </div>
-          </div>
-
-          <div class="v4-card">
-            <div class="v4-card-hd">
-              <div class="v4-card-title">On Coaching</div>
-              <div class="v4-card-meta">/series/on-coaching/ · <span class="pill pill-concept">Concept</span></div>
-            </div>
-            <div class="v4-card-body">
-              <p class="v4-card-desc">Practical lessons from coaching designers and leaders.</p>
-              <div class="v4-parts-mini">
-                <div class="v4-part-mini"><span class="v4-part-num">01</span><span class="v4-part-title">Listening for the real question</span><span class="pill pill-concept">Conc.</span></div>
-              </div>
-            </div>
-            <div class="v4-card-foot">
-              <span class="content-block-count">1 part</span>
-              <div style="display:flex;gap:6px"><a href="#" class="btn-sec btn-tiny">Live ↗</a><a href="#" class="btn-sec btn-tiny">Edit</a></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== V5 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V5 — Rowform with inline expand</span>
-    <div class="variant-title">Each series is a single rowform-row; chevron expands to show parts</div>
-    <p class="variant-pitch">Most compact option. Each series is one row of a rowform list (same chrome as Navigation) showing name, slug, parts count, status. Click the chevron to expand — parts list and add-form drop down inline. Multiple can be open at once or just one (your choice).</p>
-    <p class="variant-refs">Refs: .rowform-row (with inline expand) · .pill · matches Navigation visually</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
-      <div class="view-header">
-        <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Ordered groups of articles. Click ⌄ to expand a series.</p>
-        </div>
-        <div class="view-header-actions"><a href="#" class="btn-pri">+ New Series</a></div>
-      </div>
-      <div style="padding:var(--space-24)">
-        <div class="rowform-list" style="padding:0">
-          <div class="rowform-headers" style="--rowform-cols: 28px minmax(160px, 1.4fr) 80px minmax(180px, 1fr) auto auto">
-            <span></span><span>Name</span><span>Slug</span><span>Live URL</span><span>Status</span><span></span>
-          </div>
-
-          <div class="v5-row is-open">
-            <span class="v5-row-chevron">⌄</span>
-            <span class="v5-row-name">UX 2.0</span>
-            <span class="v5-row-slug">ux-2-0</span>
-            <a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/ux-2-0/</a>
-            <span class="pill pill-published"><span class="live-dot"></span>Live</span>
-            <button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-          <div class="v5-expand">
-            <p class="v5-expand-desc">Four-part series rethinking the design process post-AI.</p>
-            <div class="v5-parts-list">
-              <div class="v5-part"><div class="grip">⋮⋮</div><div class="val-pill">01</div><div>How we got here</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger" style="width:22px;height:22px"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="v5-part"><div class="grip">⋮⋮</div><div class="val-pill">02</div><div>What's changed</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger" style="width:22px;height:22px"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="v5-part"><div class="grip">⋮⋮</div><div class="val-pill">03</div><div>The new substrate</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger" style="width:22px;height:22px"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="v5-part"><div class="grip">⋮⋮</div><div class="val-pill">04</div><div>What we owe each other</div><span class="pill pill-concept">Concept</span><button class="btn-icon btn-icon-danger" style="width:22px;height:22px"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center"><select class="field-input" style="flex:1;max-width:300px"><option>+ Add article…</option></select><button class="btn-sec btn-tiny">Add</button><a href="#" class="btn-sec btn-tiny" style="margin-left:auto">Edit details</a></div>
-          </div>
-
-          <div class="v5-row">
-            <span class="v5-row-chevron">›</span>
-            <span class="v5-row-name">Leading Design</span>
-            <span class="v5-row-slug">leading-design</span>
-            <a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/leading-design/</a>
-            <span class="pill pill-draft">Draft</span>
-            <button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button>
-          </div>
-
-          <div class="v5-row">
-            <span class="v5-row-chevron">›</span>
-            <span class="v5-row-name">On Coaching</span>
-            <span class="v5-row-slug">on-coaching</span>
-            <a href="#" style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-micro)">/series/on-coaching/</a>
-            <span class="pill pill-concept">Concept</span>
-            <button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================== V6 =================== -->
-<section class="variant">
-  <div class="variant-header">
-    <span class="variant-label">V6 — Hybrid: list + sticky detail strip</span>
-    <div class="variant-title">Compact rowform list, with one expanded "active" series under a sticky strip</div>
-    <p class="variant-pitch">A compromise of V3 and V5: top half is a compact rowform list (like Navigation). Below it, the currently-selected series gets its own full <code>.content-block</code> with parts inline. Click another row to swap. Combines scan-ability with full editing in one screen.</p>
-    <p class="variant-refs">Refs: .rowform-row · .content-block · .pill</p>
-  </div>
-  <div class="variant-frame">
-    <div style="background:var(--surface);border-radius:var(--r-card);overflow:hidden;border:var(--rule-faint)">
-      <div class="view-header">
-        <div>
-          <h2>Series</h2>
-          <p class="view-subtitle">Click a row to edit its parts in the panel below.</p>
-        </div>
-        <div class="view-header-actions"><a href="#" class="btn-pri">+ New Series</a></div>
-      </div>
-      <div style="padding:var(--space-24)">
-
-        <div class="rowform-list" style="padding:0;margin-bottom:var(--space-20)">
-          <div class="rowform-headers" style="--rowform-cols: minmax(160px, 1.4fr) 80px 60px 100px auto">
-            <span>Name</span><span>Slug</span><span>Parts</span><span>Status</span><span></span>
-          </div>
-          <div class="rowform-row" style="--rowform-cols: minmax(160px, 1.4fr) 80px 60px 100px auto;background:color-mix(in srgb,var(--primary) 4%,var(--surface));border-color:var(--primary)">
-            <span style="font-weight:600">UX 2.0</span>
-            <span class="val-pill">ux-2-0</span>
-            <span style="font-family:var(--font-mono);color:var(--muted)">4</span>
-            <span class="pill pill-published"><span class="live-dot"></span>Live</span>
-            <div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a></div>
-          </div>
-          <div class="rowform-row" style="--rowform-cols: minmax(160px, 1.4fr) 80px 60px 100px auto">
-            <span style="font-weight:600">Leading Design</span>
-            <span class="val-pill">leading-design</span>
-            <span style="font-family:var(--font-mono);color:var(--muted)">2</span>
-            <span class="pill pill-draft">Draft</span>
-            <div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a></div>
-          </div>
-          <div class="rowform-row" style="--rowform-cols: minmax(160px, 1.4fr) 80px 60px 100px auto">
-            <span style="font-weight:600">On Coaching</span>
-            <span class="val-pill">on-coaching</span>
-            <span style="font-family:var(--font-mono);color:var(--muted)">1</span>
-            <span class="pill pill-concept">Concept</span>
-            <div class="row-actions"><a href="#" class="btn-sec btn-tiny">Live ↗</a></div>
-          </div>
-        </div>
-
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">UX 2.0 — parts</span>
-              <span class="content-block-sublabel">Drag to reorder · changes save automatically</span>
-            </div>
-            <span class="content-block-count">4 parts</span>
-          </div>
-          <div style="padding:var(--space-16)">
-            <div class="rowform-list" style="--rowform-cols: 18px 28px 1fr auto auto;padding:0">
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">01</div><div>How we got here</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">02</div><div>What's changed</div><span class="pill pill-published">Live</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">03</div><div>The new substrate</div><span class="pill pill-draft">Draft</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="rowform-row"><div class="grip">⋮⋮</div><div class="val-pill">04</div><div>What we owe each other</div><span class="pill pill-concept">Concept</span><button class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2"/></svg></button></div>
-              <div class="rowform-row rowform-add-row" style="grid-template-columns:1fr auto"><select class="field-input"><option>+ Add article…</option></select><button class="btn-sec btn-tiny">Add</button></div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="variant" style="border-bottom:none">
-  <div class="variant-header">
-    <div class="variant-title" style="font-family:var(--font);font-style:normal;font-size:18px;font-weight:600">When you've picked one</div>
-    <p class="variant-pitch">Tell me which variation (or hybrid) you want, plus any specific tweaks. I'll rebuild the Series page accordingly.</p>
-  </div>
-</section>
+</div>
 
 </body>
 </html>

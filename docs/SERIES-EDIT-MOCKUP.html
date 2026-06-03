@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Series — edit mockup</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../site/_design-system/css/tables.css">
+<link rel="stylesheet" href="../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../site/_design-system/css/views.css">
+<link rel="stylesheet" href="../site/cms/_assets/style-cms.css">
+</head>
+<body class="dot-surface">
+
+<div class="layout">
+
+  <main class="main">
+    <div class="view active">
+
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">UX 2.0</h2>
+          <p class="view-subtitle">/series/ux-2-0/ · Edit name, description, and parts. Drag part rows to reorder.</p>
+        </div>
+        <div class="view-header-actions">
+          <a href="SERIES-VARIATIONS.html" class="btn-sec">← Back to Series</a>
+          <a href="#" class="btn-sec">Live ↗</a>
+        </div>
+      </div>
+
+      <div class="content-area">
+        <form class="cms-form">
+
+          <div class="field-group">
+            <label class="field-label">Name</label>
+            <input type="text" class="field-input" value="UX 2.0">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Slug <span class="field-hint-inline">read-only</span></label>
+            <input type="text" class="field-input" value="ux-2-0" readonly>
+            <p class="field-hint">Permanent. Used in the public /series/ux-2-0/ URL.</p>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <textarea class="field-input" rows="2">A four-part series rethinking the design process post-AI.</textarea>
+            <p class="field-hint">Shown on /series/ux-2-0/ as the intro paragraph.</p>
+          </div>
+
+          <div class="content-block">
+            <div class="content-block-header">
+              <div>
+                <span class="content-block-label">Parts</span>
+                <span class="content-block-sublabel">Drag to reorder · saves automatically</span>
+              </div>
+              <span class="content-block-count">4 parts</span>
+            </div>
+
+            <div class="rowform-list" style="--rowform-cols: 18px 36px minmax(0,1fr) 80px auto">
+              <div class="rowform-row" draggable="true">
+                <div class="grip" title="Drag to reorder">⋮⋮</div>
+                <span class="val-pill">01</span>
+                <div>How we got here</div>
+                <span class="pill pill-published">Live</span>
+                <button type="button" class="btn-icon btn-icon-danger" title="Remove">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="rowform-row" draggable="true">
+                <div class="grip" title="Drag to reorder">⋮⋮</div>
+                <span class="val-pill">02</span>
+                <div>What's changed</div>
+                <span class="pill pill-published">Live</span>
+                <button type="button" class="btn-icon btn-icon-danger" title="Remove">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="rowform-row" draggable="true">
+                <div class="grip" title="Drag to reorder">⋮⋮</div>
+                <span class="val-pill">03</span>
+                <div>The new substrate</div>
+                <span class="pill pill-draft">Draft</span>
+                <button type="button" class="btn-icon btn-icon-danger" title="Remove">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="rowform-row" draggable="true">
+                <div class="grip" title="Drag to reorder">⋮⋮</div>
+                <span class="val-pill">04</span>
+                <div>What we owe each other</div>
+                <span class="pill pill-concept">Concept</span>
+                <button type="button" class="btn-icon btn-icon-danger" title="Remove">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="rowform-row rowform-add-row">
+                <span></span>
+                <span></span>
+                <select class="field-input">
+                  <option>+ Add article…</option>
+                </select>
+                <span></span>
+                <button type="button" class="btn-sec btn-tiny">Add</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions form-actions-sticky">
+            <button type="submit" class="btn-sec" data-save-btn>Save</button>
+            <a href="SERIES-VARIATIONS.html" class="btn-sec">Cancel</a>
+            <button type="button" class="btn-sec btn-danger">Delete series</button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

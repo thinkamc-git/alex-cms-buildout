@@ -374,6 +374,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    column percentages (e.g. articles' 10%) often under-allocate; this
    min-width guarantees fit and overrides the inline % suggestion. */
 .cms-table td.cell-actions, .cms-table th:last-child { min-width:170px; white-space:nowrap; }
+/* Categories actions only need Save + trash (~90px) — the 170px
+   global was stealing budget from the % widths (Use looked too big).
+   Reset to auto so the inline 16% works. */
+.cms-table--cat td.cell-actions, .cms-table--cat th:last-child { min-width:auto; }
 .cms-table tr:last-child td { border-bottom:none; }
 /* Phase 21.7 — hover treatment: clickable rows get a 20% black outline
    (matches the .kcard fade-in behaviour in Draft Writing). Draggable

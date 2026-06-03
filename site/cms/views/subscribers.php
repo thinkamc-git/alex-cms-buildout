@@ -187,7 +187,7 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="dash-stat-div"></div>
         <div class="dash-stat"><span class="num"><?= (int)$counts['unsubscribed'] ?></span><span class="lbl">Unsubscribed</span></div>
         <div class="dash-stat-div"></div>
-        <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl" style="text-transform:none;letter-spacing:0">New in last 30 days</span></div>
+        <div class="dash-stat"><span class="num"><?= (int)$counts['recent'] ?></span><span class="lbl">New in last 30 days</span></div>
       </div>
 
       <form class="sub-filters" method="get" action="/cms/subscribers">

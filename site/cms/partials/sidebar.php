@@ -50,7 +50,11 @@ $count = static function (string $id) use ($nav_counts, $count_allowed): string 
     if (!array_key_exists($id, $nav_counts)) return '';
     $n = (int)$nav_counts[$id];
     if ($n === 0) return '';
-    return ' <span class="nav-count">' . htmlspecialchars((string)$n, ENT_QUOTES, 'UTF-8') . '</span>';
+    // Subscribers' count is a notification-style "new since last visit"
+    // count — gets the prominent .is-new variant. All other counts are
+    // plain totals and use the subtle default.
+    $cls = $id === 'subscribers' ? 'nav-count is-new' : 'nav-count';
+    return ' <span class="' . $cls . '">' . htmlspecialchars((string)$n, ENT_QUOTES, 'UTF-8') . '</span>';
 };
 $activeClass = static function (string $id) use ($active_nav_id): string {
     return $id === $active_nav_id ? ' active' : '';

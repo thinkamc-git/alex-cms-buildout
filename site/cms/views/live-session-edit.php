@@ -874,7 +874,7 @@ require __DIR__ . '/../partials/topbar.php';
                 name="action"
                 value="unpublish"
                 class="btn-sec"
-                data-confirm-unpublish="1">Move back to Draft</button>
+                data-confirm-unpublish="1">Move Back To Draft</button>
             <?php endif; ?>
 
             <?php if ($isLive): ?>
@@ -882,8 +882,8 @@ require __DIR__ . '/../partials/topbar.php';
                 type="submit"
                 name="action"
                 value="unpublish"
-                class="btn-sec"
-                data-confirm-unpublish="1">Move to draft</button>
+                class="btn-sec btn-actions-end"
+                data-confirm-unpublish="1">Move Back To Draft</button>
             <?php endif; ?>
           </div>
         </form>

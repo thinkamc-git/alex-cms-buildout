@@ -897,11 +897,18 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   flex-direction: column;
   gap: 2px;
   min-width: 140px;
+  max-height: 168px;  /* ~5.5 items × 28px + 8px padding = scrollable after */
+  overflow-y: auto;
   box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 }
 /* HTML's hidden attribute would normally apply display:none, but the
    display:flex above overrides it. Re-assert hidden as none. */
 .cat-colour-menu[hidden] { display: none; }
+/* Let the dropdown escape the table-card's and cat-block's overflow
+   clipping when a menu is open. :has() makes the parent containers
+   switch to overflow:visible only while a menu is active. */
+.table-card:has(.cat-colour-menu:not([hidden])),
+.cat-block:has(.cat-colour-menu:not([hidden])) { overflow: visible; }
 .cat-colour-opt {
   appearance: none;
   border: none;

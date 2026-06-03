@@ -143,6 +143,11 @@ cp site/cms/_assets/dragdrop.js      "$STAGE/cms/_assets/"
 cp site/cms/_assets/scroll-actions.js "$STAGE/cms/_assets/"
 cp site/cms/_assets/publish-choreography.js "$STAGE/cms/_assets/"
 cp site/cms/_assets/preview-tab-guard.js "$STAGE/cms/_assets/"
+# Phase 21.6: shared CMS JS modules extracted from per-view inline scripts.
+cp site/cms/_assets/dirty-flip.js       "$STAGE/cms/_assets/"
+cp site/cms/_assets/body-mode-toggle.js "$STAGE/cms/_assets/"
+cp site/cms/_assets/confirm.js          "$STAGE/cms/_assets/"
+cp site/cms/_assets/row-click.js        "$STAGE/cms/_assets/"
 
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point
@@ -176,6 +181,8 @@ cp site/lib/blocks_data.php        "$STAGE/lib/"
 # _pages/_layout/_page-shell.php on staging via env-gated cascade.
 cp site/lib/pages.php              "$STAGE/lib/"
 cp site/lib/nav.php                "$STAGE/lib/"
+# Phase 21.6: pills() helper used by post-template for status pills.
+cp site/lib/pills.php              "$STAGE/lib/"
 # Vendored CodeMirror 5 — used by the Pages editor for PHP-mode editing
 # of mock versions. ~280KB, no CDN dependency at runtime.
 mkdir -p "$STAGE/cms/_assets/codemirror"

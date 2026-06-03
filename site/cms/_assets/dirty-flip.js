@@ -23,13 +23,21 @@
  *
  * Per-row pattern compatibility (navigation, redirects):
  *   When the button uses form="row-N" binding (cross-form), the module
- *   reads the form id from the attribute. Programmatic .submit() does NOT
- *   carry the submit button's name/value, so any callers that rely on a
- *   server-side `action` discriminator must inject it as a hidden input
- *   before invoking submit. The redirects view did this manually; we
- *   preserve that responsibility by checking for a hidden input named
- *   "action" and synthesizing one with value="update" if missing AND the
- *   button itself has a name="action" + value="<x>" pair.
+ *   reads the form id from the attribute. Programmatic .requestSubmit()
+ *   does NOT carry the submit button's name/value, so any callers that
+ *   rely on a server-side `action` discriminator must inject it as a
+ *   hidden input before invoking submit. The redirects view did this
+ *   manually; we preserve that responsibility by checking for a hidden
+ *   input named "action" and synthesizing one with value="update" if
+ *   missing AND the button itself has a name="action" + value="<x>" pair.
+ *
+ * Submit dispatch:
+ *   We invoke form.requestSubmit() rather than form.submit() so the
+ *   form's `submit` event fires. preview-tab-guard.js listens for that
+ *   event to set submittingNow=true and suppress its beforeunload
+ *   "changes may not be saved" warning — the native form.submit() does
+ *   not fire the event, so without requestSubmit the user gets a false
+ *   warning every time they click Save.
  *
  * The module self-initialises on DOMContentLoaded and is safe to load on
  * any page — it's a no-op when no [data-save-btn] elements exist.
@@ -108,7 +116,19 @@
         }
       }
 
-      setTimeout(function () { form.submit(); }, 300);
+      setTimeout(function () {
+        // requestSubmit() fires the form's `submit` event (form.submit()
+        // does not, per spec). preview-tab-guard.js listens for that event
+        // to clear its beforeunload guard — without this, every Save triggers
+        // a spurious "changes may not be saved" warning.
+        if (typeof form.requestSubmit === 'function') {
+          form.requestSubmit();
+        } else {
+          // Fallback for very old browsers — emit the event manually first.
+          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          form.submit();
+        }
+      }, 300);
     });
   }
 

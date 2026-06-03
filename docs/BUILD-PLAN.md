@@ -117,7 +117,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 20.3** — HTML body variants (article-html-body, experiment-html-body) + RTF/HTML toggle · *Manual* · 4–5h · **Staging-only**
 - [ ] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 - [ ] **Phase 21.5** — CMS copy audit (scrub "Phase X" refs, tighten labels) · *Semi-auto* · 2h · **Staging-only**
-- [ ] **Phase 21.7** — Custom Index builder polish (UI + UX rework) · *Manual* · 4–6h · **Staging-only**
+- [ ] **Phase 21.7** — Editorial Index section-stack rework (schema + builder + render) · *Manual* · ~8–12h (multi-session) · **Staging-only**
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
@@ -1653,50 +1653,63 @@ CREATE TABLE settings (
 
 ---
 
-## 24.7. Phase 21.7 — Custom Index builder polish (staging-only)
+## 24.7. Phase 21.7 — Editorial Index section-stack rework (staging-only)
 
 **Session brief**
 
-- **Autonomy:** Manual
-- **Ships:** Staging-only. The four built-in indexes (writing / journal / live-sessions / experiments) keep working; the custom Editorial / Listing builder gets a polish pass.
+- **Autonomy:** Manual *(design-heavy builder + render; do the schema/data stages semi-autonomously, pause for UI sign-off).*
+- **Ships:** Staging-only. The four built-in **Basic Listing** indexes (writing / journal / live-sessions / experiments) keep working unchanged. The **Editorial Page** layout is reworked from a fixed hero + featured + single-feed form into an ordered, typed **section stack**.
+
+**Why this phase changed.** The original 21.7 was scoped as polish-only ("no schema or render changes"). That was wrong for the actual intent: Editorial Pages are meant to be custom editorial layouts composed of stackable sections — the "+ Add Section" feature deferred since Phase 12 (`CMS-STRUCTURE.md` §16.1). This rework builds that properly. It is a real schema + data + builder + render change, so it is staged across the build order below.
+
+**The model (full spec: `CMS-STRUCTURE.md` §16).** An Editorial Page = optional title/subtitle + an ordered stack of sections. Each section has a **type**:
+- **Hero** — one hand-picked item, banner treatment.
+- **Curated** — hand-picked, drag-ordered items (the former "Featured" strip). Display: grid/carousel + optional see-more.
+- **Feed** — filter-driven, self-updating. Three layers: (1) content query — types + categories + sort; (2) display — grid (rows) / carousel (N posts) + optional author-targeted see-more card; (3) visitor filter — optional public pill row, by type or category, with a hand-pickable subset and the query pre-selected.
 
 **Decisions to capture before starting**
-- Scope: visual + UX rework of `/cms/indexes/edit`. The data model (the `indexes` table, save_index, build_index_pills) is correct — no schema or render-pipeline changes.
-- Builder layout: decide whether to keep the single-column form or move to a two-column "form + live preview" layout matching the post-edit Preview tab pattern (Phase 20.2).
-- Hero + Featured picker: current implementation is functional but rough; pick between (a) keep current pickers + tighten labels, (b) port to the same card-picker affordance the design mockup uses, (c) defer that piece further.
-- Feed-config UI: currently four exposed knobs (types / sort / rows / filter mode). Decide whether to collapse them behind a "Configure feed" disclosure or keep flat.
+- Confirmed: Basic Listing stays a single flat feed, **no sections**, untouched. Only Editorial gains the stack.
+- Confirmed: Hero and Curated ("Featured") are section *types* in the stack, not page-level fields. Both may repeat.
+- Confirmed: section see-more is optional; target is author-specified (index slug or absolute URL); carousel author sets the post count.
+- Confirmed: visitor filter is a separate layer from the content query (show/hide, by type vs category, hand-picked subset, pre-selected).
+- Builder UX: section list is drag-reorderable cards with an "+ Add Section → choose type" affordance; each section expands to its type-specific config. Match the post-edit form's visual rhythm.
+- Migration of existing Editorial pages (digital-garden, any custom): map `hero_content_id` → a hero section, `featured_ids` → a curated section, the flat feed → a feed section. Confirm whether to migrate in SQL or via a one-shot script.
 
-**Read at start (only):** This phase section. `docs/CMS-STRUCTURE.md` §16 (Indexes spec). `site/cms/views/index-edit.php`, `index-new.php`, `indexes.php`. `site/lib/indexes.php`. The /cms/post-template Preview tab as a pattern reference for live preview.
+**Read at start (only):** This phase section. `docs/CMS-STRUCTURE.md` §16 (full section-stack spec). `site/cms/views/index-edit.php`, `index-new.php`, `indexes.php`. `site/lib/indexes.php`. `site/templates/index-editorial.php`, `index-listing.php`, `partials/index-card.php`. `site/_design-system/index.html` §"Content Cards" + §04/§06 (card + filter markup — mirror, don't approximate). `docs/design-mockups/cms-ui.html` (Indexes views).
+
+**Build order (stages — commit per stage):**
+1. **Schema** — `db/migrations/00XX_index_sections.sql`: create `index_sections` per §16.4 + a migration of existing Editorial pages into sections. Basic Listing rows untouched.
+2. **Data** — `lib/indexes.php`: section CRUD (`list_index_sections`, `save_index_section`, `delete_index_section`, reorder), per-section feed query, per-section pill builder. Update `series_auto_index` to emit a section stack (§16.5). Keep the Basic Listing path on the existing flat-column code.
+3. **Builder** — `cms/views/index-edit.php`: Editorial branch becomes the section-stack builder (add / type / configure / drag-reorder / delete). Basic Listing branch left as-is. New section-config JS.
+4. **Render** — `templates/index-editorial.php` iterates sections; new partials `partials/section-hero.php`, `section-curated.php`, `section-feed.php` (each handling grid/carousel + see-more + visitor pills). `index-listing.php` unchanged.
+5. **Mockup + spec sync** — update `docs/design-mockups/cms-ui.html` Editorial index views to the section-stack builder (per CLAUDE.md's linked-files rule). Reconcile `CMS-STRUCTURE.md` §16 with anything the build revealed.
 
 **Touch:**
-- `site/cms/views/index-edit.php` — full UI rework
-- `site/cms/views/index-new.php` — smaller polish pass (layout choice, slug input)
-- `site/cms/views/indexes.php` — list view polish (probably minor)
-- `site/cms/_assets/style-cms.css` — new selectors only; reuse existing tokens
-- Possibly `site/cms/views/index-preview.php` (new) if a live preview tab gets shipped
-- `docs/CMS-STRUCTURE.md` §16 — capture any spec deltas the rework reveals
+- `site/db/migrations/00XX_index_sections.sql` (new)
+- `site/lib/indexes.php` (section CRUD + per-section query/pills + series synthesizer)
+- `site/cms/views/index-edit.php` (Editorial branch rework), `index-new.php` (minor), `indexes.php` (minor)
+- `site/templates/index-editorial.php` + new `partials/section-*.php`
+- `site/cms/_assets/style-cms.css` + `_templates/style-articles.css` (new `.section-*` selectors; reuse tokens)
+- `docs/design-mockups/cms-ui.html` (Editorial index builder views)
+- `docs/CMS-STRUCTURE.md` §16 (spec deltas)
 
 **Don't touch:**
-- `site/lib/indexes.php` (data layer) — the Phase 20.3 fixes are right
-- `site/templates/index-editorial.php`, `index-listing.php` — public render is fine
-- Series indexes — those auto-generate from /cms/series and don't surface in this builder
+- Basic Listing layout/render — `templates/index-listing.php` and the flat `feed_*`/`filter_mode` columns stay authoritative for listings.
+- The four built-in indexes' behaviour.
+- `BLOCKS.md` — that contract governs article-content blocks, not index sections; no collision.
+- Public nav / prod surface (frozen until Phase 29).
 
-**On exit:** Phase 21.7 checked in §3. The custom index builder reads as a deliberate authoring surface — not the v1 scaffold it is now. Built-in indexes still work unchanged. Series indexes still auto-generate.
+**On exit:** Phase 21.7 checked in §3. Editorial Pages are built from an ordered, typed section stack with Hero / Curated / Feed sections, per-section display + see-more + visitor filter. Basic Listing indexes render identically to before. Series indexes still auto-generate (now as a synthesized section stack).
 
-**Goal:** Bring the custom index builder up to the visual + interaction polish of the rest of the CMS (post-edit, page-edit, navigation editor). Today's builder works mechanically but the form layout, picker affordances, and feedback messages are first-pass primitives — the Phase 12 brief explicitly named this as deferred polish.
-
-**Scope:**
-- Group fields semantically: Layout / Title block / Hero (editorial only) / Featured (editorial only) / Feed / Filter
-- Match the post-edit form's visual rhythm (field-label scale, field-input padding, hint styling)
-- Restore hover-reveal action affordances on list views where missing
-- Inline validation messages instead of the top-of-form error block where it makes sense
-- Optional: live preview tab that iframes `/$slug/` and re-renders on form change
+**Goal:** Turn Editorial Pages into genuine custom editorial layouts — stackable, typed sections with detailed per-section content selection, display, and visitor-filter control — replacing the v1 fixed hero + featured + single-feed scaffold.
 
 **Verification:**
-1. Every field in `/cms/indexes/edit` reads as a deliberate control with consistent label + hint styling.
-2. Creating, editing, and rendering a custom index works end-to-end on staging.
-3. The four built-in indexes (writing / journal / live-sessions / experiments) still render identically on the public site.
-4. Series indexes still auto-render via `/series/<slug>/` from the `series` table.
+1. An Editorial Page can be built from multiple sections of mixed types, drag-reordered, each with its own config; renders correctly on staging.
+2. A Feed section's content query, display (grid rows / carousel count + see-more), and visitor-filter layer each behave independently and as configured.
+3. A Curated section shows exactly the hand-picked, hand-ordered items; a Hero section shows its single pick as a banner.
+4. The four built-in Basic Listing indexes render identically to pre-rework.
+5. Series indexes still auto-render via `/series/<slug>/` from the `series` table.
+6. Existing Editorial pages survived the migration (hero/featured/feed mapped to sections) with no data loss.
 
 ---
 
@@ -2448,10 +2461,10 @@ polish, scale, or developer-quality concerns.
   post count (<50 of any one type), pagination is real overhead with no
   user-visible benefit. *Cost:* ~1h when needed.
 
-- **"+ Add Section" in editorial index builder** (per `CMS-STRUCTURE.md`
-  §16 — stackable curated sections within an Editorial Page). *Why
-  deferred:* the v1 Editorial layout supports hero + featured + one feed,
-  which covers every page Alex has sketched. *Cost:* ~3h.
+- ~~**"+ Add Section" in editorial index builder**~~ — **promoted to Phase 21.7**
+  (Editorial Index section-stack rework). The Editorial layout is being rebuilt
+  around an ordered, typed section stack (Hero / Curated / Feed) per
+  `CMS-STRUCTURE.md` §16. No longer a backlog item.
 
 - **Manual sort for index feeds.** The `feed_sort` enum reserves `'manual'`
   but the builder doesn't surface a manual-ordering UI; `list_index_feed()`

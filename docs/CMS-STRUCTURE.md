@@ -206,9 +206,9 @@ Each form has a back button to its content tab, a **Create Draft** primary actio
 - `view-edit-experiment-draft` — existing experiment editor (legacy; will be reworked when full editor specs land).
 
 ### Index Builder views
-Two layout types:
-- **Editorial Page** — page title block + hero feature + featured articles + content feed + custom sections.
-- **Basic Listing** — page title block + content feed only.
+Two layout types (full model in §16):
+- **Editorial Page** — optional title/subtitle + an ordered stack of sections (Hero / Curated / Feed). Sections are added, typed, configured, and drag-reordered.
+- **Basic Listing** — page title block + a single content feed. No sections.
 All index configuration happens inside a white `.page-canvas` card that visually constructs the page.
 
 ---
@@ -595,30 +595,112 @@ Redirects: stored in `redirects` table, served by the router. Default status cod
 
 ## 16. Editorial Index System
 
-### Two layout types
+Indexes are author-built pages that present curated views of content. There are two layout types, and they are deliberately different in kind:
 
-- **Editorial Page** — page title + hero feature + featured articles + content feed + custom sections. Used by `/digital-garden`, `/series/[slug]`, optionally `/thoughts`.
-- **Basic Listing** — page title + content feed only. Used by `/writing`, `/journal`, `/live-sessions`, `/experiments`, `/thoughts` by default.
+- **Basic Listing** — a single filtered feed. Optional title + description, then a content feed (type filter + sort + rows). **No sections.** Used by `/writing`, `/journal`, `/live-sessions`, `/experiments`. This layout is intentionally simple and is *not* affected by the section model below.
+- **Editorial Page** — an **ordered stack of sections**, the building block for custom editorial pages (`/digital-garden`, `/series/[slug]`, `/thoughts`, etc.). The page wraps the stack with an optional title/subtitle. Everything else — hero, curated strips, filtered feeds — is a section *in* the stack.
 
-### Builder structure
+### 16.1 Editorial Page = title/subtitle + a stack of sections
 
-All index configuration happens inside a white `.page-canvas` card. Common elements:
+```
+EDITORIAL PAGE
+ ├─ title / subtitle        (optional, page-level; if absent the first section sits at the top)
+ └─ sections[]              (ordered, drag-to-reorder; "+ Add Section" → choose a type; types may repeat)
+      ├─ ◆ HERO       → one hand-picked item, full-width banner treatment
+      ├─ ◆ CURATED    → hand-picked + drag-ordered items (the former "Featured" strip)
+      └─ ◆ FEED       → filter-driven, self-updating set of items
+```
 
-- **Page Title block** (hideable on Editorial Page; required on Basic Listing) — title + optional subheader/description.
-- **Hero Feature** (Editorial only) — manually select one published item.
-- **Featured Articles** (Editorial only) — drag-ordered curated picks.
-- **Content Feed** — type chips (OR), sort chips (Newest / Oldest / Manual), rows-shown selector (Editorial: 1/2/3/4/All).
-- **+ Add Section** (Editorial) — stackable sections.
+There is no separate page-level "hero feature" or "featured strip" — both are simply section **types** you add and position in the stack. A page can have several heroes, several curated strips, several feeds, in any order.
 
-### New Index creation
+### 16.2 The three section types
+
+Every section carries a `section_type` and a `title` (optional heading). Beyond that:
+
+**◆ Hero** — one hand-picked published item rendered as a large banner. No display/filter config; the single pick *is* the section. Used for the lead item at the top of a page.
+
+**◆ Curated** — a hand-picked, drag-ordered set of published items (a mix of types is allowed). The author controls the exact lineup; it does not self-update. Has **Display** config (below). No content query, no visitor filter.
+
+**◆ Feed** — a filter-driven, self-updating set. Has all three layers below.
+
+### 16.3 The three layers of a section
+
+A section is built from up to three independent layers. Hero uses none of them (the pick is the section); Curated uses only Display; Feed uses all three.
+
+**1 · Content query** *(Feed only — authoring, never shown to visitors)*
+Defines the pool the section pulls from:
+- **Types** — one or more of Article / Journal / Live Session / Experiment (OR semantics; empty = all).
+- **Categories** — optional narrowing by category value_slug (OR; empty = any).
+- **Sort** — Newest or Oldest.
+
+**2 · Display** *(Curated + Feed)*
+How the pulled items are laid out:
+- **Format** — **Grid** (rows-shown: 1 / 2 / 3 / 4 / All) or **Carousel** (single line; author specifies the number of posts to show).
+- **See more** — an optional trailing card. If a target is set, the card appears and links to it; if no target, there is no see-more card. The target is **author-specified** — an existing index slug or an absolute URL — and the card label is editable.
+
+**3 · Visitor filter** *(Feed only — optional, public-facing pills)*
+Separate from the content query. The query decides *what the section contains*; this layer decides *whether and how the visitor can re-filter it*:
+- **Show filter row?** — off or on. Off = the query runs silently and no pills render.
+- **Pills represent** — **types** or **categories**.
+- **Which pills show** — auto-derive from the section's content, or hand-pick an explicit subset (lets the author hide options even when the row is visible).
+- **Pre-selection** — the section's own content query is reflected as the pre-selected pill state.
+
+This is why "filter by two types but hide the type filter" = layer 1 set, layer 3 off; "show it, pre-selected" = layer 1 set, layer 3 on with those pills active.
+
+### 16.4 `index_sections` table
+
+Editorial Page sections are stored one-to-many. (Basic Listing does **not** use this table — it keeps the flat `feed_*` / `filter_mode` columns on the `indexes` row.)
+
+```sql
+CREATE TABLE index_sections (
+  id              INT AUTO_INCREMENT PRIMARY KEY,
+  index_id        INT NOT NULL,                          -- FK indexes.id (Editorial pages only)
+  position        INT NOT NULL DEFAULT 0,                -- order within the page
+  section_type    ENUM('hero','curated','feed') NOT NULL,
+  title           VARCHAR(500),                          -- optional section heading
+
+  -- Display (curated + feed; ignored for hero)
+  display_format  ENUM('grid','carousel') NOT NULL DEFAULT 'grid',
+  item_limit      INT NULL,                              -- carousel: # posts to show
+  grid_rows       VARCHAR(10) NULL,                      -- grid: '1'|'2'|'3'|'4'|'all'
+  see_more_label  VARCHAR(120) NULL,                     -- text on the see-more card
+  see_more_target VARCHAR(255) NULL,                     -- index slug or absolute URL; NULL = no card
+
+  -- Content query (feed only)
+  feed_types      JSON NULL,                             -- ['article','journal',…]; NULL/empty = all
+  feed_categories JSON NULL,                             -- category value_slugs (OR); NULL = any
+  feed_sort       ENUM('newest','oldest') NOT NULL DEFAULT 'newest',
+
+  -- Visitor filter (feed only — layer 3)
+  filter_show     BOOLEAN NOT NULL DEFAULT FALSE,        -- render the interactive pill row?
+  filter_by       ENUM('types','categories') NULL,       -- what the pills represent
+  filter_options  JSON NULL,                             -- explicit pill subset to show; NULL = auto-derive
+
+  -- Picks (hero = single id; curated = ordered array)
+  item_ids        JSON NULL,                             -- ordered content.id array
+
+  created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX ix_index_sections_index (index_id, position),
+  FOREIGN KEY (index_id) REFERENCES indexes (id) ON DELETE CASCADE
+);
+```
+
+The pre-section `indexes` columns (`hero_content_id`, `featured_ids`, `feed_types`, `feed_sort`, `feed_rows_shown`, `filter_mode`) remain in place and remain authoritative **for Basic Listing**. For Editorial pages they are superseded by `index_sections` and are migrated into sections during the build (hero_content_id → a hero section, featured_ids → a curated section, the flat feed → a feed section).
+
+### 16.5 Series auto-index
+
+Series indexes are synthesized from the `series` table (no `indexes` row, no `index_sections` rows). The synthesizer emits an Editorial Page section stack on the fly: a hero section for the lead part and a feed/curated section for the remaining parts in `series_order`. Series pages have no visitor filter.
+
+### 16.6 New Index creation
 
 - Entry: **+ New Index** in the sidebar Indexes section.
-- Required: slug (permanent) + layout choice.
-- Creating a new Series automatically creates a corresponding `/series/[slug]` Editorial Page index.
+- Required: slug (permanent) + layout choice (Basic Listing vs Editorial Page).
+- Creating a new Series automatically creates a corresponding `/series/[slug]` Editorial Page (synthesized — see §16.5).
 
-### Filter logic (global)
+### 16.7 Filter logic (global)
 
-OR semantics. All is the default. Selecting a specific filter deselects All. Multiple specific filters = OR. Clicking All resets. The **Jump to** group on Published is scoped via `data-jump-group` so its active state is independent of the Status group.
+OR semantics throughout. "All" is the default. Selecting a specific filter deselects All; multiple specific filters = OR; clicking All resets. This governs both the Basic Listing feed filter and the per-section visitor filter (layer 3 above).
 
 ---
 

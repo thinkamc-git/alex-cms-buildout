@@ -769,7 +769,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 /* The shared .table-card wrapper around the partial gives the cat
    variant a card border; .cat-block already provides the outer surface
    styling, so suppress the inner card chrome for this variant. */
-.table-card--cat { border:none; padding:0; background:transparent; box-shadow:none; }
+/* Phase 21.7 — categories table regains the canonical card border so
+   it matches every other table chrome (was stripped for the cat-block
+   wrap, but the cat-block's own surface ends up needing the border too). */
+.table-card--cat { background:var(--surface); border:var(--rule-faint); border-radius:var(--r-card); padding:0; box-shadow:none; overflow:hidden; }
 
 /* Subscribers variant of the shared .cms-table partial (#8). Brought in
    line with .cms-table-default chrome (canvas-raised thead, ink-12 row

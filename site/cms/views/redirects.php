@@ -165,13 +165,13 @@ require __DIR__ . '/../partials/topbar.php';
                     <option value="301"<?= $code === 301 ? ' selected' : '' ?>>301</option>
                     <option value="302"<?= $code === 302 ? ' selected' : '' ?>>302</option>
                   </select>
-                  <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
+                  <button type="submit" class="btn-sec btn-tiny" data-save-btn>Save</button>
                 </form>
-                <form method="post" action="/cms/redirects" style="display:inline" onsubmit="return confirm('Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;? Anyone hitting that URL will get a 404 unless you re-add it.');">
+                <form method="post" action="/cms/redirects" style="display:inline" data-confirm="Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;? Anyone hitting that URL will get a 404 unless you re-add it.">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="id" value="<?= (int)$r['id'] ?>">
                   <input type="hidden" name="action" value="delete">
-                  <button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>
+                  <button type="submit" class="btn-sec btn-tiny btn-danger">Delete</button>
                 </form>
               </div>
             <?php endforeach; ?>
@@ -187,7 +187,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <option value="301" selected>301</option>
                   <option value="302">302</option>
                 </select>
-                <button type="submit" class="btn-ghost btn-tiny">Add</button>
+                <button type="submit" class="btn-sec btn-tiny">Add</button>
                 <span></span><!-- delete-column placeholder so grid stays aligned -->
               </form>
             </div>

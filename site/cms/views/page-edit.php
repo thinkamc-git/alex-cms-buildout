@@ -236,10 +236,7 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
 <style>
   /* Editor-specific: tabs row, version selector row, CodeMirror sizing,
      metadata form. All other elements use existing CMS conventions. */
-  .pe-tabs { display:flex; gap:0; border-bottom:var(--rule-faint); margin-bottom:var(--space-16); }
-  .pe-tab { padding:10px 18px; font-family:var(--font-cond); font-size:var(--text-micro); letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; font-weight:600; }
-  .pe-tab:hover { color:var(--ink); }
-  .pe-tab.is-active { color:var(--ink); border-bottom-color:var(--primary); }
+  /* .pe-tabs / .pe-tab definitions moved to style-cms.css (Batch 2 #14). */
   .pe-version-row { display:flex; gap:var(--space-12); align-items:center; padding:var(--space-12) var(--space-16); background:var(--bg-soft); border:1px solid var(--border); border-radius:4px; margin-bottom:var(--space-16); flex-wrap:wrap; }
   .pe-version-label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); }
   .pe-version-row select { padding:6px 10px; border:1px solid var(--border); border-radius:4px; font-size:13px; background:var(--surface); color:var(--ink); min-width:280px; font-family:var(--font-cond); }
@@ -248,7 +245,8 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
   .pe-override-note strong { color:var(--ink); font-weight:600; }
   .pe-unsaved { color:var(--c-terracotta); font-size:var(--text-micro); display:none; font-family:var(--font-mono); }
   .pe-unsaved.is-visible { display:inline; }
-  .pe-readonly-notice { padding:10px 14px; background:color-mix(in srgb, var(--c-amber) 10%, transparent); border:1px solid color-mix(in srgb, var(--c-amber) 30%, transparent); border-radius:4px; font-size:var(--text-micro); margin-bottom:var(--space-12); color:var(--ink); }
+  /* .pe-readonly-notice rule moved to style-cms.css as .readonly-notice
+     (Batch 2 #28); kept as alias in the central sheet. */
   .CodeMirror { border:1px solid var(--border); border-radius:4px; font-size:13px; height:560px; }
   .pe-meta-form { display:grid; grid-template-columns: 200px 1fr; gap:var(--space-12) var(--space-16); align-items:start; max-width:880px; margin-bottom:var(--space-24); }
   .pe-meta-form label { font-size:var(--text-micro); color:var(--muted); padding-top:8px; font-family:var(--font-cond); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
@@ -263,11 +261,11 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
   .pe-unfurl-title { font-weight:600; color:var(--ink); font-size:14px; margin-bottom:4px; }
   .pe-unfurl-desc  { color:var(--muted); font-size:12px; line-height:1.4; }
   .pe-inline-form { display:inline; }
-  /* Uniform button dimensions inside the page-edit chrome — btn-ghost and
+  /* Uniform button dimensions inside the page-edit chrome — btn-sec and
      btn-pri only differ in colour, not size, so dirty-flips don't jump. */
-  .pe-version-actions .btn-ghost, .pe-version-actions .btn-pri,
-  .pe-version-actions a.btn-ghost, a.pe-btn,
-  .pe-meta-form .btn-ghost, .pe-meta-form .btn-pri {
+  .pe-version-actions .btn-sec, .pe-version-actions .btn-pri,
+  .pe-version-actions a.btn-sec, .pe-version-actions a.btn-pri, a.pe-btn,
+  .pe-meta-form .btn-sec, .pe-meta-form .btn-pri {
     padding: 7px 16px;
     font-family: var(--font-cond);
     font-size: var(--text-label);
@@ -292,6 +290,7 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'pages';
+  $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
@@ -302,7 +301,7 @@ require __DIR__ . '/../partials/topbar.php';
       $subtitle = $is_partial
         ? 'Layout partial. Publish a mock to override the file on staging — the file stays canonical until you do.'
         : 'Marketing page. Edit as mocks for preview — the CMS never writes to disk, so the file stays canonical.';
-      $actions  = '<a href="/cms/pages" class="btn-ghost">← Back to Pages</a>';
+      $actions  = '<a href="/cms/pages" class="btn-sec">← Back to Pages</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -347,26 +346,26 @@ require __DIR__ . '/../partials/topbar.php';
 
             <div class="pe-version-actions">
               <?php if ($is_live): ?>
-                <a class="btn-ghost" href="<?= $e($preview_live_url) ?>" target="_blank" rel="noopener">Preview Live ↗</a>
+                <a class="btn-sec" href="<?= $e($preview_live_url) ?>" target="_blank" rel="noopener">Preview Live ↗</a>
                 <?php if ($published_mock !== null && $is_publishable): ?>
-                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Revert to file? This un-publishes the active mock and falls back to the on-disk file.');">
+                  <form class="pe-inline-form" method="post" action="/cms/pages/edit" data-confirm="Revert to file? This un-publishes the active mock and falls back to the on-disk file.">
                     <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                     <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                     <input type="hidden" name="action" value="revert_to_file">
-                    <button type="submit" class="btn-ghost btn-danger">Revert to file</button>
+                    <button type="submit" class="btn-sec btn-danger">Revert to file</button>
                   </form>
                 <?php endif; ?>
                 <button type="button" class="btn-pri" onclick="peCreateMock()">+ New Mock</button>
               <?php else: ?>
-                <button type="button" class="btn-ghost" onclick="peRenameMock()">Rename</button>
-                <button type="button" class="btn-ghost" onclick="peDuplicateMock()">Duplicate</button>
-                <a class="btn-ghost" href="<?= $e($preview_url) ?>" target="_blank" rel="noopener">Preview ↗</a>
-                <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This can&#039;t be undone.');">
+                <button type="button" class="btn-sec" onclick="peRenameMock()">Rename</button>
+                <button type="button" class="btn-sec" onclick="peDuplicateMock()">Duplicate</button>
+                <a class="btn-sec" href="<?= $e($preview_url) ?>" target="_blank" rel="noopener">Preview ↗</a>
+                <form class="pe-inline-form" method="post" action="/cms/pages/edit" data-confirm="Delete mock &quot;<?= $e($current_mock['name']) ?>&quot;? This can&#039;t be undone.">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                   <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
                   <input type="hidden" name="action" value="delete_mock">
-                  <button type="submit" class="btn-ghost btn-danger">Delete version</button>
+                  <button type="submit" class="btn-sec btn-danger">Delete version</button>
                 </form>
                 <?php if ($is_publishable): ?>
                   <?php if ((int)$current_mock['is_published'] === 1): ?>
@@ -375,10 +374,10 @@ require __DIR__ . '/../partials/topbar.php';
                       <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                       <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
                       <input type="hidden" name="action" value="unpublish_mock">
-                      <button type="submit" class="btn-ghost">Un-publish</button>
+                      <button type="submit" class="btn-sec">Un-publish</button>
                     </form>
                   <?php else: ?>
-                    <form class="pe-inline-form" method="post" action="/cms/pages/edit" onsubmit="return confirm('Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This overrides <?= $e($file_row['filename']) ?> on staging until you un-publish or revert.');">
+                    <form class="pe-inline-form" method="post" action="/cms/pages/edit" data-confirm="Publish &quot;<?= $e($current_mock['name']) ?>&quot;? This overrides <?= $e($file_row['filename']) ?> on staging until you un-publish or revert.">
                       <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                       <input type="hidden" name="slug" value="<?= $e($slug) ?>">
                       <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
@@ -387,13 +386,13 @@ require __DIR__ . '/../partials/topbar.php';
                     </form>
                   <?php endif; ?>
                 <?php endif; ?>
-                <button type="submit" form="pe-mock-form" class="btn-ghost" data-save-btn data-body-save>Save</button>
+                <button type="submit" form="pe-mock-form" class="btn-sec" data-save-btn data-body-save>Save</button>
               <?php endif; ?>
             </div>
           </div>
 
           <?php if ($is_live): ?>
-            <div class="pe-readonly-notice">This is the on-disk file. The CMS never writes here — click [+ New Mock] to start editing.</div>
+            <div class="readonly-notice">This is the on-disk file. The CMS never writes here — click [+ New Mock] to start editing.</div>
             <textarea id="pe-editor-live" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
           <?php else: ?>
             <form id="pe-mock-form" method="post" action="/cms/pages/edit" data-preview-source-form>
@@ -469,7 +468,7 @@ require __DIR__ . '/../partials/topbar.php';
               </select>
 
               <div></div>
-              <div><button type="submit" class="btn-ghost" data-save-btn>Save metadata</button></div>
+              <div><button type="submit" class="btn-sec" data-save-btn>Save metadata</button></div>
             </div>
 
             <div class="content-block-header"><span class="content-block-label">Unfurl preview</span></div>
@@ -551,7 +550,7 @@ require __DIR__ . '/../partials/topbar.php';
         if (flag) flag.classList.toggle('is-visible', dirty);
         // Mirror to the underlying textarea so listeners like
         // preview-tab-guard (which watches input/change) detect this edit.
-        // The Body Save button's btn-ghost → btn-pri flip is handled by
+        // The Body Save button's btn-sec → btn-pri flip is handled by
         // the shared cms/_assets/dirty-flip.js module, which binds to the
         // dispatched 'input' event below.
         ta.value = cm.getValue();

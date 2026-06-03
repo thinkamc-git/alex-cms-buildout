@@ -39,13 +39,12 @@ header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
 /**
- * Render a stage pill (status). Uses the design system's .pill / .stage-{x}
- * classes from status.css.
+ * Stage pill renderer (#40). Thin wrapper around lib/pills.php cms_pill_stage()
+ * so the closure-style call sites below need no rewrite.
  */
-$stagePill = static function (string $status) use ($e): string {
-    $status = strtolower($status);
-    $label  = ucfirst($status);
-    return '<span class="pill pill-' . $e($status) . '">' . $e($label) . '</span>';
+require_once __DIR__ . '/../../lib/pills.php';
+$stagePill = static function (string $status): string {
+    return cms_pill_stage($status);
 };
 ?><!doctype html>
 <html lang="en">
@@ -183,7 +182,7 @@ require __DIR__ . '/../partials/topbar.php';
             // its published siblings), so rendering it on drafts misleads.
             $seriesName = (string)($a['series_name'] ?? '');
             $seriesHtml = $seriesName !== ''
-                ? '<a href="/cms/series" class="val-pill" style="text-decoration:none">' . $e($seriesName) . '</a>'
+                ? '<a href="/cms/series" class="val-pill">' . $e($seriesName) . '</a>'
                 : '<span class="muted">—</span>';
 
             // Live ↗ only on rows that are actually live — scheduled rows
@@ -192,14 +191,14 @@ require __DIR__ . '/../partials/topbar.php';
             $isLiveRow = (string)($a['status'] ?? '') === 'published'
                       && (string)($a['published_status'] ?? '') !== 'scheduled';
             $liveBtn = $isLiveRow && $slug !== ''
-                ? '<a href="/writing/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
+                ? '<a href="/writing/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             // Edit + Delete reveal on row hover. Live ↗ stays visible.
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
                 . '<span class="row-actions-hover">'
-                .   '<a href="/cms/articles/edit?id=' . $id . '&from=articles" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<a href="/cms/articles/edit?id=' . $id . '&from=articles" class="btn-sec btn-tiny">Edit</a>'
                 .   '<form method="post" action="/cms/articles/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this article? This cannot be undone.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
                 .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
@@ -283,27 +282,9 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<script>
-  // Whole-row navigation: click anywhere on a .row-clickable row to open
-  // the edit view. Clicks inside .cell-actions (Edit/Delete buttons) are
-  // ignored so those keep their own behavior.
-  for (const tr of document.querySelectorAll('tr.row-clickable')) {
-    tr.addEventListener('click', (e) => {
-      if (e.target.closest('.cell-actions, a, button, form, input, label, select')) return;
-      const href = tr.getAttribute('data-row-href');
-      if (href) location.href = href;
-    });
-  }
-
-  // Wire delete confirmations. Each delete form has data-confirm="…"; if
-  // the user cancels, the submit is suppressed.
-  for (const form of document.querySelectorAll('form.inline-delete')) {
-    form.addEventListener('submit', (e) => {
-      const msg = form.getAttribute('data-confirm') || 'Delete?';
-      if (!window.confirm(msg)) e.preventDefault();
-    });
-  }
-</script>
+<!-- Row-click navigation + delete confirmations now load via partials/table.php
+     (Batch 2 #48/#49/#52 — shared modules in cms/_assets/row-click.js +
+     cms/_assets/confirm.js). -->
 
 </body>
 </html>

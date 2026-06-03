@@ -200,8 +200,8 @@ require __DIR__ . '/../partials/topbar.php';
       $subtitle = $isEditorial
           ? 'Editorial Page · configure the hero feature, curated picks, and content feed for this page.'
           : 'Basic Listing · title, optional description, and a content feed.';
-      $actions  = '<a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-ghost">View</a>'
-                . '<a href="/cms/indexes" class="btn-ghost">All indexes</a>';
+      $actions  = '<a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-sec">View</a>'
+                . '<a href="/cms/indexes" class="btn-sec">All indexes</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -224,16 +224,16 @@ require __DIR__ . '/../partials/topbar.php';
               <span class="content-block-sublabel">Switch between the two layout types. Hero and featured settings are preserved when you switch back.</span>
             </div>
           </div>
-          <div style="padding:var(--space-16) var(--space-20);display:flex;gap:8px">
-            <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer">
-              <input type="radio" name="layout" value="listing" <?= !$isEditorial ? 'checked' : '' ?> style="margin-right:8px">
+          <div class="radio-card-group" style="padding:var(--space-16) var(--space-20)">
+            <label class="radio-card">
+              <input type="radio" name="layout" value="listing" <?= !$isEditorial ? 'checked' : '' ?>>
               <strong>Basic Listing</strong>
-              <p class="field-hint" style="margin:6px 0 0">Title + content feed.</p>
+              <p class="field-hint">Title + content feed.</p>
             </label>
-            <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer">
-              <input type="radio" name="layout" value="editorial" <?= $isEditorial ? 'checked' : '' ?> style="margin-right:8px">
+            <label class="radio-card">
+              <input type="radio" name="layout" value="editorial" <?= $isEditorial ? 'checked' : '' ?>>
               <strong>Editorial Page</strong>
-              <p class="field-hint" style="margin:6px 0 0">Hero + featured + feed.</p>
+              <p class="field-hint">Hero + featured + feed.</p>
             </label>
           </div>
         </div>
@@ -314,7 +314,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <option value="<?= (int)$row['id'] ?>" data-label="<?= $pickLabel($row) ?>"><?= $pickLabel($row) ?></option>
                 <?php endforeach; ?>
               </select>
-              <button type="button" id="featured-add-btn" class="btn-row-action" style="font-size:11px">Add</button>
+              <button type="button" id="featured-add-btn" class="btn-sec btn-tiny">Add</button>
             </div>
           </div>
         </div>
@@ -402,7 +402,7 @@ require __DIR__ . '/../partials/topbar.php';
              than viewport-pinned. The previous zero-content .content-block
              with inline styles was a positioning workaround. -->
         <div class="form-actions" style="justify-content:flex-end">
-          <a href="/cms/indexes" class="btn-ghost">Cancel</a>
+          <a href="/cms/indexes" class="btn-sec">Cancel</a>
           <button type="submit" class="btn-pri">Save</button>
         </div>
       </form>

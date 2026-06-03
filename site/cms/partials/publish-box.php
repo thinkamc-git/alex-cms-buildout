@@ -62,7 +62,7 @@ if (!isset($e) || !is_callable($e)) {
       <a href="<?= $e($live_url) ?>"
          target="_blank"
          rel="noopener"
-         class="btn-ghost btn-tiny">View live ↗</a>
+         class="btn-sec btn-tiny">View live ↗</a>
     </div>
     <div class="field-group" style="margin-bottom:var(--space-12)">
       <label class="field-sublabel" for="<?= $e($published_at_id) ?>">Published</label>

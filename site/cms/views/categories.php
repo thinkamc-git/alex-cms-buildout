@@ -6,7 +6,7 @@
  * 2-column grid, mirroring docs/design-mockups/cms-ui.html.
  *
  * Each row's controls (label input, colour select, Save, Delete) are
- * bound via the HTML5 `form="cat-row-N"` attribute to a `<form>`
+ * bound via the HTML5 `form="row-form-cat-N"` attribute to a `<form>`
  * rendered outside the <table> — forms can't wrap <tr> validly, so the
  * attribute is the cleanest cross-cell binding. One form per row,
  * two submit buttons, each named `action` with a different value:
@@ -167,9 +167,9 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       // Render the per-row <form> elements once, before the layout grid.
       // They live outside the tables so they can host inputs from any
-      // cell via the HTML5 form="cat-row-N" attribute.
+      // cell via the HTML5 form="row-form-cat-N" attribute.
       foreach ($all as $cat):
-        $rid = 'cat-row-' . (int)$cat['id'];
+        $rid = 'row-form-cat-' . (int)$cat['id'];
       ?>
         <form id="<?= $e($rid) ?>" method="post" action="/cms/categories" style="display:none">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -197,7 +197,7 @@ require __DIR__ . '/../partials/topbar.php';
           foreach ($catRows as $cat) {
               $use       = (int)($cat['usage_count'] ?? 0);
               $canDelete = $use === 0;
-              $rid       = 'cat-row-' . (int)$cat['id'];
+              $rid       = 'row-form-cat-' . (int)$cat['id'];
               $labelCell =
                   '<div style="display:flex;align-items:center;gap:6px">'
                 . '<div class="cat-swatch" style="background:var(--c-' . $e((string)$cat['colour']) . ')"></div>'
@@ -206,21 +206,18 @@ require __DIR__ . '/../partials/topbar.php';
               $slugCell    = '<span class="val-pill">' . $e((string)$cat['value_slug']) . '</span>';
               $colourCell  = $colour_select((string)$cat['colour'], $rid);
               $useCell     = (string)$use;
-              $actionsCell = '<button type="submit" name="action" value="update" form="' . $e($rid) . '" class="btn-row-action" title="Save changes" style="font-size:11px;margin-right:6px">Save</button>';
+              $actionsCell = '<button type="submit" name="action" value="update" form="' . $e($rid) . '" class="btn-sec btn-tiny" title="Save changes" style="margin-right:6px">Save</button>';
               if ($canDelete) {
-                  // Preserve the original inline markup verbatim: outer JS
-                  // string uses single quotes, inner label wrapped in &quot;
-                  // for visual quotes, and can&#039;t for the apostrophe
-                  // (matches the pre-migration behaviour exactly).
+                  // Batch 2 #37/#48: switch to canonical icon-button + data-confirm.
                   $catLabelAttr = $e((string)$cat['label']);
                   $actionsCell .=
-                      '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="cat-del ok" title="Delete category" aria-label="Delete"'
-                    . ' onclick="return confirm(\'Delete category &quot;' . $catLabelAttr . '&quot;? This can&#039;t be undone.\');">'
+                      '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="btn-icon btn-icon-danger" title="Delete category" aria-label="Delete"'
+                    . ' data-confirm="Delete category &quot;' . $catLabelAttr . '&quot;? This can&#039;t be undone.">'
                     . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                     . '</button>';
               } else {
                   $actionsCell .=
-                      '<button class="cat-del" title="Delete (in use, cannot delete)" aria-label="Delete" disabled>'
+                      '<button class="btn-icon" title="Delete (in use, cannot delete)" aria-label="Delete" disabled>'
                     . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                     . '</button>';
               }

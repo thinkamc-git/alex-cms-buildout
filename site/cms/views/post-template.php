@@ -145,7 +145,7 @@ $tabHref = static function (string $tab) use ($selected): string {
   /* Required asterisk. */
   .field-req { font-family:var(--font-cond); font-size:10px; color:var(--c-terracotta); margin-left:var(--space-4); letter-spacing:0.06em; text-transform:uppercase; }
   /* Phase 14.5 read-only note on sub-template panels. */
-  .ct-readonly-note { font-size:var(--text-tiny); color:var(--muted); font-style:italic; margin-top:var(--space-16); padding:var(--space-12) var(--space-16); border:1px dashed var(--ink-18); border-radius:var(--r-card); }
+  /* .ct-readonly-note rule moved to style-cms.css (Batch 2 #28). */
 </style>
 </head>
 <body>
@@ -158,6 +158,7 @@ require __DIR__ . '/../partials/topbar.php';
 <div class="layout">
   <?php
   $active_nav_id = 'post-templates';
+  $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
@@ -301,7 +302,7 @@ require __DIR__ . '/../partials/topbar.php';
                         <div class="field-note-box">Renders in the <strong>Author Bio</strong> block — the footer "About the author" panel. Independently toggleable from the inline Author byline.</div>
                       </div>
                       <div style="margin-top:var(--space-16)">
-                        <button class="btn-save" type="submit">Save Author</button>
+                        <button class="btn-pri" type="submit">Save Author</button>
                       </div>
                     </div>
                   </div>
@@ -378,7 +379,7 @@ require __DIR__ . '/../partials/topbar.php';
                 $variant    = 'reference';
                 require __DIR__ . '/../partials/table.php';
                 ?>
-                <div class="ct-readonly-note">
+                <div class="readonly-notice ct-readonly-note">
                   Per-sub-template visibility toggles are read-only — the modes shown above are the matrix defaults. Editable suppression isn't available yet.
                 </div>
               </div>

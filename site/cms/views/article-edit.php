@@ -743,7 +743,7 @@ require __DIR__ . '/../partials/topbar.php';
           'experiments'   => ['/cms/experiments',   'Back to Experiments'],
       ];
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/articles', 'Back to list'];
-      $actions  = '<a href="' . $e($backHref) . '" class="btn-ghost">' . $e($backLabel) . '</a>';
+      $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -846,8 +846,8 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions form-actions-sticky">
             <button type="submit" name="action" value="save" class="btn-pri"><?= $e($saveLabel) ?></button>
-            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
-            <button type="submit" form="article-delete-form" class="btn-ghost btn-danger">Delete</button>
+            <a href="<?= $e($backHref) ?>" class="btn-sec">Cancel</a>
+            <button type="submit" form="article-delete-form" class="btn-sec btn-danger">Delete</button>
             <button type="submit" name="action" value="advance" class="btn-pri" data-advance-button>
               Advance to <span data-advance-target><?= $e(ucfirst($nextStage ?? 'Concept')) ?></span> →
             </button>
@@ -881,24 +881,17 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <?php if ($isScheduled): ?>
-            <div class="schedule-banner" data-target="<?= $e($publishedAtRaw) ?>">
-              <span class="schedule-banner-icon">⏱</span>
-              <span class="schedule-banner-text">
-                Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
-                · <span class="schedule-countdown" data-countdown>computing…</span>
-              </span>
-            </div>
+            <?php
+            $published_at_raw = $publishedAtRaw;
+            require __DIR__ . '/../partials/schedule-banner.php';
+            ?>
           <?php elseif ($isLive): ?>
-            <?php $articleSlug = (string)($article['slug'] ?? ''); ?>
-            <div class="live-banner">
-              <span class="cms-live-dot" aria-hidden="true"></span>
-              <span class="live-banner-text">
-                Published<?php if ($publishedAtRaw !== ''): ?> on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong><?php endif; ?>
-              </span>
-              <?php if ($articleSlug !== ''): ?>
-                <a class="live-banner-link" href="/writing/<?= $e($articleSlug) ?>" target="_blank" rel="noopener">View live ↗</a>
-              <?php endif; ?>
-            </div>
+            <?php
+            $articleSlug      = (string)($article['slug'] ?? '');
+            $published_at_raw = $publishedAtRaw;
+            $live_url         = $articleSlug !== '' ? ('/writing/' . $articleSlug) : '';
+            require __DIR__ . '/../partials/live-banner.php';
+            ?>
           <?php endif; ?>
 
           <div class="form-grid">
@@ -1038,7 +1031,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <div class="body-source-panel" data-body-panel="html-body"<?= $bodyMode !== 'html-body' ? ' hidden' : '' ?>>
                     <div class="folder-block">
                       <div class="folder-block-hd">
-                        <div class="folder-path" style="font-family:var(--font-mono);font-size:var(--text-meta)"><?= $e($articleFolderPath) ?></div>
+                        <div class="folder-path"><?= $e($articleFolderPath) ?></div>
                         <span class="folder-status">
                           <?php if (!$articleFolderExists): ?>
                             <span class="muted">Folder not set up yet</span>
@@ -1128,7 +1121,7 @@ require __DIR__ . '/../partials/topbar.php';
                          name="hero"
                          accept="image/jpeg,image/png,image/webp,image/gif">
                   <div class="cms-hero-pick-row">
-                    <label for="article-hero-file" class="btn-ghost cms-hero-pick-btn">
+                    <label for="article-hero-file" class="btn-sec cms-hero-pick-btn">
                       <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
                     </label>
                     <span class="cms-hero-pick-name" aria-live="polite"></span>
@@ -1207,7 +1200,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <div style="display:flex;align-items:center;gap:8px;color:var(--secondary);font-family:var(--font-mono);font-size:var(--text-meta)">
                   <?php $partNo = (int)($article['series_order'] ?? 0); ?>
                   <?php if ($partNo > 0): ?>
-                    <span class="val-pill" style="font-family:var(--font-mono);font-size:var(--text-micro)"><?= str_pad((string)$partNo, 2, '0', STR_PAD_LEFT) ?></span>
+                    <span class="val-pill"><?= str_pad((string)$partNo, 2, '0', STR_PAD_LEFT) ?></span>
                   <?php else: ?>
                     <span style="color:var(--muted);font-style:italic">unset (save once to assign)</span>
                   <?php endif; ?>
@@ -1287,10 +1280,10 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-ghost" data-save-btn><?= $e($saveLabel) ?></button>
-            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="save" class="btn-sec" data-save-btn><?= $e($saveLabel) ?></button>
+            <a href="<?= $e($backHref) ?>" class="btn-sec">Cancel</a>
 
-            <button type="submit" form="article-delete-form" class="btn-ghost btn-danger">Delete</button>
+            <button type="submit" form="article-delete-form" class="btn-sec btn-danger">Delete</button>
 
             <?php if ($nextStage !== null && $status !== 'draft' && $status !== 'published'): ?>
               <button type="submit" name="action" value="advance" class="btn-pri">Advance to <?= $e(ucfirst($nextStage)) ?> →</button>
@@ -1299,17 +1292,17 @@ require __DIR__ . '/../partials/topbar.php';
             <?php if ($status === 'draft'): ?>
               <button type="submit" name="action" value="publish" class="btn-pri" data-publish-btn>Publish →</button>
               <button type="submit" name="action" value="schedule" class="btn-pri" data-schedule-btn hidden>Schedule →</button>
-              <button type="button" class="btn-ghost" data-set-schedule>Schedule Publish</button>
+              <button type="button" class="btn-sec" data-set-schedule>Schedule Publish</button>
             <?php endif; ?>
 
             <?php if ($isScheduled): ?>
               <button type="submit" name="action" value="publish-now" class="btn-pri"
-                      onclick="return confirm('Publish this now? It will go live immediately at the current time.');">Publish Now</button>
+                      data-confirm="Publish this now? It will go live immediately at the current time.">Publish Now</button>
               <button
                 type="submit"
                 name="action"
                 value="unpublish"
-                class="btn-ghost"
+                class="btn-sec"
                 data-confirm-unpublish="1">Move back to Draft</button>
             <?php endif; ?>
 
@@ -1318,7 +1311,7 @@ require __DIR__ . '/../partials/topbar.php';
                 type="submit"
                 name="action"
                 value="unpublish"
-                class="btn-ghost"
+                class="btn-sec"
                 data-confirm-unpublish="1">Move to draft</button>
             <?php endif; ?>
           </div>
@@ -1442,22 +1435,10 @@ require __DIR__ . '/../partials/topbar.php';
 <?php endif; ?>
 
 <script>
-  // Phase 20.3: body-source toggle. Clicking RTF or HTML shows the matching
-  // panel without touching the other — preserves TipTap state (DOM intact)
-  // and the file-selector state across toggles.
-  (function () {
-    const root = document.querySelector('[data-body-source-block]');
-    if (!root) return;
-    const radios = root.querySelectorAll('input[name="body_mode"]');
-    const panels = root.querySelectorAll('[data-body-panel]');
-    const options = root.querySelectorAll('.body-source-option');
-    function activate(mode) {
-      panels.forEach(p => { p.hidden = (p.getAttribute('data-body-panel') !== mode); });
-      options.forEach(o => o.classList.toggle('is-active', o.querySelector('input').value === mode));
-    }
-    radios.forEach(r => r.addEventListener('change', () => activate(r.value)));
-  })();
+  // Phase 20.3 + Batch 2 #23: body-source toggle now lives in
+  // cms/_assets/body-mode-toggle.js (auto-wires every [data-body-source-block]).
 </script>
+<script src="/cms/_assets/body-mode-toggle.js" defer></script>
 <?php endif; ?>
 
 <?php if ($showReadTime): ?>

@@ -502,7 +502,7 @@ require __DIR__ . '/../partials/topbar.php';
           'experiments'   => ['/cms/experiments',   'Back to Experiments'],
       ];
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/live-sessions', 'Back to list'];
-      $actions  = '<a href="' . $e($backHref) . '" class="btn-ghost">' . $e($backLabel) . '</a>';
+      $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -556,24 +556,17 @@ require __DIR__ . '/../partials/topbar.php';
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <?php if ($isScheduled): ?>
-            <div class="schedule-banner" data-target="<?= $e($publishedAtRaw) ?>">
-              <span class="schedule-banner-icon">⏱</span>
-              <span class="schedule-banner-text">
-                Scheduled for publish on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong>
-                · <span class="schedule-countdown" data-countdown>computing…</span>
-              </span>
-            </div>
+            <?php
+            $published_at_raw = $publishedAtRaw;
+            require __DIR__ . '/../partials/schedule-banner.php';
+            ?>
           <?php elseif ($isLive): ?>
-            <?php $sessionSlug = (string)($session['slug'] ?? ''); ?>
-            <div class="live-banner">
-              <span class="cms-live-dot" aria-hidden="true"></span>
-              <span class="live-banner-text">
-                Published<?php if ($publishedAtRaw !== ''): ?> on <strong><?= $e(date('M j, Y · g:i A', strtotime($publishedAtRaw))) ?></strong><?php endif; ?>
-              </span>
-              <?php if ($sessionSlug !== ''): ?>
-                <a class="live-banner-link" href="/live-sessions/<?= $e($sessionSlug) ?>" target="_blank" rel="noopener">View live ↗</a>
-              <?php endif; ?>
-            </div>
+            <?php
+            $sessionSlug      = (string)($session['slug'] ?? '');
+            $published_at_raw = $publishedAtRaw;
+            $live_url         = $sessionSlug !== '' ? ('/live-sessions/' . $sessionSlug) : '';
+            require __DIR__ . '/../partials/live-banner.php';
+            ?>
           <?php endif; ?>
 
           <div class="form-grid">
@@ -788,7 +781,7 @@ require __DIR__ . '/../partials/topbar.php';
                        name="hero"
                        accept="image/jpeg,image/png,image/webp,image/gif">
                 <div class="cms-hero-pick-row">
-                  <label for="ls-hero-file" class="btn-ghost cms-hero-pick-btn">
+                  <label for="ls-hero-file" class="btn-sec cms-hero-pick-btn">
                     <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
                   </label>
                   <span class="cms-hero-pick-name" aria-live="polite"></span>
@@ -863,25 +856,25 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" name="action" value="save" class="btn-ghost" data-save-btn><?= $e($saveLabel) ?></button>
-            <a href="<?= $e($backHref) ?>" class="btn-ghost">Cancel</a>
+            <button type="submit" name="action" value="save" class="btn-sec" data-save-btn><?= $e($saveLabel) ?></button>
+            <a href="<?= $e($backHref) ?>" class="btn-sec">Cancel</a>
 
-            <button type="submit" form="live-session-delete-form" class="btn-ghost btn-danger">Delete</button>
+            <button type="submit" form="live-session-delete-form" class="btn-sec btn-danger">Delete</button>
 
             <?php if ($status === 'draft'): ?>
               <button type="submit" name="action" value="publish" class="btn-pri" data-publish-btn>Publish →</button>
               <button type="submit" name="action" value="schedule" class="btn-pri" data-schedule-btn hidden>Schedule →</button>
-              <button type="button" class="btn-ghost" data-set-schedule>Schedule Publish</button>
+              <button type="button" class="btn-sec" data-set-schedule>Schedule Publish</button>
             <?php endif; ?>
 
             <?php if ($isScheduled): ?>
               <button type="submit" name="action" value="publish-now" class="btn-pri"
-                      onclick="return confirm('Publish this now? It will go live immediately at the current time.');">Publish Now</button>
+                      data-confirm="Publish this now? It will go live immediately at the current time.">Publish Now</button>
               <button
                 type="submit"
                 name="action"
                 value="unpublish"
-                class="btn-ghost"
+                class="btn-sec"
                 data-confirm-unpublish="1">Move back to Draft</button>
             <?php endif; ?>
 
@@ -890,7 +883,7 @@ require __DIR__ . '/../partials/topbar.php';
                 type="submit"
                 name="action"
                 value="unpublish"
-                class="btn-ghost"
+                class="btn-sec"
                 data-confirm-unpublish="1">Move to draft</button>
             <?php endif; ?>
           </div>

@@ -107,3 +107,12 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
     </tbody>
   </table>
 </div>
+<?php
+/* Load shared row-click + confirm modules once per page (Batch 2 #48/#49/#52).
+   Uses $GLOBALS so multiple cms-table includes don't emit duplicate scripts. */
+if (empty($GLOBALS['__cms_table_modules_loaded'])):
+    $GLOBALS['__cms_table_modules_loaded'] = true;
+?>
+<script src="/cms/_assets/row-click.js" defer></script>
+<script src="/cms/_assets/confirm.js" defer></script>
+<?php endif; ?>

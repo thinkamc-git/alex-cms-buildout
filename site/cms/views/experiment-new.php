@@ -112,7 +112,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'New experiment';
       $subtitle = 'Pick a template, give it a title and slug. Body / folder picker live on the edit screen.';
-      $actions  = '<a href="/cms/experiments" class="btn-ghost">Cancel</a>';
+      $actions  = '<a href="/cms/experiments" class="btn-sec">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -172,7 +172,7 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions">
             <button type="submit" class="btn-pri">Create draft</button>
-            <a href="/cms/experiments" class="btn-ghost">Cancel</a>
+            <a href="/cms/experiments" class="btn-sec">Cancel</a>
           </div>
         </form>
       </div>

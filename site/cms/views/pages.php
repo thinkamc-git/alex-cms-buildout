@@ -89,9 +89,9 @@ $buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $
 
     $modHtml = $rel_time((int)$f['modified_at']);
 
-    $actionsHtml = '<div class="row-actions">'
-        . '<a href="' . $e($liveUrl) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny" title="Open the live page">Live ↗</a>'
-        . '<a href="' . $e($editUrl) . '" class="btn-ghost btn-tiny">Edit</a>'
+    $actionsHtml = '<div class="row-actions row-actions-always">'
+        . '<a href="' . $e($liveUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny" title="Open the live page">Live ↗</a>'
+        . '<a href="' . $e($editUrl) . '" class="btn-sec btn-tiny">Edit</a>'
         . '</div>';
 
     return [
@@ -187,8 +187,8 @@ require __DIR__ . '/../partials/topbar.php';
                       ['html' => '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="row-title">' . $e((string)$a['name']) . '</a>'],
                       ['html' => $e((string)$a['slug'])],
                       ['html' => $rel_time((int)$captured)],
-                      ['html' => '<div class="row-actions">'
-                          . '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny">Preview ↗</a>'
+                      ['html' => '<div class="row-actions row-actions-always">'
+                          . '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny">Preview ↗</a>'
                           . '</div>', 'class' => 'cell-actions'],
                   ],
               ];
@@ -276,15 +276,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<script>
-  for (const tr of document.querySelectorAll('tr.row-clickable')) {
-    tr.addEventListener('click', (e) => {
-      if (e.target.closest('.cell-actions, a, button, form, input, label, select')) return;
-      const href = tr.getAttribute('data-row-href');
-      if (href) location.href = href;
-    });
-  }
-</script>
+<!-- Row-click now loads via partials/table.php (Batch 2 #52). -->
 
 </body>
 </html>

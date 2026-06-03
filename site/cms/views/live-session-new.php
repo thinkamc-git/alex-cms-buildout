@@ -95,7 +95,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'New live session';
       $subtitle = 'Set a title and slug. Event details, format pills, and body are on the next screen.';
-      $actions  = '<a href="/cms/live-sessions" class="btn-ghost">Cancel</a>';
+      $actions  = '<a href="/cms/live-sessions" class="btn-sec">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -140,7 +140,7 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions">
             <button type="submit" class="btn-pri">Create draft</button>
-            <a href="/cms/live-sessions" class="btn-ghost">Cancel</a>
+            <a href="/cms/live-sessions" class="btn-sec">Cancel</a>
           </div>
         </form>
       </div>

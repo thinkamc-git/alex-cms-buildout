@@ -61,7 +61,11 @@
 
     function flip() {
       if (btn.classList.contains('btn-pri')) return; // already dirty
+      // Batch 2 button canonical — Save buttons now start life as .btn-sec
+      // (the prior .btn-ghost was an alias for the same look). Strip both
+      // before adding .btn-pri so the cascade unambiguously paints primary.
       btn.classList.remove('btn-ghost');
+      btn.classList.remove('btn-sec');
       btn.classList.add('btn-pri');
     }
 

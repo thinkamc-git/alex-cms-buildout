@@ -138,9 +138,9 @@ require __DIR__ . '/../partials/topbar.php';
             // "View live ↗" stays visible (every index is always live), Edit
             // and × reveal on hover.
             $actionsHtml = '<div class="row-actions">'
-                . '<a href="/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live index page">Live ↗</a>'
+                . '<a href="/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live index page">Live ↗</a>'
                 . '<span class="row-actions-hover">'
-                .   '<a href="/cms/indexes/edit?id=' . $id . '" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<a href="/cms/indexes/edit?id=' . $id . '" class="btn-sec btn-tiny">Edit</a>'
                 .   '<form method="post" action="/cms/indexes/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete index &quot;' . $e($titleStr !== '' ? $titleStr : $slug) . '&quot;? The URL /' . $e($slug) . '/ will 404 unless you re-create it.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
                 .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
@@ -207,9 +207,9 @@ require __DIR__ . '/../partials/topbar.php';
                       ['html' => '<span class="muted">' . $count . ' part' . ($count === 1 ? '' : 's') . '</span>'],
                       ['html' => ''],
                       ['html' => '<div class="row-actions">'
-                          . '<a href="/series/' . $e($sSlug) . '/" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live series index">Live ↗</a>'
+                          . '<a href="/series/' . $e($sSlug) . '/" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live series index">Live ↗</a>'
                           . '<span class="row-actions-hover">'
-                          .   '<a href="/cms/series" class="btn-ghost btn-tiny">Manage</a>'
+                          .   '<a href="/cms/series" class="btn-sec btn-tiny">Manage</a>'
                           . '</span>'
                           . '</div>', 'class' => 'cell-actions'],
                   ],
@@ -246,21 +246,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<script>
-  for (const tr of document.querySelectorAll('tr.row-clickable')) {
-    tr.addEventListener('click', (e) => {
-      if (e.target.closest('.cell-actions, a, button, form, input, label, select')) return;
-      const href = tr.getAttribute('data-row-href');
-      if (href) location.href = href;
-    });
-  }
-  for (const form of document.querySelectorAll('form.inline-delete')) {
-    form.addEventListener('submit', (e) => {
-      const msg = form.getAttribute('data-confirm') || 'Delete?';
-      if (!window.confirm(msg)) e.preventDefault();
-    });
-  }
-</script>
+<!-- Row-click + confirm now load via partials/table.php (Batch 2 #48/#49/#52). -->
 
 </body>
 </html>

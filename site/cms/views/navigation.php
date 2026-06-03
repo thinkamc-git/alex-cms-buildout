@@ -233,7 +233,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Navigation';
       $subtitle = 'Header and footer link lists. Drag to reorder. Items whose target no longer exists are flagged BROKEN and hidden from the public site until you fix them.';
-      $actions  = '<a href="/" target="_blank" rel="noopener" class="btn-ghost">Open homepage ↗</a>';
+      $actions  = '<a href="/" target="_blank" rel="noopener" class="btn-sec">Open homepage ↗</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -313,13 +313,13 @@ require __DIR__ . '/../partials/topbar.php';
                   </select>
                   <?= $renderMarkCell((string)$it['highlight'], (string)$it['highlight_text'], (string)$it['highlight_color']) ?>
                   <input type="text" name="highlight_color" value="<?= $e((string)$it['highlight_color']) ?>" placeholder="#d63031" data-color<?= $it['highlight']==='none' ? ' class="is-off"' : '' ?>>
-                  <button type="submit" class="btn-ghost btn-tiny" data-save-btn>Save</button>
+                  <button type="submit" class="btn-sec btn-tiny" data-save-btn>Save</button>
                 </form>
-                <form method="post" action="/cms/navigation" style="display:inline" onsubmit="return confirm('Delete &quot;<?= $e((string)$it['label']) ?>&quot;? This removes the link from the public site.');">
+                <form method="post" action="/cms/navigation" style="display:inline" data-confirm="Delete &quot;<?= $e((string)$it['label']) ?>&quot;? This removes the link from the public site.">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="id" value="<?= (int)$it['id'] ?>">
                   <input type="hidden" name="action" value="delete_item">
-                  <button type="submit" class="btn-ghost btn-tiny btn-danger">Delete</button>
+                  <button type="submit" class="btn-sec btn-tiny btn-danger">Delete</button>
                 </form>
                 <?php if ($broken): ?><span class="pill-broken">Broken</span><?php endif; ?>
               </div>
@@ -367,7 +367,7 @@ require __DIR__ . '/../partials/topbar.php';
                 </select>
                 <?= $renderMarkCell('none', '', '') ?>
                 <input type="text" name="highlight_color" placeholder="#d63031" data-color class="is-off">
-                <button type="submit" class="btn-ghost btn-tiny">Add</button>
+                <button type="submit" class="btn-sec btn-tiny">Add</button>
               </form>
             </div>
           </div>

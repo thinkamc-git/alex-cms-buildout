@@ -35,10 +35,9 @@ header('Content-Type: text/html; charset=utf-8');
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-$stagePill = static function (string $status) use ($e): string {
-    $status = strtolower($status);
-    $label  = ucfirst($status);
-    return '<span class="pill pill-' . $e($status) . '">' . $e($label) . '</span>';
+require_once __DIR__ . '/../../lib/pills.php';
+$stagePill = static function (string $status): string {
+    return cms_pill_stage($status);
 };
 ?><!doctype html>
 <html lang="en">
@@ -163,13 +162,13 @@ require __DIR__ . '/../partials/topbar.php';
             $isLiveRow = (string)($j['status'] ?? '') === 'published'
                       && (string)($j['published_status'] ?? '') !== 'scheduled';
             $liveBtn = $isLiveRow && $slug !== ''
-                ? '<a href="/journal/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-ghost btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
+                ? '<a href="/journal/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
                 . $liveBtn
                 . '<span class="row-actions-hover">'
-                .   '<a href="/cms/journals/edit?id=' . $id . '&from=journals" class="btn-ghost btn-tiny">Edit</a>'
+                .   '<a href="/cms/journals/edit?id=' . $id . '&from=journals" class="btn-sec btn-tiny">Edit</a>'
                 .   '<form method="post" action="/cms/journals/delete?id=' . $id . '" class="inline-delete" data-confirm="Delete this journal? This cannot be undone.">'
                 .     '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
                 .     '<button type="submit" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete">×</button>'
@@ -245,22 +244,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<script>
-  for (const tr of document.querySelectorAll('tr.row-clickable')) {
-    tr.addEventListener('click', (e) => {
-      if (e.target.closest('.cell-actions, a, button, form, input, label, select')) return;
-      const href = tr.getAttribute('data-row-href');
-      if (href) location.href = href;
-    });
-  }
-
-  for (const form of document.querySelectorAll('form.inline-delete')) {
-    form.addEventListener('submit', (e) => {
-      const msg = form.getAttribute('data-confirm') || 'Delete?';
-      if (!window.confirm(msg)) e.preventDefault();
-    });
-  }
-</script>
+<!-- Row-click + confirm now load via partials/table.php (Batch 2 #48/#49/#52). -->
 
 </body>
 </html>

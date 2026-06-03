@@ -95,7 +95,7 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <div class="ideation-capture" style="background:var(--canvas-raised);border-bottom:var(--rule-faint);padding:var(--space-16) var(--space-24);">
+      <div class="ideation-capture">
         <form method="post" action="/cms/articles/new-idea" style="display:flex;gap:0;max-width:580px;">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <input type="hidden" name="from" value="ideation">

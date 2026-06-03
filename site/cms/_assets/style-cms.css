@@ -220,23 +220,48 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
    LAYER 4 — Components
    ───────────────────────────────────────────────────────────── */
 
-/* Buttons */
-.btn-pri { padding:7px 16px; background:var(--primary); border:1px solid var(--primary); border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); cursor:pointer; transition:background 0.15s; white-space:nowrap; }
-.btn-pri:hover { background:var(--primary-hover); }
-.btn-sec { padding:7px 16px; background:transparent; border:1px solid var(--ink-30); border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--secondary); cursor:pointer; transition:border-color 0.15s,color 0.15s; white-space:nowrap; }
-.btn-sec:hover { border-color:var(--primary); color:var(--primary); }
-.btn-ghost { padding:5px 12px; background:transparent; border:1px solid var(--ink-18); border-radius:var(--r-pill); font-family:var(--font-mono); font-size:var(--text-micro); font-weight:500; letter-spacing:0.06em; color:var(--muted); cursor:pointer; transition:border-color 0.15s,color 0.15s; white-space:nowrap; }
-.btn-ghost:hover { border-color:var(--ink-30); color:var(--primary); }
-.btn-danger { padding:7px 14px; background:transparent; border:1px solid transparent; border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--c-terracotta); cursor:pointer; transition:border-color 0.15s; margin-left:auto; }
-.btn-danger:hover { border-color:var(--c-terracotta); }
-.btn-row-action { padding:3px 10px; background:transparent; border:1px solid var(--ink-18); border-radius:2px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:border-color 0.12s,color 0.12s; white-space:nowrap; }
-.btn-row-action:hover { border-color:var(--primary); color:var(--primary); }
-/* Row delete trashcan — singleton style used by subscribers (#8 sub-table). */
-.btn-row-del { background:none; border:none; cursor:pointer; color:var(--muted); padding:4px; line-height:0; }
-.btn-row-del:hover { color:var(--c-terracotta); }
+/* Buttons — canonical set (Batch 2, #32/#33/#34/#37):
+   .btn-pri    — primary CTA (Save, Publish)
+   .btn-sec    — secondary (Cancel, Edit, row-level actions; absorbs .btn-ghost)
+   .btn-danger — destructive (Delete)
+   .btn-icon / .btn-icon-danger — icon-only (defined further below)
+   .btn-tiny   — size modifier composable with any of the above
+   No monospaced buttons. No underlined buttons. The .btn-ghost selector is
+   retained as an alias for .btn-sec to catch any forgotten call sites. The
+   legacy .btn-row-action / .btn-row-del / .cat-del / .btn-link / .btn-save /
+   .btn-add-dashed selectors are aliased to canonical rules so any stragglers
+   still render correctly.
+
+   Order matters: .btn-sec is declared BEFORE .btn-pri so that when both
+   classes coexist on the same element (dirty-flip removes .btn-sec then
+   adds .btn-pri — see _assets/dirty-flip.js), .btn-pri wins the cascade. */
+.btn-sec,
+.btn-ghost,
+.btn-row-action,
+.btn-link { padding:7px 16px; background:transparent; border:1px solid var(--ink-30); border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--secondary); cursor:pointer; transition:border-color 0.15s,color 0.15s; white-space:nowrap; text-decoration:none; display:inline-block; }
+.btn-sec:hover,
+.btn-ghost:hover,
+.btn-row-action:hover,
+.btn-link:hover { border-color:var(--primary); color:var(--primary); text-decoration:none; }
+.btn-pri,
+.btn-save { padding:7px 16px; background:var(--primary); border:1px solid var(--primary); border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); cursor:pointer; transition:background 0.15s; white-space:nowrap; text-decoration:none; display:inline-block; }
+.btn-pri:hover,
+.btn-save:hover { background:var(--primary-hover); }
+.btn-danger,
+.btn-row-del,
+.cat-del { padding:7px 14px; background:transparent; border:1px solid transparent; border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--c-terracotta); cursor:pointer; transition:border-color 0.15s,background 0.15s; white-space:nowrap; text-decoration:none; display:inline-block; }
+.btn-danger:hover,
+.btn-row-del:hover,
+.cat-del.ok:hover { border-color:var(--c-terracotta); background:color-mix(in srgb,var(--c-terracotta) 6%,transparent); }
+/* Cat-del compact trashcan variant — used in categories table; svg-only. */
+.cat-del { padding:0; width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; border-radius:2px; color:var(--ink-30); cursor:not-allowed; }
+.cat-del.ok { color:var(--c-terracotta); cursor:pointer; }
+.cat-del svg { width:13px; height:13px; }
+.cat-del[disabled] { cursor:not-allowed; opacity:0.5; }
+/* Subscriber row-del trashcan variant — borderless inline icon button. */
+.btn-row-del { padding:4px; border:none; line-height:0; color:var(--muted); }
 .btn-row-del svg { width:14px; height:14px; }
-.btn-save { padding:8px 20px; background:var(--primary); border:none; border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); cursor:pointer; }
-.btn-save:hover { opacity:0.8; }
+.btn-row-del:hover { color:var(--c-terracotta); background:transparent; }
 .btn-add-dashed { width:100%; border:1px dashed var(--ink-18); background:transparent; padding:8px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); cursor:pointer; transition:border-color 0.15s,color 0.15s; margin-top:var(--space-8); border-radius:var(--r-pill); }
 .btn-add-dashed:hover { border-color:var(--primary); color:var(--primary); }
 
@@ -279,13 +304,8 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
    Single canonical rule for both view-header.php and pipeline.php. */
 .view-subtitle,
 .pipeline-desc { font-family:var(--font); font-size:var(--text-meta); font-weight:400; color:var(--muted); line-height:1.5; }
-/* Inline flash sits next to the "last saved" timestamp. Green pill for
-   success/info notes (Saved, Advanced, Reverted, Published). The optional
-   Undo button hugs the pill. */
-.view-subtitle-flash { display:inline-flex; align-items:center; gap:var(--space-8); margin-left:var(--space-12); padding:2px 10px; border-radius:var(--r-pill); background:color-mix(in srgb,var(--stage-published) 12%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent); color:var(--stage-published); font-weight:600; }
-.view-subtitle-flash form { display:inline; margin:0; }
-.view-subtitle-flash button { background:transparent; border:0; padding:0; color:inherit; font:inherit; font-weight:700; text-decoration:underline; cursor:pointer; }
-.view-subtitle-flash button:hover { text-decoration:none; }
+/* .view-subtitle-flash removed Batch 2 #30 — flash notes now render in the
+   canonical .flash-success banner above the content area (partials/flash.php). */
 .view-header-actions { display:flex; gap:var(--space-8); align-items:center; flex-shrink:0; padding-top:4px; }
 
 /* Content area */
@@ -387,7 +407,11 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cms-updated-clear[hidden] { display: none; }
 .pill-hidden    { color:var(--muted);           background:var(--ink-08);                                               border:1px solid var(--ink-18); }
 
-.type-badge { display:inline-block; padding:2px 6px; border-radius:2px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
+/* Type badge — same shape/scale as .pill.pill-type (Batch 2 #44). The
+   .type-badge selector is retained as an alias so existing markup in
+   pipeline.php / ideation.php keeps rendering. */
+.type-badge,
+.pill.pill-type { display:inline-block; padding:2px 6px; border-radius:2px; font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
 .tb-article      { color:var(--type-article);      background:color-mix(in srgb,var(--type-article) 9%,transparent);      border:1px solid color-mix(in srgb,var(--type-article) 22%,transparent); }
 .tb-journal      { color:var(--type-journal);      background:color-mix(in srgb,var(--type-journal) 9%,transparent);      border:1px solid color-mix(in srgb,var(--type-journal) 22%,transparent); }
 .tb-live-session { color:var(--type-live-session); background:color-mix(in srgb,var(--type-live-session) 9%,transparent); border:1px solid color-mix(in srgb,var(--type-live-session) 22%,transparent); }
@@ -400,7 +424,8 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 
 .tag { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; padding:2px var(--space-8); border:1px solid var(--ink-18); border-radius:2px; color:var(--muted); background:transparent; white-space:nowrap; display:inline-block; }
 .tag.special { border-color:var(--primary); color:var(--primary); font-weight:700; }
-.val-pill { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-12); padding:2px 7px; border-radius:2px; display:inline-block; }
+.val-pill { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); background:var(--ink-08); border:1px solid var(--ink-12); padding:2px 7px; border-radius:2px; display:inline-block; text-decoration:none; }
+.val-pill:hover { text-decoration:none; }
 
 /* ─────────────────────────────────────────────────────────────
    LAYER 7 — View-specific
@@ -476,6 +501,9 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .idea-card-foot { display:flex; align-items:center; justify-content:space-between; gap:var(--space-8); margin-top:2px; }
 .idea-card-meta { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
 .idea-build { padding:4px 12px; font-size:var(--text-micro); background:var(--surface); }
+/* Kanban lane empty cell — slightly more compact than the canonical
+   .empty-state (#47). Kept as alias so pipeline.php / ideation.php markup
+   keeps rendering verbatim. */
 .idea-lane-empty { font-family:var(--font); font-size:var(--text-tiny); color:var(--muted); padding:var(--space-16); text-align:center; border:1px dashed var(--ink-18); border-radius:var(--r-card); }
 
 
@@ -531,16 +559,34 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .block-mode-pill.mode-auto     { color:var(--muted); font-style:italic; letter-spacing:0.06em; }
 .block-mode-pill.mode-required { color:var(--c-terracotta); border-color:color-mix(in srgb,var(--c-terracotta) 35%,transparent); }
 .block-slug { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); }
-.tpl-tabs { display:flex; border-bottom:var(--rule-faint); background:var(--canvas-raised); flex-shrink:0; }
-.tpl-tab { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:var(--space-12) var(--space-16); cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; transition:color 0.1s; margin-bottom:-1px; }
-.tpl-tab:hover { color:var(--primary); }
-.tpl-tab.active { color:var(--primary); border-bottom-color:var(--primary); background:var(--canvas-bg); }
-/* Phase 20.2: per-post Edit/Preview sub-tabs (article-edit, journal-edit etc.).
-   Use the .tpl-tab look so the CMS-wide tab pattern stays consistent. */
-.post-edit-tabs { display:flex; border-bottom:var(--rule-faint); margin:var(--space-16) 0 var(--space-24); }
-.post-edit-tab { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:var(--space-12) var(--space-20); color:var(--muted); border-bottom:2px solid transparent; text-decoration:none; transition:color 0.1s; margin-bottom:-1px; }
+/* Canonical .cms-tabs / .cms-tab family (Batch 2 #14). The .tpl-tabs and
+   .post-edit-tabs and .pe-tabs namespaces collapse into this single rule;
+   they're retained as aliases so existing markup keeps rendering.
+   .cms-tabs--filled adds the canvas-raised background used by post-template;
+   .cms-tabs--spaced adds the vertical breathing room used by editors. */
+.cms-tabs,
+.tpl-tabs,
+.post-edit-tabs { display:flex; border-bottom:var(--rule-faint); flex-shrink:0; }
+.cms-tabs--filled,
+.tpl-tabs { background:var(--canvas-raised); }
+.cms-tabs--spaced,
+.post-edit-tabs { margin:var(--space-16) 0 var(--space-24); }
+.cms-tab,
+.tpl-tab,
+.post-edit-tab { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:var(--space-12) var(--space-20); color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; transition:color 0.1s; margin-bottom:-1px; }
+.cms-tab:hover,
+.tpl-tab:hover,
 .post-edit-tab:hover { color:var(--primary); }
+.cms-tab.active,
+.tpl-tab.active,
 .post-edit-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.tpl-tab.active { background:var(--canvas-bg); }
+/* Page-edit tabs — alias to the canonical family so the page-edit inline
+   stylesheet can be slimmed later without breaking markup. */
+.pe-tabs { display:flex; gap:0; border-bottom:var(--rule-faint); margin-bottom:var(--space-16); }
+.pe-tab { padding:10px 18px; font-family:var(--font-cond); font-size:var(--text-micro); letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; font-weight:600; }
+.pe-tab:hover { color:var(--ink); }
+.pe-tab.is-active { color:var(--ink); border-bottom-color:var(--primary); }
 .post-preview-frame { border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden; background:#fff; }
 .post-preview-iframe { display:block; width:100%; height:820px; border:0; background:#fff; }
 /* Phase 20.2 redesign: tabs are client-side toggles. Both panels render
@@ -687,10 +733,9 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cms-table--cat td.cat-count { font-family:var(--font-mono); font-size:var(--text-label); color:var(--secondary); }
 .cat-table td.cat-count.zero,
 .cms-table--cat td.cat-count.zero { color:var(--muted); }
-.cat-del { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; padding:0; background:none; border:none; color:var(--ink-30); cursor:not-allowed; transition:color 0.15s,opacity 0.15s; border-radius:2px; }
-.cat-del svg { width:13px; height:13px; }
-.cat-del.ok { color:var(--c-terracotta); cursor:pointer; }
-.cat-del.ok:hover { background:color-mix(in srgb,var(--c-terracotta) 8%,transparent); }
+/* .cat-del / .cat-del.ok rules consolidated into the canonical button block
+   above (Batch 2 #37). The old block is removed here to avoid duplicate
+   property overrides. */
 .cat-add-row { display:flex; gap:0; margin-top:var(--space-12); }
 .cat-add-input { flex:1; border:1px solid var(--ink-18); border-right:none; border-radius:var(--r-pill) 0 0 var(--r-pill); background:var(--surface); padding:7px var(--space-12); font-family:var(--font); font-size:var(--text-meta); color:var(--primary); outline:none; transition:border-color 0.15s; }
 .cat-add-input:focus { border-color:var(--primary); }
@@ -758,6 +803,19 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .idx-meta-row { display:flex; gap:var(--space-16); margin-bottom:var(--space-24); padding-bottom:var(--space-20); border-bottom:var(--rule-faint); flex-wrap:wrap; align-items:flex-end; }
 .idx-meta-row .field-group { margin-bottom:0; flex:1; min-width:160px; }
 .idx-layout-sel { display:flex; }
+/* Radio-card family (Batch 2 #70). Each .radio-card is a clickable <label>
+   wrapping a hidden radio + strong title + descriptive hint. The card high-
+   lights when its radio is checked. Used by index-new / index-edit for the
+   "Listing vs Editorial" layout choice and reusable for any other radio-set
+   in the CMS. */
+.radio-card-group { display:flex; gap:var(--space-8); }
+.radio-card { flex:1; display:block; padding:var(--space-16); border:1px solid var(--ink-18); border-radius:4px; background:var(--surface); cursor:pointer; transition:background 0.12s, border-color 0.12s; }
+.radio-card:hover { border-color:var(--ink-30); }
+.radio-card:has(input[type="radio"]:checked) { background:var(--canvas-raised); border-color:var(--primary); }
+.radio-card input[type="radio"] { margin-right:var(--space-8); }
+.radio-card strong { display:inline; color:var(--ink); }
+.radio-card .field-hint { margin:6px 0 0; }
+
 .idx-layout-opt { flex:1; padding:9px var(--space-8); border:1px solid var(--ink-18); margin-left:-1px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-align:center; cursor:pointer; color:var(--muted); background:var(--neutral); transition:all 0.1s; }
 .idx-layout-opt:first-child { margin-left:0; border-radius:var(--r-pill) 0 0 var(--r-pill); }
 .idx-layout-opt:last-child { border-radius:0 var(--r-pill) var(--r-pill) 0; }
@@ -977,8 +1035,12 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 
 .flash-success { padding:var(--space-8) var(--space-16); margin-bottom:var(--space-16); background:color-mix(in srgb,var(--stage-published) 8%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 25%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--stage-published); }
 .flash-undo { display:inline; margin:0 0 0 var(--space-12); }
-.flash-undo .btn-link { background:transparent; border:0; padding:0; color:var(--stage-published); font:inherit; font-weight:600; text-decoration:underline; cursor:pointer; }
-.flash-undo .btn-link:hover { text-decoration:none; }
+/* Flash banner Undo button — small, inline next to the success message.
+   Uses canonical .btn-sec sizing via inheritance, but recolored to the
+   stage-published green for visual continuity with the flash. No underline
+   (Batch 2 button canonical). */
+.flash-undo .btn-link { color:var(--stage-published); border-color:color-mix(in srgb,var(--stage-published) 40%,transparent); padding:3px var(--space-8); font-size:var(--text-micro); }
+.flash-undo .btn-link:hover { color:var(--stage-published); border-color:var(--stage-published); }
 
 .field-hint { font-size:var(--text-tiny); color:var(--muted); line-height:1.5; margin-top:var(--space-6); }
 .field-hint code { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--secondary); }
@@ -1005,6 +1067,10 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
    scan than the inline " /slug" trailing the title text. */
 .row-slug { display:block; font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); margin-top:2px; }
 .row-actions { display:inline-flex; align-items:center; gap:var(--space-6); justify-content:flex-end; }
+/* Pages list opts into always-visible row actions (no .row-actions-hover
+   children). The class is a documentation marker — no extra style needed,
+   since the lack of .row-actions-hover already keeps the buttons visible. */
+.row-actions-always { /* documentation marker, no rules */ }
 .cell-actions { text-align:right; }
 
 /* Phase 20.3: Edit + Delete hide until the row is hovered; Live ↗ stays
@@ -1040,8 +1106,13 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 
 /* Phase 20.3: pipeline scheduled card pill. Sits where the type badge
    would on an in-flight card, but shows a clock icon + the scheduled
-   date — that's the salient info for a scheduled row. */
-.kcard-schedule-pill {
+   date — that's the salient info for a scheduled row.
+   Batch 2 #44: renamed to .pill.pill-info; .kcard-schedule-pill is kept
+   as an alias for the existing pipeline.php call sites. Same for
+   .pill.pill-warn (was .pill-broken) and .pill.pill-override (was the
+   ad-hoc page-edit "LIVE: …" pill). */
+.kcard-schedule-pill,
+.pill.pill-info {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1054,6 +1125,17 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   font-weight: 700;
   letter-spacing: 0.04em;
   white-space: nowrap;
+}
+.pill.pill-warn {
+  display:inline-block; font-family:var(--font-cond); font-size:9px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:2px 6px; border-radius:3px;
+  background:var(--c-terracotta); color:white; font-weight:600;
+  vertical-align:middle; margin-left:6px;
+}
+.pill.pill-override {
+  color:var(--stage-published);
+  background:color-mix(in srgb,var(--stage-published) 10%,transparent);
+  border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent);
 }
 .kcard-schedule-clock { width: 12px; height: 12px; flex-shrink: 0; }
 
@@ -1114,6 +1196,30 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .btn-tiny { padding:3px var(--space-8); font-size:var(--text-micro); }
 
 .muted { color:var(--muted); }
+
+/* Read-only notice (Batch 2 #28). Canonical .readonly-notice; the prior
+   .pe-readonly-notice and .ct-readonly-note callers are aliased so old
+   markup keeps rendering. Amber accent — read-only is a "heads up" not
+   a danger. */
+.readonly-notice,
+.pe-readonly-notice {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--c-amber) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-amber) 30%, transparent);
+  border-radius: 4px;
+  font-size: var(--text-micro);
+  margin-bottom: var(--space-12);
+  color: var(--ink);
+}
+.ct-readonly-note {
+  font-size: var(--text-tiny);
+  color: var(--muted);
+  font-style: italic;
+  margin-top: var(--space-16);
+  padding: var(--space-12) var(--space-16);
+  border: 1px dashed var(--ink-18);
+  border-radius: var(--r-card);
+}
 
 .danger-zone { margin-top:var(--space-32); padding-top:var(--space-20); border-top:var(--rule-faint); }
 

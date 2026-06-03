@@ -98,7 +98,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'New journal';
       $subtitle = 'Set a working title and slug. Write the Key Statement and body on the next screen.';
-      $actions  = '<a href="/cms/journals" class="btn-ghost">Cancel</a>';
+      $actions  = '<a href="/cms/journals" class="btn-sec">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -143,7 +143,7 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions">
             <button type="submit" class="btn-pri">Create draft</button>
-            <a href="/cms/journals" class="btn-ghost">Cancel</a>
+            <a href="/cms/journals" class="btn-sec">Cancel</a>
           </div>
         </form>
       </div>

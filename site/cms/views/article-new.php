@@ -108,7 +108,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'New article';
       $subtitle = 'Set a title and slug. You can write the body, add a hero, and edit metadata on the next screen.';
-      $actions  = '<a href="/cms/articles" class="btn-ghost">Cancel</a>';
+      $actions  = '<a href="/cms/articles" class="btn-sec">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -153,7 +153,7 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="form-actions">
             <button type="submit" class="btn-pri">Create draft</button>
-            <a href="/cms/articles" class="btn-ghost">Cancel</a>
+            <a href="/cms/articles" class="btn-sec">Cancel</a>
           </div>
         </form>
       </div>

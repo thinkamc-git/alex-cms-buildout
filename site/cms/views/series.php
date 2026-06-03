@@ -115,11 +115,16 @@ header('Content-Type: text/html; charset=utf-8');
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
+require_once __DIR__ . '/../../lib/pills.php';
 $stagePill = static function (string $status) use ($e): string {
+    // Series cards run small and the published row gets the dot+Live label.
     $status = strtolower($status);
-    return '<span class="pill pill-' . $e($status) . '" style="font-size:10px;padding:1px 5px">'
-         . ($status === 'published' ? '<span class="live-dot"></span>Live' : $e(ucfirst($status)))
-         . '</span>';
+    if ($status === 'published') {
+        return '<span class="pill pill-published" style="font-size:10px;padding:1px 5px">'
+             . '<span class="live-dot"></span>Live'
+             . '</span>';
+    }
+    return cms_pill_stage($status, 'small');
 };
 ?><!doctype html>
 <html lang="en">
@@ -190,14 +195,14 @@ require __DIR__ . '/../partials/topbar.php';
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-12)">
               <span class="val-pill"><?= $e((string)$s['slug']) ?></span>
               <span style="color:var(--muted);font-size:var(--text-micro);font-family:var(--font-mono)">/series/<?= $e((string)$s['slug']) ?>/</span>
-              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-ghost btn-tiny" style="margin-left:auto" title="Open the live series index">Live ↗</a>
+              <a href="/series/<?= $e((string)$s['slug']) ?>/" target="_blank" rel="noopener" class="btn-sec btn-tiny" style="margin-left:auto" title="Open the live series index">Live ↗</a>
             </div>
 
             <textarea name="description" rows="2" placeholder="Optional description — shown on the series index page."
                       style="width:100%;padding:8px;font-family:var(--font);font-size:var(--text-meta);color:var(--primary);border:1px solid var(--ink-18);border-radius:4px;background:var(--canvas-raised);resize:vertical;margin-bottom:var(--space-8)"><?= $e((string)($s['description'] ?? '')) ?></textarea>
 
             <div style="display:flex;justify-content:flex-end;margin-bottom:var(--space-4)">
-              <button type="submit" name="action" value="update" class="btn-row-action" style="font-size:11px">Save name &amp; description</button>
+              <button type="submit" name="action" value="update" class="btn-sec btn-tiny">Save name &amp; description</button>
             </div>
           </form>
 
@@ -214,7 +219,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <div class="part-title" style="flex:1"><?= $e((string)$part['title']) ?></div>
                 <?= $stagePill((string)$part['status']) ?>
                 <span class="part-date" style="color:var(--muted);font-family:var(--font-mono);font-size:10px"><?= $e($date) ?></span>
-                <form method="post" action="/cms/series" style="display:inline;margin:0;padding:0" onsubmit="return confirm('Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.');">
+                <form method="post" action="/cms/series" style="display:inline;margin:0;padding:0" data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
                   <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
                   <input type="hidden" name="action" value="remove_part">
                   <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
@@ -224,7 +229,7 @@ require __DIR__ . '/../partials/topbar.php';
               <?php endforeach; ?>
             </div>
           <?php else: ?>
-            <div style="color:var(--muted);font-size:var(--text-meta);font-style:italic;margin:var(--space-12) 0">No parts yet — add an article below.</div>
+            <div class="empty-state" style="margin:var(--space-12) 0">No parts yet — add an article below.</div>
           <?php endif; ?>
 
           <form method="post" action="/cms/series" style="display:flex;gap:6px;align-items:center;margin-bottom:var(--space-12)">
@@ -239,7 +244,7 @@ require __DIR__ . '/../partials/topbar.php';
                 <option value="<?= (int)$ua['id'] ?>"><?= $e((string)$ua['title']) ?> · <?= $e(ucfirst($st)) ?></option>
               <?php endforeach; ?>
             </select>
-            <button type="submit" class="btn-row-action" style="font-size:11px">Add</button>
+            <button type="submit" class="btn-sec btn-tiny">Add</button>
           </form>
 
           <form method="post" action="/cms/series" style="display:flex;gap:8px;justify-content:flex-end">
@@ -247,9 +252,9 @@ require __DIR__ . '/../partials/topbar.php';
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= $sid ?>">
             <?php if ($canDelete): ?>
-              <button type="submit" class="btn-row-action" style="color:var(--c-terracotta)" onclick="return confirm('Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.');">Delete series</button>
+              <button type="submit" class="btn-danger btn-tiny" data-confirm="Delete series &quot;<?= $e((string)$s['name']) ?>&quot;? This can&#039;t be undone. The articles in it are not deleted.">Delete series</button>
             <?php else: ?>
-              <button type="button" class="btn-row-action" disabled title="Cannot delete — unassign all parts first" style="opacity:0.5;cursor:not-allowed">Delete series</button>
+              <button type="button" class="btn-sec btn-tiny" disabled title="Cannot delete — unassign all parts first" style="opacity:0.5;cursor:not-allowed">Delete series</button>
             <?php endif; ?>
           </form>
         </div>

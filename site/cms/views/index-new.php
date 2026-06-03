@@ -80,13 +80,14 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <body>
 
 <?php
-$breadcrumb = 'Indexes / New';
+$breadcrumb = 'Indexes → New';
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
 <div class="layout">
   <?php
   $active_nav_id = 'indexes';
+  $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
 
@@ -95,7 +96,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'New Editorial Index';
       $subtitle = 'Creates a configurable page at a custom URL. The slug becomes the URL and is permanent — pick carefully.';
-      $actions  = '<a href="/cms/indexes" class="btn-ghost">Cancel</a>';
+      $actions  = '<a href="/cms/indexes" class="btn-sec">Cancel</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -128,23 +129,23 @@ require __DIR__ . '/../partials/topbar.php';
 
           <div class="field-group">
             <label class="field-label">Layout</label>
-            <div style="display:flex;gap:8px">
-              <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer;background:<?= $defaults['layout'] === 'listing' ? 'var(--canvas-raised)' : 'var(--surface)' ?>">
-                <input type="radio" name="layout" value="listing" <?= $defaults['layout'] === 'listing' ? 'checked' : '' ?> style="margin-right:8px">
+            <div class="radio-card-group">
+              <label class="radio-card">
+                <input type="radio" name="layout" value="listing" <?= $defaults['layout'] === 'listing' ? 'checked' : '' ?>>
                 <strong>Basic Listing</strong>
-                <p class="field-hint" style="margin:6px 0 0">Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal/).</p>
+                <p class="field-hint">Title, optional description, and a content feed. Best for catch-all section indexes (e.g. /writing, /journal/).</p>
               </label>
-              <label style="flex:1;display:block;padding:14px;border:1px solid var(--ink-18);border-radius:4px;cursor:pointer;background:<?= $defaults['layout'] === 'editorial' ? 'var(--canvas-raised)' : 'var(--surface)' ?>">
-                <input type="radio" name="layout" value="editorial" <?= $defaults['layout'] === 'editorial' ? 'checked' : '' ?> style="margin-right:8px">
+              <label class="radio-card">
+                <input type="radio" name="layout" value="editorial" <?= $defaults['layout'] === 'editorial' ? 'checked' : '' ?>>
                 <strong>Editorial Page</strong>
-                <p class="field-hint" style="margin:6px 0 0">Hero feature, curated picks, and a content feed. Use for curated landing pages (e.g. /digital-garden/).</p>
+                <p class="field-hint">Hero feature, curated picks, and a content feed. Use for curated landing pages (e.g. /digital-garden/).</p>
               </label>
             </div>
           </div>
 
-          <div class="row-btn-group" style="margin-top:var(--space-24)">
+          <div class="form-actions">
             <button type="submit" class="btn-pri">Create Index</button>
-            <a href="/cms/indexes" class="btn-ghost">Cancel</a>
+            <a href="/cms/indexes" class="btn-sec">Cancel</a>
           </div>
         </form>
       </div>

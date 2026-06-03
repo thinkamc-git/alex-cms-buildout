@@ -7,7 +7,7 @@
  * re-subscribe, or delete. The CSV export honors the active filters
  * (so a filtered view can be exported as-is).
  *
- * Each row's actions bind via HTML5 form="sub-row-N" to a per-row form
+ * Each row's actions bind via HTML5 form="row-form-sub-N" to a per-row form
  * rendered before the table — same pattern as cms/views/categories.php
  * and cms/views/redirects.php.
  */
@@ -210,7 +210,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       // Per-row forms — one per existing row, rendered before the table.
       foreach ($rows as $r):
-        $rid = 'sub-row-' . (int)$r['id'];
+        $rid = 'row-form-sub-' . (int)$r['id'];
       ?>
         <form id="<?= $e($rid) ?>" method="post" action="/cms/subscribers" style="display:none">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
@@ -230,17 +230,17 @@ require __DIR__ . '/../partials/topbar.php';
       ];
       $subRows = [];
       foreach ($rows as $r) {
-          $rid    = 'sub-row-' . (int)$r['id'];
+          $rid    = 'row-form-sub-' . (int)$r['id'];
           $subbed = ($r['unsubscribed_at'] === null || $r['unsubscribed_at'] === '');
           $statusCell = $subbed
               ? '<span class="sub-status sub">subscribed</span>'
               : '<span class="sub-status uns">unsubscribed</span>';
           $toggleBtn = $subbed
-              ? '<button type="submit" name="action" value="unsubscribe" form="' . $e($rid) . '" class="btn-row-action" title="Mark unsubscribed">Unsubscribe</button>'
-              : '<button type="submit" name="action" value="resubscribe" form="' . $e($rid) . '" class="btn-row-action" title="Mark re-subscribed">Re-subscribe</button>';
+              ? '<button type="submit" name="action" value="unsubscribe" form="' . $e($rid) . '" class="btn-sec btn-tiny" title="Mark unsubscribed">Unsubscribe</button>'
+              : '<button type="submit" name="action" value="resubscribe" form="' . $e($rid) . '" class="btn-sec btn-tiny" title="Mark re-subscribed">Re-subscribe</button>';
           $emailAttr = $e((string)$r['email']);
-          $deleteBtn = '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="btn-row-del" title="Delete" aria-label="Delete"'
-                     . ' onclick="return confirm(\'Delete subscriber &quot;' . $emailAttr . '&quot;? This can&#039;t be undone.\');">'
+          $deleteBtn = '<button type="submit" name="action" value="delete" form="' . $e($rid) . '" class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete"'
+                     . ' data-confirm="Delete subscriber &quot;' . $emailAttr . '&quot;? This can&#039;t be undone.">'
                      . '<svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
                      . '</button>';
           $subRows[] = [

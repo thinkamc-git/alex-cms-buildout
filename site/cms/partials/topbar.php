@@ -18,7 +18,7 @@ if (!defined('CMS_PARTIAL_OK')) { http_response_code(404); exit; }
  *
  * The Log out button is a real <form method="post" action="/cms/logout"> per
  * AUTH-SECURITY.md §7 (state-changing requests are POST + CSRF). The mockup
- * uses a static <button class="btn-ghost">; this partial keeps the same
+ * uses a static <button class="btn-sec">; this partial keeps the same
  * class so styling is identical.
  */
 
@@ -73,7 +73,14 @@ if (!isset($breadcrumb_href) || $breadcrumb_href === '') {
   <div class="topbar-right">
     <form method="post" action="/cms/logout" style="display:inline">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
-      <button type="submit" class="btn-ghost">Log out</button>
+      <button type="submit" class="btn-sec">Log out</button>
     </form>
   </div>
 </header>
+<?php
+/* Load shared confirm guard (Batch 2 #48/#49). Loaded from the topbar so every
+   CMS page gets it — any form/button with data-confirm="…" will prompt the
+   user before submitting. Idempotent: cms/partials/table.php also requests
+   the script; the browser dedupes on URL. */
+?>
+<script src="/cms/_assets/confirm.js" defer></script>

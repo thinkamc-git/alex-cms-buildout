@@ -1751,7 +1751,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   color: var(--muted);
   align-items: center;
 }
-.rowform-headers > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Match the input's border(1) + padding(7) inset so the header label
+   sits flush with the input/select text below it. */
+.rowform-headers > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
 .rowform-row {
   display:grid;
   grid-template-columns: var(--rowform-cols, 1fr auto auto);
@@ -1797,12 +1799,15 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 /* Add-row uses the same grid template, distinguished by tint. */
 .rowform-add-row { background:var(--bg-soft); }
 /* Phase 21.7 — hover only on draggable rowform rows (navigation).
-   Drag-targets get 100% black (--primary) — full-strength signal
-   that the row is directly grab-able. Redirects rows aren't
-   reorderable, so they get no hover at all. */
+   Uses outline (OUTSIDE the row's existing border) so the line
+   actually pops over the default --border colour. position+z-index
+   lifts the row so the shadow renders above its neighbours. */
 .rowform-row[draggable="true"]:hover,
 .rowform-row[draggable="true"]:focus-within {
-  border-color: var(--primary);
+  position: relative;
+  z-index: 1;
+  outline: 1px solid var(--primary);
+  outline-offset: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
   cursor: grab;
 }

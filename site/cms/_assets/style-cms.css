@@ -34,6 +34,7 @@
   --ink-08:  rgba(25,23,21,0.08);
   --ink-12:  rgba(25,23,21,0.12);
   --ink-16:  rgba(25,23,21,0.16);
+  --ink-20:  rgba(25,23,21,0.20);
   --ink-18:  rgba(25,23,21,0.18);
   --ink-30:  rgba(25,23,21,0.30);
   --ink-mid: #646361;
@@ -374,23 +375,20 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    min-width guarantees fit and overrides the inline % suggestion. */
 .cms-table td.cell-actions, .cms-table th:last-child { min-width:170px; white-space:nowrap; }
 .cms-table tr:last-child td { border-bottom:none; }
-/* Phase 21.7 — hover treatment ONLY on clickable rows (rows that have
-   row-clickable class, set by the table partial when row.href is passed).
-   Categories / subscribers / post-template rows aren't navigable so
-   they don't get the hover affordance.
-     • Border: 1px solid var(--ink-16)  ← 16% black, OUTSIDE the row
-                                          (knobs: --ink-08 / --ink-12 / --ink-18 / --ink-30)
-     • Shadow: 0 2px 10px rgba(0,0,0,0.07) ← 7% black, 10px blur, 2px down
-                                              (knobs: opacity 0.04–0.10,
-                                              blur 6–16, Y-offset 0–4)
-     • Stacking: position:relative + z-index:1 so the shadow renders
-                 above neighbouring rows instead of being masked.
-   To make the outline render fully outside without table-card clipping
-   it, .table-card drops overflow:hidden when a clickable row is hovered. */
+/* Phase 21.7 — hover treatment: clickable rows get a 20% black outline
+   (matches the .kcard fade-in behaviour in Draft Writing). Draggable
+   rows elsewhere get 100% (--primary) to signal they're directly
+   manipulable. Non-interactive rows (categories, subscribers, etc.)
+   don't get hover at all.
+     • Clickable border: 1px solid var(--ink-20) (20% black)
+     • Drag border:      1px solid var(--primary) (100% black)
+     • Shadow on table rows: 0 2px 10px rgba(0,0,0,0.07)
+     • Stacking: position:relative + z-index:1 so shadow renders above
+                 neighbouring rows. */
 .cms-table tbody tr.row-clickable:hover {
   position: relative;
   z-index: 1;
-  outline: 1px solid var(--ink-16);
+  outline: 1px solid var(--ink-20);
   outline-offset: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
   cursor: pointer;
@@ -517,7 +515,9 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .kgroup-label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); padding:var(--space-8) 0 var(--space-4); border-bottom:var(--rule-faint); margin-bottom:var(--space-4); }
 .kgroup-label:first-child { padding-top:0; }
 .kcard { background:var(--surface); border:1px solid var(--ink-18); border-radius:var(--r-card); padding:var(--space-16); cursor:pointer; transition:border-color 0.15s; box-shadow:0 1px 3px var(--ink-08); }
-.kcard:hover { border-color:var(--primary); }
+/* Phase 21.7 — 20% black on hover (was --primary at 100%) to match
+   the clickable-table-row hover spec. Kanban cards are clickable. */
+.kcard:hover { border-color: var(--ink-20); }
 .kcard-head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-8); margin-bottom:var(--space-8); }
 .kcard-title { font-family:var(--font); font-size:var(--text-meta); font-weight:600; color:var(--primary); line-height:1.4; flex:1; }
 .kcard-summary { font-family:var(--font); font-size:var(--text-tiny); font-weight:400; color:var(--muted); line-height:1.65; margin-top:var(--space-4); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -911,12 +911,12 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
   color:var(--secondary);
   font-weight:500;
 }
-/* Phase 21.7 — match the cms-table row hover spec (12% black border +
-   8px ambient shadow at <8% opacity) so all bordered-row patterns feel
-   the same on hover. */
+/* Phase 21.7 — series parts are draggable, so they get the same 100%
+   black hover as navigation rows. */
 .series-part:hover, .series-part:focus-within {
-  border-color: var(--ink-12);
+  border-color: var(--primary);
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  cursor: grab;
 }
 /* Save button on each series card: hidden until the dirty-flip promotes it
    to .btn-pri (matches rowform + categories). */
@@ -1797,12 +1797,12 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 /* Add-row uses the same grid template, distinguished by tint. */
 .rowform-add-row { background:var(--bg-soft); }
 /* Phase 21.7 — hover only on draggable rowform rows (navigation).
-   Redirects rows aren't reorderable, so they shouldn't read as
-   "interactive on hover" — their action surfaces are the inputs
-   themselves. Drag-targets get the same 16% border + soft shadow
-   as clickable table rows. */
+   Drag-targets get 100% black (--primary) — full-strength signal
+   that the row is directly grab-able. Redirects rows aren't
+   reorderable, so they get no hover at all. */
 .rowform-row[draggable="true"]:hover,
 .rowform-row[draggable="true"]:focus-within {
-  border-color: var(--ink-16);
+  border-color: var(--primary);
   box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  cursor: grab;
 }

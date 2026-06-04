@@ -97,7 +97,7 @@ $catsForThis = $catsForTypes($ftypes);
         <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
       </span>
     </div>
-    <div class="field-group" style="margin-bottom:0">
+    <div class="field-group">
       <label class="field-label">Pick</label>
       <select class="field-input" name="<?= $inputBase ?>[item_ids]">
         <option value="">— pick a published post —</option>
@@ -109,6 +109,24 @@ $catsForThis = $catsForTypes($ftypes);
         <?php endforeach; ?>
       </select>
       <p class="field-hint">One published item, rendered as the section's full-width banner.</p>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Side image</label>
+      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
+          <?php foreach (['auto' => 'Auto', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
+            <button type="button" class="filter-pill <?= $himode === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
+      <p class="field-hint">Auto: use the picked post's hero image (falls back to series card if none). Custom: provide a URL. None: omit the side panel.</p>
+    </div>
+
+    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $himode === 'custom' ? '' : 'display:none' ?>">
+      <label class="field-label">Custom image URL</label>
+      <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg" value="<?= $e($himgUrl) ?>">
     </div>
 
 <?php elseif ($stype === 'curated'): ?>

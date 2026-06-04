@@ -1401,8 +1401,12 @@ a.article-series-pill:hover {
 .index-section--hero {
   padding: 0;
   border-bottom: 1px solid var(--ink-18);
-  background: var(--canvas-raised, #ececea);
+  background: transparent;
 }
+/* Restore breathing room for the section that follows the hero —
+   the global "+ .index-section { padding-top:0 }" collapse was
+   pushing the next section's header flush against the hero rule. */
+.index-section--hero + .index-section { padding-top: var(--space-48); }
 
 .editorial-hero {
   display: grid;
@@ -1410,6 +1414,9 @@ a.article-series-pill:hover {
   gap: var(--space-48);
   padding: var(--space-64) var(--space-48);
   align-items: stretch;
+}
+.editorial-hero.is-solo {
+  grid-template-columns: 1fr;
 }
 
 .editorial-hero-text {

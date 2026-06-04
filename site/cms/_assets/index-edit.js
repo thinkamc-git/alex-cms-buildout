@@ -56,6 +56,14 @@
         if (rowsField) rowsField.style.display = hidden.value === 'carousel' ? 'none' : '';
       }
     }
+    // Hero side-image mode = Custom reveals the URL field.
+    if (hidden && hidden.name && hidden.name.indexOf('[hero_image_mode]') > -1) {
+      var sec2 = pill.closest('[data-section]');
+      if (sec2) {
+        var urlField = sec2.querySelector('[data-hero-image-url]');
+        if (urlField) urlField.style.display = hidden.value === 'custom' ? '' : 'none';
+      }
+    }
     updateSummaryFor(pill.closest('[data-section]'));
   });
 

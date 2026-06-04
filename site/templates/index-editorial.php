@@ -119,6 +119,17 @@ $grid_rows_for = static function (array $sec): int {
           $hSeriesNm  = (string)($hcard['series_name'] ?? '');
           $hSeriesOrd = (int)($hcard['series_order'] ?? 0);
           $hSeriesTot = $hSeriesId > 0 ? count_series_published($hSeriesId) : 0;
+          $hImgMode   = (string)($sec['hero_image_mode'] ?? 'auto');
+          $hImgCustom = (string)($sec['hero_image_url']  ?? '');
+          // Resolve which image (if any) renders on the right side.
+          $hImage = '';
+          if ($hImgMode === 'custom') {
+              $hImage = $hImgCustom;
+          } elseif ($hImgMode === 'auto') {
+              $hImage = (string)($hcard['hero_image'] ?? '');
+          }
+          $hHasSeriesCard = $hImage === '' && $hImgMode !== 'none' && $hSeriesNm !== '';
+          $hHasSide       = $hImage !== '' || $hHasSeriesCard;
           $eyebrowBits = [];
           if ($stitle !== '') $eyebrowBits[] = $stitle;
           if ($hCatLabel !== '') $eyebrowBits[] = $hCatLabel;
@@ -132,7 +143,7 @@ $grid_rows_for = static function (array $sec): int {
           $hDate  = $hPub !== '' ? strtoupper(date('M j, Y', strtotime($hPub))) : '';
           $hMeta  = trim($hDate . ($hRead ? ' · ' . (int)$hRead . ' MIN READ' : ''));
       ?>
-        <div class="editorial-hero">
+        <div class="editorial-hero<?= $hHasSide ? '' : ' is-solo' ?>">
           <div class="editorial-hero-text">
             <?php if ($eyebrowBits !== []): ?>
               <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
@@ -150,23 +161,23 @@ $grid_rows_for = static function (array $sec): int {
               <a href="<?= $e($hUrl) ?>" class="editorial-hero-cta">Read &rarr;</a>
             </div>
           </div>
-          <aside class="editorial-hero-side">
-            <?php if ($hSeriesNm !== ''): ?>
-              <div class="editorial-hero-card">
-                <div class="editorial-hero-card-label">Series</div>
-                <div class="editorial-hero-card-title">
-                  <?= $e($hSeriesNm) ?>
-                  <?php if ($hSeriesOrd > 0 && $hSeriesTot > 0): ?>
-                    <span class="editorial-hero-card-part">&mdash; Part <?= $hSeriesOrd ?> of <?= $hSeriesTot ?></span>
-                  <?php endif; ?>
+          <?php if ($hHasSide): ?>
+            <aside class="editorial-hero-side">
+              <?php if ($hImage !== ''): ?>
+                <div class="editorial-hero-thumb" style="background-image:url('<?= $e($hImage) ?>')"></div>
+              <?php elseif ($hHasSeriesCard): ?>
+                <div class="editorial-hero-card">
+                  <div class="editorial-hero-card-label">Series</div>
+                  <div class="editorial-hero-card-title">
+                    <?= $e($hSeriesNm) ?>
+                    <?php if ($hSeriesOrd > 0 && $hSeriesTot > 0): ?>
+                      <span class="editorial-hero-card-part">&mdash; Part <?= $hSeriesOrd ?> of <?= $hSeriesTot ?></span>
+                    <?php endif; ?>
+                  </div>
                 </div>
-              </div>
-            <?php elseif (!empty($hcard['thumbnail'])): ?>
-              <div class="editorial-hero-thumb" style="background-image:url('<?= $e((string)$hcard['thumbnail']) ?>')"></div>
-            <?php else: ?>
-              <div class="editorial-hero-card editorial-hero-card--empty"></div>
-            <?php endif; ?>
-          </aside>
+              <?php endif; ?>
+            </aside>
+          <?php endif; ?>
         </div>
 
       <?php elseif ($cards !== []): ?>

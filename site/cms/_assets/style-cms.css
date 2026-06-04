@@ -1980,7 +1980,7 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .switch-filled { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; vertical-align: middle; }
 .switch-filled input { opacity: 0; width: 0; height: 0; }
 .switch-filled .slider { position: absolute; cursor: pointer; inset: 0; background: var(--ink-18); border-radius: var(--r-pill); transition: 0.18s; }
-.switch-filled .slider::before { position: absolute; content: ''; width: 14px; height: 14px; left: 3px; top: 3px; background: var(--surface); border-radius: var(--r-pill); transition: 0.18s; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+.switch-filled .slider::before { position: absolute; content: ''; width: 14px; height: 14px; left: 3px; top: 3px; background: var(--surface); border-radius: 1px; transition: 0.18s; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
 .switch-filled input:checked + .slider { background: var(--primary); }
 .switch-filled input:checked + .slider::before { transform: translateX(16px); }
 

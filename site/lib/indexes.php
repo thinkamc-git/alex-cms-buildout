@@ -475,6 +475,7 @@ const INDEX_SECTION_FORMATS = ['grid', 'carousel'];
 const INDEX_SECTION_ROWS    = ['1', '2', '3', '4', 'all'];
 const INDEX_SECTION_SORTS   = ['newest', 'oldest'];
 const INDEX_SECTION_FILTERS = ['types', 'categories'];
+const INDEX_SECTION_HEADERS = ['small', 'big'];
 
 /**
  * Decode a JSON column that may arrive as either a string (raw from
@@ -503,6 +504,7 @@ function _index_section_normalize(array $row): array
     $row['filter_options']  = _index_section_json_decode($row['filter_options']  ?? null);
     $row['filter_show']     = (bool)($row['filter_show'] ?? false);
     $row['position']        = (int)($row['position']     ?? 0);
+    $row['header_style']    = (string)($row['header_style'] ?? 'small');
     $row['item_limit']      = isset($row['item_limit']) && $row['item_limit'] !== null
                               ? (int)$row['item_limit'] : null;
     return $row;
@@ -578,6 +580,9 @@ function save_index_section(array $data): array
 
     $title = trim((string)($data['title'] ?? ($existing['title'] ?? '')));
 
+    $headerStyle = (string)($data['header_style'] ?? ($existing['header_style'] ?? 'small'));
+    if (!in_array($headerStyle, INDEX_SECTION_HEADERS, true)) $headerStyle = 'small';
+
     // Display layer — only meaningful for curated/feed. Hero ignores it
     // but we still store sane defaults so the row is consistent.
     $format = (string)($data['display_format'] ?? ($existing['display_format'] ?? 'grid'));
@@ -648,6 +653,7 @@ function save_index_section(array $data): array
         ':pos'         => $position,
         ':type'        => $type,
         ':title'       => $title !== '' ? $title : null,
+        ':hstyle'      => $headerStyle,
         ':fmt'         => $format,
         ':limit'       => $item_limit,
         ':rows'        => $grid_rows,
@@ -664,13 +670,13 @@ function save_index_section(array $data): array
 
     if ($id === 0) {
         $sql = 'INSERT INTO index_sections
-                  (index_id, position, section_type, title,
+                  (index_id, position, section_type, title, header_style,
                    display_format, item_limit, grid_rows, see_more_label, see_more_target,
                    feed_types, feed_categories, feed_sort,
                    filter_show, filter_by, filter_options,
                    item_ids)
                 VALUES
-                  (:iid, :pos, :type, :title,
+                  (:iid, :pos, :type, :title, :hstyle,
                    :fmt, :limit, :rows, :see_label, :see_target,
                    :ftypes, :fcats, :fsort,
                    :fshow, :fby, :fopts,
@@ -683,6 +689,7 @@ function save_index_section(array $data): array
               position = :pos,
               section_type = :type,
               title = :title,
+              header_style = :hstyle,
               display_format = :fmt,
               item_limit = :limit,
               grid_rows = :rows,

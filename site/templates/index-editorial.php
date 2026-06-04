@@ -62,40 +62,46 @@ $grid_rows_for = static function (array $sec): int {
   <?php foreach ($sections as $sec):
       $stype   = (string)$sec['section_type'];
       $stitle  = (string)($sec['title'] ?? '');
+      $hstyle  = (string)($sec['header_style'] ?? 'small');
       $cards   = $sec['_cards'] ?? [];
+      $count   = count($cards);
       $format  = (string)($sec['display_format'] ?? 'grid');
       $seeLab  = (string)($sec['see_more_label']  ?? '');
       $seeTgt  = (string)($sec['see_more_target'] ?? '');
+      $viewLab = $seeLab !== '' ? $seeLab : 'View all';
       if ($cards === [] && $stype !== 'feed') continue; // empty hero / curated → skip silently
   ?>
     <section class="index-section index-section--<?= $e($stype) ?>">
-      <?php if ($stitle !== '' || ($seeLab !== '' && $seeTgt !== '')): ?>
-        <div class="index-section-header">
-          <?php if ($stitle !== ''): ?>
-            <h2 class="index-section-title"><?= $e($stitle) ?></h2>
-          <?php endif; ?>
-          <?php if ($seeLab !== '' && $seeTgt !== ''): ?>
-            <a class="index-section-see-more" href="<?= $e($seeTgt) ?>"><?= $e($seeLab) ?> →</a>
-          <?php endif; ?>
-        </div>
+      <?php if ($stype !== 'hero' && $stitle !== ''): ?>
+        <?php if ($hstyle === 'big'): ?>
+          <header class="index-section-header is-big">
+            <h2 class="index-section-title-big"><?= render_title_emphasis($stitle) ?></h2>
+            <?php if ($seeTgt !== ''): ?>
+              <a class="index-section-view-all" href="<?= $e($seeTgt) ?>"><?= $e($viewLab) ?> →</a>
+            <?php endif; ?>
+          </header>
+        <?php else: ?>
+          <div class="group-header">
+            <span class="group-header-eyebrow"><?= $e($stitle) ?> &mdash; <?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
+            <?php if ($seeTgt !== ''): ?>
+              <a class="group-header-link" href="<?= $e($seeTgt) ?>"><?= $e($viewLab) ?> →</a>
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
       <?php endif; ?>
 
       <?php
-      // Visitor pills for feed sections.
+      // Visitor pills for feed sections — render bare under the title,
+      // no .controller wrapper / "Type" label.
       $pills = $sec['_pills'] ?? null;
       if ($pills && !empty($pills['show']) && $pills['pills'] !== []):
           $mode = (string)$pills['by'];
       ?>
-        <div class="controller" data-pill-mode="<?= $e($mode) ?>">
-          <div class="controller-row">
-            <span class="ctrl-label"><?= $mode === 'types' ? 'Type' : 'Topic' ?></span>
-            <div class="pill-group">
-              <button type="button" class="fp on" data-cat="all">All</button>
-              <?php foreach ($pills['pills'] as $p): ?>
-                <button type="button" class="fp" data-cat="<?= $e((string)$p['key']) ?>"><?= $e((string)$p['label']) ?></button>
-              <?php endforeach; ?>
-            </div>
-          </div>
+        <div class="index-section-pills" data-pill-mode="<?= $e($mode) ?>">
+          <button type="button" class="fp on" data-cat="all">All</button>
+          <?php foreach ($pills['pills'] as $p): ?>
+            <button type="button" class="fp" data-cat="<?= $e((string)$p['key']) ?>"><?= $e((string)$p['label']) ?></button>
+          <?php endforeach; ?>
         </div>
       <?php endif; ?>
 
@@ -137,7 +143,7 @@ $grid_rows_for = static function (array $sec): int {
   <script>
   (function () {
     'use strict';
-    document.querySelectorAll('.index-section .controller').forEach(function (ctrl) {
+    document.querySelectorAll('.index-section .index-section-pills').forEach(function (ctrl) {
       var section = ctrl.closest('.index-section');
       if (!section) return;
       var attr  = ctrl.getAttribute('data-pill-mode') === 'types' ? 'type' : 'category';

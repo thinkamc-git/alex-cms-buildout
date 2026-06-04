@@ -144,6 +144,7 @@ function save_editorial_sections_from_post(int $index_id, array $posted): void
             'position'        => $position,
             'section_type'    => $type,
             'title'           => (string)($row['title'] ?? ''),
+            'header_style'    => (string)($row['header_style'] ?? 'small'),
             'display_format'  => (string)($row['display_format'] ?? 'grid'),
             'item_limit'      => ($row['item_limit'] ?? '') !== '' ? (int)$row['item_limit'] : null,
             'grid_rows'       => (string)($row['grid_rows'] ?? 'all'),
@@ -400,6 +401,7 @@ require __DIR__ . '/../partials/topbar.php';
               $sid     = (int)$s['id'];
               $stype   = (string)$s['section_type'];
               $stitle  = (string)($s['title'] ?? '');
+              $hstyle  = (string)($s['header_style'] ?? 'small');
               $items   = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
               $ftypes  = is_array($s['feed_types'] ?? null) ? $s['feed_types'] : [];
               $fcats   = is_array($s['feed_categories'] ?? null) ? $s['feed_categories'] : [];
@@ -434,7 +436,7 @@ require __DIR__ . '/../partials/topbar.php';
                 'item_limit' => '', 'see_more_label' => '', 'see_more_target' => '',
                 'feed_sort' => 'newest',
             ];
-            $sid = 0; $stype = $tplType; $stitle = ''; $items = [];
+            $sid = 0; $stype = $tplType; $stitle = ''; $hstyle = 'small'; $items = [];
             $ftypes = []; $fcats = []; $fopts = []; $fshow = false; $fby = 'types';
             $fmt = 'grid'; $gridR = 'all'; $limit = ''; $seeLab = ''; $seeTgt = '';
             $fsort = 'newest';

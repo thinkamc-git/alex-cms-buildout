@@ -11,6 +11,7 @@
  *                          Templates pass the literal string '__TPL__' so the
  *                          JS can str-replace it to the real index on clone.
  *   $sid     int           Section id (0 for new / template).
+ *   $hstyle  string        'small' | 'big' — section header rendering.
  *   $stype   string        'hero' | 'curated' | 'feed'
  *   $stitle  string
  *   $items   int[]         picked content ids (hero = 0 or 1 id, curated = N).
@@ -122,6 +123,17 @@ $catsForThis = $catsForTypes($ftypes);
           </span>
         </div>
         <div class="field-group">
+          <label class="field-label">Header</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[header_style]">
+              <?php foreach (['small' => 'Small', 'big' => 'Big'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hstyle === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[header_style]" value="<?= $e($hstyle) ?>">
+        </div>
+        <div class="field-group">
           <label class="field-label">Format</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[display_format]">
@@ -144,11 +156,11 @@ $catsForThis = $catsForTypes($ftypes);
           <input type="hidden" name="<?= $inputBase ?>[grid_rows]" value="<?= $e($gridR) ?>">
         </div>
         <div class="field-group">
-          <label class="field-label">See more label</label>
-          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="See more" value="<?= $e($seeLab) ?>">
+          <label class="field-label">View all label</label>
+          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="View all" value="<?= $e($seeLab) ?>">
         </div>
         <div class="field-group" style="margin-bottom:0">
-          <label class="field-label">See more target</label>
+          <label class="field-label">View all target</label>
           <div class="see-target-row">
             <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
               <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
@@ -235,6 +247,17 @@ $catsForThis = $catsForTypes($ftypes);
           </span>
         </div>
         <div class="field-group">
+          <label class="field-label">Header</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[header_style]">
+              <?php foreach (['small' => 'Small', 'big' => 'Big'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hstyle === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[header_style]" value="<?= $e($hstyle) ?>">
+        </div>
+        <div class="field-group">
           <label class="field-label">Format</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[display_format]">
@@ -257,11 +280,11 @@ $catsForThis = $catsForTypes($ftypes);
           <input type="hidden" name="<?= $inputBase ?>[grid_rows]" value="<?= $e($gridR) ?>">
         </div>
         <div class="field-group">
-          <label class="field-label">See more label</label>
-          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="See more" value="<?= $e($seeLab) ?>">
+          <label class="field-label">View all label</label>
+          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="View all" value="<?= $e($seeLab) ?>">
         </div>
         <div class="field-group" style="margin-bottom:0">
-          <label class="field-label">See more target</label>
+          <label class="field-label">View all target</label>
           <div class="see-target-row">
             <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
               <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>

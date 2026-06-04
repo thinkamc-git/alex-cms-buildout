@@ -1,7 +1,7 @@
 # alexmchong.ca CMS — System Structure
 
 **Status:** Schema locked. Ready to build.
-**Reference files:** `docs/design-mockups/cms-ui.html` (canonical UI), `docs/BLOCKS.md` (block contract), `site/_templates/` (page rendering templates), `site/_design-system/` (tokens + components)
+**Reference files:** `site/cms/` (the live admin UI — canonical), `docs/BLOCKS.md` (block contract), `site/_templates/` (page rendering templates), `site/_design-system/` (tokens + components). *(The old `docs/design-mockups/cms-ui.html` mockup is retired/archived in `docs/design-mockups/_completed/` — not a reference.)*
 **Note:** `site/_pages/` in this repo holds standalone marketing pages (about, coaching, landing, etc.) and is **not** part of the CMS content flow. Do not confuse it with the page-rendering templates in `site/_templates/`.
 
 ---
@@ -39,7 +39,7 @@ The CMS is built on Alex M. Chong's personal design system. The canonical refere
 
 ### Tokens used in the CMS
 
-The CMS inlines a copy of the design-system tokens at the top of `cms-ui.html`'s `<style>` block. Two CMS-specific tokens are added beyond the public design system:
+The CMS layers two CMS-specific tokens on top of the public design system (defined in `site/cms/_assets/style-cms.css`, which loads after `/_ds/css/*`):
 
 | Token | Value | Purpose |
 |---|---|---|
@@ -297,7 +297,7 @@ Sub-templates have **no tabs** — they show one panel: their applicable blocks 
 
 ### Per-template block matrix
 
-See `docs/BLOCKS.md` §6. The mockup's `blockMatrix` JS object in `cms-ui.html` is the runtime mirror.
+See `docs/BLOCKS.md` §6. The runtime mirror is `block_matrix()` / the block data in `site/lib/blocks_data.php`.
 
 ---
 
@@ -843,7 +843,7 @@ When the list outgrows manual management (typical threshold: a few hundred subsc
 
 | File / Folder | Role |
 |---|---|
-| `docs/design-mockups/cms-ui.html` | Canonical CMS UI mockup. Build PHP against this. |
+| `site/cms/` (views + partials + `_assets/style-cms.css`) | The live CMS admin UI — **source of truth**. (The old `cms-ui.html` mockup is retired/archived in `docs/design-mockups/_completed/`.) |
 | `docs/BLOCKS.md` | Block contract — source of truth for what blocks exist, their slugs, modes, and rendering rules. |
 | `site/_templates/article.html` | Static preview of the article template with annotated blocks. |
 | `site/_templates/layouts.html` | Multi-layout reference (article / journal / live session / experiment renderings). |

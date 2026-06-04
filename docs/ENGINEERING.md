@@ -308,7 +308,7 @@ This section is written specifically for a Claude instance working in this repo 
 ### 16.3 When unsure
 
 - If the spec is silent, **ask**. Don't invent.
-- If you find a contradiction between `CMS-STRUCTURE.md`, `BLOCKS.md`, and `cms-ui.html` (the three coupled files per `CLAUDE.md`), stop and surface it. Don't pick a side silently.
+- If you find a contradiction between `CMS-STRUCTURE.md`, `BLOCKS.md`, and the live CMS editor views under `site/cms/` (the three coupled surfaces per `CLAUDE.md`), stop and surface it. Don't pick a side silently. (The old `cms-ui.html` mockup is retired — don't treat it as the tiebreaker; `site/cms/` is the source of truth.)
 - If a rule here seems wrong for a specific case, raise it as a proposed exception in this file rather than just breaking the rule.
 
 ### 16.4 What "done" looks like

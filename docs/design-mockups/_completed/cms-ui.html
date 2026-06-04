@@ -7,19 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Canonical design system modules — loaded first; the inline <style>
-     block below provides CMS-specific overrides (bumped type scale,
-     --canvas-raised / --live-green / --stage-* tokens, and the
-     CMS-admin view styles that aren't yet promoted to the canonical DS).
-     Path is relative because this file lives outside the deployed tree. -->
-<link rel="stylesheet" href="../../site/_design-system/css/tokens.css">
-<link rel="stylesheet" href="../../site/_design-system/css/base.css">
-<link rel="stylesheet" href="../../site/_design-system/css/typography.css">
-<link rel="stylesheet" href="../../site/_design-system/css/shell.css">
-<link rel="stylesheet" href="../../site/_design-system/css/components.css">
-<link rel="stylesheet" href="../../site/_design-system/css/tables.css">
-<link rel="stylesheet" href="../../site/_design-system/css/status.css">
-<link rel="stylesheet" href="../../site/_design-system/css/views.css">
 <style>
 /* ============================================================
    alexmchong.ca CMS — Hi-Fi v2
@@ -2460,7 +2447,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
       <div class="view-header">
         <div class="view-header-left">
           <div class="view-title">/digital-garden</div>
-          <div class="view-subtitle">Editorial page — page title + an ordered stack of Hero / Curated / Feed sections.</div>
+          <div class="view-subtitle">Editorial index page — configure the layout, hero feature, sections, and content feed for this page.</div>
         </div>
         <div class="view-header-actions"><button class="btn-sec">Preview</button><button class="btn-pri">Save</button></div>
       </div>
@@ -2499,141 +2486,50 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
             </div>
           </div>
 
-          <div class="page-canvas-label" style="margin-top:var(--space-4)">
-            Sections <span style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">drag to reorder</span>
-          </div>
-
-          <!-- Section · Hero -->
           <div class="page-block">
             <div class="page-block-hd open" onclick="toggleSection(this)">
-              <span class="drag-handle" style="margin-right:var(--space-8)">⠿</span>
-              <span class="page-block-label">◆ Hero</span>
-              <span class="page-block-hint">UX is not UI · bleed-dark · post hero</span>
+              <span class="page-block-label">Hero Feature</span>
+              <span class="page-block-hint">1 article</span>
               <span class="page-block-chevron">▾</span>
             </div>
             <div class="page-block-body">
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Eyebrow Prefix <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">optional · prefixes the category line</span></div>
-                <input class="field-input" type="text" placeholder="e.g. Featured" value="Featured">
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Select a post</div>
-                <div class="hero-sel-row">
-                  <div class="hero-thumb">📄</div>
-                  <div class="hero-info"><div class="ht">UX is not UI — and it never was</div><div class="hs">/writing/ux-is-not-ui · UX Industry · Live</div></div>
-                  <span class="hero-change">Change</span>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Layout</div>
-                <div class="row-sel">
-                  <div class="row-opt" onclick="setRowOpt(this)">Plain</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Image Container</div>
-                  <div class="row-opt active" onclick="setRowOpt(this)">Bleed Dark</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Bleed Light</div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Background <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">only for Plain / Image Container</span></div>
-                <div class="row-sel">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Transparent</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Solid White</div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:0">
-                <div class="field-label">Image source</div>
-                <div class="row-sel">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Post Hero</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Custom</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">None</div>
-                </div>
+              <div class="hero-sel-row">
+                <div class="hero-thumb">📄</div>
+                <div class="hero-info"><div class="ht">UX is not UI — and it never was</div><div class="hs">/writing/ux-is-not-ui · UX Industry · Live</div></div>
+                <span class="hero-change">Change</span>
               </div>
             </div>
           </div>
 
-          <!-- Section · Curated -->
           <div class="page-block">
             <div class="page-block-hd" onclick="toggleSection(this)">
-              <span class="drag-handle" style="margin-right:var(--space-8)">⠿</span>
-              <span class="page-block-label">◆ Curated</span>
-              <span class="page-block-hint">3 picks · grid · 2 rows · see more →</span>
+              <span class="page-block-label">Featured Articles</span>
+              <span class="page-block-hint">3 selected</span>
               <span class="page-block-chevron">▾</span>
             </div>
             <div class="page-block-body">
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Section Title</div>
-                <input class="field-input" type="text" value="Recent *thinking*">
+              <div class="featured-list">
+                <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">What can't be automated</span><span class="fi-type">Article</span><span class="fi-remove">×</span></div>
+                <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">Design-Native Spec Workflow</span><span class="fi-type">Experiment</span><span class="fi-remove">×</span></div>
+                <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">Designing for Human Agency</span><span class="fi-type">Live Session</span><span class="fi-remove">×</span></div>
               </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Header style</div>
-                <div class="row-sel">
-                  <div class="row-opt" onclick="setRowOpt(this)">Tiny</div>
-                  <div class="row-opt active" onclick="setRowOpt(this)">Large</div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Picks <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">drag to reorder</span></div>
-                <div class="featured-list">
-                  <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">What can't be automated</span><span class="fi-type">Article</span><span class="fi-remove">×</span></div>
-                  <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">Design-Native Spec Workflow</span><span class="fi-type">Experiment</span><span class="fi-remove">×</span></div>
-                  <div class="featured-item"><span class="drag-handle">⠿</span><span class="fi-title">Designing for Human Agency</span><span class="fi-type">Live Session</span><span class="fi-remove">×</span></div>
-                </div>
-                <button class="btn-add-dashed">+ Add Content</button>
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Display</div>
-                <div class="row-sel" style="margin-bottom:var(--space-8)">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Grid</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Carousel</div>
-                </div>
-                <div class="row-sel">
-                  <div class="row-opt" onclick="setRowOpt(this)">1 row</div>
-                  <div class="row-opt active" onclick="setRowOpt(this)">2 rows</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">3 rows</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">4 rows</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">All</div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:0">
-                <div class="field-label">See more <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">optional · trailing card</span></div>
-                <input class="field-input" type="text" placeholder="Target — index slug or URL" value="/writing" style="margin-bottom:var(--space-8)">
-                <input class="field-input" type="text" placeholder="Custom label" value="">
-              </div>
+              <button class="btn-add-dashed">+ Add Content</button>
             </div>
           </div>
 
-          <!-- Section · Feed -->
           <div class="page-block">
             <div class="page-block-hd" onclick="toggleSection(this)">
-              <span class="drag-handle" style="margin-right:var(--space-8)">⠿</span>
-              <span class="page-block-label">◆ Feed</span>
-              <span class="page-block-hint">all types · newest · grid · 2 rows · filter row on</span>
+              <span class="page-block-label">Content Feed</span>
+              <span class="page-block-hint">auto · all types · newest · 2 rows</span>
               <span class="page-block-chevron">▾</span>
             </div>
             <div class="page-block-body">
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Section Title <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">optional</span></div>
-                <input class="field-input" type="text" value="Latest">
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Header style</div>
-                <div class="row-sel">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Tiny</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Large</div>
-                </div>
-              </div>
-              <div class="page-canvas-label" style="margin-top:0;font-size:var(--text-micro);color:var(--muted);text-transform:uppercase;letter-spacing:0.04em">Content query</div>
               <div class="source-builder">
-                <div class="source-row"><span class="source-row-label">Types</span><div class="source-chips"><div class="source-chip on" onclick="toggleChip(this)">Articles</div><div class="source-chip on" onclick="toggleChip(this)">Journals</div><div class="source-chip on" onclick="toggleChip(this)">Experiments</div><div class="source-chip on" onclick="toggleChip(this)">Live Sessions</div></div></div>
-                <div class="source-row"><span class="source-row-label">Categories</span><div class="source-chips"><div class="source-chip on" onclick="toggleChip(this)">All</div><div class="source-chip" onclick="toggleChip(this)">UX Industry</div><div class="source-chip" onclick="toggleChip(this)">Design Leadership</div><div class="source-chip" onclick="toggleChip(this)">AI Era</div></div></div>
-                <div class="source-row"><span class="source-row-label">Sort</span><div class="source-chips"><div class="source-chip on" onclick="setChipGroup(this)">Newest</div><div class="source-chip" onclick="setChipGroup(this)">Oldest</div></div></div>
+                <div class="source-row"><span class="source-row-label">Type</span><div class="source-chips"><div class="source-chip on" onclick="toggleChip(this)">Articles</div><div class="source-chip on" onclick="toggleChip(this)">Journals</div><div class="source-chip on" onclick="toggleChip(this)">Experiments</div><div class="source-chip on" onclick="toggleChip(this)">Live Sessions</div></div></div>
+                <div class="source-row"><span class="source-row-label">Sort</span><div class="source-chips"><div class="source-chip on" onclick="setChipGroup(this)">Newest</div><div class="source-chip" onclick="setChipGroup(this)">Oldest</div><div class="source-chip" onclick="setChipGroup(this)">Manual</div></div></div>
               </div>
-              <div class="page-canvas-label" style="margin-top:var(--space-16);font-size:var(--text-micro);color:var(--muted);text-transform:uppercase;letter-spacing:0.04em">Display</div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="row-sel" style="margin-bottom:var(--space-8)">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Grid</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Carousel</div>
-                </div>
+              <div class="field-group" style="margin-bottom:0">
+                <div class="field-label">Rows shown</div>
                 <div class="row-sel">
                   <div class="row-opt" onclick="setRowOpt(this)">1</div>
                   <div class="row-opt active" onclick="setRowOpt(this)">2</div>
@@ -2642,37 +2538,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
                   <div class="row-opt" onclick="setRowOpt(this)">All</div>
                 </div>
               </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">See more <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">optional · trailing card</span></div>
-                <input class="field-input" type="text" placeholder="Target — index slug or URL" value="">
-              </div>
-              <div class="page-canvas-label" style="margin-top:0;font-size:var(--text-micro);color:var(--muted);text-transform:uppercase;letter-spacing:0.04em">Visitor filter</div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label" style="display:flex;align-items:center;gap:var(--space-12)">
-                  Show filter row
-                  <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:var(--space-16)">
-                <div class="field-label">Pills represent</div>
-                <div class="row-sel">
-                  <div class="row-opt active" onclick="setRowOpt(this)">Types</div>
-                  <div class="row-opt" onclick="setRowOpt(this)">Categories</div>
-                </div>
-              </div>
-              <div class="field-group" style="margin-bottom:0">
-                <div class="field-label">Visible pills <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">hand-pick — empty = auto-derive from query</span></div>
-                <div class="source-chips"><div class="source-chip on" onclick="toggleChip(this)">All</div><div class="source-chip on" onclick="toggleChip(this)">Articles</div><div class="source-chip on" onclick="toggleChip(this)">Journals</div><div class="source-chip" onclick="toggleChip(this)">Experiments</div><div class="source-chip" onclick="toggleChip(this)">Live Sessions</div></div>
-              </div>
             </div>
           </div>
 
-          <div class="row-btn-group" style="margin-top:var(--space-8)">
-            <button class="btn-sec">+ Hero</button>
-            <button class="btn-sec">+ Curated</button>
-            <button class="btn-sec">+ Filtered</button>
-            <button class="btn-sec" disabled style="opacity:0.5;cursor:not-allowed">+ Hero Multi</button>
-          </div>
+          <button class="btn-add-dashed">+ Add Section</button>
         </div>
 
         <div class="row-btn-group" style="padding-top:var(--space-16);border-top:var(--rule-faint);margin-top:var(--space-8)">
@@ -2687,7 +2556,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
       <div class="view-header">
         <div class="view-header-left">
           <div class="view-title">/thoughts</div>
-          <div class="view-subtitle">Basic Listing — title, optional subtitle, and a single content feed.</div>
+          <div class="view-subtitle">Editorial index page — configure the layout, title, and content feed for this page.</div>
         </div>
         <div class="view-header-actions"><button class="btn-sec">Preview</button><button class="btn-pri">Save</button></div>
       </div>
@@ -2784,7 +2653,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
             <div class="idx-layout-opt active" onclick="setLayout(this)">Basic Listing</div>
             <div class="idx-layout-opt" onclick="setLayout(this)">Editorial Page</div>
           </div>
-          <div class="field-note-box"><strong>Basic Listing</strong> — title, optional description, and a single content feed. <strong>Editorial Page</strong> — page title + an ordered stack of Hero, Curated, and Feed sections.</div>
+          <div class="field-note-box"><strong>Basic Listing</strong> — title, optional description, and a content feed. <strong>Editorial Page</strong> — hero feature, curated sections, and a content feed below.</div>
         </div>
         <div class="row-btn-group">
           <button class="btn-save">Create Index</button>

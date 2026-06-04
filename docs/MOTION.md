@@ -2,7 +2,7 @@
 
 Implementation contract for the CMS load animation — content fades-and-rises into
 place on page load instead of snapping in fully formed. Tuned against the real
-admin chrome in the `docs/motion-mock.html` sandbox (archived once this spec is
+admin chrome in the `docs/design-mockups/motion-mock.html` sandbox (archived once this spec is
 built).
 
 **Status:** locked, ready to implement. **Scope:** CMS admin (`site/cms/`) — plus a public-side fade-in for the HTML-body article loader (§5 below).
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 ## 6. Provenance
 
-Tuned in `docs/motion-mock.html` (temporary sandbox, references live CMS
-stylesheets). Archive or delete that file once this spec is implemented — it is
-not deployed (`docs/` never ships).
+Tuned in `docs/design-mockups/motion-mock.html` (temporary sandbox, references
+live CMS stylesheets). Once this spec is implemented, move it to
+`docs/design-mockups/_completed/` — it is not deployed (`docs/` never ships).
 

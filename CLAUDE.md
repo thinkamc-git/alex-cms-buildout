@@ -70,9 +70,11 @@ alex-cms-buildout/
 │   ├── BLOCKS.md                   ← block contract (slugs, modes, composition)
 │   ├── DESIGN.md                   ← design system brief
 │   ├── onboarding/                 ← Phase 0 lessons for Alex
-│   └── design-mockups/
-│       ├── cms-ui.html             ← canonical CMS UI mockup (admin panel)
-│       └── landing-postcms.html    ← future-nav landing canvas (not live)
+│   └── design-mockups/             ← design sandboxes (NOT references once built)
+│       ├── motion-mock.html        ← active sandbox (CMS load-motion design)
+│       ├── landing-postcms.html    ← future-nav landing canvas (not live)
+│       └── _completed/             ← retired mockups · archived, do NOT reference
+│           └── cms-ui.html         ← pre-build CMS mockup · superseded by site/cms/
 │
 └── site/                           ← deployable source · rsynced to DreamHost
     ├── _pages/                     ← standalone marketing pages (NOT CMS)
@@ -95,20 +97,22 @@ The split is intentional: anything under `site/` deploys; anything outside it do
 
 ## ⚠️ The most important rule
 
-**`docs/design-mockups/cms-ui.html`, `site/_templates/`, and `docs/BLOCKS.md` are tightly linked.** A change in one almost always requires matching changes in the other two.
+**`docs/BLOCKS.md`, `site/_templates/`, and the CMS editor views under `site/cms/` are tightly linked.** A change in one almost always requires matching changes in the other two.
 
 - **`docs/BLOCKS.md`** is the **contract** — it defines every block, its slug, its toggleability mode, its composition (which DB fields it reads), and its rendering rules.
 - **`site/_templates/article.html` and `site/_templates/layouts.html`** are the **rendering** — they're the actual HTML that the public site displays. The CMS feeds data into these.
-- **`docs/design-mockups/cms-ui.html`** is the **editor** — the CMS admin panel where the author creates and edits the content that flows into the templates.
+- **`site/cms/views/*-edit.php` (+ `site/cms/partials/`, `site/cms/_assets/style-cms.css`)** are the **editor** — the live CMS admin forms where the author creates and edits the content that flows into the templates. **This is the source of truth for the admin UI.**
 
 If you change a block (add one, rename a slug, change visibility behaviour, alter composition), you must:
 
 1. Update `docs/BLOCKS.md` (the contract).
 2. Update `site/_templates/article.html` and/or `site/_templates/layouts.html` (the rendering).
-3. Update `docs/design-mockups/cms-ui.html` (the editor — `blocks[]` array, `blockMatrix`, relevant form fields).
+3. Update the relevant CMS editor view(s) under `site/cms/views/` (the editor).
 4. Update `docs/CMS-STRUCTURE.md` if the change affects the schema, render rules, or any documented decision.
 
 If a change touches only one of the three and not the others, it's almost certainly incomplete.
+
+> **Retired — do not use as a reference.** `docs/design-mockups/cms-ui.html` was the *pre-build* mockup that originally played the "editor" role above. The real CMS (`site/cms/`) has since diverged from it, and the mockup is **not** kept in sync — treating it as a source of truth produced styling that didn't match the real admin. It's archived, unmaintained, at `docs/design-mockups/_completed/cms-ui.html` (pristine original, for history only). Build the admin UI against `site/cms/`, never the mockup.
 
 ---
 
@@ -126,11 +130,11 @@ If a change touches only one of the three and not the others, it's almost certai
 
 | Want to… | Touch… |
 |---|---|
-| Tweak the CMS admin UI (a button, a form, a view) | `docs/design-mockups/cms-ui.html` only |
+| Tweak the CMS admin UI (a button, a form, a view) | the relevant view in `site/cms/views/` (+ `site/cms/_assets/style-cms.css`) |
 | Tweak how an article renders on the public site | `site/_templates/article.html` and `site/_templates/style-articles.css` |
-| Change what a block is or how it behaves | `docs/BLOCKS.md` + `site/_templates/*.html` + `docs/design-mockups/cms-ui.html` (all three — see rule above) |
-| Add a new content type | `docs/CMS-STRUCTURE.md`, new template files in `site/_templates/`, new views in `docs/design-mockups/cms-ui.html`, schema change |
-| Update the design system tokens | `site/_design-system/system.css` (and verify the CMS mockup's inlined token block stays in sync) |
+| Change what a block is or how it behaves | `docs/BLOCKS.md` + `site/_templates/*.html` + the relevant `site/cms/views/*-edit.php` (all three — see rule above) |
+| Add a new content type | `docs/CMS-STRUCTURE.md`, new template files in `site/_templates/`, new views in `site/cms/views/`, schema change |
+| Update the design system tokens | `site/_design-system/css/tokens.css` |
 | Add or edit a marketing page | `site/_pages/<page>.html` and `site/_pages/_layout/style-pages.css` |
 | Change something about the database schema | `docs/CMS-STRUCTURE.md` §9, then plan the migration |
 

@@ -14,7 +14,9 @@ in `docs/design-mockups/`. Every block, slug, field mapping, and toggleability m
 listed here must be respected by the eventual PHP templates and the CMS
 toggle UI. Changes to a block here must be paired with corresponding
 changes in `site/_templates/article.html` (and `site/_templates/layouts.html`)
-plus the CMS mockup `docs/design-mockups/cms-ui.html` — these three files are linked.
+plus the live CMS editor views under `site/cms/views/` — these three are linked.
+(The old mockup `docs/design-mockups/cms-ui.html` is retired/archived in
+`docs/design-mockups/_completed/` — `site/cms/` is the source of truth, not it.)
 
 **The companion file is `site/_templates/article.html`**, which visually
 demonstrates every block in two complementary forms:

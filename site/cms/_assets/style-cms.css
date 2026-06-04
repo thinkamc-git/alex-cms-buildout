@@ -1942,12 +1942,25 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    narrow per column, so long category lists need to flow onto a new line. */
 #view-index-edit .filter-group { flex-wrap: wrap; row-gap: 6px; }
 
-/* Drag drop-indicator: a 2px primary line above the would-be neighbor
-   (or below the last sibling when dragging past the end). */
-.sec-card.is-drop-before { box-shadow: 0 -2px 0 0 var(--primary), 0 1px 3px var(--ink-08); }
-.sec-card.is-drop-after  { box-shadow:  0 2px 0 0 var(--primary), 0 1px 3px var(--ink-08); }
-tr.is-drop-before > td:first-child { box-shadow: inset 0 2px 0 0 var(--primary); }
-tr.is-drop-after  > td:first-child { box-shadow: inset 0 -2px 0 0 var(--primary); }
+/* Drag drop-indicator: a real 2px line that sits in the gap between
+   the cards where the dragging element will land. The JS injects a
+   .drop-line div in that position; it occupies the gap's vertical
+   space (rendered between siblings, no overlap on either card). */
+.drop-line { height: 2px; background: var(--primary); border-radius: 2px; margin: 0; }
+.sec-list .drop-line { margin: -1px 0; }
+.posts-table tr.drop-line-row > td { padding: 0; border: none; height: 2px; background: var(--primary); }
+
+/* New-section flash: brief border highlight + soft inset so the user
+   sees where the new card landed. */
+.sec-card.is-fresh { animation: secCardFlash 1.2s ease-out 1; }
+@keyframes secCardFlash {
+  0%   { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent), 0 1px 3px var(--ink-08); }
+  100% { border-color: var(--ink-18); box-shadow: 0 1px 3px var(--ink-08); }
+}
+
+/* Native <select> chevron needs breathing room — .field-input's default
+   horizontal padding is 12px which sits too tight under the chevron. */
+#view-index-edit select.field-input { padding-right: 32px; }
 
 /* See-more target picker: type-select (1/3) + value-input (2/3) side by side. */
 .see-target-row { display: grid; grid-template-columns: 1fr 2fr; gap: var(--space-8); align-items: start; }

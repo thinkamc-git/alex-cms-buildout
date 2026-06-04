@@ -282,13 +282,30 @@
       dragging = null;
       if (onReorder) onReorder();
     });
+    // Drop-line placeholder — a real 2px line element inserted into the
+    // gap where the dragging item will land. Cleared on drop / dragend.
+    function makeDropLine() {
+      // tr-style for posts table needs a <tr> wrapper; everything else
+      // uses a plain <div>.
+      if (container.tagName === 'TBODY') {
+        var tr = document.createElement('tr');
+        tr.className = 'drop-line-row';
+        var td = document.createElement('td');
+        td.setAttribute('colspan', '6');
+        tr.appendChild(td);
+        return tr;
+      }
+      var d = document.createElement('div');
+      d.className = 'drop-line';
+      return d;
+    }
+    function clearDropLine() {
+      container.querySelectorAll('.drop-line, .drop-line-row').forEach(function (el) { el.remove(); });
+    }
     container.addEventListener('dragover', function (e) {
       if (!dragging) return;
       e.preventDefault();
-      // Clear stale drop indicators.
-      container.querySelectorAll('.is-drop-before, .is-drop-after').forEach(function (el) {
-        el.classList.remove('is-drop-before', 'is-drop-after');
-      });
+      clearDropLine();
       var siblings = Array.prototype.slice.call(
         container.querySelectorAll(itemSel + ':not(.is-dragging)')
       );
@@ -296,19 +313,25 @@
         var box = sib.getBoundingClientRect();
         return e.clientY < box.top + box.height / 2;
       });
-      if (after) after.classList.add('is-drop-before');
-      else if (siblings.length) siblings[siblings.length - 1].classList.add('is-drop-after');
+      var line = makeDropLine();
+      if (after) container.insertBefore(line, after);
+      else       container.appendChild(line);
     });
     container.addEventListener('drop', function (e) {
       e.preventDefault();
       if (!dragging) return;
-      var before = container.querySelector('.is-drop-before');
-      var after  = container.querySelector('.is-drop-after');
-      if (before) container.insertBefore(dragging, before);
-      else        container.appendChild(dragging);
-      container.querySelectorAll('.is-drop-before, .is-drop-after').forEach(function (el) {
-        el.classList.remove('is-drop-before', 'is-drop-after');
-      });
+      var line = container.querySelector('.drop-line, .drop-line-row');
+      if (line) {
+        container.insertBefore(dragging, line);
+        line.remove();
+      } else {
+        container.appendChild(dragging);
+      }
+    });
+    container.addEventListener('dragleave', function (e) {
+      // Only clear when leaving the container entirely (not when moving
+      // between children — dragleave fires on every child boundary).
+      if (e.target === container) clearDropLine();
     });
   }
 

@@ -778,6 +778,7 @@ function list_section_feed(array $section, array $excludeIds = []): array
     }
     $where = 'c.type IN (' . implode(',', $typePlaceholders) . ')';
 
+    $catJoin = '';
     if ($cats !== []) {
         $catPlaceholders = [];
         foreach ($cats as $i => $c) {
@@ -785,7 +786,10 @@ function list_section_feed(array $section, array $excludeIds = []): array
             $catPlaceholders[] = $k;
             $params[$k] = $c;
         }
-        $where .= ' AND c.category IN (' . implode(',', $catPlaceholders) . ')';
+        // Match the same pattern list_articles uses: join the primary
+        // category row and filter on its slug.
+        $catJoin = 'LEFT JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1';
+        $where  .= ' AND cc.category IN (' . implode(',', $catPlaceholders) . ')';
     }
 
     $sort = (string)($section['feed_sort'] ?? 'newest');
@@ -800,6 +804,7 @@ function list_section_feed(array $section, array $excludeIds = []): array
                    s.name AS series_name, s.slug AS series_slug
               FROM content c
          LEFT JOIN series s ON s.id = c.series_id
+         $catJoin
              WHERE $where
                AND c.status = 'published'
                AND (c.published_status IS NULL OR c.published_status = 'live')

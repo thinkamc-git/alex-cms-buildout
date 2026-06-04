@@ -1444,7 +1444,7 @@ a.article-series-pill:hover {
   flex-direction: column;
   gap: var(--space-24);
   min-width: 0;
-  max-width: 72ch;
+  max-width: 760px;
 }
 .editorial-hero-eyebrow {
   font-family: var(--font-cond);

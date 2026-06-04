@@ -335,7 +335,7 @@ $catsForThis = $catsForTypes($ftypes);
       <div>
         <div class="content-block-label" style="margin-bottom:var(--space-12);letter-spacing:0.16em">Configure section</div>
         <div class="field-group sec-title-field">
-          <label class="field-label">Title</label>
+          <label class="field-label">Section Title</label>
           <span class="field-clearable">
             <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">
             <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>

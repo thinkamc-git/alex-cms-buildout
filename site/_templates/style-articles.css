@@ -1331,14 +1331,12 @@ a.article-series-pill:hover {
 .cards-grid .card.is-filtered-out { display: none !important; }
 
 @media (max-width: 900px) {
-  .cards-grid { grid-template-columns: repeat(2, 1fr); }
   .index-page-header { padding: var(--space-40) var(--space-32) var(--space-32); }
   .index-grid,
   .index-hero,
   .index-featured { padding: var(--space-24) var(--space-32); }
 }
 @media (max-width: 600px) {
-  .cards-grid { grid-template-columns: 1fr; }
   .index-page-header { padding: var(--space-32) var(--space-24) var(--space-24); }
   .index-page-header-row { flex-direction: column; align-items: flex-start; }
   .index-grid,
@@ -1493,7 +1491,6 @@ a.article-series-pill:hover {
   z-index: 1;
 }
 .editorial-hero--bleed-dark .editorial-hero-text   { color: #fff; }
-.editorial-hero--bleed-dark .editorial-hero-eyebrow { color: #f4a4a4; }
 .editorial-hero--bleed-dark .editorial-hero-summary { color: rgba(255,255,255,0.86); }
 .editorial-hero--bleed-dark .editorial-hero-meta    { color: rgba(255,255,255,0.65); }
 .editorial-hero--bleed-dark .editorial-hero-cta {
@@ -1501,14 +1498,16 @@ a.article-series-pill:hover {
   color: #000;
 }
 .editorial-hero--bleed-light .editorial-hero-text   { color: var(--primary); }
-
-.editorial-hero--bleed-light .editorial-hero-eyebrow { color: var(--c-terracotta); }
 .editorial-hero--bleed-light .editorial-hero-summary { color: var(--secondary); }
 .editorial-hero--bleed-light .editorial-hero-meta    { color: var(--muted); }
 .editorial-hero--bleed-light .editorial-hero-cta {
   background: var(--primary);
   color: var(--surface);
 }
+/* Eyebrow follows the post's category colour across every layout.
+   The inline style="--c-current: <hex>" set in the template overrides;
+   fallback is terracotta. */
+.editorial-hero-eyebrow { color: var(--c-current, var(--c-terracotta, var(--primary))); }
 
 .editorial-hero-text {
   display: flex;

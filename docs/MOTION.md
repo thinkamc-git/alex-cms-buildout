@@ -5,7 +5,7 @@ place on page load instead of snapping in fully formed. Tuned against the real
 admin chrome in the `docs/motion-mock.html` sandbox (archived once this spec is
 built).
 
-**Status:** locked, ready to implement. **Scope:** CMS admin (`site/cms/`) only.
+**Status:** locked, ready to implement. **Scope:** CMS admin (`site/cms/`) — plus a public-side fade-in for the HTML-body article loader (§5 below).
 
 **Every page animates — there is no "dead" page.** The axis is not animated-vs-not,
 it's *which* motion:
@@ -211,10 +211,85 @@ polyfill.
       no transform, no flash.
 - [ ] No layout shift: rows/cards animate into a stable layout (§3.1).
 - [ ] (If §3.2 shipped) navigation crossfade reads smoothly with the cascade.
+- [ ] §5 — `.article-prose[data-body-mode="html-body"]` fades in (opacity
+      0 → 1, 420ms easeOutQuint) on `DOMContentLoaded`; RTF bodies
+      unaffected; reduced-motion users see instant content.
 
 ---
 
-## 5. Provenance
+## 5. Public-side: HTML-body article fade-in
+
+The public article template's `block-body` partial supports two body
+modes — `rtf` (Tiptap output, inline) and `html-body` (a raw HTML file
+`readfile()`'d into the page from `/content/<type>/<slug>/<file>.html`).
+RTF bodies render instantly because they're just inline markup. HTML-body
+articles have a perceptible load delay — the included file can be larger,
+its inline `<style>` / `<script>` blocks parse, and any images / external
+assets inside it decode before the page settles. The result reads as a
+"pop" — content arrives, then re-flows as styles apply.
+
+**Spec:** fade the `.article-prose[data-body-mode="html-body"]` container
+in from 0 → 1 opacity once the document is ready, so the content lands
+calmly instead of snapping in.
+
+**Implementation contract:**
+
+| Property        | Value                              | Note                          |
+|-----------------|------------------------------------|-------------------------------|
+| Duration        | `420ms`                            | shorter than the CMS reveal — once it's there, it's there |
+| Easing          | `cubic-bezier(0.22, 1, 0.36, 1)`   | same easeOutQuint as the CMS  |
+| Rise distance   | none — opacity-only              | the body is the whole page focus; lift would feel wrong |
+| Trigger         | `DOMContentLoaded` (no fetch — content is inline) | |
+
+```css
+/* docs/MOTION.md §5 — html-body article fade-in.
+   Initial opacity 0; .is-loaded toggles to 1 once DOM is ready. */
+.article-prose[data-body-mode="html-body"] {
+  opacity: 0;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.article-prose[data-body-mode="html-body"].is-loaded {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .article-prose[data-body-mode="html-body"] {
+    opacity: 1;
+    transition: none;
+  }
+}
+```
+
+```html
+<!-- Add to the experiment-html / article template <head> or footer
+     (one script, runs on every html-body page): -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.article-prose[data-body-mode="html-body"]')
+          .forEach(function (el) { el.classList.add('is-loaded'); });
+});
+</script>
+```
+
+**Notes:**
+
+- Don't wait for `load` (full asset decode) — that delays the fade for
+  slow images and makes the page feel broken. `DOMContentLoaded` is
+  enough: the HTML + inline styles are parsed, layout is stable, and
+  later-loading images sit inside an already-faded-in container.
+- Body modes other than `html-body` are unaffected; they render
+  instantly as before.
+- Stylesheet home: append to
+  [site/_templates/style-articles.css](../site/_templates/style-articles.css)
+  (the public article stylesheet — same surface that already styles
+  `.article-prose`).
+- Script home: inline at the bottom of
+  [site/templates/partials/block-body.php](../site/templates/partials/block-body.php),
+  inside the `html-body` branch — keeps the wiring local to the partial
+  that emits the marker attribute.
+
+---
+
+## 6. Provenance
 
 Tuned in `docs/motion-mock.html` (temporary sandbox, references live CMS
 stylesheets). Archive or delete that file once this spec is implemented — it is

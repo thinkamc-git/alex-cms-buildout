@@ -134,6 +134,9 @@ staggered children automatically.
 > and animates the row's *contents* per-row** — so the card reads as anchored
 > while the text fills in. Per-row delay is stamped via `--row-delay` and
 > inherited by descendants doing the actual animating. Drag hook untouched.
+> The bottom `.rowform-add-row` ("+ Add" / new-item input) is **excluded** from
+> the cascade — it's an affordance, not loaded data; stays visible from
+> first paint so the user can start typing immediately.
 
 > **Editors don't cascade — they get the unified rise.** Forms (`*-edit.php`,
 > `*-new.php`, Settings) must NOT stagger field-by-field. Instead add
@@ -227,6 +230,17 @@ revisit if the CM pop feels jarring.
 > `.reveal-page` so each tab (Author Info, PHP Layout File, Content Blocks,
 > Field Reference, Block Visibility, Preview) gets a unified rise on load.
 > Tab switches are full page reloads, so the animation re-fires per click.
+>
+> **Tab panels (page-edit / article-edit / journal-edit / etc.):** these views
+> use [`preview-tab-guard.js`](../site/cms/_assets/preview-tab-guard.js) for
+> *client-side* tab swaps (no page reload). The CSS animation only runs
+> once on first render — subsequent tab clicks wouldn't re-fire. To restore
+> per-click motion, `activate()` removes and re-adds `.reveal-page` on the
+> newly-visible panel (and any descendant carrying it, e.g. `.cms-form`),
+> forcing a reflow so the keyframe restarts. Skipped on initial page render
+> and `popstate` (CSS already handles those). For page-edit specifically,
+> `.reveal-page` lives on each `[data-tab-panel]` wrapper directly, so each
+> tab animates as its own unified rise.
 
 ---
 

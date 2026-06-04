@@ -1830,6 +1830,13 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   animation: rise-in 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: var(--row-delay, 0ms);
 }
+/* Add-row stays visible from page load — the "new item" / "old path" form
+   is an affordance, not loaded data. Excluded from the cascade. */
+.rowform-list.reveal > .rowform-add-row > *:not(form),
+.rowform-list.reveal > .rowform-add-row > form > * {
+  opacity: 1;
+  animation: none;
+}
 
 /* ─────────────────────────────────────────────────────────────
    LAYER 8b — .fade-on-load utility

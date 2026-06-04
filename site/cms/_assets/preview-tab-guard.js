@@ -104,9 +104,16 @@
   }
 
   function activate(target, replaceHistory) {
+    // On user-driven tab clicks (no replaceHistory flag), re-trigger any
+    // .reveal-page animation on the newly-visible panel so the tab swap
+    // feels alive — without this, the CSS animation only runs on initial
+    // page render (CSS animations don't re-fire on display: none → block).
+    // See docs/MOTION.md §3.3 + the page-edit data-tab-panel wrappers.
+    var shouldReplay = !replaceHistory;
     panels.forEach(function (p) {
       var match = p.getAttribute('data-tab-panel') === target;
       p.classList.toggle('is-hidden-tab', !match);
+      if (match && shouldReplay) replayReveal(p);
     });
     tabLinks.forEach(function (a) {
       var match = a.getAttribute('data-tab-target') === target;
@@ -125,6 +132,26 @@
 
     // Re-render the preview iframe against current form values.
     if (target === 'preview') refreshPreviewIframe();
+  }
+
+  // Re-trigger .reveal-page animation on a panel (and any descendant
+  // that carries it — e.g. .cms-form in article-edit). Removing the
+  // class, forcing a reflow, then re-adding it restarts the CSS keyframes.
+  function replayReveal(panel) {
+    var targets = [];
+    if (panel.classList.contains('reveal-page')) targets.push(panel);
+    Array.prototype.push.apply(
+      targets,
+      panel.querySelectorAll('.reveal-page')
+    );
+    targets.forEach(function (el) {
+      el.classList.remove('reveal-page');
+      // Force layout recalc so the browser registers the class removal
+      // before we re-add it; otherwise the toggle gets optimised away
+      // and the animation never re-fires.
+      void el.offsetWidth;
+      el.classList.add('reveal-page');
+    });
   }
 
   // ── Preview iframe refresh (Edit form values → Preview render) ──────

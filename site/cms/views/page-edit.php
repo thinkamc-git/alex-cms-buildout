@@ -321,7 +321,7 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
       </div>
 
-      <div class="content-area reveal-page">
+      <div class="content-area">
         <?php
         $heading = "Couldn't save:";
         require __DIR__ . '/../partials/form-errors.php';
@@ -330,7 +330,7 @@ require __DIR__ . '/../partials/topbar.php';
 
         <!-- BODY panel — always in the DOM, hidden by .is-hidden-tab when
              another tab is active. Same for Metadata and Preview below. -->
-        <div data-tab-panel="body" class="<?= $tab !== 'body' ? 'is-hidden-tab' : '' ?>">
+        <div data-tab-panel="body" class="reveal-page <?= $tab !== 'body' ? 'is-hidden-tab' : '' ?>">
           <!-- Version selector + actions (only in the Body HTML tab) -->
           <div class="pe-version-row">
             <span class="pe-version-label">Version:</span>
@@ -413,7 +413,7 @@ require __DIR__ . '/../partials/topbar.php';
         </div><!-- /data-tab-panel="body" -->
 
         <?php if ($preview_tab_available): /* PREVIEW panel — only when a mock exists */ ?>
-        <div data-tab-panel="preview" class="<?= $tab !== 'preview' ? 'is-hidden-tab' : '' ?>">
+        <div data-tab-panel="preview" class="reveal-page <?= $tab !== 'preview' ? 'is-hidden-tab' : '' ?>">
           <div class="post-preview-frame" style="margin-top:var(--space-16)">
             <iframe
               name="pe-preview-iframe"
@@ -428,7 +428,7 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
 
         <?php if (!$is_partial): /* METADATA panel — pages only, partials don't have meta */ ?>
-        <div data-tab-panel="metadata" class="<?= $tab !== 'metadata' ? 'is-hidden-tab' : '' ?>">
+        <div data-tab-panel="metadata" class="reveal-page <?= $tab !== 'metadata' ? 'is-hidden-tab' : '' ?>">
           <?php
           // Live mode: form is visible but every field is read-only. The
           // values come from the parsed file ($title / $description) plus

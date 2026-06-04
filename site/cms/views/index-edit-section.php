@@ -217,10 +217,9 @@ $catsForThis = $catsForTypes($ftypes);
           </span>
         </div>
         <div class="field-group">
-          <label class="field-label">Header</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[header_style]">
-              <?php foreach (['small' => 'Small', 'big' => 'Big'] as $v => $l): ?>
+              <?php foreach (['small' => 'Tiny', 'big' => 'Large'] as $v => $l): ?>
                 <button type="button" class="filter-pill <?= $hstyle === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
               <?php endforeach; ?>
             </div>
@@ -342,10 +341,9 @@ $catsForThis = $catsForTypes($ftypes);
           </span>
         </div>
         <div class="field-group">
-          <label class="field-label">Header</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[header_style]">
-              <?php foreach (['small' => 'Small', 'big' => 'Big'] as $v => $l): ?>
+              <?php foreach (['small' => 'Tiny', 'big' => 'Large'] as $v => $l): ?>
                 <button type="button" class="filter-pill <?= $hstyle === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
               <?php endforeach; ?>
             </div>

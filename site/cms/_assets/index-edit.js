@@ -430,6 +430,40 @@
     }
   });
 
+  // ── Basic Listing: Show Filters toggle + Types/Categories choice ────
+  // Wires the page-level filter UI (NOT the per-section Filtered card).
+  // On change we recompute the hidden `filter_mode` from toggle + pill,
+  // and show/hide the detail block.
+  (function () {
+    var toggle = document.getElementById('bl-filter-toggle');
+    var detail = document.getElementById('bl-filter-detail');
+    var hidden = document.getElementById('bl-filter-mode');
+    var byGroup = document.querySelector('[data-bl-by]');
+    if (!toggle || !hidden) return;
+
+    function syncMode() {
+      if (!toggle.checked) { hidden.value = 'none'; return; }
+      var active = byGroup ? byGroup.querySelector('.filter-pill.active') : null;
+      var v = active ? active.getAttribute('data-bl-by-value') : 'categories';
+      hidden.value = (v === 'types' || v === 'categories') ? v : 'categories';
+    }
+
+    toggle.addEventListener('change', function () {
+      if (detail) detail.style.display = toggle.checked ? '' : 'none';
+      syncMode();
+    });
+
+    if (byGroup) {
+      byGroup.addEventListener('click', function (e) {
+        var pill = e.target.closest('.filter-pill[data-bl-by-value]');
+        if (!pill) return;
+        byGroup.querySelectorAll('.filter-pill').forEach(function (p) { p.classList.remove('active'); });
+        pill.classList.add('active');
+        syncMode();
+      });
+    }
+  })();
+
   // ── Featured-list (legacy Basic Listing) — keep the existing behaviour.
   (function () {
     var list = document.getElementById('featured-list');

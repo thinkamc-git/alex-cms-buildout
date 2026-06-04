@@ -89,7 +89,23 @@ $catsForThis = $catsForTypes($ftypes);
 
   <div class="sec-card-body" style="padding:var(--space-20) var(--space-24)">
 
-<?php if ($stype === 'hero'): ?>
+<?php if ($stype === 'hero'):
+    // Resolve the currently-selected post's hero_image so the preview
+    // can show it server-side on first render (Auto mode default).
+    $pickedHero = '';
+    $pickedId = $items !== [] ? (int)$items[0] : 0;
+    if ($pickedId > 0 && isset($pickById[$pickedId])) {
+        $pickedHero = (string)($pickById[$pickedId]['hero_image'] ?? '');
+    }
+    $previewSrc = '';
+    if ($himode === 'custom' && $himgUrl !== '') {
+        $previewSrc = $himgUrl;
+    } elseif ($himode === 'auto' && $pickedHero !== '') {
+        $previewSrc = $pickedHero;
+    }
+?>
+    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 220px; gap: var(--space-24)">
+      <div class="form-side" data-hero-form>
     <div class="field-group sec-title-field">
       <label class="field-label">Title</label>
       <span class="field-clearable">
@@ -99,13 +115,13 @@ $catsForThis = $catsForTypes($ftypes);
     </div>
     <div class="field-group">
       <label class="field-label">Pick</label>
-      <select class="field-input" name="<?= $inputBase ?>[item_ids]">
-        <option value="">— pick a published post —</option>
+      <select class="field-input" name="<?= $inputBase ?>[item_ids]" data-hero-pick>
+        <option value="" data-hero-image="">— pick a published post —</option>
         <?php foreach ($pickList as $row):
             $rid = (int)$row['id'];
             $sel = ($items !== [] && (int)$items[0] === $rid) ? ' selected' : '';
         ?>
-          <option value="<?= $rid ?>"<?= $sel ?>><?= $pickLabel($row) ?></option>
+          <option value="<?= $rid ?>"<?= $sel ?> data-hero-image="<?= $e((string)($row['hero_image'] ?? '')) ?>"><?= $pickLabel($row) ?></option>
         <?php endforeach; ?>
       </select>
       <p class="field-hint">One published item, rendered as the section's full-width banner.</p>
@@ -160,6 +176,20 @@ $catsForThis = $catsForTypes($ftypes);
       </div>
       <p class="field-hint" data-hero-img-status style="display:none"></p>
     </div>
+      </div><!-- /.form-side data-hero-form -->
+
+      <div class="form-side" data-hero-preview-pane>
+        <label class="field-label" style="margin-bottom:var(--space-8);display:block">Preview</label>
+        <div class="hero-img-preview" data-hero-preview>
+          <?php if ($previewSrc !== ''): ?>
+            <img src="<?= $e($previewSrc) ?>" alt="" data-hero-preview-img>
+          <?php else: ?>
+            <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
+          <?php endif; ?>
+        </div>
+      </div>
+    </div><!-- /.form-grid hero 2-col -->
+
 
 <?php elseif ($stype === 'curated'): ?>
     <div class="form-grid" style="grid-template-columns: 280px minmax(0,1fr)">

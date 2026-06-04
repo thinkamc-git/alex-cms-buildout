@@ -397,7 +397,7 @@ function list_index_feed(array $config, array $excludeIds = []): array
     $sort = (string)($config['feed_sort'] ?? 'newest');
     $order = $sort === 'oldest' ? 'c.published_at ASC' : 'c.published_at DESC';
 
-    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail,
+    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail, c.hero_image,
                    c.published_at, c.read_time, c.special_tag,
                    c.series_id, c.series_order,
                    c.journal_number,

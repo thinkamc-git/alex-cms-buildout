@@ -45,7 +45,56 @@
     if (bgField) bgField.style.display = (layout === 'plain' || layout === 'within') ? '' : 'none';
     if (imgMode) imgMode.style.display = (layout === 'plain') ? 'none' : '';
     if (imgUrl)  imgUrl.style.display  = (layout !== 'plain' && mode === 'custom') ? '' : 'none';
+    syncHeroPreview(sec);
   }
+
+  // Update the right-side hero image preview based on current
+  // layout / image source / custom URL / picked post's hero_image.
+  function syncHeroPreview(sec) {
+    if (!sec) return;
+    var pane = sec.querySelector('[data-hero-preview]');
+    if (!pane) return;
+    var layoutH = sec.querySelector('input[type="hidden"][name$="[hero_layout]"]');
+    var modeH   = sec.querySelector('input[type="hidden"][name$="[hero_image_mode]"]');
+    var urlIn   = sec.querySelector('[data-hero-img-url-input]');
+    var pickSel = sec.querySelector('[data-hero-pick]');
+    var layout = layoutH ? layoutH.value : 'within';
+    var mode   = modeH ? modeH.value : 'auto';
+    var src = '';
+    if (layout !== 'plain' && mode === 'custom' && urlIn) {
+      src = (urlIn.value || '').trim();
+    } else if (layout !== 'plain' && mode === 'auto' && pickSel) {
+      var opt = pickSel.options[pickSel.selectedIndex];
+      src = opt ? (opt.getAttribute('data-hero-image') || '') : '';
+    }
+    pane.innerHTML = '';
+    if (src) {
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      img.setAttribute('data-hero-preview-img', '');
+      pane.appendChild(img);
+    } else {
+      var span = document.createElement('span');
+      span.className = 'hero-img-preview-empty';
+      span.setAttribute('data-hero-preview-empty', '');
+      span.textContent = layout === 'plain' ? 'No side image (Plain)' : 'No image';
+      pane.appendChild(span);
+    }
+  }
+
+  // Refresh preview when the URL input changes (paste or upload-fill)
+  // or the Pick select changes.
+  form.addEventListener('input', function (e) {
+    if (e.target && e.target.matches('[data-hero-img-url-input]')) {
+      syncHeroPreview(e.target.closest('[data-section]'));
+    }
+  });
+  form.addEventListener('change', function (e) {
+    if (e.target && e.target.matches('[data-hero-pick]')) {
+      syncHeroPreview(e.target.closest('[data-section]'));
+    }
+  });
 
   // ── Pill single-select (data-pill-group="single") ───────────────────
   // Each .filter-group with data-pill-group="single" pairs with a hidden

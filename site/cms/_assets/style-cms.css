@@ -1916,3 +1916,17 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .parts-list .rowform-row { background: color-mix(in srgb, var(--surface) 55%, var(--canvas-bg)); }
 .parts-list .rowform-row.is-published { background: var(--surface); }
 .part-date { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); white-space: nowrap; }
+
+/* ── Phase 21.7 — Editorial Index section-stack builder ───────────────
+   The only new visual primitive is .sec-card — a real card with chrome,
+   collapsible to a single header row. Mirrors the .kcard chrome (same
+   tokens) without the cursor:pointer (sections aren't clickable as a
+   whole — the header is the toggle, body is the editor). */
+.sec-list { display: flex; flex-direction: column; gap: var(--space-12); }
+.sec-card { background: var(--surface); border: 1px solid var(--ink-18); border-radius: var(--r-card); box-shadow: 0 1px 3px var(--ink-08); transition: border-color 0.15s; }
+.sec-card:hover { border-color: var(--ink); }
+.sec-card-head { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-12) var(--space-20); cursor: pointer; }
+.sec-card-head .kcard-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sec-card-body { padding: var(--space-16) var(--space-20) var(--space-20); border-top: var(--rule-faint); }
+.sec-card.is-collapsed .sec-card-body { display: none; }
+.sec-card.is-collapsed .sec-card-head { border-bottom: none; }

@@ -1949,6 +1949,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 tr.is-drop-before > td:first-child { box-shadow: inset 0 2px 0 0 var(--primary); }
 tr.is-drop-after  > td:first-child { box-shadow: inset 0 -2px 0 0 var(--primary); }
 
+/* See-more target picker: type-select (1/3) + value-input (2/3) side by side. */
+.see-target-row { display: grid; grid-template-columns: 1fr 2fr; gap: var(--space-8); align-items: start; }
+
 /* Three-equal-column body grid — extends .form-grid for the Filtered section. */
 .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-32); }
 .form-grid-3 > div { min-width: 0; display: flex; flex-direction: column; gap: var(--space-12); }

@@ -149,21 +149,23 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div class="field-group" style="margin-bottom:0">
           <label class="field-label">See more target</label>
-          <select class="field-input" data-see-type onchange="(function(s){var w=s.parentElement.querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
-            <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
-            <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
-          </select>
-          <span data-see-picker style="display:block;margin-top:6px">
-            <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
-              <option value="">— pick an index —</option>
-              <?php foreach (list_indexes() as $idx):
-                  $idxSlug = (string)$idx['slug'];
-              ?>
-                <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
-              <?php endforeach; ?>
+          <div class="see-target-row">
+            <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
+              <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
+              <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
             </select>
-            <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
-          </span>
+            <span data-see-picker>
+              <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
+                <option value="">— pick an index —</option>
+                <?php foreach (list_indexes() as $idx):
+                    $idxSlug = (string)$idx['slug'];
+                ?>
+                  <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
+                <?php endforeach; ?>
+              </select>
+              <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
+            </span>
+          </div>
           <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
         </div>
       </div>
@@ -260,21 +262,23 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div class="field-group" style="margin-bottom:0">
           <label class="field-label">See more target</label>
-          <select class="field-input" data-see-type onchange="(function(s){var w=s.parentElement.querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
-            <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
-            <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
-          </select>
-          <span data-see-picker style="display:block;margin-top:6px">
-            <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
-              <option value="">— pick an index —</option>
-              <?php foreach (list_indexes() as $idx):
-                  $idxSlug = (string)$idx['slug'];
-              ?>
-                <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
-              <?php endforeach; ?>
+          <div class="see-target-row">
+            <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
+              <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
+              <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
             </select>
-            <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
-          </span>
+            <span data-see-picker>
+              <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
+                <option value="">— pick an index —</option>
+                <?php foreach (list_indexes() as $idx):
+                    $idxSlug = (string)$idx['slug'];
+                ?>
+                  <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
+                <?php endforeach; ?>
+              </select>
+              <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
+            </span>
+          </div>
           <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
         </div>
       </div>

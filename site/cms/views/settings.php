@@ -189,7 +189,7 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
 
           <div class="form-actions form-actions-sticky">
-            <button type="submit" class="btn-pri" data-save-btn>Save settings</button>
+            <button type="submit" class="btn-sec" data-save-btn>Save settings</button>
           </div>
         </form>
       </div>
@@ -197,6 +197,11 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<!-- preview-tab-guard for the dirty-form beforeunload prompt; dirty-flip
+     for the btn-sec → btn-pri flip on the Save button. (Tab logic in
+     preview-tab-guard is gated on [data-tab-panel] / [data-tab-target]
+     and stays inert here — Settings has no tabs.) -->
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
 <script src="/cms/_assets/dirty-flip.js" defer></script>
 <script>
   // Mirror the live Site title value into the example shown in its hint.

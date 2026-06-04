@@ -1993,6 +1993,21 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    promoted to a global utility for the section stack + posts list. */
 .cms-grip { cursor: grab; color: var(--muted); user-select: none; font-size: 14px; flex-shrink: 0; }
 
+/* Hero section editor — Selected post display under the dropdown.
+   Title is heavier; meta (type · date) is the default body weight. */
+.hero-pick-display {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  color: var(--secondary);
+  margin-top: var(--space-8);
+  line-height: 1.4;
+}
+.hero-pick-display strong {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: var(--space-4);
+}
+
 /* Hero section editor — right-side mini preview pane.
    Width: 290px column, aspect ~1.76:1 (kept the prior 4:3 height while
    widening the pane ~30%). Border styling + bg / layout / gradient
@@ -2061,25 +2076,39 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   color: var(--secondary);
 }
 
-/* ── Plain — single text area, no image area visible. ── */
+/* ── Plain — single text area, no image area visible. Content
+   sits inset from the pane edges to mirror the public hero's
+   section-level padding. ── */
 .hero-img-preview--plain {
   display: flex;
+  padding: var(--space-12) var(--space-16);
 }
 .hero-img-preview--plain .hero-img-preview-imgwrap { display: none; }
-.hero-img-preview--plain .hero-img-preview-text { flex: 1; }
+.hero-img-preview--plain .hero-img-preview-text {
+  flex: 1;
+  padding: 0;
+}
 
-/* ── Image Container (within) — text left, mini image right. ── */
+/* ── Image Container (within) — text left, mini image right. Both
+   sit inset from the pane edges so the image isn't flush — mirrors
+   the real .editorial-hero padding. ── */
 .hero-img-preview--within {
   display: flex;
   align-items: stretch;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
 }
 .hero-img-preview--within .hero-img-preview-text {
   flex: 1;
   min-width: 0;
+  padding: 0;
+  justify-content: center;
 }
 .hero-img-preview--within .hero-img-preview-imgwrap {
   width: 38%;
   flex-shrink: 0;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 /* ── Bleed — image fills, text overlays, gradient on top. ── */

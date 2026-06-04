@@ -108,9 +108,37 @@
   });
   form.addEventListener('change', function (e) {
     if (e.target && e.target.matches('[data-hero-pick]')) {
-      syncHeroPreview(e.target.closest('[data-section]'));
+      var sec = e.target.closest('[data-section]');
+      syncHeroPreview(sec);
+      syncHeroPickDisplay(sec);
     }
   });
+
+  // Render the "selected post" line under the Pick dropdown — title
+  // in heavier weight, type · date in muted body weight.
+  function syncHeroPickDisplay(sec) {
+    if (!sec) return;
+    var sel  = sec.querySelector('[data-hero-pick]');
+    var box  = sec.querySelector('[data-hero-pick-display]');
+    var titEl= sec.querySelector('[data-hero-pick-title]');
+    var metEl= sec.querySelector('[data-hero-pick-meta]');
+    if (!sel || !box || !titEl || !metEl) return;
+    var opt = sel.options[sel.selectedIndex];
+    var title = opt ? (opt.getAttribute('data-title') || '') : '';
+    var meta  = opt ? (opt.getAttribute('data-meta')  || '') : '';
+    if (title === '') {
+      box.style.display = 'none';
+      titEl.textContent = '';
+      metEl.textContent = '';
+      return;
+    }
+    box.style.display = '';
+    titEl.textContent = title;
+    metEl.textContent = meta !== '' ? '— ' + meta : '';
+  }
+
+  // Initial sync on every hero section.
+  document.querySelectorAll('[data-section][data-section-type="hero"]').forEach(syncHeroPickDisplay);
 
   // ── Pill single-select (data-pill-group="single") ───────────────────
   // Each .filter-group with data-pill-group="single" pairs with a hidden

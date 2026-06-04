@@ -116,15 +116,43 @@ $catsForThis = $catsForTypes($ftypes);
     <div class="field-group">
       <label class="field-label">Select a post</label>
       <select class="field-input" name="<?= $inputBase ?>[item_ids]" data-hero-pick>
-        <option value="" data-hero-image="">— pick a published post —</option>
+        <option value="" data-hero-image="" data-title="" data-meta="">— pick a published post —</option>
         <?php foreach ($pickList as $row):
-            $rid = (int)$row['id'];
-            $sel = ($items !== [] && (int)$items[0] === $rid) ? ' selected' : '';
+            $rid     = (int)$row['id'];
+            $sel     = ($items !== [] && (int)$items[0] === $rid) ? ' selected' : '';
+            $rType   = (string)($row['type']  ?? '');
+            $rTitle  = (string)($row['title'] ?? '');
+            $rPub    = (string)($row['published_at'] ?? '');
+            $rDate   = $rPub !== '' ? date('Y-m-d', strtotime($rPub)) : '';
+            $rTLab   = ucfirst(str_replace('-', ' ', $rType));
+            $rMeta   = trim($rTLab . ($rDate !== '' ? ' · ' . $rDate : ''));
         ?>
-          <option value="<?= $rid ?>"<?= $sel ?> data-hero-image="<?= $e((string)($row['hero_image'] ?? '')) ?>"><?= $pickLabel($row) ?></option>
+          <option value="<?= $rid ?>"<?= $sel ?>
+                  data-hero-image="<?= $e((string)($row['hero_image'] ?? '')) ?>"
+                  data-title="<?= $e($rTitle) ?>"
+                  data-meta="<?= $e($rMeta) ?>"><?= $pickLabel($row) ?></option>
         <?php endforeach; ?>
       </select>
-      <p class="field-hint">One published item, rendered as the section's full-width banner.</p>
+      <?php
+        $selOpt = null;
+        if ($items !== []) {
+            foreach ($pickList as $r) {
+                if ((int)$r['id'] === (int)$items[0]) { $selOpt = $r; break; }
+            }
+        }
+        $selTitle = $selOpt ? (string)($selOpt['title'] ?? '') : '';
+        $selMeta  = '';
+        if ($selOpt) {
+            $st = (string)($selOpt['type'] ?? '');
+            $sp = (string)($selOpt['published_at'] ?? '');
+            $sd = $sp !== '' ? date('Y-m-d', strtotime($sp)) : '';
+            $selMeta = trim(ucfirst(str_replace('-', ' ', $st)) . ($sd !== '' ? ' · ' . $sd : ''));
+        }
+      ?>
+      <div class="hero-pick-display" data-hero-pick-display style="<?= $selTitle === '' ? 'display:none' : '' ?>">
+        <strong data-hero-pick-title><?= $e($selTitle) ?></strong>
+        <span data-hero-pick-meta><?= $selMeta !== '' ? '— ' . $e($selMeta) : '' ?></span>
+      </div>
     </div>
 
     <div class="field-group">

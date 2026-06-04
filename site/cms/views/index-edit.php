@@ -556,10 +556,9 @@ require __DIR__ . '/../partials/topbar.php';
 
 <?php endif; ?>
 
-        <div class="form-actions form-actions-sticky" style="display:flex;align-items:center;gap:var(--space-12)">
-          <a href="/cms/indexes" class="btn-sec">Cancel</a>
-          <span style="flex:1"></span>
+        <div class="form-actions form-actions-sticky">
           <button type="submit" class="btn-sec" data-save-btn>Save</button>
+          <a href="/cms/indexes" class="btn-sec">Cancel</a>
         </div>
 
       </form>

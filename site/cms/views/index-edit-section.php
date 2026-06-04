@@ -140,7 +140,7 @@ $catsForThis = $catsForTypes($ftypes);
           <label class="field-label">Image source</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
-              <?php foreach (['auto' => 'From Post', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
+              <?php foreach (['auto' => 'Post Hero', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
                 <button type="button" class="filter-pill <?= $himode === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
               <?php endforeach; ?>
             </div>

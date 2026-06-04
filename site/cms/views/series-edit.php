@@ -525,10 +525,46 @@ require __DIR__ . '/../partials/topbar.php';
     }
   });
 
+  // Narrate the auto-save through the Publish button so the user sees
+  // a clear "saving → saved" pulse instead of the previous silent
+  // fetch (matches the dirty-flip vocabulary used elsewhere).
+  function publishBtn() { return document.querySelector('[data-save-btn]'); }
+  function pulseSaving() {
+    var btn = publishBtn();
+    if (!btn) return;
+    btn.dataset.origText = btn.dataset.origText || btn.textContent;
+    btn.classList.remove('btn-sec');
+    btn.classList.remove('btn-ghost');
+    btn.classList.add('btn-pri');
+    btn.textContent = 'Saving…';
+  }
+  function pulseSaved() {
+    var btn = publishBtn();
+    if (!btn) return;
+    btn.textContent = 'Saved';
+    setTimeout(function () {
+      btn.textContent = btn.dataset.origText || 'Publish';
+      btn.classList.remove('btn-pri');
+      btn.classList.add('btn-sec');
+    }, 1000);
+  }
+  function pulseError(msg) {
+    var btn = publishBtn();
+    if (btn) {
+      btn.textContent = btn.dataset.origText || 'Publish';
+      btn.classList.remove('btn-pri');
+      btn.classList.add('btn-sec');
+    }
+    alert('Reorder failed: ' + msg);
+  }
+
   list.addEventListener('drop', function (e) {
     e.preventDefault();
     renumber();
-    persist().catch(function (err) {
+    pulseSaving();
+    persist().then(function () {
+      pulseSaved();
+    }).catch(function (err) {
       // Revert DOM on failure so the visible order matches the DB.
       var addRow = list.querySelector('.rowform-add-row');
       prevOrder.forEach(function (el) {
@@ -536,7 +572,7 @@ require __DIR__ . '/../partials/topbar.php';
         else        list.appendChild(el);
       });
       renumber();
-      alert('Reorder failed: ' + (err && err.message ? err.message : 'unknown error'));
+      pulseError(err && err.message ? err.message : 'unknown error');
     });
   });
 })();

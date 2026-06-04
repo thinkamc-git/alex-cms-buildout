@@ -1490,7 +1490,8 @@ a.article-series-pill:hover {
   position: relative;
   z-index: 1;
 }
-.editorial-hero--bleed-dark .editorial-hero-text   { color: #fff; }
+.editorial-hero--bleed-dark .editorial-hero-text    { color: #fff; }
+.editorial-hero--bleed-dark .editorial-hero-title   { color: #fff; }
 .editorial-hero--bleed-dark .editorial-hero-summary { color: rgba(255,255,255,0.86); }
 .editorial-hero--bleed-dark .editorial-hero-meta    { color: rgba(255,255,255,0.65); }
 .editorial-hero--bleed-dark .editorial-hero-cta {

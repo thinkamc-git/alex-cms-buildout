@@ -1368,7 +1368,7 @@ a.article-series-pill:hover {
 }
 .index-section-title-big {
   font-family: var(--font-serif);
-  font-size: clamp(28px, 3vw, 40px);
+  font-size: clamp(24px, 2.4vw, 32px);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.1;
@@ -1376,6 +1376,11 @@ a.article-series-pill:hover {
   color: var(--ink);
 }
 .index-section-title-big em { font-style: italic; }
+
+/* Bump the small (group-header) eyebrow up one step from the DS
+   default — index sections want a bit more presence than the inline
+   tag chips the eyebrow style was originally tuned for. */
+.index-section .group-header-eyebrow { font-size: var(--text-meta); }
 .index-section-view-all {
   font-family: var(--font-cond);
   font-size: var(--text-label);
@@ -1389,12 +1394,26 @@ a.article-series-pill:hover {
 }
 .index-section-view-all:hover { opacity: 0.5; }
 
-/* Bare per-section visitor pills — no .controller white bar. */
+/* Bare per-section visitor pills — no .controller white bar.
+   Override the colored category-tinted hovers from status.css; inside
+   editorial sections we want a single neutral hover treatment. */
 .index-section-pills {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-8);
   padding-bottom: var(--space-20);
+}
+.index-section-pills .fp,
+.index-section-pills .fp:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
+}
+.index-section-pills .fp.on,
+.index-section-pills .fp.on:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
 }
 
 /* Hero section is a full-bleed editorial banner, not a card-grid. */
@@ -1461,7 +1480,7 @@ a.article-series-pill:hover {
 }
 .editorial-hero-meta {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;

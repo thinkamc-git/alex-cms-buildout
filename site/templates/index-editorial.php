@@ -81,7 +81,7 @@ $grid_rows_for = static function (array $sec): int {
           </header>
         <?php else: ?>
           <div class="group-header">
-            <span class="group-header-eyebrow"><?= $e($stitle) ?> &mdash; <?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
+            <span class="group-header-eyebrow"><?= $e($stitle) ?></span>
             <a class="group-header-link" href="<?= $e($viewHref) ?>"><?= $e($viewLab) ?> →</a>
           </div>
         <?php endif; ?>

@@ -2043,7 +2043,7 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: var(--space-12) var(--space-14);
+  padding: var(--space-16);
   gap: 4px;
   pointer-events: none;
 }

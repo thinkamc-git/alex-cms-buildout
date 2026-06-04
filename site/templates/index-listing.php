@@ -17,35 +17,38 @@ $feedRows = $ctx['feed_rows'] ?? [];
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-$title    = (string)($idx['title']    ?? '');
-$subtitle = (string)($idx['subtitle'] ?? '');
-$eyebrow  = humanize_slug((string)($idx['slug'] ?? ''));
-$count    = count($feedRows);
+$showTitle = !empty($idx['show_title']);
+$title     = (string)($idx['title']    ?? '');
+$subtitle  = (string)($idx['subtitle'] ?? '');
+$eyebrow   = humanize_slug((string)($idx['slug'] ?? ''));
+$count     = count($feedRows);
 
 $pillRow = build_index_pills($idx);
 $catMap  = [];
 ?>
 <div class="index-page">
 
-  <header class="index-page-header">
-    <div class="index-page-header-row">
-      <div class="index-page-header-left">
-        <?php if ($eyebrow !== ''): ?>
-          <div class="index-eyebrow"><?= $e($eyebrow) ?></div>
-        <?php endif; ?>
-        <?php if ($title !== ''): ?>
-          <h1 class="index-title"><?= render_title_emphasis($title) ?></h1>
-        <?php endif; ?>
-        <?php if ($subtitle !== ''): ?>
-          <p class="index-subtitle"><?= $e($subtitle) ?></p>
-        <?php endif; ?>
+  <?php if ($showTitle && ($title !== '' || $subtitle !== '' || $eyebrow !== '')): ?>
+    <header class="index-page-header">
+      <div class="index-page-header-row">
+        <div class="index-page-header-left">
+          <?php if ($eyebrow !== ''): ?>
+            <div class="index-eyebrow"><?= $e($eyebrow) ?></div>
+          <?php endif; ?>
+          <?php if ($title !== ''): ?>
+            <h1 class="index-title"><?= render_title_emphasis($title) ?></h1>
+          <?php endif; ?>
+          <?php if ($subtitle !== ''): ?>
+            <p class="index-subtitle"><?= $e($subtitle) ?></p>
+          <?php endif; ?>
+        </div>
+        <div class="index-page-header-right">
+          <span class="index-count" data-count-target><?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
+        </div>
       </div>
-      <div class="index-page-header-right">
-        <span class="index-count" data-count-target><?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
-      </div>
-    </div>
 
-  </header>
+    </header>
+  <?php endif; ?>
 
   <?php if ($pillRow['mode'] !== 'none' && $pillRow['pills'] !== []): ?>
     <div class="controller" data-pill-mode="<?= $e($pillRow['mode']) ?>">

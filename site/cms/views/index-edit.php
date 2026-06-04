@@ -361,18 +361,18 @@ require __DIR__ . '/../partials/topbar.php';
         <!-- Page-level fields: title, subtitle, show_title toggle on the
              left, Layout pill toggle on the right. -->
         <div class="field-group">
-          <label class="field-label" for="title-input">Title</label>
+          <label class="field-label" for="title-input">Page Title</label>
           <input id="title-input" type="text" name="title" class="field-input large" value="<?= $e((string)($index['title'] ?? '')) ?>" maxlength="500">
         </div>
 
         <div class="field-group">
-          <label class="field-label" for="subtitle-input">Subtitle</label>
+          <label class="field-label" for="subtitle-input">Page Subtitle</label>
           <input id="subtitle-input" type="text" name="subtitle" class="field-input" value="<?= $e((string)($index['subtitle'] ?? '')) ?>" maxlength="500">
         </div>
 
         <div class="field-group" style="display:flex;gap:var(--space-12);align-items:center;flex-wrap:wrap">
           <label class="switch-filled"><input type="checkbox" name="show_title" id="show-title-toggle" value="1" <?= $showTitle ? 'checked' : '' ?>><span class="slider"></span></label>
-          <label for="show-title-toggle" style="font-family:var(--font);font-size:var(--text-meta);color:var(--secondary);cursor:pointer;margin:0">Show title</label>
+          <label for="show-title-toggle" style="font-family:var(--font);font-size:var(--text-meta);color:var(--secondary);cursor:pointer;margin:0">Show page title</label>
           <span style="flex:1"></span>
           <span class="content-block-label" style="margin-right:var(--space-8)">Layout</span>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">

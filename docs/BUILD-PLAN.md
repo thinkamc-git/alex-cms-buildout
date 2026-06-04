@@ -1747,7 +1747,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 **Decisions to capture before starting**
 - Audit document location: `docs/DS-AUDIT.md` (markdown, committed)
 - Categorization buckets: `Root · Pages · Blocks · CMS · Dead`
-- Files in scope: `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, all inline `<style>` blocks in `cms/views/*.php`, inlined token block in `docs/design-mockups/cms-ui.html`
+- Files in scope: `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, `site/cms/_assets/style-cms.css`, all inline `<style>` blocks in `site/cms/views/*.php`. *(Note: `docs/design-mockups/cms-ui.html` is retired — `site/cms/` is the source of truth for admin UI. Pristine original at `docs/design-mockups/_completed/cms-ui.html` is reference-only.)*
 - Audit row format: markdown table with columns `Selector · File · Category · Notes · Move-To-Path`
 
 **Read at start (only):** This phase section. `docs/BUILD-PLAN.md` §26 (project intro). Every CSS file listed above.
@@ -2101,12 +2101,12 @@ Worked example using real selectors and real files. The recipe is a single ~150-
 - **Ships:** Nothing on the live site. Deliverable is a standalone canvas at `docs/design-mockups/mobile.html` plus a short decisions doc.
 
 **Decisions to capture before starting**
-- Sandbox location: `docs/design-mockups/mobile.html` — a self-contained HTML file with viewport-locked mock canvases (390 / 768 / 1024 columns side-by-side), one row per surface. Same pattern as `cms-ui.html` was for the CMS shell.
+- Sandbox location: `docs/design-mockups/mobile.html` — a self-contained HTML file with viewport-locked mock canvases (390 / 768 / 1024 columns side-by-side), one row per surface. Same pattern as the archived `docs/design-mockups/_completed/cms-ui.html` was for the CMS shell.
 - Surfaces in scope: landing, about/coaching/work-with-me/resume/newsletter, article-standard, article-series, journal-entry, live-session, experiment, experiment-html, Basic Listing, Editorial Page with each hero variant (plain / within / bleed-dark / bleed-light), Series page, 404.
 - Behaviour to nail before code: nav (hamburger vs sticky toggle vs reveal-on-scroll), carousel touch + edge fade behaviour, sticky CTAs, hero image cropping per layout variant, byline-row stacking, article-prose padding, table-of-contents on series, filter-pill row scrollability.
 - Tokens: reuse v1 design tokens; mobile work is layout + sizing, not new brand.
 
-**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Mobile findings section, produced in 22.1). `docs/design-mockups/cms-ui.html` (for the canvas pattern). Live staging at 390 / 768 / 1024 in DevTools.
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Mobile findings section, produced in 22.1). `docs/design-mockups/_completed/cms-ui.html` (archived — for the canvas pattern only; the file has been retired, `site/cms/` is now source of truth). Live staging at 390 / 768 / 1024 in DevTools.
 
 **Touch:**
 - `docs/design-mockups/mobile.html` (new) — the sandbox canvas

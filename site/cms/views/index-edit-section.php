@@ -159,31 +159,6 @@ $catsForThis = $catsForTypes($ftypes);
       <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
     </div>
 
-    <div class="field-group" data-hero-image-mode-field style="<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
-      <label class="field-label">Image source</label>
-      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
-          <?php foreach (['auto' => 'Auto', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
-            <button type="button" class="filter-pill <?= $himode === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
-      <p class="field-hint">Auto: use the picked post's hero image. Custom: upload or paste a URL. None: gradient over canvas (bleed) or no side image (within).</p>
-    </div>
-
-    <?php $showCustomImg = $hlayout !== 'plain' && $himode === 'custom'; ?>
-    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $showCustomImg ? '' : 'display:none' ?>">
-      <label class="field-label">Custom image</label>
-      <div style="display:flex;gap:var(--space-8);align-items:center">
-        <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg or paste URL" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1">
-        <label class="btn-sec" style="cursor:pointer;white-space:nowrap;margin:0">
-          Upload
-          <input type="file" accept="image/*" data-hero-img-upload style="display:none">
-        </label>
-      </div>
-      <p class="field-hint" data-hero-img-status style="display:none"></p>
-    </div>
       </div><!-- /.form-side data-hero-form -->
 
       <div class="form-side" data-hero-preview-pane>
@@ -200,6 +175,31 @@ $catsForThis = $catsForTypes($ftypes);
               <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
             <?php endif; ?>
           </div>
+        </div>
+
+        <div class="field-group" data-hero-image-mode-field style="margin-top:var(--space-16);<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
+          <label class="field-label">Image source</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
+              <?php foreach (['auto' => 'Auto', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $himode === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
+        </div>
+
+        <?php $showCustomImg = $hlayout !== 'plain' && $himode === 'custom'; ?>
+        <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $showCustomImg ? '' : 'display:none' ?>">
+          <label class="field-label">Custom image</label>
+          <div style="display:flex;gap:var(--space-8);align-items:center">
+            <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1;min-width:0">
+            <label class="btn-sec" style="cursor:pointer;white-space:nowrap;margin:0">
+              Upload
+              <input type="file" accept="image/*" data-hero-img-upload style="display:none">
+            </label>
+          </div>
+          <p class="field-hint" data-hero-img-status style="display:none"></p>
         </div>
       </div>
     </div><!-- /.form-grid hero 2-col -->

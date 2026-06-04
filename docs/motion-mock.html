@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Sandbox — alexmchong.ca CMS (temp design tool)</title>
+
+<!--
+  ============================================================================
+  docs/motion-mock.html — TEMPORARY load-animation design sandbox.
+  ----------------------------------------------------------------------------
+  Tune + preview the CMS "progressive reveal" load animation (DreamHost-style
+  cascade) against the REAL admin chrome, across EVERY page archetype, then
+  archive once docs/MOTION.md is implemented.
+
+  Faithful by reference: links the real stylesheets by relative path —
+    ../site/_design-system/css/*.css  and  ../site/cms/_assets/style-cms.css
+  so the shell is pixel-identical to production and never drifts. Opens by
+  double-click (file://) — no PHP server needed. Content is static placeholder
+  data using the real class names. docs/ never deploys.
+
+  Coverage — one representative per archetype:
+    BOARDS     Draft Writing · Ideation            (.lane-cards reveal)   ✓
+    TABLES     Articles · Subscribers · Indexes    (tbody reveal)         ✓
+    ROW-FORMS  Categories · Navigation · Redirects (review — editable)    ⚠
+    FORMS      Settings · Article editor           (exempt)               ✗
+  ============================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- REAL design-system + CMS stylesheets (relative to docs/) -->
+<link rel="stylesheet" href="../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../site/_design-system/css/tables.css">
+<link rel="stylesheet" href="../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../site/_design-system/css/views.css">
+<link rel="stylesheet" href="../site/cms/_assets/style-cms.css">
+
+<style>
+  /* ==========================================================================
+     MOTION LAYER — the candidate-for-production CSS (locked values as default).
+     Driven by custom properties so the panel can tune live.
+     ========================================================================== */
+  :root {
+    --rev-dur:        580ms;
+    --rev-stagger:     60ms;
+    --rev-dist-cards:   6px;   /* boards (kanban / ideation) + dashboard stats */
+    --rev-dist-rows:    3px;   /* data tables + row-forms — thinner, subtler lift */
+    --rev-ease:       cubic-bezier(0.22, 1, 0.36, 1);
+    --rev-cap:          6;
+  }
+  /* Per-archetype rise distance. --rise is set on the container and inherited
+     by the animating children, so the keyframe resolves it per element. */
+  .reveal                  { --rise: var(--rev-dist-cards); }   /* default: cards */
+  .cms-table tbody.reveal  { --rise: var(--rev-dist-rows); }    /* tables override */
+  .rowform-list.reveal     { --rise: var(--rev-dist-rows); }    /* row-forms (table-like) */
+  [data-page-reveal] .content-block { --rise: var(--rev-dist-rows); }
+
+  @keyframes rev-rise {
+    from { opacity: 0; transform: translateY(var(--rise, 6px)); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  /* CASCADE — staggered, element-by-element. Trigger lives on .is-revealing
+     (added by JS); scope is always per-group (index resets per container).
+     For scannable collections: boards, tables, row-forms. */
+  .is-revealing > * {
+    opacity: 0;
+    animation: rev-rise var(--rev-dur) var(--rev-ease) both;
+    animation-delay: calc(var(--rev-stagger) * var(--ri, 0));
+  }
+
+  /* UNIFIED RISE — the whole panel lifts in together, no stagger. For working
+     surfaces (forms / editors): alive, but instantly usable. 8px, slightly more
+     travel than a card since the whole block moves as one. */
+  @keyframes rev-rise-block {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .is-revealing-page {
+    opacity: 0;
+    animation: rev-rise-block var(--rev-dur) var(--rev-ease) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-revealing > *, .is-revealing-page { animation-duration: 1ms; animation-delay: 0ms; transform: none; }
+  }
+  body.sim-reduce .is-revealing > *,
+  body.sim-reduce .is-revealing-page { animation-duration: 1ms !important; animation-delay: 0ms !important; transform: none !important; }
+
+  /* ==========================================================================
+     SANDBOX CHROME (.mk-* — never ships)
+     ========================================================================== */
+  .mk-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9998; background: #191715; color: #fff;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+    padding: 5px 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .mk-banner b { color: #f3b34a; font-weight: 500; }
+  .mk-banner span { opacity: 0.6; }
+  body { padding-top: 26px; }
+
+  /* per-view fit badge shown top-right of the main area */
+  .mk-fit { position: fixed; top: 34px; right: 340px; z-index: 9997; font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; padding: 4px 11px;
+    border-radius: 20px; pointer-events: none; }
+  .mk-fit.ok      { background: #e7f0e8; color: #3f6b46; border: 1px solid #b9d3bd; }
+  .mk-fit.review  { background: #fdf2dc; color: #8a6a1e; border: 1px solid #ecd49a; }
+  .mk-fit.unified { background: #e6edf5; color: #3a5573; border: 1px solid #b9cbe0; }
+
+  .mk-panel {
+    position: fixed; right: 16px; bottom: 16px; z-index: 9999; width: 312px; background: #fff;
+    border: 1px solid rgba(25,23,21,0.18); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    font-family: 'Barlow', sans-serif; color: #191715; max-height: calc(100vh - 64px); overflow-y: auto;
+  }
+  .mk-panel.collapsed .mk-body { display: none; }
+  .mk-head { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 11px 14px;
+    border-bottom: 1px solid rgba(25,23,21,0.10); font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em; font-size: 12px; }
+  .mk-head .mk-dot { width: 8px; height: 8px; border-radius: 50%; background: #6B7F6E; }
+  .mk-head .mk-collapse { margin-left: auto; color: #818080; font-size: 11px; }
+  .mk-body { padding: 12px 14px 16px; }
+  .mk-row { margin-bottom: 13px; }
+  .mk-row label { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 600; margin-bottom: 5px; }
+  .mk-row label .mk-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B7F6E; font-weight: 500; }
+  .mk-row input[type="range"] { width: 100%; accent-color: #191715; }
+  .mk-row select { width: 100%; padding: 5px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; border: 1px solid rgba(25,23,21,0.20); border-radius: 6px; background: #fff; }
+  .mk-segrow { display: flex; gap: 6px; margin-bottom: 13px; }
+  .mk-seg { flex: 1; display: flex; }
+  .mk-seg button { flex: 1; padding: 6px 4px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; font-size: 11px; border: 1px solid rgba(25,23,21,0.18); background: #fff; color: #818080; cursor: pointer; margin-left: -1px; }
+  .mk-seg button:first-child { margin-left: 0; border-radius: 6px 0 0 6px; }
+  .mk-seg button:last-child  { border-radius: 0 6px 6px 0; }
+  .mk-seg button.on { background: #191715; color: #fff; border-color: #191715; }
+  .mk-btns { display: flex; gap: 8px; margin: 4px 0 14px; }
+  .mk-btns button { flex: 1; padding: 9px; border-radius: 7px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; cursor: pointer; border: 1px solid; }
+  .mk-replay { background: #191715; color: #fff; border-color: #191715; }
+  .mk-reset  { background: #fff; color: #494846; border-color: rgba(25,23,21,0.20); }
+  .mk-check { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; margin-bottom: 12px; cursor: pointer; }
+  .mk-check input { accent-color: #191715; }
+  .mk-hr { border: none; border-top: 1px solid rgba(25,23,21,0.10); margin: 14px 0; }
+  .mk-note { font-size: 11px; color: #818080; line-height: 1.5; margin-bottom: 12px; }
+  .mk-readhead { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; color: #818080; margin-bottom: 6px; display: flex; align-items: center; }
+  .mk-readhead button { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; border: 1px solid rgba(25,23,21,0.20); background: #fff; border-radius: 5px; padding: 2px 8px; cursor: pointer; }
+  .mk-read { width: 100%; height: 132px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 10px; line-height: 1.5; border: 1px solid rgba(25,23,21,0.16); border-radius: 6px; padding: 8px; background: #F8F7F6; color: #191715; white-space: pre; }
+  /* light hint that sidebar items are wired as the view switcher here */
+  .sidebar .nav-item[data-view] { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="mk-banner">
+  <b>MOTION SANDBOX</b>
+  <span>temp design tool · real CMS styles · every page archetype · not deployed · archive after the plan ships</span>
+</div>
+<div class="mk-fit ok" id="mkFit">animated</div>
+
+<!-- ===================== REAL SHELL ===================== -->
+<header class="topbar dot-surface" role="banner">
+  <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em></div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-breadcrumb" id="breadcrumb"><span class="crumb-active">Draft Writing</span></div>
+  <div class="topbar-right"><button type="button" class="btn-sec">Log out</button></div>
+</header>
+
+<div class="layout">
+
+  <nav class="sidebar dot-surface" aria-label="CMS navigation">
+    <div class="nav-section">
+      <span class="nav-label">Writer's Desk</span>
+      <a class="nav-item" data-view="ideation"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="6" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 10.5h3M6.5 12.5h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Ideation Board</a>
+      <a class="nav-item active" data-view="draft-writing"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="2.5" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="3" width="2.5" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="2.5" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg> Draft Writing</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Library</span>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Articles <span class="nav-count">8</span></a>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Journals <span class="nav-count">5</span></a>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg> Live Sessions <span class="nav-count">3</span></a>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Experiments <span class="nav-count">4</span></a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Site</span>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg> Pages</a>
+      <a class="nav-item" data-view="navigation"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Navigation</a>
+      <a class="nav-item" data-view="redirects"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Redirects</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Collections</span>
+      <a class="nav-item" data-view="categories"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg> Categories</a>
+      <a class="nav-item" data-view="articles"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg> Series</a>
+      <a class="nav-item" data-view="indexes"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg> Indexes</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Audience</span>
+      <a class="nav-item" data-view="subscribers"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11v7h-11z" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4l5.5 4 5.5-4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg> Subscribers <span class="nav-count is-new">2</span></a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">System · editors (unified rise)</span>
+      <a class="nav-item" data-view="editor"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Article editor</a>
+      <a class="nav-item" data-view="settings"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.2"/><path d="M7 1.5v2M7 10.5v2M1.5 7h2M10.5 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Settings</a>
+    </div>
+  </nav>
+
+  <main class="main" id="main" tabindex="-1">
+
+    <!-- ============ BOARDS ============ -->
+
+    <!-- Draft Writing (kanban) -->
+    <div class="view active" id="view-draft-writing" data-fit="ok">
+      <div class="view-header"><div class="view-header-left">
+        <div class="view-title">Draft Writing</div>
+        <div class="view-subtitle">Everything in flight and recently published — Concept through to live.</div>
+      </div></div>
+      <div class="dash-meta reveal">
+        <div class="dash-stat"><span class="num">12</span><span class="lbl">In flight</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-concept)">3</span><span class="lbl">Concept</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-outline)">4</span><span class="lbl">Outline</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-draft)">5</span><span class="lbl">Draft</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num" style="color:var(--stage-published)">31</span><span class="lbl">Live</span></div>
+      </div>
+      <div class="kanban-board">
+        <div class="kanban-lane" data-key="concept">
+          <div class="lane-header"><div class="lane-dot" style="background:var(--stage-concept)"></div><div class="lane-title" style="color:var(--stage-concept)">Concept</div><div class="lane-count">3</div></div>
+          <div class="lane-cards reveal">
+            <div class="kcard"><div class="kcard-title">On leaving the studio</div><div class="kcard-summary">A reflection on changing how I work.</div><div class="kcard-meta">Article · 2d</div></div>
+            <div class="kcard"><div class="kcard-title">Notes toward a slower week</div><div class="kcard-summary">When the calendar isn't the boss.</div><div class="kcard-meta">Journal · 4d</div></div>
+            <div class="kcard"><div class="kcard-title">The honest portfolio</div><div class="kcard-summary">Showing the work that didn't land.</div><div class="kcard-meta">Article · 5d</div></div>
+          </div>
+        </div>
+        <div class="kanban-lane" data-key="outline">
+          <div class="lane-header"><div class="lane-dot" style="background:var(--stage-outline)"></div><div class="lane-title" style="color:var(--stage-outline)">Outline</div><div class="lane-count">4</div></div>
+          <div class="lane-cards reveal">
+            <div class="kcard"><div class="kcard-title">Coaching without a script</div><div class="kcard-summary">Five sessions, five shapes.</div><div class="kcard-meta">Article · 1d</div></div>
+            <div class="kcard"><div class="kcard-title">Live: building in public</div><div class="kcard-summary">Prep for the March session.</div><div class="kcard-meta">Live · 3d</div></div>
+            <div class="kcard"><div class="kcard-title">A field guide to feedback</div><div class="kcard-summary">Useful notes from noise.</div><div class="kcard-meta">Article · 6d</div></div>
+            <div class="kcard"><div class="kcard-title">Why I kept the typewriter</div><div class="kcard-summary">Tools that earn desk space.</div><div class="kcard-meta">Journal · 1w</div></div>
+          </div>
+        </div>
+        <div class="kanban-lane" data-key="draft">
+          <div class="lane-header"><div class="lane-dot" style="background:var(--stage-draft)"></div><div class="lane-title" style="color:var(--stage-draft)">Draft</div><div class="lane-count">5</div></div>
+          <div class="lane-cards reveal">
+            <div class="kcard"><div class="kcard-title">The cost of a clean inbox</div><div class="kcard-summary">Hours nobody bills for.</div><div class="kcard-meta">Article · 12h</div></div>
+            <div class="kcard"><div class="kcard-title">Experiment: the type ramp</div><div class="kcard-summary">A scale you can drag.</div><div class="kcard-meta">Experiment · 1d</div></div>
+            <div class="kcard"><div class="kcard-title">On asking better questions</div><div class="kcard-summary">The opening move.</div><div class="kcard-meta">Article · 2d</div></div>
+            <div class="kcard"><div class="kcard-title">Three months off social</div><div class="kcard-summary">What came back.</div><div class="kcard-meta">Journal · 3d</div></div>
+            <div class="kcard"><div class="kcard-title">Live: the messy middle</div><div class="kcard-summary">The part nobody shows.</div><div class="kcard-meta">Live · 4d</div></div>
+          </div>
+        </div>
+        <div class="kanban-lane lane-scheduled" data-key="scheduled">
+          <div class="lane-header"><div class="lane-dot" style="background:var(--stage-concept)"></div><div class="lane-title" style="color:var(--stage-concept)">Scheduled</div><div class="lane-count">2</div></div>
+          <div class="lane-cards reveal">
+            <div class="kgroup-label">This Week · 1</div>
+            <div class="kcard"><div class="kcard-title">The honest portfolio</div><div class="kcard-summary">Live Thursday 9am.</div><div class="kcard-meta">Article · Jun 5</div></div>
+            <div class="kgroup-label">Next Week · 1</div>
+            <div class="kcard"><div class="kcard-title">Notes toward a slower week</div><div class="kcard-summary">Queued Monday.</div><div class="kcard-meta">Journal · Jun 9</div></div>
+          </div>
+        </div>
+        <div class="kanban-lane lane-recently-published" data-key="recently-published">
+          <div class="lane-header"><div class="lane-dot" style="background:var(--stage-published)"></div><div class="lane-title" style="color:var(--stage-published)">Recently Published</div><div class="lane-count">2</div></div>
+          <div class="lane-cards reveal">
+            <div class="kcard"><div class="kcard-title">What a good brief feels like</div><div class="kcard-summary">Live since Saturday.</div><div class="kcard-meta">Article · Jun 1</div></div>
+            <div class="kcard"><div class="kcard-title">Studio reset, week one</div><div class="kcard-summary">First of the new cadence.</div><div class="kcard-meta">Journal · May 29</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ideation Board -->
+    <div class="view" id="view-ideation" data-fit="ok">
+      <div class="view-header"><div class="view-header-left">
+        <div class="view-title">Ideation Board</div>
+        <div class="view-subtitle">Capture loose ideas and let them mature before they enter the pipeline.</div>
+      </div></div>
+      <div class="ideation-capture">
+        <form onsubmit="return false" style="display:flex;gap:0;max-width:580px;">
+          <input class="qc-input" type="text" placeholder="What's the idea?">
+          <button class="qc-btn" type="submit">+ Add idea</button>
+        </form>
+      </div>
+      <div class="kanban-board">
+        <div class="kanban-lane" data-key="article">
+          <div class="lane-header"><span class="type-badge">Articles</span><div class="lane-count">4</div></div>
+          <div class="lane-cards reveal">
+            <a class="idea-card"><div class="idea-card-title">A taxonomy of busywork</div><div class="idea-card-foot"><span class="idea-card-meta">3d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">The two-hour workday</div><div class="idea-card-foot"><span class="idea-card-meta">5d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">Designing for boredom</div><div class="idea-card-foot"><span class="idea-card-meta">1w ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">What clients never ask</div><div class="idea-card-foot"><span class="idea-card-meta">2w ago</span></div></a>
+          </div>
+        </div>
+        <div class="kanban-lane" data-key="journal">
+          <div class="lane-header"><span class="type-badge">Journals</span><div class="lane-count">3</div></div>
+          <div class="lane-cards reveal">
+            <a class="idea-card"><div class="idea-card-title">Morning pages, month three</div><div class="idea-card-foot"><span class="idea-card-meta">2d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">On keeping a commonplace book</div><div class="idea-card-foot"><span class="idea-card-meta">6d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">The walk I take to think</div><div class="idea-card-foot"><span class="idea-card-meta">1w ago</span></div></a>
+          </div>
+        </div>
+        <div class="kanban-lane" data-key="live">
+          <div class="lane-header"><span class="type-badge">Live Sessions</span><div class="lane-count">2</div></div>
+          <div class="lane-cards reveal">
+            <a class="idea-card"><div class="idea-card-title">Office hours: pricing</div><div class="idea-card-foot"><span class="idea-card-meta">4d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">Live critique night</div><div class="idea-card-foot"><span class="idea-card-meta">1w ago</span></div></a>
+          </div>
+        </div>
+        <div class="kanban-lane" data-key="experiment">
+          <div class="lane-header"><span class="type-badge">Experiments</span><div class="lane-count">2</div></div>
+          <div class="lane-cards reveal">
+            <a class="idea-card"><div class="idea-card-title">A color-contrast playground</div><div class="idea-card-foot"><span class="idea-card-meta">3d ago</span></div></a>
+            <a class="idea-card"><div class="idea-card-title">Interactive type specimen</div><div class="idea-card-foot"><span class="idea-card-meta">2w ago</span></div></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TABLES ============ -->
+
+    <!-- Articles (represents Journals / Live Sessions / Experiments / Series / Pages) -->
+    <div class="view" id="view-articles" data-fit="ok">
+      <div class="view-header">
+        <div class="view-header-left"><div class="view-title">Articles</div><div class="view-subtitle">Long-form pieces. Same table shape as Journals, Live Sessions, Experiments, Series, Pages.</div></div>
+        <div class="view-header-actions"><button type="button" class="btn-pri">New Article</button></div>
+      </div>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="content-block-header"><div><span class="content-block-label">All articles</span></div><span class="content-block-count">8</span></div>
+          <div class="table-card">
+            <table class="cms-table"><thead><tr><th style="width:42%">Title</th><th style="width:18%">Category</th><th style="width:14%">Stage</th><th style="width:12%">Updated</th><th>Actions</th></tr></thead>
+              <tbody class="reveal">
+                <tr class="row-clickable"><td>What a good brief feels like</td><td>Craft</td><td><span class="pill-concept">Published</span></td><td>Jun 1</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>The cost of a clean inbox</td><td>Work</td><td><span class="pill-draft">Draft</span></td><td>12h</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>On asking better questions</td><td>Coaching</td><td><span class="pill-draft">Draft</span></td><td>2d</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>The honest portfolio</td><td>Craft</td><td><span class="pill-concept">Scheduled</span></td><td>5d</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>Coaching without a script</td><td>Coaching</td><td><span class="pill-outline">Outline</span></td><td>1d</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>A field guide to feedback</td><td>Craft</td><td><span class="pill-outline">Outline</span></td><td>6d</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>On leaving the studio</td><td>Life</td><td><span class="pill-concept">Concept</span></td><td>2d</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+                <tr class="row-clickable"><td>The slow website manifesto</td><td>Craft</td><td><span class="pill-concept">Published</span></td><td>Apr 18</td><td class="cell-actions"><button class="btn-row-action">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subscribers (dash-meta + table) -->
+    <div class="view" id="view-subscribers" data-fit="ok">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Subscribers</div><div class="view-subtitle">Newsletter audience. Stats cascade, then rows.</div></div></div>
+      <div class="dash-meta reveal">
+        <div class="dash-stat"><span class="num">214</span><span class="lbl">Total</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num">198</span><span class="lbl">Subscribed</span></div>
+        <div class="dash-stat-div"></div>
+        <div class="dash-stat"><span class="num">16</span><span class="lbl">Unsubscribed</span></div>
+      </div>
+      <div class="content-area">
+        <div class="table-card">
+          <table class="cms-table"><thead><tr><th style="width:30%">Email</th><th style="width:16%">Name</th><th style="width:18%">Subscribed</th><th style="width:12%">Source</th><th style="width:10%">Status</th><th>Actions</th></tr></thead>
+            <tbody class="reveal">
+              <tr><td class="is-mono">amaya@studio.co</td><td>Amaya R.</td><td>May 30</td><td>Footer</td><td><span class="sub-status sub">subscribed</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Unsubscribe</button></td></tr>
+              <tr><td class="is-mono">jonas@mail.com</td><td>Jonas P.</td><td>May 28</td><td>Article</td><td><span class="sub-status sub">subscribed</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Unsubscribe</button></td></tr>
+              <tr><td class="is-mono">lena.k@web.de</td><td>Lena K.</td><td>May 21</td><td>Footer</td><td><span class="sub-status sub">subscribed</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Unsubscribe</button></td></tr>
+              <tr><td class="is-mono">old@addr.io</td><td>—</td><td>Apr 2</td><td>Import</td><td><span class="sub-status uns">unsubscribed</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Re-subscribe</button></td></tr>
+              <tr><td class="is-mono">sam@quay.org</td><td>Sam T.</td><td>Mar 14</td><td>Footer</td><td><span class="sub-status sub">subscribed</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Unsubscribe</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indexes (multiple content-blocks, each a table) -->
+    <div class="view" id="view-indexes" data-fit="ok">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Indexes</div><div class="view-subtitle">Two stacked tables — each <code>tbody</code> cascades independently.</div></div></div>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="content-block-header"><div><span class="content-block-label">Post Type indexes</span><span class="content-block-sublabel">The four built-in content-type indexes</span></div><span class="content-block-count">4</span></div>
+          <div class="table-card">
+            <table class="cms-table"><thead><tr><th style="width:34%">Index</th><th style="width:12%">Layout</th><th style="width:30%">Feed</th><th>Actions</th></tr></thead>
+              <tbody class="reveal">
+                <tr class="row-clickable"><td>Articles<div class="row-slug">/articles/</div></td><td><span class="pill-concept">Grid</span></td><td><span class="muted">All published articles</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td>Journals<div class="row-slug">/journal/</div></td><td><span class="pill-concept">List</span></td><td><span class="muted">All published journals</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td>Live Sessions<div class="row-slug">/live/</div></td><td><span class="pill-concept">List</span></td><td><span class="muted">All sessions</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td>Experiments<div class="row-slug">/lab/</div></td><td><span class="pill-concept">Grid</span></td><td><span class="muted">All experiments</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="content-block">
+          <div class="content-block-header"><div><span class="content-block-label">Custom indexes</span><span class="content-block-sublabel">Hand-built landing pages with a curated feed</span></div><span class="content-block-count">2</span></div>
+          <div class="table-card">
+            <table class="cms-table"><thead><tr><th style="width:34%">Index</th><th style="width:12%">Layout</th><th style="width:30%">Feed</th><th>Actions</th></tr></thead>
+              <tbody class="reveal">
+                <tr class="row-clickable"><td>Best of 2025<div class="row-slug">/best-of-2025/</div></td><td><span class="pill-concept">Grid</span></td><td><span class="muted">Tag: featured</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td>Coaching<div class="row-slug">/coaching-writing/</div></td><td><span class="pill-concept">List</span></td><td><span class="muted">Category: coaching</span></td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ROW-FORMS (review) ============ -->
+
+    <!-- Categories -->
+    <div class="view" id="view-categories" data-fit="ok">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Categories</div><div class="view-subtitle">Each row is an inline editable form. Watch whether cascading editable fields feels right.</div></div></div>
+      <div class="content-area">
+        <div class="cat-block">
+          <div class="cat-block-title">Article categories</div>
+          <div class="table-card">
+            <table class="cms-table cms-table--cat"><thead><tr><th style="width:32%">Label</th><th style="width:22%">Value slug</th><th style="width:22%">Colour</th><th style="width:8%">Use</th><th>Actions</th></tr></thead>
+              <tbody class="reveal">
+                <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="cat-swatch" style="background:var(--c-terracotta)"></div><input class="cat-input" value="Craft"></div></td><td class="is-mono">craft</td><td>terracotta</td><td class="cat-count">12</td><td class="cell-actions"><button class="btn-sec btn-tiny">Save</button></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="cat-swatch" style="background:var(--c-forest)"></div><input class="cat-input" value="Coaching"></div></td><td class="is-mono">coaching</td><td>forest</td><td class="cat-count">7</td><td class="cell-actions"><button class="btn-sec btn-tiny">Save</button></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="cat-swatch" style="background:var(--c-denim)"></div><input class="cat-input" value="Work"></div></td><td class="is-mono">work</td><td>denim</td><td class="cat-count">5</td><td class="cell-actions"><button class="btn-sec btn-tiny">Save</button></td></tr>
+                <tr><td><div style="display:flex;align-items:center;gap:6px"><div class="cat-swatch" style="background:var(--c-amber)"></div><input class="cat-input" value="Life"></div></td><td class="is-mono">life</td><td>amber</td><td class="cat-count zero">0</td><td class="cell-actions"><button class="btn-sec btn-tiny">Save</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <form onsubmit="return false" class="cat-add-row" style="margin-top:12px;display:flex;max-width:420px">
+            <input class="cat-add-input" placeholder="New label…">
+            <button type="submit" class="btn-sec cat-add-btn">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation (draggable row-forms) -->
+    <div class="view" id="view-navigation" data-fit="ok">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Navigation</div><div class="view-subtitle">Drag-reorderable rows, each an inline form. Cascade + drag affordance can fight each other.</div></div></div>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="content-block-header"><div><span class="content-block-label">Top navigation</span><span class="content-block-sublabel">Shown above every public page</span></div><span class="content-block-count">4</span></div>
+          <div class="rowform-list nav-list reveal">
+            <div class="rowform-headers"><span></span><span>Label</span><span>Key</span><span>Type</span><span>Target</span><span></span></div>
+            <div class="rowform-row nav-row"><div class="grip" title="Drag to reorder">⋮⋮</div><input type="text" value="Thoughts" style="max-width:120px"><input type="text" value="thoughts" style="max-width:100px"><span class="muted">Index</span><span class="muted is-mono">/articles/</span><button class="btn-sec btn-tiny">Save</button></div>
+            <div class="rowform-row nav-row"><div class="grip" title="Drag to reorder">⋮⋮</div><input type="text" value="Talks" style="max-width:120px"><input type="text" value="talks" style="max-width:100px"><span class="muted">Index</span><span class="muted is-mono">/live/</span><button class="btn-sec btn-tiny">Save</button></div>
+            <div class="rowform-row nav-row"><div class="grip" title="Drag to reorder">⋮⋮</div><input type="text" value="Experiments" style="max-width:120px"><input type="text" value="lab" style="max-width:100px"><span class="muted">Index</span><span class="muted is-mono">/lab/</span><button class="btn-sec btn-tiny">Save</button></div>
+            <div class="rowform-row nav-row"><div class="grip" title="Drag to reorder">⋮⋮</div><input type="text" value="About" style="max-width:120px"><input type="text" value="about" style="max-width:100px"><span class="muted">Page</span><span class="muted is-mono">/about/</span><button class="btn-sec btn-tiny">Save</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Redirects (row-forms) -->
+    <div class="view" id="view-redirects" data-fit="ok">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Redirects</div><div class="view-subtitle">Map old paths to new · inline-form rows.</div></div></div>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="content-block-header"><div><span class="content-block-label">Redirects</span><span class="content-block-sublabel">301 permanent · 302 temporary</span></div><span class="content-block-count">3</span></div>
+          <div class="rowform-list red-list reveal">
+            <div class="rowform-headers"><span>From URL</span><span>New URL</span><span>Code</span><span></span></div>
+            <div class="rowform-row red-row"><input type="text" value="/old-blog/hello"><input type="text" value="/articles/hello"><span class="muted">301</span><button class="btn-sec btn-tiny">Save</button></div>
+            <div class="rowform-row red-row"><input type="text" value="/services"><input type="text" value="/work-with-me"><span class="muted">301</span><button class="btn-sec btn-tiny">Save</button></div>
+            <div class="rowform-row red-row"><input type="text" value="/launch"><input type="text" value="/best-of-2025"><span class="muted">302</span><button class="btn-sec btn-tiny">Save</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ FORMS (exempt) ============ -->
+
+    <!-- Article editor -->
+    <div class="view" id="view-editor" data-fit="unified">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Edit · On leaving the studio</div><div class="view-subtitle">The whole form lifts in together (no stagger) — alive, but you can type immediately. Toggle "cascade fields" to see why staggering is wrong here.</div></div></div>
+      <div class="content-area">
+        <form onsubmit="return false" class="cms-form cms-form-wide" data-page-reveal>
+          <div class="content-block">
+            <div class="content-block-header"><div><span class="content-block-label">Title &amp; slug</span></div></div>
+            <div class="field-group"><label class="field-label">Title</label><input type="text" class="field-input" value="On leaving the studio"></div>
+            <div class="field-group"><label class="field-label">Slug</label><input type="text" class="field-input" value="on-leaving-the-studio"></div>
+            <div class="field-group"><label class="field-label">Category</label><input type="text" class="field-input" value="Life"></div>
+          </div>
+          <div class="content-block">
+            <div class="content-block-header"><div><span class="content-block-label">Short description</span></div></div>
+            <div class="field-group"><label class="field-label">Summary</label><input type="text" class="field-input" value="A reflection on changing how I work after ten years."></div>
+          </div>
+          <div class="content-block">
+            <div class="content-block-header"><div><span class="content-block-label">Body</span></div></div>
+            <div class="field-group"><label class="field-label">Content</label><input type="text" class="field-input" value="The studio had become a habit more than a home…"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="view" id="view-settings" data-fit="unified">
+      <div class="view-header"><div class="view-header-left"><div class="view-title">Settings</div><div class="view-subtitle">Unified rise — the form arrives as one calm motion, never field-by-field.</div></div></div>
+      <div class="content-area">
+        <form onsubmit="return false" class="cms-form cms-form-wide" data-page-reveal>
+          <div class="content-block">
+            <div class="content-block-header"><div><span class="content-block-label">Identity</span><span class="content-block-sublabel">Names and labels in browser chrome and footers</span></div></div>
+            <div class="field-group"><label class="field-label">Site title</label><input type="text" class="field-input" value="alexmchong.ca"><p class="field-hint">Appended to every page's &lt;title&gt; as the suffix.</p></div>
+            <div class="field-group"><label class="field-label">Site tagline</label><input type="text" class="field-input" value="Designer · writer · coach"></div>
+            <div class="field-group"><label class="field-label">Footer copyright</label><input type="text" class="field-input" value="Alex M. Chong"></div>
+          </div>
+          <div class="content-block">
+            <div class="content-block-header"><div><span class="content-block-label">Social preview defaults</span><span class="content-block-sublabel">Fallback og:image / og:type</span></div></div>
+            <div class="field-group"><label class="field-label">Default og:image URL</label><input type="text" class="field-input" value="/_layout/og-default.png"><p class="field-hint">Recommended 1200×630.</p></div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== CONTROL PANEL ===================== -->
+<div class="mk-panel" id="mkPanel">
+  <div class="mk-head" id="mkHead"><span class="mk-dot"></span> Load Motion <span class="mk-collapse" id="mkCollapse">collapse ▾</span></div>
+  <div class="mk-body">
+
+    <div class="mk-note">Navigate with the real sidebar ←. The badge top-right shows each page's fit. <b>Replay</b> re-runs the cascade.</div>
+
+    <div class="mk-btns">
+      <button class="mk-replay" id="mkReplay">▶ Replay</button>
+      <button class="mk-reset"  id="mkReset">Reset</button>
+    </div>
+
+    <div class="mk-row"><label>Duration <span class="mk-val" id="vDur">580ms</span></label><input type="range" id="sDur" min="100" max="800" step="10" value="580"></div>
+    <div class="mk-row"><label>Stagger step <span class="mk-val" id="vStag">60ms</span></label><input type="range" id="sStag" min="0" max="120" step="5" value="60"></div>
+    <div class="mk-row"><label>Cards rise <span class="mk-val" id="vDistCards">6px</span></label><input type="range" id="sDistCards" min="0" max="24" step="1" value="6"></div>
+    <div class="mk-row"><label>Rows rise <span class="mk-val" id="vDistRows">3px</span></label><input type="range" id="sDistRows" min="0" max="24" step="1" value="3"></div>
+    <div class="mk-row"><label>Stagger cap <span class="mk-val" id="vCap">6</span></label><input type="range" id="sCap" min="1" max="20" step="1" value="6"></div>
+    <div class="mk-row"><label>Easing</label>
+      <select id="sEase">
+        <option value="cubic-bezier(0.22, 1, 0.36, 1)">easeOutQuint — soft land (locked)</option>
+        <option value="cubic-bezier(0.16, 1, 0.3, 1)">easeOutExpo — snappier</option>
+        <option value="ease-out">ease-out — browser default</option>
+        <option value="ease">ease</option>
+        <option value="linear">linear (debug)</option>
+      </select>
+    </div>
+    <div class="mk-note">Cascade is always <b>per&nbsp;group</b> — each lane / table resets its own stagger.</div>
+
+    <hr class="mk-hr">
+    <label class="mk-check"><input type="checkbox" id="cFieldCascade"> Cascade form fields instead <span style="color:#9a4f40">(✗ jarring — see why)</span></label>
+    <label class="mk-check"><input type="checkbox" id="cReduce"> Simulate reduced motion</label>
+    <label class="mk-check"><input type="checkbox" id="cAuto" checked> Auto-replay on view switch</label>
+
+    <hr class="mk-hr">
+    <div class="mk-readhead">CSS for the plan <button id="mkCopy">copy</button></div>
+    <textarea class="mk-read" id="mkRead" readonly></textarea>
+  </div>
+</div>
+
+<script>
+(function () {
+  const root = document.documentElement, body = document.body;
+  const DEFAULTS = { dur:580, stag:60, distCards:6, distRows:3, cap:6, ease:'cubic-bezier(0.22, 1, 0.36, 1)' };
+  const state = { ...DEFAULTS };
+  const $ = id => document.getElementById(id);
+  const VIEW_LABELS = {
+    'draft-writing':'Draft Writing', 'ideation':'Ideation Board', 'articles':'Articles',
+    'subscribers':'Subscribers', 'indexes':'Indexes', 'categories':'Categories',
+    'navigation':'Navigation', 'redirects':'Redirects', 'editor':'Article editor', 'settings':'Settings'
+  };
+  const FIT_TEXT = { ok:'✓ cascade', review:'⚠ review — editable rows', unified:'◆ unified rise — form' };
+
+  function applyVars() {
+    root.style.setProperty('--rev-dur', state.dur+'ms');
+    root.style.setProperty('--rev-stagger', state.stag+'ms');
+    root.style.setProperty('--rev-dist-cards', state.distCards+'px');
+    root.style.setProperty('--rev-dist-rows', state.distRows+'px');
+    root.style.setProperty('--rev-ease', state.ease);
+    root.style.setProperty('--rev-cap', state.cap);
+    $('vDur').textContent = state.dur+'ms'; $('vStag').textContent = state.stag+'ms';
+    $('vDistCards').textContent = state.distCards+'px'; $('vDistRows').textContent = state.distRows+'px';
+    $('vCap').textContent = state.cap;
+  }
+  const activeView = () => document.querySelector('.view.active');
+
+  function replay() {
+    const view = activeView(); if (!view) return;
+    // clear any prior reveal state across the whole view first
+    view.querySelectorAll('.is-revealing, .is-revealing-page')
+        .forEach(c => c.classList.remove('is-revealing', 'is-revealing-page'));
+
+    // CASCADE targets — staggered, element-by-element (tables, boards, row-forms)
+    const cascade = [...view.querySelectorAll('.reveal')];
+
+    // UNIFIED targets — whole form lifts in together
+    let unified = [...view.querySelectorAll('[data-page-reveal]')];
+
+    // Demo: stagger the form's fields instead of the unified rise (shows why it's wrong)
+    if ($('cFieldCascade').checked) {
+      unified.forEach(p => cascade.push(...p.querySelectorAll('.content-block')));
+      unified = [];
+    }
+
+    // always per-group: stagger index resets per container
+    cascade.forEach(c => {
+      [...c.children].forEach((child, i) => child.style.setProperty('--ri', Math.min(i, state.cap)));
+    });
+    void view.offsetWidth;
+    cascade.forEach(c => c.classList.add('is-revealing'));
+    unified.forEach(p => p.classList.add('is-revealing-page'));
+    renderReadout();
+  }
+
+  function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const v = $('view-'+name); if (!v) return;
+    v.classList.add('active');
+    $('breadcrumb').innerHTML = '<span class="crumb-active">'+(VIEW_LABELS[name]||name)+'</span>';
+    document.querySelectorAll('.sidebar .nav-item[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view===name));
+    const fit = v.dataset.fit || 'ok';
+    const badge = $('mkFit'); badge.className = 'mk-fit '+fit; badge.textContent = FIT_TEXT[fit];
+    if ($('cAuto').checked) replay();
+  }
+
+  function renderReadout() {
+    const L = [];
+    L.push('/* CMS load reveal — docs/MOTION.md · no JS, nth-child = per group */');
+    L.push('@keyframes rise-in {');
+    L.push('  from { opacity: 0; transform: translateY(var(--rise)); }');
+    L.push('  to   { opacity: 1; transform: translateY(0); }');
+    L.push('}');
+    L.push('.reveal                  { --rise: '+state.distCards+'px; }  /* cards / boards / stats */');
+    L.push('.cms-table tbody.reveal,');
+    L.push('.rowform-list.reveal     { --rise: '+state.distRows+'px; }  /* tables + row-forms */');
+    L.push('.reveal > * {');
+    L.push('  opacity: 0;');
+    L.push('  animation: rise-in '+state.dur+'ms '+state.ease+' both;');
+    L.push('}');
+    for (let i=1;i<=state.cap;i++) L.push('.reveal > *:nth-child('+i+') { animation-delay: '+((i-1)*state.stag)+'ms; }');
+    L.push('.reveal > *:nth-child(n+'+(state.cap+1)+') { animation-delay: '+(state.cap*state.stag)+'ms; }');
+    L.push('');
+    L.push('');
+    L.push('/* UNIFIED RISE — forms / editors: whole panel lifts in together. */');
+    L.push('@keyframes rise-in-block {');
+    L.push('  from { opacity: 0; transform: translateY(8px); }');
+    L.push('  to   { opacity: 1; transform: translateY(0); }');
+    L.push('}');
+    L.push('.reveal-page { opacity: 0; animation: rise-in-block '+state.dur+'ms '+state.ease+' both; }');
+    L.push('');
+    L.push('@media (prefers-reduced-motion: reduce) {');
+    L.push('  .reveal > *, .reveal-page { animation: none; opacity: 1; transform: none; }');
+    L.push('}');
+    $('mkRead').value = L.join('\n');
+  }
+
+  $('sDur').addEventListener('input', e => { state.dur=+e.target.value; applyVars(); replay(); });
+  $('sStag').addEventListener('input', e => { state.stag=+e.target.value; applyVars(); replay(); });
+  $('sDistCards').addEventListener('input', e => { state.distCards=+e.target.value; applyVars(); replay(); });
+  $('sDistRows').addEventListener('input', e => { state.distRows=+e.target.value; applyVars(); replay(); });
+  $('sCap').addEventListener('input', e => { state.cap=+e.target.value; applyVars(); replay(); });
+  $('sEase').addEventListener('change', e => { state.ease=e.target.value; applyVars(); replay(); });
+
+  document.querySelector('.sidebar').addEventListener('click', e => { const a=e.target.closest('.nav-item[data-view]'); if(a){ e.preventDefault(); switchView(a.dataset.view); } });
+
+  $('mkReplay').addEventListener('click', replay);
+  $('mkReset').addEventListener('click', () => {
+    Object.assign(state, DEFAULTS);
+    $('sDur').value=state.dur; $('sStag').value=state.stag;
+    $('sDistCards').value=state.distCards; $('sDistRows').value=state.distRows;
+    $('sCap').value=state.cap; $('sEase').value=state.ease;
+    applyVars(); replay();
+  });
+  $('cFieldCascade').addEventListener('change', replay);
+  $('cReduce').addEventListener('change', e => { body.classList.toggle('sim-reduce', e.target.checked); replay(); });
+
+  $('mkCopy').addEventListener('click', () => { $('mkRead').select(); navigator.clipboard?.writeText($('mkRead').value); $('mkCopy').textContent='copied'; setTimeout(()=>$('mkCopy').textContent='copy',1200); });
+  $('mkHead').addEventListener('click', e => { if (e.target.id==='mkCollapse'||e.target.classList.contains('mk-dot')||e.currentTarget===e.target){ $('mkPanel').classList.toggle('collapsed'); $('mkCollapse').textContent=$('mkPanel').classList.contains('collapsed')?'expand ▸':'collapse ▾'; } });
+
+  applyVars(); renderReadout();
+  window.addEventListener('load', () => requestAnimationFrame(replay));
+})();
+</script>
+</body>
+</html>

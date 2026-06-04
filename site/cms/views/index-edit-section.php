@@ -132,7 +132,7 @@ $catsForThis = $catsForTypes($ftypes);
           </div>
           <input type="hidden" name="<?= $inputBase ?>[display_format]" value="<?= $e($fmt) ?>">
         </div>
-        <div class="field-group">
+        <div class="field-group" data-grid-rows-field<?= $fmt === 'carousel' ? ' style="display:none"' : '' ?>>
           <label class="field-label">Grid rows</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[grid_rows]">
@@ -245,7 +245,7 @@ $catsForThis = $catsForTypes($ftypes);
           </div>
           <input type="hidden" name="<?= $inputBase ?>[display_format]" value="<?= $e($fmt) ?>">
         </div>
-        <div class="field-group">
+        <div class="field-group" data-grid-rows-field<?= $fmt === 'carousel' ? ' style="display:none"' : '' ?>>
           <label class="field-label">Grid rows</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[grid_rows]">
@@ -304,17 +304,11 @@ $catsForThis = $catsForTypes($ftypes);
         <div class="field-group">
           <label class="field-label">Categories <span class="field-hint-inline" style="font-family:var(--font-mono);font-size:var(--text-micro);font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted)">based on selected types</span></label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
-            <div class="filter-group">
-              <?php foreach ($catsForThis as $cat):
-                  $cslug = (string)$cat['value_slug'];
-                  $on = in_array($cslug, $fcats, true);
-              ?>
-                <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                  <input type="checkbox" name="<?= $inputBase ?>[feed_categories][]" value="<?= $e($cslug) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                  <?= $e((string)$cat['label']) ?>
-                </label>
-              <?php endforeach; ?>
-            </div>
+            <div class="cat-rail"
+                 data-cat-rail
+                 data-cat-rail-name="<?= $inputBase ?>[feed_categories][]"
+                 data-cat-rail-selected="<?= $e(implode(',', $fcats)) ?>"
+                 data-cat-rail-types-source="content-query"></div>
           </div>
         </div>
         <div class="field-group" style="margin-bottom:0">
@@ -358,17 +352,11 @@ $catsForThis = $catsForTypes($ftypes);
           <div class="field-group" style="margin-bottom:0">
             <label class="field-label">Category Toggles</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
-              <div class="filter-group">
-                <?php foreach ($catsForThis as $cat):
-                    $cslug = (string)$cat['value_slug'];
-                    $on = in_array($cslug, $fopts, true);
-                ?>
-                  <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                    <input type="checkbox" name="<?= $inputBase ?>[filter_options][]" value="<?= $e($cslug) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                    <?= $e((string)$cat['label']) ?>
-                  </label>
-                <?php endforeach; ?>
-              </div>
+              <div class="cat-rail"
+                   data-cat-rail
+                   data-cat-rail-name="<?= $inputBase ?>[filter_options][]"
+                   data-cat-rail-selected="<?= $e(implode(',', $fopts)) ?>"
+                   data-cat-rail-types-source="content-query"></div>
             </div>
           </div>
         </div>

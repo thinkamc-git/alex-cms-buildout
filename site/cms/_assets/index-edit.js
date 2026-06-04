@@ -48,6 +48,14 @@
       hidden.value = pill.getAttribute('data-pill-value');
       hidden.dispatchEvent(new Event('change', { bubbles: true }));
     }
+    // Carousel format hides Grid rows; Grid restores it.
+    if (hidden && hidden.name && hidden.name.indexOf('[display_format]') > -1) {
+      var section = pill.closest('[data-section]');
+      if (section) {
+        var rowsField = section.querySelector('[data-grid-rows-field]');
+        if (rowsField) rowsField.style.display = hidden.value === 'carousel' ? 'none' : '';
+      }
+    }
     updateSummaryFor(pill.closest('[data-section]'));
   });
 
@@ -368,14 +376,78 @@
 
   /**
    * Rebuild a Filtered section's Category pill rails (Content Query
-   * Categories + Show Filter Category Filters) when the Types selection
-   * changes. For v1 we just toggle .active class — the per-type
-   * category fetch is server-side, so on full refresh the right pills
-   * render. Simpler than fetching via AJAX. Future: fetch on change.
+   * Categories + Visible Category Toggles). One rail per [data-cat-rail].
+   * Categories are grouped per type with visible separation, sourced from
+   * window.CMS_CATEGORIES_BY_TYPE (emitted by the view).
    */
-  function rebuildCategoriesFor(sec) {
-    // Intentionally minimal for v1 — server-rendered on next reload.
+  var CAT_TYPE_ORDER = ['article', 'journal', 'live-session', 'experiment'];
+
+  function renderCatRail(rail) {
+    if (!rail) return;
+    var sec = rail.closest('[data-section]');
+    var name = rail.getAttribute('data-cat-rail-name') || '';
+    var selAttr = rail.getAttribute('data-cat-rail-selected') || '';
+    var selected = selAttr ? selAttr.split(',').filter(Boolean) : [];
+
+    // Read this section's active Content Query types. Empty = show all.
+    var types = sec
+      ? Array.prototype.map.call(
+          sec.querySelectorAll('input[name$="[feed_types][]"]:checked'),
+          function (cb) { return cb.value; }
+        )
+      : [];
+    if (types.length === 0) types = CAT_TYPE_ORDER.slice();
+
+    var byType = window.CMS_CATEGORIES_BY_TYPE || {};
+    rail.innerHTML = '';
+    types.forEach(function (t) {
+      var cats = byType[t] || [];
+      if (cats.length === 0) return;
+      var group = document.createElement('div');
+      group.className = 'filter-group cat-group';
+      cats.forEach(function (cat) {
+        var on = selected.indexOf(cat.slug) !== -1;
+        var lab = document.createElement('label');
+        lab.className = 'filter-pill' + (on ? ' active' : '');
+        lab.style.cursor = 'pointer';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.name = name;
+        cb.value = cat.slug;
+        cb.checked = on;
+        cb.style.display = 'none';
+        lab.appendChild(cb);
+        lab.appendChild(document.createTextNode(cat.label));
+        group.appendChild(lab);
+      });
+      rail.appendChild(group);
+    });
   }
+
+  function refreshCatRailsIn(scope) {
+    if (!scope) return;
+    scope.querySelectorAll('[data-cat-rail]').forEach(function (rail) {
+      var checked = Array.prototype.map.call(
+        rail.querySelectorAll('input[type=checkbox]:checked'),
+        function (cb) { return cb.value; }
+      );
+      if (checked.length) rail.setAttribute('data-cat-rail-selected', checked.join(','));
+      renderCatRail(rail);
+    });
+  }
+
+  // Initial render of all rails on the page.
+  document.querySelectorAll('[data-cat-rail]').forEach(renderCatRail);
+
+  // When any Content Query Types pill changes, refresh that section's rails.
+  form.addEventListener('change', function (e) {
+    var cb = e.target;
+    if (!cb || cb.tagName !== 'INPUT' || cb.type !== 'checkbox') return;
+    if (!cb.name || cb.name.indexOf('[feed_types][]') === -1) return;
+    refreshCatRailsIn(cb.closest('[data-section]'));
+  });
+
+  function rebuildCategoriesFor(sec) { refreshCatRailsIn(sec); }
 
   /**
    * Update the collapsed-header summary line based on the section's

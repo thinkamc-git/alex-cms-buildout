@@ -185,6 +185,23 @@ foreach ($pickList as $p) $pickById[(int)$p['id']] = $p;
 // All categories (for the Filtered section's categories pill rail).
 $allCats = list_categories();
 
+// Bucket categories by type, in the same order the type pills render.
+// Each entry: { slug, label, colour }. Consumed by index-edit.js for
+// the dynamic per-type rebuild of category pill rails.
+$catsByType = [];
+foreach (['article', 'journal', 'live-session', 'experiment'] as $t) {
+    $catsByType[$t] = [];
+}
+foreach ($allCats as $c) {
+    $t = (string)$c['type'];
+    if (!isset($catsByType[$t])) $catsByType[$t] = [];
+    $catsByType[$t][] = [
+        'slug'   => (string)$c['value_slug'],
+        'label'  => (string)$c['label'],
+        'colour' => (string)($c['colour'] ?? ''),
+    ];
+}
+
 // Decode legacy JSON columns for the Basic Listing form.
 $featuredIds = $index['featured_ids'] ?? null;
 if (is_string($featuredIds)) {
@@ -509,6 +526,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<script>window.CMS_CATEGORIES_BY_TYPE = <?= json_encode($catsByType, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;</script>
 <script src="/cms/_assets/index-edit.js" defer></script>
 <script src="/cms/_assets/preview-tab-guard.js" defer></script>
 <script src="/cms/_assets/dirty-flip.js" defer></script>

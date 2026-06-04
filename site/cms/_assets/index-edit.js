@@ -79,6 +79,7 @@
     if (sec) sec.remove();
     reindexSections();
     updateSectionCount();
+    toggleSecEmpty();
   });
 
   // ── Add section: three buttons (+ Hero / + Curated / + Filtered) ────
@@ -104,7 +105,21 @@
     stack.appendChild(card);
     reindexSections();
     updateSectionCount();
+    toggleSecEmpty();
     card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+
+  function toggleSecEmpty() {
+    var empty = document.querySelector('[data-sec-empty]');
+    var has = stack && stack.children.length > 0;
+    if (empty && has) empty.remove();
+    if (!empty && !has) {
+      var d = document.createElement('div');
+      d.className = 'empty-state';
+      d.setAttribute('data-sec-empty', '');
+      d.textContent = 'No sections yet — add one below.';
+      if (stack && stack.parentElement) stack.parentElement.insertBefore(d, stack);
+    }
   }
 
   // ── Drag-reorder for the section stack ──────────────────────────────
@@ -150,6 +165,9 @@
       '<td style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);white-space:nowrap">' + escapeHtml(date) + '</td>' +
       '<td><button type="button" class="btn-icon" title="Remove from this section" data-post-remove><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>';
     tr.children[2].textContent = title;
+    // Drop the "No posts yet" row if it's there.
+    var empty = tbody.querySelector('[data-posts-empty]');
+    if (empty) empty.remove();
     tbody.appendChild(tr);
     sel.value = '';
     renumberPosts(tbody);
@@ -165,6 +183,13 @@
     var sec = btn.closest('[data-section]');
     var tbody = tr.parentElement;
     tr.remove();
+    // Re-add the "No posts yet" row if the table is empty.
+    if (!tbody.querySelector('tr[data-post-id]') && !tbody.querySelector('[data-posts-empty]')) {
+      var er = document.createElement('tr');
+      er.setAttribute('data-posts-empty', '');
+      er.innerHTML = '<td colspan="6" style="text-align:center;color:var(--muted);padding:var(--space-24)">No posts yet.</td>';
+      tbody.appendChild(er);
+    }
     renumberPosts(tbody);
     serializePosts(sec);
     updateSummaryFor(sec);

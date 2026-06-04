@@ -200,6 +200,11 @@ $catsForThis = $catsForTypes($ftypes);
                   <td><button type="button" class="btn-icon" title="Remove from this section" data-post-remove><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>
                 </tr>
                 <?php endforeach; ?>
+                <?php if ($rn === 0): ?>
+                <tr data-posts-empty>
+                  <td colspan="6" style="text-align:center;color:var(--muted);padding:var(--space-24)">No posts yet.</td>
+                </tr>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>

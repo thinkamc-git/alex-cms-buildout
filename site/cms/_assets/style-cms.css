@@ -1930,6 +1930,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .sec-card-body { padding: var(--space-16) var(--space-20) var(--space-20); border-top: var(--rule-faint); }
 .sec-card.is-collapsed .sec-card-body { display: none; }
 .sec-card.is-collapsed .sec-card-head { border-bottom: none; }
+/* When .sec-card-body is the first/only child (Basic Listing — no head),
+   drop its top divider so the card looks like one continuous surface. */
+.sec-card > .sec-card-body:first-child { border-top: none; }
 
 /* index-edit field-groups span full width — the section cards below them
    are full-width, so the global 720px cap on .cms-form field-groups

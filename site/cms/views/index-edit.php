@@ -318,8 +318,8 @@ require __DIR__ . '/../partials/topbar.php';
       $subtitle = $isEditorial
           ? 'Editorial Page · composed of typed sections (Hero / Curated / Filtered).'
           : 'Basic Listing · single filtered feed.';
-      $actions  = '<a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-sec">View</a>'
-                . '<a href="/cms/indexes" class="btn-sec">All indexes</a>';
+      $actions  = '<a href="/cms/indexes" class="btn-sec">← Back to Indexes</a>'
+                . ' <a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -371,6 +371,10 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-sublabel">drag to reorder</span>
           </div>
         </div>
+
+        <?php if (count($sections) === 0): ?>
+          <div class="empty-state" data-sec-empty>No sections yet — add one below.</div>
+        <?php endif; ?>
 
         <div id="sec-stack" class="sec-list">
           <?php

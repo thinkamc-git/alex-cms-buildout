@@ -222,23 +222,20 @@
   }
 
   // ── Layout toggle: Editorial ↔ Basic Listing ────────────────────────
-  // The two layouts use materially different form structures, so we
-  // can't swap them client-side; submit the form with the new layout
-  // and re-render.
+  // Flip the pill + the hidden layout input, dispatch a change so the
+  // dirty-flip wiring marks the Save button. Server re-renders the
+  // appropriate form on the next Save (the two layouts use materially
+  // different markup, so we can't swap them client-side).
   document.querySelectorAll('[data-layout-toggle] .filter-pill[data-layout]').forEach(function (p) {
     p.addEventListener('click', function () {
       var newLayout = p.getAttribute('data-layout');
       var hidden = document.getElementById('layout-input');
       if (!hidden) return;
       if (hidden.value === newLayout) return;
-      // Mark active and reload by submitting the form with the new layout.
-      // Since the markup differs, server returns the right view.
       hidden.value = newLayout;
-      // Visually flip immediately so the click feels responsive.
       p.parentElement.querySelectorAll('.filter-pill').forEach(function (x) { x.classList.remove('active'); });
       p.classList.add('active');
-      // Save the index with the new layout choice and reload.
-      form.submit();
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
     });
   });
 

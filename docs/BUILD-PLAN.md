@@ -118,7 +118,6 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 - [x] **Phase 21.5** — CMS copy audit (scrub "Phase X" refs, tighten labels) · *Semi-auto* · 2h · **Staging-only**
 - [ ] **Phase 21.7** — Editorial Index section-stack rework (schema + builder + render) · *Manual* · ~8–12h (multi-session) · **Staging-only**
-- [ ] **Phase 21.8** — CMS load motion (progressive reveal) · *Auto* · ~30–45 min · **Staging-only**
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
@@ -1711,51 +1710,6 @@ CREATE TABLE settings (
 4. The four built-in Basic Listing indexes render identically to pre-rework.
 5. Series indexes still auto-render via `/series/<slug>/` from the `series` table.
 6. Existing Editorial pages survived the migration (hero/featured/feed mapped to sections) with no data loss.
-
----
-
-## 24.8. Phase 21.8 — CMS load motion (progressive reveal)
-
-- **Autonomy:** Auto *(fully specced in `docs/MOTION.md`; no decisions to make)*
-- **Estimate:** ~30–45 min (pure CSS + class additions; the BUILD-PLAN-style
-  "2–3h" would be 3–4× high here).
-
-**Session brief**
-
-**Decisions to capture before starting:** none — every value is locked in
-`docs/MOTION.md` §1 (cards 6px / rows 3px / forms 8px, 580ms, 60ms step,
-easeOutQuint, cap 6, per-group, no JS).
-
-**Read at start (only):** `docs/MOTION.md` (the whole file — it's short).
-
-**Touch:**
-- `site/cms/_assets/style-cms.css` — append the LAYER 8 block from §1 verbatim.
-- `site/cms/partials/table.php` — `class="reveal"` on the `<tbody>`.
-- `site/cms/views/pipeline.php` — `.reveal` on `.dash-meta` + each `.lane-cards`.
-- `site/cms/views/ideation.php` — `.reveal` on each `.lane-cards`.
-- `site/cms/views/navigation.php`, `redirects.php` — `.reveal` on the `.rowform-list`.
-- All editors (`*-edit.php`, `*-new.php`) + `settings.php` — `class="reveal-page"`
-  on the `.cms-form` wrapper.
-
-**Don't touch:** any block contract, schema, or the design-system `/_ds/` CSS.
-Motion is CMS-admin-only (LAYER 8 of `style-cms.css`). The §3 companion pieces
-(anti-layout-shift, navigation crossfade) are a SEPARATE later follow-up — out of
-scope here.
-
-**On exit:** tick the §4 acceptance checklist in `docs/MOTION.md`; archive
-`docs/motion-mock.html`; delete this staged §6; check Phase 21.8 in §3.
-
-**Goal:** every CMS page animates on load — scannable surfaces (boards, tables,
-row-forms) cascade; working surfaces (forms/editors) do a unified rise. No dead
-pages, no field-by-field stagger on forms.
-
-**Deliverables:** the two CSS primitives (`.reveal`, `.reveal-page`) live in
-`style-cms.css`; the class additions above; reduced-motion honored.
-
-**Verification:** `docs/MOTION.md` §4 checklist.
-
-**Out of scope:** §3.1 anti-layout-shift, §3.2 navigation crossfade, any public-
-site (non-CMS) motion.
 
 ---
 

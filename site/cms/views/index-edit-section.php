@@ -333,7 +333,7 @@ $catsForThis = $catsForTypes($ftypes);
       <!-- Col 1 — title + display + trailing card -->
       <div>
         <div class="content-block-label" style="margin-bottom:var(--space-12);letter-spacing:0.16em">Configure section</div>
-        <div class="field-group sec-title-field">
+        <div class="field-group sec-title-field" style="margin-bottom:var(--space-8)">
           <label class="field-label">Section Title</label>
           <span class="field-clearable">
             <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">

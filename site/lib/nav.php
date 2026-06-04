@@ -18,11 +18,11 @@ require_once __DIR__ . '/db.php';
 const NAV_ZONES        = ['header', 'footer'];
 const NAV_TARGET_TYPES = ['index', 'category', 'series', 'content', 'page', 'custom'];
 const NAV_HIGHLIGHTS   = ['none', 'dot', 'pill'];
-// Default colour for dot / pill when no per-item override is set. The
-// CSS-variable fallback handles marketing pages, which load style-pages.css
-// (no design-system tokens) — there --c-terracotta is undefined, so the
-// literal #d63031 (the original hardcoded header red) wins.
-const NAV_DEFAULT_HIGHLIGHT_COLOR = 'var(--c-terracotta, #d63031)';
+// Default colour for dot / pill when no per-item override is set.
+// Use the literal #d63031 (the brand header red). The earlier
+// var(--c-terracotta, …) reference resolved to #7d4631 on
+// design-system pages, which masked the intended brand red.
+const NAV_DEFAULT_HIGHLIGHT_COLOR = '#d63031';
 // Plain hex fallback when we need a real colour value (not a CSS var) —
 // e.g. for color-mix() tints, and the contrast helper which needs to parse.
 const NAV_DEFAULT_HIGHLIGHT_HEX   = '#d63031';

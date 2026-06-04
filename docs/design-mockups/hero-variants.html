@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorial Hero — variants sandbox</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Real public-site stylesheets — same cascade /fancy/ uses. -->
+<link rel="stylesheet" href="../../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../../site/_design-system/css/views.css">
+<link rel="stylesheet" href="../../site/_templates/style-articles.css">
+
+<style>
+/* ───────── Sandbox chrome — labels each variant, not for prod ───── */
+body { background: var(--canvas, #ececea); margin: 0; }
+.variant {
+  margin: 0 0 var(--space-32);
+  background: var(--surface);
+  border-top: 1px solid var(--ink-12);
+  border-bottom: 1px solid var(--ink-12);
+}
+.variant-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: var(--space-16) var(--space-48);
+  border-bottom: 1px solid var(--ink-12);
+  background: var(--canvas, #ececea);
+}
+.variant-label span { color: var(--ink); margin-right: var(--space-8); }
+.sandbox-header {
+  margin: var(--space-32) 0;
+  padding: 0 var(--space-48);
+}
+.sandbox-header h1 {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 40px;
+  margin: 0 0 var(--space-8);
+}
+.sandbox-header p {
+  font-family: var(--font);
+  color: var(--secondary);
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* ───────── Variant C + D — bleed-image hero treatments ─────────── */
+/* These aren't yet in the public CSS. Prototyping inline so we can
+   decide if they're worth promoting into the template. */
+.bleed-hero {
+  position: relative;
+  padding: 0;
+  border-bottom: 1px solid var(--ink-18);
+  overflow: hidden;
+  min-height: 480px;
+  display: flex;
+  align-items: flex-end;
+  background-size: cover;
+  background-position: center;
+}
+.bleed-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bleed-hero--dark::before {
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.55) 65%,
+    rgba(0,0,0,0.85) 100%
+  );
+}
+.bleed-hero--light::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.55) 55%,
+    rgba(255,255,255,0.92) 100%
+  );
+}
+.bleed-hero-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  padding: var(--space-64) var(--space-48);
+  max-width: 72ch;
+}
+.bleed-hero--dark .bleed-hero-text { color: #fff; }
+.bleed-hero--dark .bleed-hero-eyebrow { color: #f4a4a4; }
+.bleed-hero--dark .bleed-hero-summary { color: rgba(255,255,255,0.86); }
+.bleed-hero--dark .bleed-hero-meta    { color: rgba(255,255,255,0.65); }
+.bleed-hero--dark .bleed-hero-cta {
+  background: #fff;
+  color: #000;
+}
+.bleed-hero--light .bleed-hero-text { color: var(--ink); }
+.bleed-hero--light .bleed-hero-eyebrow { color: var(--c-terracotta); }
+.bleed-hero--light .bleed-hero-summary { color: var(--secondary); }
+.bleed-hero--light .bleed-hero-meta    { color: var(--muted); }
+.bleed-hero--light .bleed-hero-cta {
+  background: var(--primary);
+  color: var(--surface);
+}
+.bleed-hero-eyebrow {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.bleed-hero-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(34px, 3.8vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.bleed-hero-summary {
+  font-family: var(--font);
+  font-size: 19px;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 56ch;
+}
+.bleed-hero-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  margin-top: var(--space-16);
+  flex-wrap: wrap;
+  max-width: 56ch;
+}
+.bleed-hero-meta {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.bleed-hero-cta {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  padding: 10px var(--space-20);
+  border-radius: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<header class="sandbox-header">
+  <h1>Editorial hero — variants</h1>
+  <p>Sandbox preview of four hero layouts so we can compare and decide which to expose in the CMS. Uses the real public-site stylesheets; the bleed-image variants pull mockup-only CSS at the top of this file.</p>
+</header>
+
+<!-- ═══ A — Hero, no image (image_mode = none) ═══════════════════════ -->
+<section class="variant">
+  <div class="variant-label"><span>A</span>Hero · no image — left column spans full width</div>
+  <div class="index-section index-section--hero">
+    <div class="editorial-hero is-solo">
+      <div class="editorial-hero-text">
+        <div class="editorial-hero-eyebrow" style="--c-current: var(--c-terracotta)">— FEATURED · UX INDUSTRY</div>
+        <h1 class="editorial-hero-title">A Discipline Reset</h1>
+        <p class="editorial-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+        <div class="editorial-hero-foot">
+          <span class="editorial-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+          <a href="#" class="editorial-hero-cta">Read →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ B — Hero, side image (image_mode = auto/custom) ════════════ -->
+<section class="variant">
+  <div class="variant-label"><span>B</span>Hero · side image — current default</div>
+  <div class="index-section index-section--hero">
+    <div class="editorial-hero">
+      <div class="editorial-hero-text">
+        <div class="editorial-hero-eyebrow" style="--c-current: var(--c-terracotta)">— FEATURED · UX INDUSTRY</div>
+        <h1 class="editorial-hero-title">A Discipline Reset</h1>
+        <p class="editorial-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+        <div class="editorial-hero-foot">
+          <span class="editorial-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+          <a href="#" class="editorial-hero-cta">Read →</a>
+        </div>
+      </div>
+      <aside class="editorial-hero-side">
+        <div class="editorial-hero-thumb" style="background-image:url('https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=900&q=70')"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ C — Full-bleed bg image + dark overlay + white text ════════ -->
+<section class="variant">
+  <div class="variant-label"><span>C</span>Full-bleed background · dark overlay · white text</div>
+  <div class="bleed-hero bleed-hero--dark" style="background-image:url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1600&q=70')">
+    <div class="bleed-hero-text">
+      <div class="bleed-hero-eyebrow">— FEATURED · UX INDUSTRY</div>
+      <h1 class="bleed-hero-title">A Discipline Reset</h1>
+      <p class="bleed-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+      <div class="bleed-hero-foot">
+        <span class="bleed-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+        <a href="#" class="bleed-hero-cta">Read →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ D — Full-bleed bg image + light overlay + dark text ═════════ -->
+<section class="variant">
+  <div class="variant-label"><span>D</span>Full-bleed background · light overlay · dark text</div>
+  <div class="bleed-hero bleed-hero--light" style="background-image:url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=70')">
+    <div class="bleed-hero-text">
+      <div class="bleed-hero-eyebrow">— FEATURED · UX INDUSTRY</div>
+      <h1 class="bleed-hero-title">A Discipline Reset</h1>
+      <p class="bleed-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+      <div class="bleed-hero-foot">
+        <span class="bleed-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+        <a href="#" class="bleed-hero-cta">Read →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

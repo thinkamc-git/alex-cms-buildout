@@ -127,7 +127,7 @@ $catsForThis = $catsForTypes($ftypes);
       <label class="field-label">Background</label>
       <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
         <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
-          <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid'] as $v => $l): ?>
+          <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid White'] as $v => $l): ?>
             <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
           <?php endforeach; ?>
         </div>

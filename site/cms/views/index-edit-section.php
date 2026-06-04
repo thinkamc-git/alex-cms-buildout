@@ -181,16 +181,16 @@ $catsForThis = $catsForTypes($ftypes);
       <div class="form-side" data-hero-preview-pane>
         <label class="field-label" style="margin-bottom:var(--space-8);display:block">Preview</label>
         <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
+          <div class="hero-img-preview-text" aria-hidden="true">
+            <div class="hero-img-preview-title">Title</div>
+            <div class="hero-img-preview-caption">Caption text</div>
+          </div>
           <div class="hero-img-preview-imgwrap" data-hero-preview-imgwrap>
             <?php if ($previewSrc !== ''): ?>
               <img src="<?= $e($previewSrc) ?>" alt="" data-hero-preview-img>
             <?php else: ?>
               <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
             <?php endif; ?>
-          </div>
-          <div class="hero-img-preview-text" aria-hidden="true">
-            <div class="hero-img-preview-title">Title</div>
-            <div class="hero-img-preview-caption">Caption text</div>
           </div>
         </div>
       </div>

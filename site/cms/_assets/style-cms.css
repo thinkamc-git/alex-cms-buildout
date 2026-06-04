@@ -2052,7 +2052,7 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   font-style: italic;
   font-size: 18px;
   line-height: 1.05;
-  color: var(--ink);
+  color: var(--primary);
 }
 .hero-img-preview-caption {
   font-family: var(--font);
@@ -2121,8 +2121,8 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   );
 }
 .hero-img-preview--bleed-dark .hero-img-preview-title   { color: #fff; }
-.hero-img-preview--bleed-dark .hero-img-preview-caption { color: rgba(255,255,255,0.78); }
-.hero-img-preview--bleed-light .hero-img-preview-title   { color: var(--ink); }
+.hero-img-preview--bleed-dark .hero-img-preview-caption { color: rgba(255,255,255,0.86); }
+.hero-img-preview--bleed-light .hero-img-preview-title   { color: var(--primary); }
 .hero-img-preview--bleed-light .hero-img-preview-caption { color: var(--secondary); }
 .cms-grip:active { cursor: grabbing; }
 

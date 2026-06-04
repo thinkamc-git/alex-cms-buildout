@@ -1373,7 +1373,7 @@ a.article-series-pill:hover {
   letter-spacing: -0.01em;
   line-height: 1.1;
   margin: 0;
-  color: var(--ink);
+  color: var(--primary);
 }
 .index-section-title-big em { font-style: italic; }
 
@@ -1492,7 +1492,8 @@ a.article-series-pill:hover {
   background: #fff;
   color: #000;
 }
-.editorial-hero--bleed-light .editorial-hero-text   { color: var(--ink); }
+.editorial-hero--bleed-light .editorial-hero-text   { color: var(--primary); }
+
 .editorial-hero--bleed-light .editorial-hero-eyebrow { color: var(--c-terracotta); }
 .editorial-hero--bleed-light .editorial-hero-summary { color: var(--secondary); }
 .editorial-hero--bleed-light .editorial-hero-meta    { color: var(--muted); }
@@ -1523,7 +1524,7 @@ a.article-series-pill:hover {
   font-size: clamp(34px, 3.8vw, 54px);
   line-height: 1.05;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--primary);
   margin: 0;
 }
 .editorial-hero-summary {
@@ -1594,7 +1595,7 @@ a.article-series-pill:hover {
   font-style: italic;
   font-size: var(--text-h4);
   line-height: 1.25;
-  color: var(--ink);
+  color: var(--primary);
 }
 .editorial-hero-card-part {
   display: inline;

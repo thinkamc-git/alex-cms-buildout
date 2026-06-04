@@ -461,12 +461,495 @@ function get_index_content_card(int $id): ?array
     return $row === false ? null : $row;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Phase 21.7 — Editorial Page section stack (CMS-STRUCTURE.md §16)
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Editorial pages render an ordered, typed section stack (hero / curated /
+// feed). Basic Listing still uses the flat feed_* columns on `indexes` —
+// none of the functions below apply to it.
+//
+// Sections are stored one-to-many in `index_sections`; per-type fields are
+// NULL-able and ignored when not applicable. See migration 0021 for the
+// full schema.
+
+const INDEX_SECTION_TYPES   = ['hero', 'curated', 'feed'];
+const INDEX_SECTION_FORMATS = ['grid', 'carousel'];
+const INDEX_SECTION_ROWS    = ['1', '2', '3', '4', 'all'];
+const INDEX_SECTION_SORTS   = ['newest', 'oldest'];
+const INDEX_SECTION_FILTERS = ['types', 'categories'];
+
+/**
+ * Decode a JSON column that may arrive as either a string (raw from
+ * PDO) or null. Returns an array (possibly empty).
+ */
+function _index_section_json_decode($value): array
+{
+    if (is_array($value)) return $value;
+    if (is_string($value) && $value !== '') {
+        $d = json_decode($value, true);
+        return is_array($d) ? $d : [];
+    }
+    return [];
+}
+
+/**
+ * Normalize a section row from the DB: decode JSON columns into arrays
+ * so the caller doesn't have to re-parse them. The original raw values
+ * stay accessible via the `*_raw` keys for debugging.
+ */
+function _index_section_normalize(array $row): array
+{
+    $row['item_ids']        = _index_section_json_decode($row['item_ids']        ?? null);
+    $row['feed_types']      = _index_section_json_decode($row['feed_types']      ?? null);
+    $row['feed_categories'] = _index_section_json_decode($row['feed_categories'] ?? null);
+    $row['filter_options']  = _index_section_json_decode($row['filter_options']  ?? null);
+    $row['filter_show']     = (bool)($row['filter_show'] ?? false);
+    $row['position']        = (int)($row['position']     ?? 0);
+    $row['item_limit']      = isset($row['item_limit']) && $row['item_limit'] !== null
+                              ? (int)$row['item_limit'] : null;
+    return $row;
+}
+
+/**
+ * Return every section attached to an index, in render order.
+ */
+function list_index_sections(int $index_id): array
+{
+    if ($index_id <= 0) return [];
+    $stmt = db()->prepare(
+        'SELECT * FROM index_sections WHERE index_id = :id ORDER BY position ASC, id ASC'
+    );
+    $stmt->execute([':id' => $index_id]);
+    $rows = $stmt->fetchAll() ?: [];
+    return array_map('_index_section_normalize', $rows);
+}
+
+function get_index_section(int $id): ?array
+{
+    if ($id <= 0) return null;
+    $stmt = db()->prepare('SELECT * FROM index_sections WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => $id]);
+    $row = $stmt->fetch();
+    return $row === false ? null : _index_section_normalize($row);
+}
+
+/**
+ * Upsert a section. $data accepts (all optional except index_id +
+ * section_type on create):
+ *   id, index_id, position, section_type, title,
+ *   display_format, item_limit, grid_rows, see_more_label, see_more_target,
+ *   feed_types[], feed_categories[], feed_sort,
+ *   filter_show, filter_by, filter_options[],
+ *   item_ids[]
+ *
+ * Returns ['ok' => bool, 'error' => string, 'id' => int].
+ */
+function save_index_section(array $data): array
+{
+    $id       = (int)($data['id'] ?? 0);
+    $index_id = (int)($data['index_id'] ?? 0);
+
+    if ($id === 0 && $index_id <= 0) {
+        return ['ok' => false, 'error' => 'index_id required.', 'id' => 0];
+    }
+
+    // Existing row dictates index_id + position on update unless caller overrides.
+    $existing = $id > 0 ? get_index_section($id) : null;
+    if ($id > 0 && $existing === null) {
+        return ['ok' => false, 'error' => 'Section not found.', 'id' => 0];
+    }
+    if ($id > 0) {
+        $index_id = (int)$existing['index_id'];
+    }
+
+    $type = (string)($data['section_type'] ?? ($existing['section_type'] ?? ''));
+    if (!in_array($type, INDEX_SECTION_TYPES, true)) {
+        return ['ok' => false, 'error' => 'Invalid section_type.', 'id' => 0];
+    }
+
+    // Position: explicit override, else preserve existing, else append.
+    if (array_key_exists('position', $data)) {
+        $position = (int)$data['position'];
+    } elseif ($existing !== null) {
+        $position = (int)$existing['position'];
+    } else {
+        $stmt = db()->prepare('SELECT COALESCE(MAX(position),-1)+1 AS n FROM index_sections WHERE index_id = :id');
+        $stmt->execute([':id' => $index_id]);
+        $position = (int)($stmt->fetch()['n'] ?? 0);
+    }
+
+    $title = trim((string)($data['title'] ?? ($existing['title'] ?? '')));
+
+    // Display layer — only meaningful for curated/feed. Hero ignores it
+    // but we still store sane defaults so the row is consistent.
+    $format = (string)($data['display_format'] ?? ($existing['display_format'] ?? 'grid'));
+    if (!in_array($format, INDEX_SECTION_FORMATS, true)) $format = 'grid';
+    $item_limit = $data['item_limit'] ?? ($existing['item_limit'] ?? null);
+    $item_limit = ($item_limit === '' || $item_limit === null) ? null : max(1, (int)$item_limit);
+    $grid_rows = (string)($data['grid_rows'] ?? ($existing['grid_rows'] ?? 'all'));
+    if (!in_array($grid_rows, INDEX_SECTION_ROWS, true)) $grid_rows = 'all';
+    $see_label  = trim((string)($data['see_more_label']  ?? ($existing['see_more_label']  ?? ''))) ?: null;
+    $see_target = trim((string)($data['see_more_target'] ?? ($existing['see_more_target'] ?? ''))) ?: null;
+
+    // Content query — only feed uses it; hero/curated store NULL.
+    $feed_types_json = null;
+    $feed_cats_json  = null;
+    $feed_sort       = (string)($data['feed_sort'] ?? ($existing['feed_sort'] ?? 'newest'));
+    if (!in_array($feed_sort, INDEX_SECTION_SORTS, true)) $feed_sort = 'newest';
+
+    if ($type === 'feed') {
+        $types = $data['feed_types'] ?? ($existing['feed_types'] ?? []);
+        if (is_string($types)) $types = _index_section_json_decode($types);
+        $types = is_array($types)
+            ? array_values(array_unique(array_filter($types, static fn($t) => in_array($t, INDEX_FEED_TYPES, true))))
+            : [];
+        $feed_types_json = $types === [] ? null : json_encode($types);
+
+        $cats = $data['feed_categories'] ?? ($existing['feed_categories'] ?? []);
+        if (is_string($cats)) $cats = _index_section_json_decode($cats);
+        $cats = is_array($cats)
+            ? array_values(array_unique(array_filter(array_map('strval', $cats), static fn($c) => $c !== '')))
+            : [];
+        $feed_cats_json = $cats === [] ? null : json_encode($cats);
+    }
+
+    // Visitor filter — only feed uses it.
+    $filter_show    = $type === 'feed' && !empty($data['filter_show']);
+    $filter_by      = null;
+    $filter_opts_js = null;
+    if ($type === 'feed' && $filter_show) {
+        $fb = (string)($data['filter_by'] ?? ($existing['filter_by'] ?? ''));
+        $filter_by = in_array($fb, INDEX_SECTION_FILTERS, true) ? $fb : null;
+
+        $opts = $data['filter_options'] ?? ($existing['filter_options'] ?? []);
+        if (is_string($opts)) $opts = _index_section_json_decode($opts);
+        $opts = is_array($opts)
+            ? array_values(array_unique(array_filter(array_map('strval', $opts), static fn($o) => $o !== '')))
+            : [];
+        $filter_opts_js = $opts === [] ? null : json_encode($opts);
+    }
+
+    // Picks: hero = JSON_ARRAY(single id); curated = JSON array.
+    $item_ids_json = null;
+    if ($type === 'hero' || $type === 'curated') {
+        $ids = $data['item_ids'] ?? ($existing['item_ids'] ?? []);
+        if (is_string($ids)) $ids = _index_section_json_decode($ids);
+        $clean = [];
+        if (is_array($ids)) {
+            foreach ($ids as $v) {
+                $vi = (int)$v;
+                if ($vi > 0 && !in_array($vi, $clean, true)) $clean[] = $vi;
+            }
+        }
+        if ($type === 'hero' && count($clean) > 1) $clean = [$clean[0]];
+        $item_ids_json = $clean === [] ? null : json_encode($clean);
+    }
+
+    $params = [
+        ':iid'         => $index_id,
+        ':pos'         => $position,
+        ':type'        => $type,
+        ':title'       => $title !== '' ? $title : null,
+        ':fmt'         => $format,
+        ':limit'       => $item_limit,
+        ':rows'        => $grid_rows,
+        ':see_label'   => $see_label,
+        ':see_target'  => $see_target,
+        ':ftypes'      => $feed_types_json,
+        ':fcats'       => $feed_cats_json,
+        ':fsort'       => $feed_sort,
+        ':fshow'       => $filter_show ? 1 : 0,
+        ':fby'         => $filter_by,
+        ':fopts'       => $filter_opts_js,
+        ':items'       => $item_ids_json,
+    ];
+
+    if ($id === 0) {
+        $sql = 'INSERT INTO index_sections
+                  (index_id, position, section_type, title,
+                   display_format, item_limit, grid_rows, see_more_label, see_more_target,
+                   feed_types, feed_categories, feed_sort,
+                   filter_show, filter_by, filter_options,
+                   item_ids)
+                VALUES
+                  (:iid, :pos, :type, :title,
+                   :fmt, :limit, :rows, :see_label, :see_target,
+                   :ftypes, :fcats, :fsort,
+                   :fshow, :fby, :fopts,
+                   :items)';
+        db()->prepare($sql)->execute($params);
+        return ['ok' => true, 'error' => '', 'id' => (int)db()->lastInsertId()];
+    }
+
+    $sql = 'UPDATE index_sections SET
+              position = :pos,
+              section_type = :type,
+              title = :title,
+              display_format = :fmt,
+              item_limit = :limit,
+              grid_rows = :rows,
+              see_more_label = :see_label,
+              see_more_target = :see_target,
+              feed_types = :ftypes,
+              feed_categories = :fcats,
+              feed_sort = :fsort,
+              filter_show = :fshow,
+              filter_by = :fby,
+              filter_options = :fopts,
+              item_ids = :items
+            WHERE id = :id LIMIT 1';
+    $params[':id'] = $id;
+    unset($params[':iid']); // index_id is immutable post-create
+    db()->prepare($sql)->execute($params);
+    return ['ok' => true, 'error' => '', 'id' => $id];
+}
+
+function delete_index_section(int $id): array
+{
+    if ($id <= 0) return ['ok' => false, 'error' => 'Missing id.'];
+    db()->prepare('DELETE FROM index_sections WHERE id = :id LIMIT 1')->execute([':id' => $id]);
+    return ['ok' => true, 'error' => ''];
+}
+
+/**
+ * Persist a new ordering for an index's sections. $ordered_ids is the
+ * new sequence of section ids, top to bottom. Sections not in the list
+ * are left untouched (callers that re-order from a complete drag list
+ * should always pass every id).
+ */
+function reorder_index_sections(int $index_id, array $ordered_ids): void
+{
+    if ($index_id <= 0 || $ordered_ids === []) return;
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare(
+            'UPDATE index_sections SET position = :pos WHERE id = :id AND index_id = :iid'
+        );
+        foreach (array_values($ordered_ids) as $i => $sid) {
+            $stmt->execute([':pos' => $i, ':id' => (int)$sid, ':iid' => $index_id]);
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+    }
+}
+
+// ─── Per-section data resolution ─────────────────────────────────────────
+
+/**
+ * Resolve a hero/curated section's hand-picked items into card rows, in
+ * the order specified by item_ids. Items that no longer publish-resolve
+ * are silently dropped — the render side just shows fewer cards.
+ */
+function list_section_items(array $section): array
+{
+    $ids = is_array($section['item_ids'] ?? null) ? $section['item_ids'] : [];
+    if ($ids === []) return [];
+
+    $out = [];
+    foreach ($ids as $id) {
+        $card = get_index_content_card((int)$id);
+        if ($card !== null) $out[] = $card;
+    }
+    return $out;
+}
+
+/**
+ * Run a feed section's content query and return the resulting card rows.
+ * Combines feed_types (OR), feed_categories (OR), feed_sort, and applies
+ * the display-layer limit (grid_rows for grids, item_limit for carousels).
+ *
+ * $excludeIds lets the caller suppress items shown by an earlier section
+ * on the same page (a hero pick shouldn't reappear in a feed below it).
+ */
+function list_section_feed(array $section, array $excludeIds = []): array
+{
+    $types = is_array($section['feed_types'] ?? null) ? $section['feed_types'] : [];
+    $types = array_values(array_filter($types, static fn($t) => in_array($t, INDEX_FEED_TYPES, true)));
+    if ($types === []) $types = INDEX_FEED_TYPES;
+
+    $cats = is_array($section['feed_categories'] ?? null) ? $section['feed_categories'] : [];
+
+    $params = [];
+    $typePlaceholders = [];
+    foreach ($types as $i => $t) {
+        $k = ":t{$i}";
+        $typePlaceholders[] = $k;
+        $params[$k] = $t;
+    }
+    $where = 'c.type IN (' . implode(',', $typePlaceholders) . ')';
+
+    if ($cats !== []) {
+        $catPlaceholders = [];
+        foreach ($cats as $i => $c) {
+            $k = ":c{$i}";
+            $catPlaceholders[] = $k;
+            $params[$k] = $c;
+        }
+        $where .= ' AND c.category IN (' . implode(',', $catPlaceholders) . ')';
+    }
+
+    $sort = (string)($section['feed_sort'] ?? 'newest');
+    $order = $sort === 'oldest' ? 'c.published_at ASC' : 'c.published_at DESC';
+
+    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail,
+                   c.published_at, c.read_time, c.special_tag,
+                   c.series_id, c.series_order,
+                   c.journal_number,
+                   c.event_date, c.event_time, c.event_end_time,
+                   c.location, c.venue, c.cost_pill, c.attendance,
+                   s.name AS series_name, s.slug AS series_slug
+              FROM content c
+         LEFT JOIN series s ON s.id = c.series_id
+             WHERE $where
+               AND c.status = 'published'
+               AND (c.published_status IS NULL OR c.published_status = 'live')
+          ORDER BY $order, c.id DESC";
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll() ?: [];
+
+    if ($excludeIds !== []) {
+        $rows = array_values(array_filter(
+            $rows,
+            static fn($r) => !in_array((int)$r['id'], $excludeIds, true)
+        ));
+    }
+
+    // Display limit. Grid: rows × 4 cards per row (matches list_index_feed's
+    // v1 approximation). Carousel: item_limit directly.
+    $format = (string)($section['display_format'] ?? 'grid');
+    if ($format === 'carousel') {
+        $limit = $section['item_limit'] ?? null;
+        if ($limit !== null && (int)$limit > 0) {
+            $rows = array_slice($rows, 0, (int)$limit);
+        }
+    } else {
+        $grid_rows = (string)($section['grid_rows'] ?? 'all');
+        if ($grid_rows !== 'all' && ctype_digit($grid_rows)) {
+            $rows = array_slice($rows, 0, max(1, (int)$grid_rows * 4));
+        }
+    }
+
+    return $rows;
+}
+
+/**
+ * Build the visitor-filter pills for a feed section. Returns:
+ *   [
+ *     'show'         => bool,
+ *     'by'           => 'types' | 'categories' | null,
+ *     'pills'        => [['key','label','data_attr','colour'], …],
+ *     'preselected'  => ['key1', 'key2', …],
+ *   ]
+ *
+ * Pill set: filter_options if explicit, else auto-derived from the
+ * section's content query (feed_types for 'types'; the categories that
+ * actually appear in the feed for 'categories').
+ *
+ * Pre-selection: reflects the content query — feed_types for 'types',
+ * feed_categories for 'categories'. Empty arrays = nothing pre-selected
+ * (visitor sees the "All" state by default).
+ */
+function build_section_pills(array $section): array
+{
+    $off = ['show' => false, 'by' => null, 'pills' => [], 'preselected' => []];
+    if (empty($section['filter_show'])) return $off;
+
+    $by = (string)($section['filter_by'] ?? '');
+    if (!in_array($by, INDEX_SECTION_FILTERS, true)) return $off;
+
+    $opts = is_array($section['filter_options'] ?? null) ? $section['filter_options'] : [];
+
+    $feed_types = is_array($section['feed_types'] ?? null) ? $section['feed_types'] : [];
+    $feed_cats  = is_array($section['feed_categories'] ?? null) ? $section['feed_categories'] : [];
+
+    if ($by === 'types') {
+        // Pill set: explicit subset if given, else feed_types (or all four if open).
+        $set = $opts !== [] ? $opts : ($feed_types !== [] ? $feed_types : INDEX_FEED_TYPES);
+        $pills = [];
+        foreach ($set as $t) {
+            if (!in_array($t, INDEX_FEED_TYPES, true)) continue;
+            $pills[] = [
+                'key'       => $t,
+                'label'     => INDEX_TYPE_LABELS[$t] ?? ucfirst($t),
+                'data_attr' => 'type',
+                'colour'    => '',
+            ];
+        }
+        return [
+            'show'        => true,
+            'by'          => 'types',
+            'pills'       => $pills,
+            'preselected' => $feed_types,
+        ];
+    }
+
+    // by === 'categories'
+    // Auto-derive: categories that exist for the section's content types
+    // (or all categories if types is open).
+    $types = $feed_types !== [] ? $feed_types : INDEX_FEED_TYPES;
+    $placeholders = [];
+    $params = [];
+    foreach ($types as $i => $t) {
+        $k = ":t{$i}";
+        $placeholders[] = $k;
+        $params[$k] = $t;
+    }
+    $sql = 'SELECT value_slug, label, colour
+              FROM categories
+             WHERE type IN (' . implode(',', $placeholders) . ')
+          ORDER BY type ASC, sort_order ASC, label ASC';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $allRows = $stmt->fetchAll() ?: [];
+
+    // If author hand-picked a subset, intersect with the auto-derived
+    // list (filter_options is the allow-list).
+    if ($opts !== []) {
+        $allow = array_flip($opts);
+        $allRows = array_values(array_filter(
+            $allRows,
+            static fn($r) => isset($allow[(string)$r['value_slug']])
+        ));
+    }
+
+    $pills = [];
+    foreach ($allRows as $r) {
+        $pills[] = [
+            'key'       => (string)$r['value_slug'],
+            'label'     => (string)$r['label'],
+            'data_attr' => 'category',
+            'colour'    => (string)$r['colour'],
+        ];
+    }
+
+    return [
+        'show'        => true,
+        'by'          => 'categories',
+        'pills'       => $pills,
+        'preselected' => $feed_cats,
+    ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+
 /**
  * Resolve the auto-generated index for /series/[slug]/. Returns a
  * synthetic "index" array shaped like a normal index row plus a `parts`
  * key listing every published part in series_order, and `hero_card` /
  * `featured_cards` derived from the latest part (Decisions block:
  * "Editorial — hero = latest part, feed = remaining parts").
+ *
+ * Phase 21.7 (stage 2): the return shape now ALSO includes a `sections`
+ * key carrying the synthesized section stack (§16.5). The legacy
+ * hero_card/featured_cards/feed_rows keys are still emitted so the
+ * pre-rework editorial template keeps working until Stage 4 swaps it
+ * for a section-iterating render. After that, the legacy keys can be
+ * dropped from this function.
  *
  * NULL if no such series exists.
  */
@@ -512,6 +995,60 @@ function series_auto_index(string $slug): ?array
     }
     unset($row);
 
+    // §16.5 — synthesized section stack: hero for the lead (latest)
+    // part, curated for the remainder in display order (latest first).
+    // Both sections carry the same _series_number metadata so the
+    // section partials can render the faint italic watermark over each
+    // card. Series pages have no visitor filter (per §16.5).
+    $sections = [];
+    if ($feed !== []) {
+        $lead = $feed[0];
+        $rest = array_slice($feed, 1);
+
+        $sections[] = _index_section_normalize([
+            'id'             => 0,
+            'index_id'       => 0,
+            'position'       => 0,
+            'section_type'   => 'hero',
+            'title'          => null,
+            'display_format' => 'grid',
+            'item_limit'     => null,
+            'grid_rows'      => null,
+            'item_ids'       => json_encode([(int)$lead['id']]),
+            'feed_types'     => null,
+            'feed_categories'=> null,
+            'feed_sort'      => 'newest',
+            'filter_show'    => 0,
+            'filter_by'      => null,
+            'filter_options' => null,
+            // Pre-resolved cards travel alongside the section so the
+            // render side doesn't re-hit the DB. The section partial
+            // can prefer `_items` when present.
+            '_items'         => [$lead],
+        ]);
+
+        if ($rest !== []) {
+            $sections[] = _index_section_normalize([
+                'id'             => 0,
+                'index_id'       => 0,
+                'position'       => 1,
+                'section_type'   => 'curated',
+                'title'          => null,
+                'display_format' => 'grid',
+                'item_limit'     => null,
+                'grid_rows'      => 'all',
+                'item_ids'       => json_encode(array_map(static fn($r) => (int)$r['id'], $rest)),
+                'feed_types'     => null,
+                'feed_categories'=> null,
+                'feed_sort'      => 'newest',
+                'filter_show'    => 0,
+                'filter_by'      => null,
+                'filter_options' => null,
+                '_items'         => $rest,
+            ]);
+        }
+    }
+
     return [
         'id'              => 0, // Synthetic — not in indexes table.
         'slug'            => 'series/' . $series['slug'],
@@ -522,9 +1059,12 @@ function series_auto_index(string $slug): ?array
         'hero_content_id' => null,
         'feed_sort'       => 'manual',
         'feed_rows_shown' => 'all',
+        // Legacy keys — pre-rework editorial template reads these.
         'hero_card'       => null,
         'featured_cards'  => [],
         'feed_rows'       => $feed,
+        // New section-stack form (§16.5) — stage 4 render will iterate this.
+        'sections'        => $sections,
         'is_series'       => true,
         'series_row'      => $series,
     ];

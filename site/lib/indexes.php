@@ -1055,58 +1055,32 @@ function series_auto_index(string $slug): ?array
     }
     unset($row);
 
-    // §16.5 — synthesized section stack: hero for the lead (latest)
-    // part, curated for the remainder in display order (latest first).
-    // Both sections carry the same _series_number metadata so the
-    // section partials can render the faint italic watermark over each
-    // card. Series pages have no visitor filter (per §16.5).
+    // Synthesized section stack: a single curated section containing
+    // every published part in display order (latest first). Series
+    // pages no longer surface a hero — every part renders as a
+    // uniform card with the faint italic _series_number watermark.
     $sections = [];
     if ($feed !== []) {
-        $lead = $feed[0];
-        $rest = array_slice($feed, 1);
-
         $sections[] = _index_section_normalize([
             'id'             => 0,
             'index_id'       => 0,
             'position'       => 0,
-            'section_type'   => 'hero',
+            'section_type'   => 'curated',
             'title'          => null,
             'display_format' => 'grid',
             'item_limit'     => null,
-            'grid_rows'      => null,
-            'item_ids'       => json_encode([(int)$lead['id']]),
+            'grid_rows'      => 'all',
+            'item_ids'       => json_encode(array_map(static fn($r) => (int)$r['id'], $feed)),
             'feed_types'     => null,
             'feed_categories'=> null,
             'feed_sort'      => 'newest',
             'filter_show'    => 0,
             'filter_by'      => null,
             'filter_options' => null,
-            // Pre-resolved cards travel alongside the section so the
-            // render side doesn't re-hit the DB. The section partial
-            // can prefer `_items` when present.
-            '_items'         => [$lead],
+            // Pre-resolved cards travel alongside so render doesn't
+            // re-hit the DB. The section partial prefers `_items`.
+            '_items'         => $feed,
         ]);
-
-        if ($rest !== []) {
-            $sections[] = _index_section_normalize([
-                'id'             => 0,
-                'index_id'       => 0,
-                'position'       => 1,
-                'section_type'   => 'curated',
-                'title'          => null,
-                'display_format' => 'grid',
-                'item_limit'     => null,
-                'grid_rows'      => 'all',
-                'item_ids'       => json_encode(array_map(static fn($r) => (int)$r['id'], $rest)),
-                'feed_types'     => null,
-                'feed_categories'=> null,
-                'feed_sort'      => 'newest',
-                'filter_show'    => 0,
-                'filter_by'      => null,
-                'filter_options' => null,
-                '_items'         => $rest,
-            ]);
-        }
     }
 
     return [

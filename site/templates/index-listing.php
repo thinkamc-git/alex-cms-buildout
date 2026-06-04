@@ -42,9 +42,6 @@ $catMap  = [];
             <p class="index-subtitle"><?= $e($subtitle) ?></p>
           <?php endif; ?>
         </div>
-        <div class="index-page-header-right">
-          <span class="index-count" data-count-target><?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
-        </div>
       </div>
 
     </header>

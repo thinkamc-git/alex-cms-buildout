@@ -197,7 +197,7 @@ body {
 .layout-footer-left,
 .layout-footer-right a {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1276,7 +1276,7 @@ a.article-series-pill:hover {
 }
 .index-subtitle {
   font-family: var(--font);
-  font-size: var(--text-sm);
+  font-size: var(--text-body);
   font-weight: 500;
   line-height: 1.5;
   color: var(--secondary);

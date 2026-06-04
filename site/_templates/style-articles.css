@@ -1525,6 +1525,15 @@ a.article-series-pill:hover {
   letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
+  padding: var(--space-20) 0;
+  border-top: 1px solid var(--ink-18);
+  border-bottom: 1px solid var(--ink-18);
+}
+/* Bleed-dark uses translucent white rules so they read on the
+   gradient. Bleed-light inherits the default ink-18 rules. */
+.editorial-hero--bleed-dark .editorial-hero-title {
+  border-top-color: rgba(255,255,255,0.28);
+  border-bottom-color: rgba(255,255,255,0.28);
 }
 .editorial-hero-summary {
   font-family: var(--font);

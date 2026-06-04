@@ -107,9 +107,9 @@ $catsForThis = $catsForTypes($ftypes);
     <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 360px; gap: var(--space-24)">
       <div class="form-side" data-hero-form>
         <div class="field-group sec-title-field">
-          <label class="field-label">Title</label>
+          <label class="field-label">Eyebrow Prefix</label>
           <span class="field-clearable">
-            <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">
+            <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no prefix" value="<?= $e($stitle) ?>">
             <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
           </span>
         </div>
@@ -165,6 +165,7 @@ $catsForThis = $catsForTypes($ftypes);
           <label class="field-label">Preview</label>
           <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
             <div class="hero-img-preview-text" aria-hidden="true">
+              <div class="hero-img-preview-eyebrow" data-hero-preview-eyebrow style="<?= $stitle === '' ? 'display:none' : '' ?>"><?= $e(strtoupper($stitle)) ?></div>
               <div class="hero-img-preview-title">Title Example</div>
               <div class="hero-img-preview-caption">An example of the summary text.</div>
             </div>

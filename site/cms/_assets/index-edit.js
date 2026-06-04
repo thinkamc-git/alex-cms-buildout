@@ -102,8 +102,24 @@
   // Refresh preview when the URL input changes (paste or upload-fill)
   // or the Pick select changes.
   form.addEventListener('input', function (e) {
-    if (e.target && e.target.matches('[data-hero-img-url-input]')) {
+    if (!e.target) return;
+    if (e.target.matches('[data-hero-img-url-input]')) {
       syncHeroPreview(e.target.closest('[data-section]'));
+    }
+    // Hero "Eyebrow Prefix" → live preview eyebrow.
+    var sec = e.target.closest('[data-section][data-section-type="hero"]');
+    if (sec && e.target.matches('input[name$="[title]"]')) {
+      var eb = sec.querySelector('[data-hero-preview-eyebrow]');
+      if (eb) {
+        var v = (e.target.value || '').trim();
+        if (v === '') {
+          eb.style.display = 'none';
+          eb.textContent = '';
+        } else {
+          eb.style.display = '';
+          eb.textContent = v.toUpperCase();
+        }
+      }
     }
   });
   form.addEventListener('change', function (e) {

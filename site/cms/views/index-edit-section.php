@@ -333,7 +333,7 @@ $catsForThis = $catsForTypes($ftypes);
       <!-- Col 1 — title + display + trailing card -->
       <div>
         <div class="content-block-label" style="margin-bottom:var(--space-12);letter-spacing:0.16em">Configure section</div>
-        <div class="field-group sec-title-field" style="margin-bottom:var(--space-8)">
+        <div class="field-group sec-title-field" style="margin-bottom:var(--space-4)">
           <label class="field-label">Section Title</label>
           <span class="field-clearable">
             <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">
@@ -372,7 +372,7 @@ $catsForThis = $catsForTypes($ftypes);
           </div>
           <input type="hidden" name="<?= $inputBase ?>[grid_rows]" value="<?= $e($gridR) ?>">
         </div>
-        <div class="field-group">
+        <div class="field-group" style="margin-bottom:var(--space-4)">
           <label class="field-label">View all target</label>
           <div class="see-target-row">
             <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">

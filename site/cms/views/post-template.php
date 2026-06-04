@@ -209,7 +209,7 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <?php if ($activeTab === 'blocks'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   The <strong>Master Template</strong> defines every block available across content types. Each block has a stable slug used in code (<code style="font-family:var(--font-mono);font-size:var(--text-tiny)">data-block</code>) and a visibility mode. <strong>Always</strong> blocks render whenever applicable. <strong>Optional</strong> blocks are toggled on or off per content type from each sub-template. <strong>Auto</strong> blocks render based on the data (e.g. Tags renders only when tags exist). To inspect a sub-template's specific visibility, select it from the list on the left.
                 </div>
@@ -236,7 +236,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
             <?php elseif ($activeTab === 'fields'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   Every database field that backs a block. Each row maps a field to its PHP variable. Use this tab for layout work; use the Content Blocks tab for visibility.
                 </div>
@@ -261,7 +261,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
             <?php elseif ($activeTab === 'author'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   The author block renders next to the byline on every template that includes the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">$author</code> fields. Sub-templates can hide it on a per-content basis via the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author</code> / <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author_bio</code> booleans on each content row.
                 </div>
@@ -311,7 +311,7 @@ require __DIR__ . '/../partials/topbar.php';
 
             <?php elseif ($activeTab === 'php'): ?>
               <?php $masterCode = $readTemplate('master-layout.php'); ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   The master PHP layout file — the wrapper for every public article-family page. Read-only here; edit at <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/master-layout.php</code> and deploy to ship.
                 </div>
@@ -324,7 +324,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
             <?php elseif ($activeTab === 'preview'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   Full-block preview — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">master-layout.php</code> wrapping <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">article-standard.php</code> with every block populated. This is the live counterpart to <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/_templates/article.html</code>.
                 </div>
@@ -332,6 +332,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <iframe
                     src="/cms/post-template/preview?tpl=master"
                     title="Master Template preview · every block populated"
+                    class="fade-on-load"
                     style="display:block;width:100%;height:820px;border:0;background:#fff"
                     loading="lazy"></iframe>
                 </div>
@@ -351,7 +352,7 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
 
             <?php if ($activeTab === 'visibility'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   <strong><?= $e($info['name']) ?>.</strong> <?= $e($info['desc']) ?>
                 </div>
@@ -385,7 +386,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
             <?php elseif ($activeTab === 'php'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   The PHP layout file for <strong><?= $e($info['name']) ?></strong>. Read-only here; edit at <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> and deploy to ship.
                 </div>
@@ -403,7 +404,7 @@ require __DIR__ . '/../partials/topbar.php';
               </div>
 
             <?php elseif ($activeTab === 'preview'): ?>
-              <div class="tpl-panel is-server-active">
+              <div class="tpl-panel is-server-active reveal-page">
                 <div class="info-box">
                   Live preview of <strong><?= $e($info['name']) ?></strong> — renders <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">site/templates/<?= $e($info['php_file']) ?></code> against sample content. Edits to the template file show up here immediately.
                   <?php if ($selected === 'article-series'): ?>
@@ -450,6 +451,19 @@ require __DIR__ . '/../partials/topbar.php';
       lineWrapping: false,
     });
   });
+
+  // .fade-on-load → .is-loaded (see style-cms.css LAYER 8b).
+  // Preview iframe fades in when its content has loaded.
+  (function () {
+    function mark(el) { el.classList.add('is-loaded'); }
+    document.querySelectorAll('iframe.fade-on-load').forEach(function (f) {
+      if (f.complete && f.contentDocument && f.contentDocument.readyState === 'complete') {
+        mark(f);
+      } else {
+        f.addEventListener('load', function () { mark(f); });
+      }
+    });
+  })();
 </script>
 
 </body>

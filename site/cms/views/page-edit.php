@@ -396,14 +396,14 @@ require __DIR__ . '/../partials/topbar.php';
 
           <?php if ($is_live): ?>
             <div class="readonly-notice">This is the on-disk file. The CMS never writes here — click [+ New Mock] to start editing.</div>
-            <textarea id="pe-editor-live" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
+            <textarea id="pe-editor-live" class="fade-on-load" readonly data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
           <?php else: ?>
             <form id="pe-mock-form" method="post" action="/cms/pages/edit" data-preview-source-form>
               <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
               <input type="hidden" name="slug" value="<?= $e($slug) ?>">
               <input type="hidden" name="id" value="<?= (int)$current_mock['id'] ?>">
               <input type="hidden" name="action" value="save_mock">
-              <textarea id="pe-editor-mock" name="body_html" data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
+              <textarea id="pe-editor-mock" name="body_html" class="fade-on-load" data-mode="<?= $e($_editor_mode) ?>"><?= $e($current_body) ?></textarea>
             </form>
             <div class="form-actions form-actions-sticky">
               <button type="submit" form="pe-mock-form" class="btn-sec" data-save-btn data-body-save>Save</button>
@@ -419,7 +419,7 @@ require __DIR__ . '/../partials/topbar.php';
               name="pe-preview-iframe"
               src="<?= $e($preview_iframe_src) ?>"
               title="Preview · <?= $e($file_row['filename']) ?>"
-              class="post-preview-iframe"
+              class="post-preview-iframe fade-on-load"
               loading="lazy"
               data-preview-iframe
               data-preview-endpoint="/cms/pages/preview-form"></iframe>
@@ -624,6 +624,25 @@ require __DIR__ . '/../partials/topbar.php';
     if (d)  document.getElementById('pe-unfurl-desc').textContent  = d.value;
     if (im) document.getElementById('pe-unfurl-img').style.backgroundImage = im.value ? "url('" + im.value.replace(/'/g, "\\'") + "')" : '';
   }
+
+  // .fade-on-load → .is-loaded (see style-cms.css LAYER 8b).
+  // Body textareas fade in on DOMContentLoaded; preview iframe waits
+  // for its own load event so the content fades, not the empty frame.
+  (function () {
+    function mark(el) { el.classList.add('is-loaded'); }
+    function go() {
+      document.querySelectorAll('.fade-on-load:not(iframe)').forEach(mark);
+      document.querySelectorAll('iframe.fade-on-load').forEach(function (f) {
+        if (f.complete && f.contentDocument && f.contentDocument.readyState === 'complete') {
+          mark(f);
+        } else {
+          f.addEventListener('load', function () { mark(f); });
+        }
+      });
+    }
+    if (document.readyState !== 'loading') go();
+    else document.addEventListener('DOMContentLoaded', go);
+  })();
 </script>
 
 </body>

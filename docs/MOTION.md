@@ -40,8 +40,9 @@ re-opening the sandbox.
 |----------------------------|----------------|----------------------|---------------------------------------|
 | Cards / boards / stats     | Cascade        | `6px` (`--rise: 6px`)| chunky blocks — bigger lift reads well |
 | Data tables (rows)         | Cascade        | `3px` (`--rise: 3px`)| thin, dense rows — more would feel floaty |
-| Row-forms (Categories, Nav, Redirects) | Cascade | `3px` (`--rise: 3px`)| table-like; rows cascade despite being editable/draggable |
+| Row-forms (Nav, Redirects) | Cascade — text-only | `3px` (`--rise: 3px`)| **row frame stays static**; only row contents (inputs, selects, drag handle, save button) cascade with per-row stagger. Cards feel anchored. |
 | Forms / editors            | Unified rise   | `8px` (whole panel)  | one calm motion, no field-by-field stagger |
+| Heavy content (CM editors, iframes) | Fade-only | opacity 0→1 (420ms) | for elements loaded after the panel rise — see §3.3 |
 
 The cascade distance is carried by a `--rise` custom property set on the container
 and inherited by the animating children, so a single keyframe serves every
@@ -128,9 +129,11 @@ staggered children automatically.
 > **Navigation and Redirects don't use the table partial** — they hand-roll
 > `.rowform-list` markup. Add `class="reveal"` to the `.rowform-list` element in
 > [navigation.php](../site/cms/views/navigation.php) and
-> [redirects.php](../site/cms/views/redirects.php) directly. The `.rowform-row`
-> children cascade. They're editable/draggable, but the reveal is a one-time load
-> animation (same as the draggable kanban cards) — it doesn't touch the drag hook.
+> [redirects.php](../site/cms/views/redirects.php) directly. **A separate
+> override (`LAYER 8a` in `style-cms.css`) keeps the `.rowform-row` frame static
+> and animates the row's *contents* per-row** — so the card reads as anchored
+> while the text fills in. Per-row delay is stamped via `--row-delay` and
+> inherited by descendants doing the actual animating. Drag hook untouched.
 
 > **Editors don't cascade — they get the unified rise.** Forms (`*-edit.php`,
 > `*-new.php`, Settings) must NOT stagger field-by-field. Instead add
@@ -198,6 +201,32 @@ like too much motion. Options, in order of preference:
 
 Unsupported browsers fall back to the current instant reload — graceful, no
 polyfill.
+
+### 3.3 — Heavy-content fade (`.fade-on-load`) — for editors + iframes
+
+For tab panels containing heavy async-loading content (CodeMirror editors,
+preview iframes), the `.reveal-page` rise carries the wrapper but the
+content lands *later* — the editor/iframe appears post-animation and pops.
+Add `class="fade-on-load"` to the heavy element; LAYER 8b in
+[style-cms.css](../site/cms/_assets/style-cms.css) keeps it at `opacity: 0`
+and transitions to `1` over 420ms when `.is-loaded` is toggled by view-local
+JS (`DOMContentLoaded` for regular elements; `iframe.load` for iframes).
+
+Currently applied:
+- [page-edit.php](../site/cms/views/page-edit.php) — body textareas
+  (`#pe-editor-live`, `#pe-editor-mock`) + preview iframe
+- [post-template.php](../site/cms/views/post-template.php) — preview iframe
+
+Not yet applied to the CodeMirror DOM created from `[data-ct-code]`
+textareas in post-template's PHP Layout File tab (CM replaces the textarea
+post-init; the new DOM doesn't inherit `.fade-on-load`). Acceptable for now;
+revisit if the CM pop feels jarring.
+
+> **Tab panels (post-template):** every `<div class="tpl-panel is-server-active">`
+> in [post-template.php](../site/cms/views/post-template.php) carries
+> `.reveal-page` so each tab (Author Info, PHP Layout File, Content Blocks,
+> Field Reference, Block Visibility, Preview) gets a unified rise on load.
+> Tab switches are full page reloads, so the animation re-fires per click.
 
 ---
 

@@ -1798,6 +1798,57 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   .reveal > *, .reveal-page { animation: none; opacity: 1; transform: none; }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   LAYER 8a — Row-form text-only reveal (Navigation, Redirects)
+   Overrides the default cascade for .rowform-list.reveal so the
+   row frame stays static and only the row's contents (inputs,
+   selects, drag handle, buttons) fade + rise per-row. The card
+   reads as "anchored" — text fills in within it.
+   Per-row delay is stamped onto each .rowform-row via --row-delay
+   and inherited by the descendants doing the actual animating.
+   ───────────────────────────────────────────────────────────── */
+.rowform-list.reveal > .rowform-headers,
+.rowform-list.reveal > .rowform-row {
+  opacity: 1;
+  transform: none;
+  animation: none;
+}
+.rowform-list.reveal > :nth-child(1)    { --row-delay:   0ms; }
+.rowform-list.reveal > :nth-child(2)    { --row-delay:  60ms; }
+.rowform-list.reveal > :nth-child(3)    { --row-delay: 120ms; }
+.rowform-list.reveal > :nth-child(4)    { --row-delay: 180ms; }
+.rowform-list.reveal > :nth-child(5)    { --row-delay: 240ms; }
+.rowform-list.reveal > :nth-child(6)    { --row-delay: 300ms; }
+.rowform-list.reveal > :nth-child(7)    { --row-delay: 360ms; }
+.rowform-list.reveal > :nth-child(8)    { --row-delay: 420ms; }
+.rowform-list.reveal > :nth-child(9)    { --row-delay: 480ms; }
+.rowform-list.reveal > :nth-child(n+10) { --row-delay: 540ms; }
+.rowform-list.reveal > .rowform-headers > *,
+.rowform-list.reveal > .rowform-row > *:not(form),
+.rowform-list.reveal > .rowform-row > form > * {
+  opacity: 0;
+  animation: rise-in 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--row-delay, 0ms);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LAYER 8b — .fade-on-load utility
+   For heavy content that lifts in via .reveal-page (CodeMirror
+   editors, preview iframes) but whose CONTENT settles after the
+   container rise — opacity-only fade once .is-loaded is toggled
+   by view-local JS. Calms the second "pop."
+   ───────────────────────────────────────────────────────────── */
+.fade-on-load {
+  opacity: 0;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fade-on-load.is-loaded {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fade-on-load { opacity: 1; transition: none; }
+}
+
 .cms-publish-toggle { display: flex; align-items: center; gap: var(--space-8); }
 .cms-publish-check { display: flex; align-items: center; gap: var(--space-8); cursor: pointer; font-family: var(--font); font-size: var(--text-meta); color: var(--primary); }
 .cms-publish-check input[type="checkbox"] { margin: 0; }

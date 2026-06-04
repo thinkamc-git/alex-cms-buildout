@@ -445,9 +445,14 @@ function get_index_content_card(int $id): ?array
                    c.journal_number,
                    c.event_date, c.event_time, c.event_end_time,
                    c.location, c.venue, c.cost_pill, c.attendance,
-                   s.name AS series_name, s.slug AS series_slug
+                   s.name AS series_name, s.slug AS series_slug,
+                   cat.label  AS category_label,
+                   cat.value_slug AS category_slug,
+                   cat.colour AS category_colour
               FROM content c
          LEFT JOIN series s ON s.id = c.series_id
+         LEFT JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1
+         LEFT JOIN categories cat ON cat.type = cc.type AND cat.value_slug = cc.category
              WHERE c.id = :id
                AND c.status = 'published'
                AND (c.published_status IS NULL OR c.published_status = 'live')
@@ -456,6 +461,23 @@ function get_index_content_card(int $id): ?array
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch();
     return $row === false ? null : $row;
+}
+
+/**
+ * Count published live parts in a series — used by the editorial hero's
+ * series side card to render "Part X of N".
+ */
+function count_series_published(int $series_id): int
+{
+    if ($series_id <= 0) return 0;
+    $stmt = db()->prepare(
+        "SELECT COUNT(*) AS n FROM content
+          WHERE series_id = :sid
+            AND status = 'published'
+            AND (published_status IS NULL OR published_status = 'live')"
+    );
+    $stmt->execute([':sid' => $series_id]);
+    return (int)($stmt->fetch()['n'] ?? 0);
 }
 
 // ─────────────────────────────────────────────────────────────────────────

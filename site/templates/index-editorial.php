@@ -105,9 +105,68 @@ $grid_rows_for = static function (array $sec): int {
         </div>
       <?php endif; ?>
 
-      <?php if ($stype === 'hero' && $cards !== []): ?>
-        <div class="cards-grid" style="grid-template-columns:1fr">
-          <?php $card = $cards[0]; require __DIR__ . '/partials/index-card.php'; ?>
+      <?php if ($stype === 'hero' && $cards !== []):
+          $hcard      = $cards[0];
+          $hType      = (string)($hcard['type']  ?? 'article');
+          $hSlug      = (string)($hcard['slug']  ?? '');
+          $hTitle     = (string)($hcard['title'] ?? '');
+          $hSummary   = (string)($hcard['summary'] ?? '');
+          $hPub       = (string)($hcard['published_at'] ?? '');
+          $hRead      = $hcard['read_time'] ?? null;
+          $hCatLabel  = (string)($hcard['category_label'] ?? '');
+          $hCatColour = (string)($hcard['category_colour'] ?? '');
+          $hSeriesId  = (int)($hcard['series_id'] ?? 0);
+          $hSeriesNm  = (string)($hcard['series_name'] ?? '');
+          $hSeriesOrd = (int)($hcard['series_order'] ?? 0);
+          $hSeriesTot = $hSeriesId > 0 ? count_series_published($hSeriesId) : 0;
+          $eyebrowBits = [];
+          if ($stitle !== '') $eyebrowBits[] = $stitle;
+          if ($hCatLabel !== '') $eyebrowBits[] = $hCatLabel;
+          $hUrlBase = [
+              'article'      => '/writing/',
+              'journal'      => '/journal/',
+              'live-session' => '/live-sessions/',
+              'experiment'   => '/experiments/',
+          ][$hType] ?? '/writing/';
+          $hUrl   = $hSlug !== '' ? $hUrlBase . $hSlug : '#';
+          $hDate  = $hPub !== '' ? strtoupper(date('M j, Y', strtotime($hPub))) : '';
+          $hMeta  = trim($hDate . ($hRead ? ' · ' . (int)$hRead . ' MIN READ' : ''));
+      ?>
+        <div class="editorial-hero">
+          <div class="editorial-hero-text">
+            <?php if ($eyebrowBits !== []): ?>
+              <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
+                &mdash; <?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?>
+              </div>
+            <?php endif; ?>
+            <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>
+            <?php if ($hSummary !== ''): ?>
+              <p class="editorial-hero-summary"><?= $e($hSummary) ?></p>
+            <?php endif; ?>
+            <div class="editorial-hero-foot">
+              <?php if ($hMeta !== ''): ?>
+                <span class="editorial-hero-meta"><?= $e($hMeta) ?></span>
+              <?php endif; ?>
+              <a href="<?= $e($hUrl) ?>" class="editorial-hero-cta">Read &rarr;</a>
+            </div>
+          </div>
+          <aside class="editorial-hero-side">
+            <?php if ($hSeriesNm !== ''): ?>
+              <div class="editorial-hero-card">
+                <div class="editorial-hero-card-label">Series</div>
+                <div class="editorial-hero-card-title">
+                  <?= $e($hSeriesNm) ?>
+                  <?php if ($hSeriesOrd > 0 && $hSeriesTot > 0): ?>
+                    <span class="editorial-hero-card-part">&mdash; Part <?= $hSeriesOrd ?> of <?= $hSeriesTot ?></span>
+                  <?php endif; ?>
+                </div>
+              </div>
+            <?php elseif (!empty($hcard['thumbnail'])): ?>
+              <div class="editorial-hero-thumb" style="background-image:url('<?= $e((string)$hcard['thumbnail']) ?>')"></div>
+            <?php else: ?>
+              <div class="editorial-hero-card editorial-hero-card--empty"></div>
+            <?php endif; ?>
+          </aside>
         </div>
 
       <?php elseif ($cards !== []): ?>

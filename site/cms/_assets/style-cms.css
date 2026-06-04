@@ -1916,3 +1916,91 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .parts-list .rowform-row { background: color-mix(in srgb, var(--surface) 55%, var(--canvas-bg)); }
 .parts-list .rowform-row.is-published { background: var(--surface); }
 .part-date { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); white-space: nowrap; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Phase 21.7 — Editorial Index section-stack builder
+   ─────────────────────────────────────────────────────────────────────
+   The builder reuses .content-block / .content-block-header / .field-*
+   / .cms-table / .filter-pill / .btn-* / .form-actions-sticky / .pe-tabs
+   from the existing CMS. The four new components below are the only
+   genuinely new patterns the builder introduces.
+   ───────────────────────────────────────────────────────────────── */
+
+/* (1) .content-block-body — wraps a content-block's body content so the
+   block can be collapsed by toggling .is-collapsed on the parent. The
+   existing .content-block uses arbitrary children; this is a thin
+   convention layer that lets the same block expand/collapse. */
+.content-block-body { /* default: visible, no extra styling needed */ }
+.content-block.is-collapsed > .content-block-header { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.content-block.is-collapsed > .content-block-body { display: none; }
+
+/* Hover state on collapsible content-blocks (Editorial-only — Basic
+   Listing renders a single non-interactive block, see .is-headerless). */
+.content-block.is-collapsible { transition: border-color 0.15s; }
+.content-block.is-collapsible:hover { border-color: var(--ink); }
+.content-block.is-headerless:hover { border-color: var(--ink-18); }
+.content-block.is-headerless > .content-block-header { display: none; }
+.content-block.is-headerless > .content-block-body { padding: 0; }
+
+/* (2) .form-grid-3 — three equal columns. Extends the existing .form-grid
+   pattern (1fr + 320px main/side split). Used by the Filtered section
+   body. */
+.form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-32); }
+.form-grid-3 > div { min-width: 0; display: flex; flex-direction: column; gap: var(--space-12); }
+
+/* (3) .field-clearable — text input with an X button overlaid on the
+   right that clears the field on click. The X auto-hides when the
+   input is empty (nothing to clear). */
+.field-clearable { position: relative; display: block; }
+.field-clearable .field-input { padding-right: 32px; }
+.field-clearable .clear-x {
+  position: absolute;
+  right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; padding: 4px;
+  cursor: pointer; color: var(--ink-30);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 2px;
+  transition: color 0.15s, background 0.15s;
+}
+.field-clearable .clear-x:hover { color: var(--primary); background: var(--ink-08); }
+.field-clearable .field-input:placeholder-shown + .clear-x { display: none; }
+
+/* (4) .switch-filled — pill-shaped toggle. Track + thumb both use
+   var(--r-pill) so it reads as part of the same button family. */
+.switch-filled { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; vertical-align: middle; }
+.switch-filled input { opacity: 0; width: 0; height: 0; }
+.switch-filled .slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--ink-18); border-radius: var(--r-pill);
+  transition: 0.18s;
+}
+.switch-filled .slider::before {
+  position: absolute; content: '';
+  width: 16px; height: 16px; left: 3px; top: 3px;
+  background: var(--surface); border-radius: var(--r-pill);
+  transition: 0.18s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.switch-filled input:checked + .slider { background: var(--primary); }
+.switch-filled input:checked + .slider::before { transform: translateX(18px); }
+
+/* Tiny conveniences used by the builder — every selector below is a
+   thin re-use of existing tokens, not a new visual pattern. */
+
+/* Drag handle glyph (⋮⋮) — same as navigation.php uses, promoted to
+   global since the builder needs it on the section header AND on each
+   post row inside Curated. */
+.cms-grip {
+  cursor: grab;
+  color: var(--muted);
+  user-select: none;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.cms-grip:active { cursor: grabbing; }
+
+/* Vertical 1px divider — used inside .content-block-header to separate
+   the type label from the section name. Matches the height of header
+   text content. */
+.cms-divider-v { display: inline-block; width: 1px; height: 18px; background: var(--ink-18); flex-shrink: 0; vertical-align: middle; }
+

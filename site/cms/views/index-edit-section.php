@@ -45,12 +45,7 @@ $summary     = $sectionSummary([
     'grid_rows'      => $gridR,
 ]);
 $itemIdsStr  = implode(',', array_map('intval', $items));
-// Section-name display in the card head should ignore <em> wrappers
-// (authors may type "Latest <em>thinking</em>" to italicize on the
-// public side — we don't want the tag literals showing up in the
-// CMS collapsable header).
-$nameClean   = $stitle !== '' ? trim(preg_replace('/<\/?em[^>]*>/i', '', $stitle) ?? $stitle) : '';
-$displayName = $nameClean !== '' ? $nameClean : '(no title)';
+$displayName = $stitle !== '' ? $stitle : '(no title)';
 
 // See more — split the stored target into ("index"|"custom") + value
 // for the picker. An empty target = no see-more card.

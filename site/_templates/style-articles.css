@@ -1256,7 +1256,7 @@ a.article-series-pill:hover {
 }
 .index-title {
   font-family: var(--font);
-  font-size: var(--text-h3);
+  font-size: var(--text-h2);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -1366,11 +1366,11 @@ a.article-series-pill:hover {
   gap: var(--space-16);
   padding-bottom: var(--space-20);
 }
-/* Big section title — mirrors /writing/'s .index-title treatment so
-   the eyebrow / em-emphasis vocabulary stays consistent. */
+/* Big section title — mirrors /writing/'s .index-title treatment but
+   one step smaller so the page-level title stays dominant. */
 .index-section-title-big {
   font-family: var(--font);
-  font-size: var(--text-h3);
+  font-size: var(--text-h4);
   font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.1;

@@ -413,6 +413,9 @@ require __DIR__ . '/../partials/topbar.php';
       ];
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/journals', '← Back to list'];
       $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
+      if ((string)($journal['status'] ?? '') === 'published' && !empty($journal['slug'])) {
+          $actions .= ' <a href="/journal/' . $e((string)$journal['slug']) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
+      }
       require __DIR__ . '/../partials/view-header.php';
       ?>
 

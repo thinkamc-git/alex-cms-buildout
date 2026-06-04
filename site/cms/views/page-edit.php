@@ -302,6 +302,9 @@ require __DIR__ . '/../partials/topbar.php';
         ? 'Layout partial. Publish a mock to override the file on staging — the file stays canonical until you do.'
         : 'Marketing page. Edit as mocks for preview — the CMS never writes to disk, so the file stays canonical.';
       $actions  = '<a href="/cms/pages" class="btn-sec">← Back to Pages</a>';
+      if (!$is_partial && $slug !== '') {
+          $actions .= ' <a href="/' . $e($slug) . '/" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
+      }
       require __DIR__ . '/../partials/view-header.php';
       ?>
 

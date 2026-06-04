@@ -744,6 +744,9 @@ require __DIR__ . '/../partials/topbar.php';
       ];
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/articles', '← Back to list'];
       $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
+      if ((string)($article['status'] ?? '') === 'published' && !empty($article['slug'])) {
+          $actions .= ' <a href="/writing/' . $e((string)$article['slug']) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
+      }
       require __DIR__ . '/../partials/view-header.php';
       ?>
 

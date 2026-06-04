@@ -107,11 +107,13 @@
     if (!card) return;
     // New sections start expanded so the author can configure immediately.
     card.classList.remove('is-collapsed');
+    card.classList.add('is-fresh');
     stack.appendChild(card);
     reindexSections();
     updateSectionCount();
     toggleSecEmpty();
     card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    setTimeout(function () { card.classList.remove('is-fresh'); }, 1300);
   }
 
   function toggleSecEmpty() {

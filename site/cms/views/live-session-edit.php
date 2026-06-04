@@ -503,6 +503,9 @@ require __DIR__ . '/../partials/topbar.php';
       ];
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/live-sessions', '← Back to list'];
       $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
+      if ((string)($session['status'] ?? '') === 'published' && !empty($session['slug'])) {
+          $actions .= ' <a href="/live-sessions/' . $e((string)$session['slug']) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
+      }
       require __DIR__ . '/../partials/view-header.php';
       ?>
 

@@ -106,79 +106,37 @@ $catsForThis = $catsForTypes($ftypes);
 ?>
     <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 290px; gap: var(--space-24)">
       <div class="form-side" data-hero-form>
-    <div class="field-group sec-title-field">
-      <label class="field-label">Title</label>
-      <span class="field-clearable">
-        <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">
-        <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
-      </span>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Select a post</label>
-      <select class="field-input" name="<?= $inputBase ?>[item_ids]" data-hero-pick>
-        <option value="" data-hero-image="" data-title="" data-meta="">— pick a published post —</option>
-        <?php foreach ($pickList as $row):
-            $rid     = (int)$row['id'];
-            $sel     = ($items !== [] && (int)$items[0] === $rid) ? ' selected' : '';
-            $rType   = (string)($row['type']  ?? '');
-            $rTitle  = (string)($row['title'] ?? '');
-            $rPub    = (string)($row['published_at'] ?? '');
-            $rDate   = $rPub !== '' ? date('Y-m-d', strtotime($rPub)) : '';
-            $rTLab   = ucfirst(str_replace('-', ' ', $rType));
-            $rMeta   = trim($rTLab . ($rDate !== '' ? ' · ' . $rDate : ''));
-        ?>
-          <option value="<?= $rid ?>"<?= $sel ?>
-                  data-hero-image="<?= $e((string)($row['hero_image'] ?? '')) ?>"
-                  data-title="<?= $e($rTitle) ?>"
-                  data-meta="<?= $e($rMeta) ?>"><?= $pickLabel($row) ?></option>
-        <?php endforeach; ?>
-      </select>
-    </div>
-
-    <div class="field-group">
-      <label class="field-label">Layout</label>
-      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
-        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
-          <?php foreach (['plain' => 'Plain', 'within' => 'Image Container', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
-            <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
-          <?php endforeach; ?>
+        <div class="field-group sec-title-field">
+          <label class="field-label">Title</label>
+          <span class="field-clearable">
+            <input type="text" class="field-input" name="<?= $inputBase ?>[title]" placeholder="no title" value="<?= $e($stitle) ?>">
+            <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+          </span>
         </div>
-      </div>
-      <input type="hidden" name="<?= $inputBase ?>[hero_layout]" value="<?= $e($hlayout) ?>">
-    </div>
-
-    <div class="field-group" data-hero-bg-field style="<?= in_array($hlayout, ['plain','within'], true) ? '' : 'display:none' ?>">
-      <label class="field-label">Background</label>
-      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
-          <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid White'] as $v => $l): ?>
-            <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
-          <?php endforeach; ?>
-        </div>
-      </div>
-      <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
-    </div>
-
-      </div><!-- /.form-side data-hero-form -->
-
-      <div class="form-side" data-hero-preview-pane>
-        <label class="field-label" style="margin-bottom:var(--space-8);display:block">Preview</label>
-        <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
-          <div class="hero-img-preview-text" aria-hidden="true">
-            <div class="hero-img-preview-title">Title Example</div>
-            <div class="hero-img-preview-caption">An example of the summary text.</div>
-          </div>
-          <div class="hero-img-preview-imgwrap" data-hero-preview-imgwrap>
-            <?php if ($previewSrc !== ''): ?>
-              <img src="<?= $e($previewSrc) ?>" alt="" data-hero-preview-img>
-            <?php else: ?>
-              <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
-            <?php endif; ?>
-          </div>
+        <div class="field-group">
+          <label class="field-label">Select a post</label>
+          <select class="field-input" name="<?= $inputBase ?>[item_ids]" data-hero-pick>
+            <option value="" data-hero-image="" data-title="" data-meta="">— pick a published post —</option>
+            <?php foreach ($pickList as $row):
+                $rid     = (int)$row['id'];
+                $sel     = ($items !== [] && (int)$items[0] === $rid) ? ' selected' : '';
+                $rType   = (string)($row['type']  ?? '');
+                $rTitle  = (string)($row['title'] ?? '');
+                $rPub    = (string)($row['published_at'] ?? '');
+                $rDate   = $rPub !== '' ? date('Y-m-d', strtotime($rPub)) : '';
+                $rTLab   = ucfirst(str_replace('-', ' ', $rType));
+                $rMeta   = trim($rTLab . ($rDate !== '' ? ' · ' . $rDate : ''));
+            ?>
+              <option value="<?= $rid ?>"<?= $sel ?>
+                      data-hero-image="<?= $e((string)($row['hero_image'] ?? '')) ?>"
+                      data-title="<?= $e($rTitle) ?>"
+                      data-meta="<?= $e($rMeta) ?>"><?= $pickLabel($row) ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
 
         <?php $showCustomImg = $hlayout !== 'plain' && $himode === 'custom'; ?>
-        <div class="field-group" data-hero-image-mode-field style="margin-top:var(--space-16);margin-bottom:0;<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
+        <div class="field-group" data-hero-image-mode-field style="margin-bottom:0;<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
           <label class="field-label">Image source</label>
           <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
             <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
@@ -198,6 +156,49 @@ $catsForThis = $catsForTypes($ftypes);
               </label>
             </div>
             <p class="field-hint" data-hero-img-status style="display:none"></p>
+          </div>
+        </div>
+      </div><!-- /.form-side data-hero-form -->
+
+      <div class="form-side" data-hero-preview-pane>
+        <div class="field-group">
+          <label class="field-label">Layout</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
+              <?php foreach (['plain' => 'Plain', 'within' => 'Image Container', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_layout]" value="<?= $e($hlayout) ?>">
+        </div>
+
+        <div class="field-group" data-hero-bg-field style="<?= in_array($hlayout, ['plain','within'], true) ? '' : 'display:none' ?>">
+          <label class="field-label">Background</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
+              <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid White'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
+        </div>
+
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Preview</label>
+          <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
+            <div class="hero-img-preview-text" aria-hidden="true">
+              <div class="hero-img-preview-title">Title Example</div>
+              <div class="hero-img-preview-caption">An example of the summary text.</div>
+            </div>
+            <div class="hero-img-preview-imgwrap" data-hero-preview-imgwrap>
+              <?php if ($previewSrc !== ''): ?>
+                <img src="<?= $e($previewSrc) ?>" alt="" data-hero-preview-img>
+              <?php else: ?>
+                <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
+              <?php endif; ?>
+            </div>
           </div>
         </div>
       </div>

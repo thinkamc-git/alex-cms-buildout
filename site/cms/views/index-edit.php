@@ -326,6 +326,7 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/flash.php';
       ?>
 
+      <div class="content-area">
       <form method="post" action="/cms/indexes/edit" class="cms-form cms-form-wide" id="index-edit-form">
         <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
         <input type="hidden" name="id" value="<?= $id ?>">
@@ -562,6 +563,7 @@ require __DIR__ . '/../partials/topbar.php';
         </div>
 
       </form>
+      </div>
     </div>
   </main>
 </div>

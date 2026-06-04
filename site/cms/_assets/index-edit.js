@@ -56,14 +56,6 @@
         if (rowsField) rowsField.style.display = hidden.value === 'carousel' ? 'none' : '';
       }
     }
-    // Hero side-image mode = Custom reveals the URL field.
-    if (hidden && hidden.name && hidden.name.indexOf('[hero_image_mode]') > -1) {
-      var sec2 = pill.closest('[data-section]');
-      if (sec2) {
-        var urlField = sec2.querySelector('[data-hero-image-url]');
-        if (urlField) urlField.style.display = hidden.value === 'custom' ? '' : 'none';
-      }
-    }
     updateSummaryFor(pill.closest('[data-section]'));
   });
 
@@ -553,6 +545,43 @@
       });
     }
   })();
+
+  // ── Hero Side-image upload ──────────────────────────────────────────
+  // Each Hero section has an [data-hero-img-upload] file input next to
+  // the URL text field. On change, POST the file to the upload endpoint
+  // and stuff the returned URL into the text input.
+  form.addEventListener('change', function (e) {
+    var input = e.target;
+    if (!input || !input.matches('[data-hero-img-upload]')) return;
+    var file = input.files && input.files[0];
+    if (!file) return;
+    var wrap   = input.closest('[data-hero-image-url]');
+    var urlIn  = wrap ? wrap.querySelector('[data-hero-img-url-input]') : null;
+    var status = wrap ? wrap.querySelector('[data-hero-img-status]') : null;
+    if (status) { status.style.display = ''; status.textContent = 'Uploading…'; }
+    var csrf = (form.querySelector('input[name="csrf_token"]') || {}).value || '';
+    var fd = new FormData();
+    fd.append('image', file);
+    fd.append('csrf_token', csrf);
+    fetch('/cms/indexes/upload-image', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok && j.url) {
+          if (urlIn) {
+            urlIn.value = j.url;
+            urlIn.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (status) status.textContent = 'Uploaded.';
+          setTimeout(function () { if (status) status.style.display = 'none'; }, 1500);
+        } else {
+          if (status) status.textContent = 'Upload failed: ' + ((j && j.error) || 'unknown');
+        }
+      })
+      .catch(function (err) {
+        if (status) status.textContent = 'Upload failed: ' + err.message;
+      });
+    input.value = '';
+  });
 
   // ── Featured-list (legacy Basic Listing) — keep the existing behaviour.
   (function () {

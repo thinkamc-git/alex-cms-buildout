@@ -126,6 +126,7 @@ $router->post('/cms/indexes/new',    $cms('views/index-new.php'));
 $router->get ('/cms/indexes/edit',   $cms('views/index-edit.php'));
 $router->post('/cms/indexes/edit',   $cms('views/index-edit.php'));
 $router->post('/cms/indexes/delete', $cms('views/index-delete.php'));
+$router->post('/cms/indexes/upload-image', $cms('views/index-upload-image.php'));
 
 // Phase 13: Redirects admin. Single view handles list + add + per-row
 // update/delete via $_POST['action'] (same pattern as /cms/categories).

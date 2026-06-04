@@ -121,12 +121,19 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
       </div>
       <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
-      <p class="field-hint">Auto: use the picked post's hero image (falls back to series card if none). Custom: provide a URL. None: omit the side panel.</p>
+      <p class="field-hint">Auto: use the picked post's hero image (falls back to series card if none). Custom: upload or paste a URL. None: omit the side panel.</p>
     </div>
 
-    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $himode === 'custom' ? '' : 'display:none' ?>">
-      <label class="field-label">Custom image URL</label>
-      <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg" value="<?= $e($himgUrl) ?>">
+    <div class="field-group" data-hero-image-url style="margin-bottom:0">
+      <label class="field-label">Custom image</label>
+      <div style="display:flex;gap:var(--space-8);align-items:center">
+        <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg or paste URL" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1">
+        <label class="btn-sec" style="cursor:pointer;white-space:nowrap;margin:0">
+          Upload
+          <input type="file" accept="image/*" data-hero-img-upload style="display:none">
+        </label>
+      </div>
+      <p class="field-hint" data-hero-img-status style="display:none"></p>
     </div>
 
 <?php elseif ($stype === 'curated'): ?>

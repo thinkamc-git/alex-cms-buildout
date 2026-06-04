@@ -73,19 +73,16 @@ $grid_rows_for = static function (array $sec): int {
   ?>
     <section class="index-section index-section--<?= $e($stype) ?>">
       <?php if ($stype !== 'hero' && $stitle !== ''): ?>
+        <?php $viewHref = $seeTgt !== '' ? $seeTgt : '#'; ?>
         <?php if ($hstyle === 'big'): ?>
           <header class="index-section-header is-big">
             <h2 class="index-section-title-big"><?= render_title_emphasis($stitle) ?></h2>
-            <?php if ($seeTgt !== ''): ?>
-              <a class="index-section-view-all" href="<?= $e($seeTgt) ?>"><?= $e($viewLab) ?> →</a>
-            <?php endif; ?>
+            <a class="index-section-view-all" href="<?= $e($viewHref) ?>"><?= $e($viewLab) ?> →</a>
           </header>
         <?php else: ?>
           <div class="group-header">
             <span class="group-header-eyebrow"><?= $e($stitle) ?> &mdash; <?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
-            <?php if ($seeTgt !== ''): ?>
-              <a class="group-header-link" href="<?= $e($seeTgt) ?>"><?= $e($viewLab) ?> →</a>
-            <?php endif; ?>
+            <a class="group-header-link" href="<?= $e($viewHref) ?>"><?= $e($viewLab) ?> →</a>
           </div>
         <?php endif; ?>
       <?php endif; ?>

@@ -58,8 +58,8 @@ const INDEX_TYPE_LABELS = [
 function list_indexes(): array
 {
     $sql = 'SELECT id, slug, layout, title, subtitle, show_title,
-                   hero_content_id, featured_ids, feed_types, feed_sort,
-                   feed_rows_shown, created_at, updated_at
+                   hero_content_id, featured_ids, feed_types, feed_categories,
+                   feed_sort, feed_rows_shown, created_at, updated_at
               FROM indexes
           ORDER BY slug ASC';
     return db()->query($sql)->fetchAll() ?: [];
@@ -185,6 +185,24 @@ function save_index(array $data): array
     }
     $feedTypesJson = $cleanTypes === [] ? null : json_encode($cleanTypes);
 
+    // Categories pre-filter (Basic Listing only narrows the feed; Editorial
+    // sections own their own feed_categories). Empty = all categories.
+    $cats = $data['feed_categories'] ?? [];
+    if (is_string($cats)) {
+        $decoded = json_decode($cats, true);
+        $cats = is_array($decoded) ? $decoded : [];
+    }
+    $cleanCats = [];
+    if (is_array($cats)) {
+        foreach ($cats as $c) {
+            $cs = trim((string)$c);
+            if ($cs !== '' && !in_array($cs, $cleanCats, true)) {
+                $cleanCats[] = $cs;
+            }
+        }
+    }
+    $feedCatsJson = $cleanCats === [] ? null : json_encode($cleanCats);
+
     $sort = (string)($data['feed_sort'] ?? 'newest');
     if (!in_array($sort, ['newest', 'oldest', 'manual'], true)) $sort = 'newest';
 
@@ -203,6 +221,7 @@ function save_index(array $data): array
         ':hero'     => $heroId,
         ':feat'     => $featuredIds,
         ':ftypes'   => $feedTypesJson,
+        ':fcats'    => $feedCatsJson,
         ':fsort'    => $sort,
         ':frows'    => $rows,
         ':fmode'    => $filterMode,
@@ -212,11 +231,11 @@ function save_index(array $data): array
         $sql = 'INSERT INTO indexes
                   (slug, layout, title, subtitle, show_title,
                    hero_content_id, featured_ids,
-                   feed_types, feed_sort, feed_rows_shown, filter_mode)
+                   feed_types, feed_categories, feed_sort, feed_rows_shown, filter_mode)
                 VALUES
                   (:slug, :layout, :title, :subtitle, :show,
                    :hero, :feat,
-                   :ftypes, :fsort, :frows, :fmode)';
+                   :ftypes, :fcats, :fsort, :frows, :fmode)';
         db()->prepare($sql)->execute($params);
         return ['ok' => true, 'error' => '', 'id' => (int)db()->lastInsertId()];
     }
@@ -229,6 +248,7 @@ function save_index(array $data): array
                    hero_content_id = :hero,
                    featured_ids = :feat,
                    feed_types = :ftypes,
+                   feed_categories = :fcats,
                    feed_sort = :fsort,
                    feed_rows_shown = :frows,
                    filter_mode = :fmode
@@ -297,10 +317,24 @@ function build_index_pills(array $idx): array
     $stmt->execute($params);
     $rows = $stmt->fetchAll() ?: [];
 
+    // If the author narrowed the feed to specific categories, the visitor
+    // pill rail should mirror that subset — otherwise visitors see pills
+    // for categories that can never appear in the feed.
+    $feedCats = $idx['feed_categories'] ?? null;
+    if (is_string($feedCats)) {
+        $decoded = json_decode($feedCats, true);
+        $feedCats = is_array($decoded) ? $decoded : null;
+    }
+    $catFilter = is_array($feedCats)
+        ? array_flip(array_map('strval', $feedCats))
+        : null;
+
     $pills = [];
     foreach ($rows as $r) {
+        $slug = (string)$r['value_slug'];
+        if ($catFilter !== null && !isset($catFilter[$slug])) continue;
         $pills[] = [
-            'key'       => (string)$r['value_slug'],
+            'key'       => $slug,
             'label'     => (string)$r['label'],
             'data_attr' => 'category',
             'colour'    => (string)$r['colour'],
@@ -397,6 +431,30 @@ function list_index_feed(array $config, array $excludeIds = []): array
     }
     $inTypes = implode(',', $placeholders);
 
+    // Optional categories pre-filter. JOIN against the primary category row;
+    // mirrors list_section_feed().
+    $cats = $config['feed_categories'] ?? null;
+    if (is_string($cats)) {
+        $decoded = json_decode($cats, true);
+        $cats = is_array($decoded) ? $decoded : null;
+    }
+    $cats = is_array($cats)
+        ? array_values(array_filter(array_map('strval', $cats), static fn($c) => $c !== ''))
+        : [];
+
+    $catJoin = '';
+    $catWhere = '';
+    if ($cats !== []) {
+        $catPlaceholders = [];
+        foreach ($cats as $i => $c) {
+            $key = ":c{$i}";
+            $catPlaceholders[] = $key;
+            $params[$key] = $c;
+        }
+        $catJoin  = 'LEFT JOIN content_categories cc ON cc.content_id = c.id AND cc.is_primary = 1';
+        $catWhere = ' AND cc.category IN (' . implode(',', $catPlaceholders) . ')';
+    }
+
     $sort = (string)($config['feed_sort'] ?? 'newest');
     $order = $sort === 'oldest' ? 'c.published_at ASC' : 'c.published_at DESC';
 
@@ -409,7 +467,9 @@ function list_index_feed(array $config, array $excludeIds = []): array
                    s.name AS series_name, s.slug AS series_slug
               FROM content c
          LEFT JOIN series s ON s.id = c.series_id
+         $catJoin
              WHERE c.type IN ($inTypes)
+               $catWhere
                AND c.status = 'published'
                AND (c.published_status IS NULL OR c.published_status = 'live')
           ORDER BY $order, c.id DESC";

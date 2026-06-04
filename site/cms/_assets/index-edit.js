@@ -565,6 +565,59 @@
 
   function rebuildCategoriesFor(sec) { refreshCatRailsIn(sec); }
 
+  // ── Basic Listing: rebuild Categories rail when Types pills change ──
+  // The BL branch isn't a [data-section], so it doesn't run through the
+  // editorial cat-rail machinery above. Same idea, narrower scope.
+  var blCats  = form.querySelector('[data-bl-cats]');
+  var blTypes = form.querySelector('[data-bl-types]');
+  if (blCats && blTypes) {
+    blTypes.addEventListener('change', function () {
+      // Preserve current selections by slug so toggling a type doesn't
+      // wipe categories the user already picked from a still-checked type.
+      var selected = Array.prototype.map.call(
+        blCats.querySelectorAll('input[type=checkbox]:checked'),
+        function (cb) { return cb.value; }
+      );
+      var types = Array.prototype.map.call(
+        blTypes.querySelectorAll('input[type=checkbox]:checked'),
+        function (cb) { return cb.value; }
+      );
+      if (types.length === 0) types = CAT_TYPE_ORDER.slice();
+
+      var byType = window.CMS_CATEGORIES_BY_TYPE || {};
+      blCats.innerHTML = '';
+      var seen = {};
+      var any = false;
+      types.forEach(function (t) {
+        (byType[t] || []).forEach(function (cat) {
+          if (seen[cat.slug]) return;
+          seen[cat.slug] = true;
+          any = true;
+          var on = selected.indexOf(cat.slug) !== -1;
+          var lab = document.createElement('label');
+          lab.className = 'filter-pill' + (on ? ' active' : '');
+          lab.setAttribute('data-cat-pill', cat.slug);
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.name = 'feed_categories[]';
+          cb.value = cat.slug;
+          cb.checked = on;
+          cb.style.display = 'none';
+          lab.appendChild(cb);
+          lab.appendChild(document.createTextNode(cat.label));
+          blCats.appendChild(lab);
+        });
+      });
+      if (!any) {
+        var hint = document.createElement('span');
+        hint.className = 'field-hint';
+        hint.setAttribute('data-bl-cats-empty', '');
+        hint.textContent = 'No categories available for the selected types.';
+        blCats.appendChild(hint);
+      }
+    });
+  }
+
   /**
    * Update the collapsed-header summary line based on the section's
    * current config. Best-effort cosmetic only — saves a reload.

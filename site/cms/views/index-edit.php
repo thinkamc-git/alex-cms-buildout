@@ -56,6 +56,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $typesArr = $_POST['feed_types'] ?? [];
         if (!is_array($typesArr)) $typesArr = [];
 
+        $catsArr = $_POST['feed_categories'] ?? [];
+        if (!is_array($catsArr)) $catsArr = [];
+
         $newLayout = (string)($_POST['layout'] ?? $index['layout']);
         if (!in_array($newLayout, INDEX_LAYOUTS, true)) $newLayout = 'listing';
 
@@ -68,6 +71,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'hero_content_id' => (int)($_POST['hero_content_id'] ?? 0),
             'featured_ids'    => $featuredArr,
             'feed_types'      => $typesArr,
+            'feed_categories' => $catsArr,
             'feed_sort'       => (string)($_POST['feed_sort']       ?? 'newest'),
             'feed_rows_shown' => (string)($_POST['feed_rows_shown'] ?? 'all'),
             'filter_mode'     => (string)($_POST['filter_mode']     ?? 'categories'),
@@ -103,6 +107,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'hero_content_id' => $data['hero_content_id'],
             'featured_ids'    => json_encode($data['featured_ids']),
             'feed_types'      => json_encode($data['feed_types']),
+            'feed_categories' => json_encode($data['feed_categories']),
             'feed_sort'       => $data['feed_sort'],
             'feed_rows_shown' => $data['feed_rows_shown'],
             'filter_mode'     => $data['filter_mode'],
@@ -222,6 +227,14 @@ if (is_string($feedTypes)) {
     $feedTypes = is_array($decoded) ? $decoded : [];
 }
 if (!is_array($feedTypes)) $feedTypes = [];
+
+$feedCats = $index['feed_categories'] ?? null;
+if (is_string($feedCats)) {
+    $decoded = json_decode($feedCats, true);
+    $feedCats = is_array($decoded) ? $decoded : [];
+}
+if (!is_array($feedCats)) $feedCats = [];
+$feedCats = array_map('strval', $feedCats);
 
 $layout      = (string)$index['layout'];
 $isEditorial = $layout === 'editorial';
@@ -471,7 +484,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="field-group">
             <label class="field-label">Types</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none">
-              <div class="filter-group">
+              <div class="filter-group" data-bl-types>
                 <?php foreach ($typeLabels as $slug => $label):
                   $on = in_array($slug, $feedTypes, true);
                 ?>
@@ -480,6 +493,40 @@ require __DIR__ . '/../partials/topbar.php';
                     <?= $e($label) ?>
                   </label>
                 <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <?php
+          // Derive the category options available to this index based on its
+          // currently-selected types. If no types are selected (= all types),
+          // show the full set. JS keeps this in sync on the fly.
+          $blAvailCats = [];
+          $blTypesForCats = $feedTypes === [] ? array_keys($catsByType) : $feedTypes;
+          $seenSlug = [];
+          foreach ($blTypesForCats as $t) {
+              foreach ($catsByType[$t] ?? [] as $c) {
+                  $k = $c['slug'];
+                  if ($k === '' || isset($seenSlug[$k])) continue;
+                  $seenSlug[$k] = true;
+                  $blAvailCats[] = $c;
+              }
+          }
+          ?>
+          <div class="field-group">
+            <label class="field-label">Categories <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:var(--text-micro);color:var(--muted);font-family:var(--font)">optional · empty = all</span></label>
+            <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none">
+              <div class="filter-group" data-bl-cats>
+                <?php if ($blAvailCats === []): ?>
+                  <span class="field-hint" data-bl-cats-empty>No categories available for the selected types.</span>
+                <?php else: foreach ($blAvailCats as $c):
+                  $on = in_array($c['slug'], $feedCats, true);
+                ?>
+                  <label class="filter-pill <?= $on ? 'active' : '' ?>" data-cat-pill="<?= $e($c['slug']) ?>">
+                    <input type="checkbox" name="feed_categories[]" value="<?= $e($c['slug']) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                    <?= $e($c['label']) ?>
+                  </label>
+                <?php endforeach; endif; ?>
               </div>
             </div>
           </div>

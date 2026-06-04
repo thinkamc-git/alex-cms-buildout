@@ -121,19 +121,25 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
-- [ ] **Phase 22** — DS-1: Audit · *Semi-auto* · 2h · **No code** (deliverable: `docs/DS-AUDIT.md`)
-- [ ] **Phase 23** — DS-2: Root tokens · *Semi-auto* · 2h · **Staging-only**
-- [ ] **Phase 24** — DS-3: Pages migration · *Semi-auto* · 2.5h · **Staging-only**
-- [ ] **Phase 25** — DS-4: Blocks migration · *Manual* · 3h · **Staging-only** *(highest risk)*
-- [ ] **Phase 26** — DS-4.5: Block recipe doc · *Semi-auto* · 1.5h · **No public ship**
-- [ ] **Phase 27** — DS-5: CMS migration · *Semi-auto* · 2.5h · **Staging-only**
-- [ ] **Phase 28** — DS-6: Cleanup + sunset · *Manual* · 1.5h · **Ships:** v2.1 public
-- [ ] **Phase 28.5** — Mobile optimization (site full mobile + CMS tablet-only) · *Manual* · 4–6h · **Staging-only**
-- [ ] **Phase 29** — Public cutover (v1.0 ship, marketing nav + indexes flip) · *Manual* · 2–3h · **Ships:** v1.0 public
+- [ ] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~1h · **No code** (deliverable: `docs/DS-AUDIT.md`)
+- [ ] **Phase 22.2** — Root tokens · *Semi-auto* · ~1h · **Staging-only**
+- [ ] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
+- [ ] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
+- [ ] **Phase 22.5** — CMS migration · *Semi-auto* · ~1–1.5h · **Staging-only**
+- [ ] **Phase 22.6** — Cleanup + sunset · *Manual* · ~1.5–2h · **Ships:** v2.1 public
+
+**═══ PROJECT: Mobile (v2.2) — public-site mobile optimization ═══**
+
+- [ ] **Phase 23.1** — Mobile sandbox + UI mock · *Manual* · ~2–3h · **Design canvas only** (deliverable: `docs/design-mockups/mobile.html`)
+- [ ] **Phase 23.2** — Mobile implementation · *Manual* · ~3–4h · **Staging-only** *(consumes 22.1 audit + 23.1 mockups)*
+
+**═══ FINAL ═══**
+
+- [ ] **Phase 24** — Public cutover reconciliation · *Manual* · ~0.5–1h · **Ships:** v1.0 public *(may be largely complete — drift-check)*
 
 **═══ DEFERRED ═══**
 
-- [ ] **Phase 17** *(superseded by Phases 22–28)* — original single-phase DS unification, now expanded into the v2.1 project above. Kept for historical reference.
+- [ ] **Phase 17** *(superseded by Phase 22.1–22.6)* — original single-phase DS unification, now expanded into the v2.1 project above. Kept for historical reference.
 - [ ] **Phase 18** *(deferred)* — Transactional email · *Semi-auto* · 4–5h
 
 **Rule:** finish a phase before starting the next. If a phase reveals a missing decision, capture it in `CMS-STRUCTURE.md` §17 (Open Items), make the call with Alex, then continue.
@@ -142,7 +148,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - `APP_ENV === 'staging'` gate around the new public index routes in `site/index.php`
 - `bin/deploy.sh prod` skip-list for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php`
 
-**Phase 29** is the single moment all of that flips — see its session brief for the exact unfreeze checklist.
+**Phase 24** is the single moment all of that flips — see its session brief for the exact unfreeze checklist.
 
 ---
 
@@ -801,9 +807,9 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 **Session brief**
 
 - **Autonomy:** Manual *(nav + index pages are design-heavy; design-system reference must be applied verbatim)*
-- **Ships:** **Staging** content-complete. Prod gets CMS + lib + migrations only — public-facing chrome stays frozen until **Phase 29 (Public Cutover)**.
+- **Ships:** **Staging** content-complete. Prod gets CMS + lib + migrations only — public-facing chrome stays frozen until **Phase 24 (Public Cutover)**.
 
-**Why staging-only.** The original Phase 12 brief shipped the public nav switchover and `landing.html` port on the same flight as the indexes. We've since pulled both into **Phase 29**: every phase from 12 onward ships to staging first, prod gets only CMS-side changes, and the public flip happens once at the end after a content audit. See §3 for the renumbered phase index.
+**Why staging-only.** The original Phase 12 brief shipped the public nav switchover and `landing.html` port on the same flight as the indexes. We've since pulled both into **Phase 24**: every phase from 12 onward ships to staging first, prod gets only CMS-side changes, and the public flip happens once at the end after a content audit. See §3 for the renumbered phase index.
 
 **Decisions to capture before starting**
 - Topbar nav structure (post-CMS): `What's UX 2.0 (with red dot) / Thoughts / Talks / Work with me`
@@ -819,11 +825,11 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **Read at start (only):** This phase section. `CMS-STRUCTURE.md` §16 (Indexes). `docs/design-mockups/landing-postcms.html`. `docs/design-mockups/cms-ui.html`. **`site/_design-system/index.html` §"Content Cards" + §04 Full Page Index + §06 Card Navigation & Filtering** — the canonical card markup. Don't approximate; mirror it.
 
-**Touch:** `db/migrations/0007_indexes_table.sql`, `0008_indexes_filter_mode.sql`, `0009_live_session_venue.sql`. `cms/views/indexes.php`, `index-new.php`, `index-edit.php`, `index-delete.php` (new). `cms/views/{article,journal,live-session,experiment}-edit.php` (add Primary Category dropdown). `cms/views/live-sessions.php` (split list into Drafts/Published). `templates/index-editorial.php`, `index-listing.php`, `partials/index-card.php` (new). `lib/indexes.php` (new). `lib/content.php` (add `assign_primary_category`, `get_primary_category`, venue column). `lib/render.php` (add `render_index`, `render_series_index`). `templates/master-layout.php` (load views + status + components CSS). `_templates/style-articles.css` (nav fixes + `.index-*` layout). `_design-system/css/status.css` (filter pill colours for missing categories). `bin/deploy.sh` (ship the new templates + lib files; **add prod-skip list for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php` — those flip in Phase 29**). **DO NOT touch:** `site/_pages/_layout/header.html`, `site/_pages/_bodies/landing.html`, `site/templates/partials/nav.php` (deferred to Phase 29). `docs/design-mockups/landing-postcms.html` (delete in Phase 29).
+**Touch:** `db/migrations/0007_indexes_table.sql`, `0008_indexes_filter_mode.sql`, `0009_live_session_venue.sql`. `cms/views/indexes.php`, `index-new.php`, `index-edit.php`, `index-delete.php` (new). `cms/views/{article,journal,live-session,experiment}-edit.php` (add Primary Category dropdown). `cms/views/live-sessions.php` (split list into Drafts/Published). `templates/index-editorial.php`, `index-listing.php`, `partials/index-card.php` (new). `lib/indexes.php` (new). `lib/content.php` (add `assign_primary_category`, `get_primary_category`, venue column). `lib/render.php` (add `render_index`, `render_series_index`). `templates/master-layout.php` (load views + status + components CSS). `_templates/style-articles.css` (nav fixes + `.index-*` layout). `_design-system/css/status.css` (filter pill colours for missing categories). `bin/deploy.sh` (ship the new templates + lib files; **add prod-skip list for `_pages/_layout/header.html`, `_pages/_bodies/landing.html`, `templates/partials/nav.php` — those flip in Phase 24**). **DO NOT touch:** `site/_pages/_layout/header.html`, `site/_pages/_bodies/landing.html`, `site/templates/partials/nav.php` (deferred to Phase 24). `docs/design-mockups/landing-postcms.html` (delete in Phase 24).
 
 **Don't touch:** Anything in `_pages/`, the public-facing nav partial. Polish phases (13–15). The deferred items in §Deferred backlog.
 
-**On exit:** Check Phase 12 in §3. New public index routes work on staging; same routes 404 on prod. CMS works identically on prod. Marketing pages on prod unchanged. **No public ship — that's Phase 29.**
+**On exit:** Check Phase 12 in §3. New public index routes work on staging; same routes 404 on prod. CMS works identically on prod. Marketing pages on prod unchanged. **No public ship — that's Phase 24.**
 
 **Goal:** Indexes + Editorial Page layouts work on staging end-to-end. CMS gains per-content category assignment (the data the cards need to render in colour). Prod stays visually identical to its pre-Phase-12 state.
 
@@ -836,7 +842,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - Live Sessions list view sectioned by stage (Drafts / Published), location split into `location` + `venue` columns.
 - Masterclass card uses `mc-body / mc-logistics / mc-cta-zone` per the DS reference.
 - Filter pills wired to the DS `.fp[data-cat]` colour system in `status.css`.
-- Topbar nav structure designed and tested on staging only — actual switch to prod is Phase 29.
+- Topbar nav structure designed and tested on staging only — actual switch to prod is Phase 24.
 
 **Deliverables:**
 - All migrations + lib + CMS views + public templates listed above
@@ -850,7 +856,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 3. Per-content edit forms have the Primary Category dropdown; saving writes to `content_categories`.
 4. After prod deploy: `https://alexmchong.ca/` and all marketing pages unchanged; `https://alexmchong.ca/writing/[existing-slug]` still works with the old nav; `https://alexmchong.ca/writing/` 404s (not yet live).
 
-**Out of scope:** Public-facing nav swap, `landing.html` port, activating new index routes on prod — all of that is **Phase 29**. Cron, redirects DB, newsletter, a11y (Phases 13–15). The deferred backlog at the bottom of this doc.
+**Out of scope:** Public-facing nav swap, `landing.html` port, activating new index routes on prod — all of that is **Phase 24**. Cron, redirects DB, newsletter, a11y (Phases 13–15). The deferred backlog at the bottom of this doc.
 
 ---
 
@@ -965,7 +971,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 **Session brief**
 
 - **Autonomy:** Semi-auto
-- **Ships:** Staging-only. Goes to prod at Phase 29 cutover.
+- **Ships:** Staging-only. Goes to prod at Phase 24 cutover.
 
 **Decisions captured (locked at plan time, defaults accepted)**
 - **Scope:** α — read-only port of the mockup with Author info editable. Sub-template visibility toggles are read-only documentation; "Save Template" button hidden. Full edit-with-persistence (β) deferred to a future phase.
@@ -1075,7 +1081,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 **Session brief**
 
 - **Autonomy:** Semi-auto
-- **Ships:** Staging-only. Public ship at Phase 29 cutover (along with the rest of the CMS).
+- **Ships:** Staging-only. Public ship at Phase 24 cutover (along with the rest of the CMS).
 
 **Background — why this phase exists**
 
@@ -1187,7 +1193,7 @@ schedule_content(int $id, string $datetime): array
 **Session brief**
 
 - **Autonomy:** Manual *(judgment-heavy)*
-- **Ships:** Staging-only. Public ship of v1.0 is **Phase 29**.
+- **Ships:** Staging-only. Public ship of v1.0 is **Phase 24**.
 
 **Decisions to capture before starting**
 - Skip-to-content link target: `#main`
@@ -1199,9 +1205,9 @@ schedule_content(int $id, string $datetime): array
 
 **Touch:** `cms/views/*.php` (ARIA, focus management, keyboard handlers). `cms/partials/*.php` (landmark roles, keyboard nav). `templates/*.php` (public-side a11y pass). `site/_design-system/css/components.css` (focus styles if refinement needed). `DEPLOYMENT.md` or new `RELEASES.md` (v1.0 notes).
 
-**Don't touch:** New feature work. Public-facing nav / landing files (Phase 29). Deferred phases (17, 18).
+**Don't touch:** New feature work. Public-facing nav / landing files (Phase 24). Deferred phases (17, 18).
 
-**On exit:** Check Phase 15 in §3. Staging-only ship. The public v1.0 ship moment is **Phase 29**.
+**On exit:** Check Phase 15 in §3. Staging-only ship. The public v1.0 ship moment is **Phase 24**.
 
 **Goal:** The CMS is keyboard-navigable, screen-reader-friendly, and visually polished. Public site (on staging) has the same pass.
 
@@ -1222,7 +1228,7 @@ schedule_content(int $id, string $datetime): array
 2. VoiceOver through Pipeline → Article edit → Save. Each step announced sensibly.
 3. Visual diff (on staging) against pre-pass screenshots — nothing regressed.
 
-**Out of scope:** The public cutover itself (Phase 29). Deferred phases 17, 18.
+**Out of scope:** The public cutover itself (Phase 24). Deferred phases 17, 18.
 
 ---
 
@@ -1503,7 +1509,7 @@ CREATE TABLE nav_items (
 **Don't touch:**
 - Existing TipTap editor / rich text body — keep round-trip-safe
 - The `experiment-html` passthrough template — its full-swap semantics are correct and don't change
-- Public marketing nav, indexes, anything Phase 29 ships
+- Public marketing nav, indexes, anything Phase 24 ships
 
 **On exit:** Phase 20.3 checked in §3. Both new templates render correctly with chrome + readfile body. Article-edit shows the RTF/HTML toggle. Experiment-edit shows a three-way selector. Folder system supports `article` type. Preview tab shows the right output for all five sub-templates (article-standard, article-html-body, experiment, experiment-html-body, experiment-html). docs/BLOCKS.md and CMS-STRUCTURE.md updated.
 
@@ -1531,7 +1537,7 @@ CREATE TABLE nav_items (
 **Decisions to capture before starting**
 - Settings keys (v1): `site_title`, `site_tagline`, `default_og_image`, `default_og_type`, `default_twitter_card`, `footer_copyright`, `analytics_script`
 - Settings inheritance: per-page-mock-metadata → Settings-default → hardcoded shell fallback
-- v2.0 ship moment: end of this phase; same mechanics as Phase 29
+- v2.0 ship moment: end of this phase; same mechanics as Phase 24
 
 **Read at start (only):** This phase section. `cms/partials/sidebar.php` (un-disable Settings). `_pages/_layout/_page-shell.php` (Settings integration site).
 
@@ -1619,7 +1625,7 @@ CREATE TABLE settings (
 **Decisions to capture before starting**
 - Output format: `docs/COPY-AUDIT.md` — one row per surfaced string with current text, recommended text, location, and a one-line reason.
 - Audit surface: every user-facing string in `cms/views/*.php`, `cms/partials/*.php`, every sidebar entry in `cms/partials/sidebar.php`, every Phase-N reference in subtitles / hints / placeholders, every CTA label across the four list views and four edit views.
-- Out of scope: `_pages/`, `_templates/`, `_design-system/` index.html (public-side strings live in their own audit, paired with Phase 28.5 Mobile).
+- Out of scope: `_pages/`, `_templates/`, `_design-system/` index.html (public-side strings live in their own audit, paired with Phase 23.2 Mobile).
 
 **Read at start (only):** This phase section. `cms/views/*.php`, `cms/partials/*.php`, `cms/_assets/style-cms.css` (only the comment blocks that name UI strings).
 
@@ -1697,7 +1703,7 @@ CREATE TABLE settings (
 - Basic Listing layout/render — `templates/index-listing.php` and the flat `feed_*`/`filter_mode` columns stay authoritative for listings.
 - The four built-in indexes' behaviour.
 - `BLOCKS.md` — that contract governs article-content blocks, not index sections; no collision.
-- Public nav / prod surface (frozen until Phase 29).
+- Public nav / prod surface (frozen until Phase 24).
 
 **On exit:** Phase 21.7 checked in §3. Editorial Pages are built from an ordered, typed section stack with Hero / Curated / Feed sections, per-section display + see-more + visitor filter. Basic Listing indexes render identically to before. Series indexes still auto-generate (now as a synthesized section stack).
 
@@ -1715,22 +1721,23 @@ CREATE TABLE settings (
 
 ## 25. DS Reorganization (v2.1) — project intro
 
-The next seven phases (DS-1 through DS-6, with DS-4.5 in the middle) reorganize the design system into a clean three-branch structure: **Root** (shared tokens), **Pages** (marketing-page slice), **Blocks** (article-template slice), **CMS** (admin slice). Redundancy across the three branches is intentional — the goal is *clarity*, not deduplication.
+The next six phases (22.1 through 22.6) reorganize the design system into a clean three-branch structure: **Root** (shared tokens), **Pages** (marketing-page slice), **Blocks** (article-template slice), **CMS** (admin slice). Redundancy across the three branches is intentional — the goal is *clarity*, not deduplication.
 
 **Why this project exists.** The CSS surface grew organically during v1.0. System tokens, marketing-page styles, article-template styles, and admin styles are scattered across `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, and inline `<style>` blocks in `cms/views/*.php`. There's no clean ownership boundary. This project draws those lines.
 
-**Risk posture.** This is a refactor that touches every visual surface — public pages, articles, CMS. High blast radius if done as a single phase. We split into seven phases with these safety patterns:
-- **Audit-first** — DS-1 produces a complete map before any code moves
-- **Additive migration** — DS-2 through DS-5 add new structure alongside the old; old files keep loading
+**Risk posture.** This is a refactor that touches every visual surface — public pages, articles, CMS. High blast radius if done as a single phase. We split into six phases with these safety patterns:
+- **Audit-first** — Phase 22.1 produces a complete map (CSS + mobile findings) before any code moves
+- **Additive migration** — Phases 22.2 through 22.5 add new structure alongside the old; old files keep loading
 - **Per-phase visual diff** — every migration phase ships only after a screenshot diff of its affected surface
-- **Staging-only through DS-5** — nothing public-facing on prod until DS-6 final ship
-- **Manual sign-off on the riskiest phase** — DS-4 (Blocks) is highest-risk and is Manual tier
+- **Staging-only through 22.5** — nothing public-facing on prod until Phase 22.6 final ship
+- **Manual sign-off on the riskiest phase** — Phase 22.4 (Blocks) is highest-risk and is Manual tier
+- **Mobile is its own project** — Phase 22.1's audit catalogues mobile breakage but doesn't fix it; Phases 23.1 + 23.2 implement against the clean DS surface, so we don't redo responsive rules across renames.
 
-The existing deferred Phase 17 ("Design system unification") was the single-phase version of this same intent. It's superseded by this 7-phase project.
+The existing deferred Phase 17 ("Design system unification") was the single-phase version of this same intent. It's superseded by this 6-phase project.
 
 ---
 
-## 26. Phase 22 — DS-1: Audit (no code)
+## 26. Phase 22.1 — Audit (CSS + mobile findings, no code)
 
 **Session brief**
 
@@ -1749,9 +1756,9 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 **Don't touch:** Any CSS. Any HTML or PHP. Research only.
 
-**On exit:** Phase 22 checked in §3. DS-AUDIT.md complete with every selector categorized, file-layout proposed, naming decisions captured.
+**On exit:** Phase 22.1 checked in §3. DS-AUDIT.md complete with every selector categorized, file-layout proposed, naming decisions captured.
 
-**Goal:** Complete map of the existing CSS surface so DS-2 through DS-6 know exactly what moves where.
+**Goal:** Complete map of the existing CSS surface so Phases 22.2 through 22.6 know exactly what moves where.
 
 **Scope:**
 - Inventory every CSS file and inline block listed above
@@ -1760,32 +1767,32 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Flag selectors that span categories and propose resolution
 - Capture naming conventions: prefix scheme per slice, file naming, token-vs-class boundaries
 - Identify dead code (grep-verify before flagging)
-- **Inconsistency reconciliation (added Phase 20.2):** for every selector, compare its rendered output against the canonical DS reference. Where they drift (e.g. `.pipeline-title` was 22px but `.view-title` was 26px before Phase 20.2 unified them), flag for unification and note the proposed canonical values. The audit output must distinguish "matches DS" / "drifts from DS" / "no DS equivalent yet" so DS-2+ knows which selectors to consolidate vs. promote.
+- **Inconsistency reconciliation (added Phase 20.2):** for every selector, compare its rendered output against the canonical DS reference. Where they drift (e.g. `.pipeline-title` was 22px but `.view-title` was 26px before Phase 20.2 unified them), flag for unification and note the proposed canonical values. The audit output must distinguish "matches DS" / "drifts from DS" / "no DS equivalent yet" so Phase 22.2+ knows which selectors to consolidate vs. promote.
 - **Unification pass (added Phase 20.2):** beyond per-selector categorisation, look for *families* of selectors doing the same job at different scales — buttons (`.btn-pri` / `.btn-ghost` / `.btn-row-action` / `.btn-tiny` / `.btn-danger` / inline `<button>` styles in views), titles (`.view-title` / `.pipeline-title` / `.cms-page-title` / `.cat-block-title`), pills, cards. For each family, propose: (1) which variants survive, (2) which collapse into the survivors, (3) a one-line rationale. The goal is to reduce variant count, not just rename things. Cross-reference live HTML to confirm each "merge" target is visually compatible before recommending.
 - **Button-family deep-dive (called out Phase 20.3, Alex):** the buttons specifically mix multiple type systems within a single bar — `.btn-pri` and `.btn-sec` use `var(--font-cond)` uppercase, while `.btn-ghost` uses `var(--font-mono)` lowercase, so pairing `+ New Article` next to `View live ↗` reads as two visual languages. Same for `.btn-row-action` (uppercase condensed, smaller scale) inside tables that also use `.btn-ghost`. The audit should produce a single coherent button system: one font-family per scale (condensed for primary actions; ghost should pick condensed OR mono, not both), consistent padding tokens, and an explicit rule for when each variant fires (primary CTA / secondary CTA / row action / destructive). Anything currently using font-mono or hand-rolled inline styles for actions is a unification target.
 - **Repeated-element scan (added Phase 20.2):** grep the live `cms/views/*.php`, `_pages/_bodies/*`, and `_templates/*.html` for repeated HTML patterns (info boxes, sticky bars, breadcrumbs, badges, action rows, etc.). Anything that appears 3+ times with near-identical markup is a component candidate — list it with locations, suggested DS name, and which slice it belongs in (Root / Pages / Blocks / CMS).
-- **Mobile audit (added Phase 21.7 follow-up):** alongside the desktop audit, run the public surface through a mobile viewport (≤500px, ≤768px) and capture every selector / pattern that breaks down — text overflow, fixed widths, horizontal scroll, tap-target sizing, nav usability, hero crops, card density. Catalogue findings against the Pages / Blocks slices (the CMS stays tablet-only per Phase 28.5 so CMS-internal mobile issues are out of scope here). For each finding: viewport, file, selector, what breaks, proposed fix. This becomes the input to Phase 28.5 — the audit produces the punch list; Phase 28.5 implements it.
+- **Mobile audit (added Phase 21.7 follow-up):** alongside the desktop audit, run the public surface through a mobile viewport (≤500px, ≤768px) and capture every selector / pattern that breaks down — text overflow, fixed widths, horizontal scroll, tap-target sizing, nav usability, hero crops, card density. Catalogue findings against the Pages / Blocks slices (the CMS stays tablet-only per Phase 23.2 so CMS-internal mobile issues are out of scope here). For each finding: viewport, file, selector, what breaks, proposed fix. This becomes the input to Phase 23.2 — the audit produces the punch list; Phase 23.2 implements it.
 
 **Deliverables:**
 - `docs/DS-AUDIT.md` covering all of the above
 - A "Drift" section listing every place the live site diverges from the DS reference, with proposed unification target
 - A "Variants to collapse" section listing the button / title / pill / card families and the trim plan
 - A "Component candidates" section listing repeated-HTML patterns with frequency counts and target slice
-- A "Mobile findings" section keyed by viewport breakpoint, feeding Phase 28.5
-- "Ready for DS-2" checklist at the bottom
+- A "Mobile findings" section keyed by viewport breakpoint, feeding Phase 23.2
+- "Ready for Phase 22.2" checklist at the bottom
 
 **Verification:**
 1. Every CSS file in the listed sources scanned.
 2. Each selector has a row in the audit.
 3. No selector uncategorized.
 4. Proposed directory tree matches the v2.1 plan.
-5. Naming-convention decisions documented and ready to apply in DS-2+.
+5. Naming-convention decisions documented and ready to apply in Phase 22.2+.
 
 **Out of scope:** Any code changes. JS audit. HTML structural changes.
 
 ---
 
-## 27. Phase 23 — DS-2: Root tokens (staging-only)
+## 27. Phase 22.2 — Root tokens (staging-only)
 
 **Session brief**
 
@@ -1796,7 +1803,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - New directory: `site/_design-system/root/` with `colors.css`, `fonts.css`, `base.css`
 - Approach: additive — existing `system.css` continues to load alongside new root files
 - Verification page: `/_ds/__root-test.html` — imports only root, renders every token
-- Old `system.css`: untouched (deletion happens in DS-6)
+- Old `system.css`: untouched (deletion happens in Phase 22.6)
 
 **Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Root-tier rows). `_design-system/system.css`.
 
@@ -1810,9 +1817,9 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 **Don't touch:**
 - `system.css`
 - Any consumer CSS or PHP
-- DS showcase site (DS-6 work)
+- DS showcase site (Phase 22.6 work)
 
-**On exit:** Phase 23 checked in §3. Root files deployed to staging. `/_ds/__root-test.html` renders every token. No visual regression elsewhere.
+**On exit:** Phase 22.2 checked in §3. Root files deployed to staging. `/_ds/__root-test.html` renders every token. No visual regression elsewhere.
 
 **Goal:** Build the shared root layer in isolation, verify it independently, zero impact on running surfaces.
 
@@ -1838,7 +1845,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 ---
 
-## 28. Phase 24 — DS-3: Pages migration (staging-only)
+## 28. Phase 22.3 — Pages migration (staging-only)
 
 **Session brief**
 
@@ -1866,7 +1873,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Any CMS or block CSS
 - Any HTML structure
 
-**On exit:** Phase 24 checked in §3. New pages slice loaded by `_page-shell.php` alongside old `style-pages.css`. Visual diff confirms zero regression. Staging-only.
+**On exit:** Phase 22.3 checked in §3. New pages slice loaded by `_page-shell.php` alongside old `style-pages.css`. Visual diff confirms zero regression. Staging-only.
 
 **Goal:** Set up Pages branch and rewire `_page-shell.php`, old setup still loaded as safety net.
 
@@ -1882,16 +1889,16 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - DS-AUDIT.md annotated
 
 **Verification:**
-1. Each marketing page on staging renders identically to its pre-DS-3 screenshot.
+1. Each marketing page on staging renders identically to its pre-Phase-22.3 screenshot.
 2. Network panel shows new pages slice files loading.
-3. Toggling off `style-pages.css` in DevTools: page mostly retains layout (note gaps for DS-6).
+3. Toggling off `style-pages.css` in DevTools: page mostly retains layout (note gaps for Phase 22.6).
 4. CMS and article pages unaffected.
 
 **Out of scope:** Removing `style-pages.css`. CMS or blocks work. Showcase updates.
 
 ---
 
-## 29. Phase 25 — DS-4: Blocks migration (staging-only, Manual)
+## 29. Phase 22.4 — Blocks migration + recipe doc (staging-only, Manual)
 
 **Session brief**
 
@@ -1917,9 +1924,9 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - `style-articles.css`
 - Block HTML structure (pure CSS reorganization)
 - Any Pages or CMS work
-- `docs/BLOCKS.md` — recipe content is DS-4.5
+- `docs/BLOCKS.md` — extend with the "Recipe: Adding a new block" section (folded in from the former DS-4.5)
 
-**On exit:** Phase 25 checked in §3. New blocks slice loaded alongside old `style-articles.css`. Visual diff confirms zero regression on every published content row. **Manual sign-off from Alex before exit.** Staging-only.
+**On exit:** Phase 22.4 checked in §3. New blocks slice loaded alongside old `style-articles.css`. Visual diff confirms zero regression on every published content row. BLOCKS.md now contains a self-contained "Recipe" section. **Manual sign-off from Alex before exit.** Staging-only.
 
 **Goal:** Set up Blocks branch and rewire article rendering; old setup still loaded as safety net.
 
@@ -1937,60 +1944,26 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Manual sign-off note appended to phase exit
 
 **Verification:**
-1. Every published article on staging renders identically to its pre-DS-4 screenshot.
+1. Every published article on staging renders identically to its pre-Phase-22.4 screenshot.
 2. Every block (Hero, Quote, Gallery, etc. — all in BLOCKS.md) renders correctly in context.
 3. Network panel shows `blocks.css` loading.
 4. Toggling off `style-articles.css` in DevTools: page mostly retains structure (note gaps).
 5. CMS pages and marketing pages unaffected.
 6. **Manual sign-off:** Alex eyeballs each screenshot pair before phase exit.
 
-**Out of scope:** Removing `style-articles.css`. New block types. BLOCKS.md recipe (DS-4.5). CMS work. Marketing-page work.
+**Out of scope:** Removing `style-articles.css`. New block types. CMS work. Marketing-page work.
+
+**Recipe sub-step (folded in from former DS-4.5).** Once the Blocks slice is in place and screenshot-verified, extend `docs/BLOCKS.md` with a self-contained "Recipe: Adding a new block" section covering:
+  1. Defining the block in the contract (slug, mode, composition, fields).
+  2. Adding CSS to `_design-system/blocks/blocks.css`.
+  3. Adding HTML scaffold to the article template.
+  4. Adding the CMS editor field.
+  5. Adding a showcase entry to the DS site (forward-ref to Phase 22.6).
+Worked example using real selectors and real files. The recipe is a single ~150-line doc edit — small enough to ship with the blocks migration rather than as its own phase, and it benefits from being written while the migration is fresh.
 
 ---
 
-## 30. Phase 26 — DS-4.5: Block recipe doc
-
-**Session brief**
-
-- **Autonomy:** Semi-auto
-- **Ships:** Nothing public-facing. Documentation only.
-
-**Decisions to capture before starting**
-- Extend existing `docs/BLOCKS.md` with a "Recipe: Adding a new block" section
-- Recipe covers: block contract entry, CSS scaffold, HTML scaffold, CMS editor field, showcase entry
-- Worked example: one fully-described addition of a hypothetical new block
-
-**Read at start (only):** This phase section. `docs/BLOCKS.md`. DS-AUDIT.md (Blocks section).
-
-**Touch:** `docs/BLOCKS.md` (extend).
-
-**Don't touch:** Any CSS. Any HTML. Any blocks themselves.
-
-**On exit:** Phase 26 checked in §3. BLOCKS.md has a self-contained "Recipe" section.
-
-**Goal:** Codify how to add new blocks, leveraging the cleaner Blocks structure from DS-4.
-
-**Scope:**
-- Recipe section in BLOCKS.md covering:
-  1. Defining the block in the contract (slug, mode, composition, fields)
-  2. Adding CSS to `_design-system/blocks/blocks.css`
-  3. Adding HTML scaffold to article template
-  4. Adding the CMS editor field
-  5. Adding a showcase entry to the DS site (forward-ref to DS-6)
-- Worked example using real selectors and real files
-
-**Deliverables:**
-- Extended `docs/BLOCKS.md`
-
-**Verification:**
-1. Recipe section is self-contained — readable without other context.
-2. Worked example references real files and real selectors.
-
-**Out of scope:** Actually adding a new block. CSS or code changes.
-
----
-
-## 31. Phase 27 — DS-5: CMS migration (staging-only)
+## 31. Phase 22.5 — CMS migration (staging-only)
 
 **Session brief**
 
@@ -2018,11 +1991,11 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - `docs/DS-VERIFY/cms/` (new directory) — screenshot pairs
 
 **Don't touch:**
-- Inline `<style>` blocks in `cms/views/*.php` — left intact (cleanup is DS-6)
+- Inline `<style>` blocks in `cms/views/*.php` — left intact (cleanup is Phase 22.6)
 - Any Pages or Blocks work
 - Any HTML structure
 
-**On exit:** Phase 27 checked in §3. New CMS slice loaded alongside existing inline styles. Every CMS view renders identically. Staging-only.
+**On exit:** Phase 22.5 checked in §3. New CMS slice loaded alongside existing inline styles. Every CMS view renders identically. Staging-only.
 
 **Goal:** Set up CMS branch and add imports; old inline styles remain as safety net.
 
@@ -2042,7 +2015,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - DS-AUDIT.md annotated
 
 **Verification:**
-1. Every CMS view on staging renders identically to its pre-DS-5 screenshot.
+1. Every CMS view on staging renders identically to its pre-Phase-22.5 screenshot.
 2. `/cms/settings/design-system` lists every canonical component with live preview, class name, and slice tag — matches `site/_design-system/index.html`.
 2. Public site unaffected.
 3. Network panel shows the 6 cms slice files loading on every CMS view.
@@ -2051,7 +2024,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 ---
 
-## 32. Phase 28 — DS-6: Cleanup + sunset (v2.1 ship)
+## 32. Phase 22.6 — Cleanup + sunset (v2.1 ship)
 
 **Session brief**
 
@@ -2081,10 +2054,10 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - `bin/deploy.sh` — remove `cp` lines for deleted files
 
 **Don't touch:**
-- Block recipe doc (DS-4.5 work done)
+- Block recipe doc (handled inside Phase 22.4)
 - Anything outside DS scope
 
-**On exit:** Phase 28 checked in §3. Old CSS files deleted. Inline styles removed. Showcase rebuilt. **v2.1 prod-shipped.**
+**On exit:** Phase 22.6 checked in §3. Old CSS files deleted. Inline styles removed. Showcase rebuilt. **v2.1 prod-shipped.**
 
 **Goal:** Remove redundant old CSS, rebuild showcase as four tabs, ship v2.1 to prod.
 
@@ -2112,45 +2085,92 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 7. `/_ds/` showcase has 4 tabs (Root / Pages / Blocks / CMS), each rendering live components and tokens.
 
 **Rollback plan:** If broken on prod after deploy:
-1. `git revert` Phase 28 commit (reverses deletions + showcase rebuild).
-2. Re-deploy. DS-2 through DS-5 setups still in place (additive); old files come back. Site returns to v2.0 visual state.
+1. `git revert` Phase 22.6 commit (reverses deletions + showcase rebuild).
+2. Re-deploy. Phases 22.2 through 22.5 setups still in place (additive); old files come back. Site returns to v2.0 visual state.
 3. Pre-cutover backup is last-resort fallback.
 
 **Out of scope:** New features. Deferred backlog items. Phase 18.
 
 ---
 
-## 32.5. Phase 28.5 — Mobile optimization (staging-only)
+## 32.5. Phase 23.1 — Mobile sandbox + UI mock (design canvas only)
 
 **Session brief**
 
-- **Autonomy:** Manual
-- **Ships:** Staging-only. Lands alongside DS reorg (Phases 22–28) since the slice-by-slice CSS structure makes targeted breakpoint work much easier.
+- **Autonomy:** Manual *(design-heavy iteration — pause for sign-off on each surface)*
+- **Ships:** Nothing on the live site. Deliverable is a standalone canvas at `docs/design-mockups/mobile.html` plus a short decisions doc.
+
+**Decisions to capture before starting**
+- Sandbox location: `docs/design-mockups/mobile.html` — a self-contained HTML file with viewport-locked mock canvases (390 / 768 / 1024 columns side-by-side), one row per surface. Same pattern as `cms-ui.html` was for the CMS shell.
+- Surfaces in scope: landing, about/coaching/work-with-me/resume/newsletter, article-standard, article-series, journal-entry, live-session, experiment, experiment-html, Basic Listing, Editorial Page with each hero variant (plain / within / bleed-dark / bleed-light), Series page, 404.
+- Behaviour to nail before code: nav (hamburger vs sticky toggle vs reveal-on-scroll), carousel touch + edge fade behaviour, sticky CTAs, hero image cropping per layout variant, byline-row stacking, article-prose padding, table-of-contents on series, filter-pill row scrollability.
+- Tokens: reuse v1 design tokens; mobile work is layout + sizing, not new brand.
+
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Mobile findings section, produced in 22.1). `docs/design-mockups/cms-ui.html` (for the canvas pattern). Live staging at 390 / 768 / 1024 in DevTools.
+
+**Touch:**
+- `docs/design-mockups/mobile.html` (new) — the sandbox canvas
+- `docs/MOBILE-DECISIONS.md` (new) — short list of behaviour calls made during iteration, keyed by surface
+- `docs/DS-AUDIT.md` — annotate which mobile findings were resolved by mockup vs. need implementation
+
+**Don't touch:** Production CSS. Production HTML. JS. Schema. Lib code.
+
+**On exit:** Phase 23.1 checked in §3. `mobile.html` covers every surface, each at 390 / 768 / 1024. Behaviour decisions written down. Ready to hand to 23.2 for implementation.
+
+**Goal:** Resolve mobile UX decisions in a sandbox so 23.2 is execution, not iteration.
+
+**Scope:**
+- Build the multi-column canvas in `mobile.html` using the same DS tokens
+- Mock each surface at each breakpoint
+- Iterate on nav / carousel / CTAs / hero / typography with Alex until the patterns are agreed
+- Capture each agreed pattern as one line in `MOBILE-DECISIONS.md` (e.g. "Landing nav at ≤768: hamburger, slides in from left, full-height drawer")
+
+**Deliverables:**
+- `docs/design-mockups/mobile.html`
+- `docs/MOBILE-DECISIONS.md`
+- DS-AUDIT.md annotated
+
+**Verification:**
+1. Every surface listed above has a row in `mobile.html` showing 390 / 768 / 1024 renderings.
+2. Every behaviour decision in scope has one line in `MOBILE-DECISIONS.md`.
+3. Alex signs off on the sandbox before 23.2 starts.
+
+**Out of scope:** Implementation in production CSS. CMS mobile work beyond the tablet floor. New features.
+
+---
+
+## 32.6. Phase 23.2 — Mobile implementation (staging-only)
+
+**Session brief**
+
+- **Autonomy:** Manual *(public surface; per-template visual diff before each commit)*
+- **Ships:** Staging-only. Lands after Phase 22.6 (DS reorg complete) since the slice-by-slice CSS structure makes targeted breakpoint work much easier.
 
 **Decisions to capture before starting**
 - **Public site:** target *full mobile responsiveness* across marketing pages + article templates. Standard breakpoint set: ≤480 (phone), ≤768 (small tablet portrait), ≤1024 (large tablet / landscape), default desktop. Every editorial template (article-standard, article-series, journal-entry, live-session, experiment, html-body) must read cleanly at all four widths.
 - **CMS:** *tablet-only* sweep, not full mobile. The CMS is desktop-first by design; the goal at this phase is making sure a ~1024px landscape iPad doesn't fully break (no horizontal scroll, no overlapping panels). Phone widths (~390px) are explicitly out of scope.
-- **DS pairing:** runs *after* Phase 28 (DS-6 cleanup) since the per-slice CSS structure makes adding `@media` rules per slice much cleaner than retrofitting one monolithic stylesheet. If DS reorg slips, this phase slips with it.
+- **DS pairing:** runs *after* Phase 22.6 (cleanup) since the per-slice CSS structure makes adding `@media` rules per slice much cleaner than retrofitting one monolithic stylesheet. If DS reorg slips, this phase slips with it.
+- **Source of truth:** the `mobile.html` mockups from 23.1 and `MOBILE-DECISIONS.md`. No new behaviour calls here — only translating those into production CSS + minimal JS.
 
-**Read at start (only):** This phase section. `docs/BUILD-PLAN.md` §1.3 (autonomy tiers). `_design-system/css/*.css`, `_templates/style-articles.css`, `_pages/_layout/style-pages.css`, `cms/_assets/style-cms.css`. Any DS-AUDIT.md sections relevant to layout.
+**Read at start (only):** This phase section. `docs/design-mockups/mobile.html` (the agreed mockups). `docs/MOBILE-DECISIONS.md`. `docs/DS-AUDIT.md` (Mobile findings). The post-22.6 design-system files (`_design-system/root/*`, `_design-system/pages/*`, `_design-system/blocks/*`, `_design-system/cms/*`).
 
 **Touch:**
-- `_design-system/css/*.css` — add `@media (max-width: …)` rules per slice
-- `_templates/style-articles.css` — article-template breakpoint work (typography scale, hero sizing, byline-row stacking, etc.)
-- `_pages/_layout/style-pages.css` — marketing-page breakpoints (hero, columns, nav)
-- `cms/_assets/style-cms.css` — tablet-width guard rails only (no phone styles)
+- `_design-system/pages/*.css` — marketing-page breakpoints (hero, columns, nav)
+- `_design-system/blocks/*.css` — article-template breakpoint work (typography scale, hero sizing, byline-row stacking, etc.)
+- `_design-system/cms/*.css` — tablet-width guard rails only (no phone styles)
+- New JS as needed for nav drawer / scroll behaviour decided in 23.1 (likely `_pages/_layout/mobile-nav.js` or similar)
 - `docs/MOBILE-AUDIT.md` (new) — checklist of every view × every breakpoint with pass/fail notes from the screenshot pass
 
 **Don't touch:**
-- HTML structure — this is CSS-only
+- HTML structure changes beyond what 23.1 decided
 - New features
 - Schema / lib code
-- DS organization (that's Phases 22–28)
+- DS organization (that's Phases 22.1–22.6)
 - Phone-width CMS styles (explicitly deferred)
 
-**On exit:** Phase 28.5 checked in §3. Every public page and article template reads cleanly at 480 / 768 / 1024 / desktop. CMS at ~1024 has no horizontal scroll and no overlapping panels. `docs/MOBILE-AUDIT.md` lists every check.
+**On exit:** Phase 23.2 checked in §3. Every public page and article template reads cleanly at 480 / 768 / 1024 / desktop and matches the `mobile.html` mockup. CMS at ~1024 has no horizontal scroll and no overlapping panels. `docs/MOBILE-AUDIT.md` lists every check.
 
-**Goal:** Mobile-ready public site + tablet-acceptable CMS.
+**Goal:** Mobile-ready public site + tablet-acceptable CMS — matching the sandbox decisions made in 23.1.
 
 **Scope:**
 - Public-side full mobile pass: marketing pages, article templates, index pages, 404
@@ -2159,21 +2179,21 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - Byline-row stacking on phone widths
 - Article-prose left/right padding tuning per breakpoint
 - CMS tablet pass: sidebar + main two-column layout holds at 1024; ensure no horizontal scroll
-- Screenshot every view at every breakpoint, paste into MOBILE-AUDIT.md as the before/after pair
+- Screenshot every view at every breakpoint, compare against 23.1 mockup, paste into MOBILE-AUDIT.md
 
 **Verification:**
-1. Each public template + marketing page screenshot looks correct at 480 / 768 / 1024 / 1280.
+1. Each public template + marketing page screenshot looks correct at 480 / 768 / 1024 / 1280, and matches the 23.1 mockup.
 2. The CMS at 1024 has no horizontal scroll on any of the post-edit / list / pipeline views.
 3. MOBILE-AUDIT.md has a row per view × per breakpoint, all marked pass.
 
 ---
 
-## 33. Phase 29 — Public cutover (v1.0 ship)
+## 33. Phase 24 — Public cutover reconciliation (v1.0 ship)
 
 **Session brief**
 
-- **Autonomy:** Manual *(high-stakes — the single moment public prod changes)*
-- **Ships:** **v1.0 public.** The new marketing nav, the new landing copy, the new public index URLs all go live on alexmchong.ca.
+- **Autonomy:** Manual *(most of the original cutover already shipped — this is a drift-check)*
+- **Ships:** **v1.0 public.** The unfreeze itself happened in commits `c4e4fc4` (deploy skip-list removed) and `756a412` (runtime env gates removed). This phase reconciles the BUILD-PLAN with that state, confirms nothing slipped, and runs the final smoke pass.
 
 **Decisions to capture before starting**
 - All content audited: `every published article / journal / live session / experiment reviewed for production`
@@ -2186,11 +2206,11 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 **Read at start (only):** This phase section. The current state of `site/_pages/_layout/header.html`, `site/_pages/_bodies/landing.html`, `site/templates/partials/nav.php` (the three files about to flip). `bin/deploy.sh` (the prod-skip list to remove).
 
-**Touch:** `site/index.php` (remove the `APP_ENV === 'staging'` gate around public index routes). `bin/deploy.sh` (remove the three entries from the prod-skip list). `docs/design-mockups/landing-postcms.html` (delete — the canvas is now the live landing). `BUILD-PLAN.md` (mark Phase 29 complete).
+**Touch:** `site/index.php` (remove the `APP_ENV === 'staging'` gate around public index routes). `bin/deploy.sh` (remove the three entries from the prod-skip list). `docs/design-mockups/landing-postcms.html` (delete — the canvas is now the live landing). `BUILD-PLAN.md` (mark Phase 24 complete).
 
 **Don't touch:** Anything else. This phase is exclusively the unfreeze.
 
-**On exit:** Check Phase 29 in §3. `https://alexmchong.ca/writing/`, `/journal/`, `/live-sessions/`, `/experiments/`, `/series/[slug]/` all live. Marketing nav across every `_pages/` page shows the new structure. Landing page shows the new copy. **Public ship #6 (and final v1.0 ship) confirmed.**
+**On exit:** Check Phase 24 in §3. `https://alexmchong.ca/writing/`, `/journal/`, `/live-sessions/`, `/experiments/`, `/series/[slug]/` all live. Marketing nav across every `_pages/` page shows the new structure. Landing page shows the new copy. **Public ship #6 (and final v1.0 ship) confirmed.**
 
 **Goal:** Flip the public-facing surface to its final state. Zero new features — only the unfreeze.
 
@@ -2227,7 +2247,7 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 ## 34. Phase 17 *(superseded)* — Design system unification
 
-> **Superseded by the v2.1 project (Phases 22–28).** This was the original single-phase version of the DS reorganization. It's been expanded into a seven-phase project for risk control. Kept here for historical reference. The decisions and approach below are NOT current — see Phases 22–28 for the live plan.
+> **Superseded by the v2.1 project (Phases 22.1–22.6).** This was the original single-phase version of the DS reorganization. It's been expanded into a six-phase project for risk control. Kept here for historical reference. The decisions and approach below are NOT current — see Phases 22.1–22.6 for the live plan.
 
 **Session brief**
 

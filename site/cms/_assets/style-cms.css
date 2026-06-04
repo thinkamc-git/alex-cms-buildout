@@ -1931,6 +1931,11 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .sec-card.is-collapsed .sec-card-body { display: none; }
 .sec-card.is-collapsed .sec-card-head { border-bottom: none; }
 
+/* index-edit field-groups span full width — the section cards below them
+   are full-width, so the global 720px cap on .cms-form field-groups
+   creates a visual mismatch. Scoped override. */
+#view-index-edit .field-group { max-width: none; }
+
 /* Three-equal-column body grid — extends .form-grid for the Filtered section. */
 .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-32); }
 .form-grid-3 > div { min-width: 0; display: flex; flex-direction: column; gap: var(--space-12); }

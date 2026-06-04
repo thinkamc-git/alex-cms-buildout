@@ -81,24 +81,12 @@
     updateSectionCount();
   });
 
-  // ── Add section: open menu, clone template, append ──────────────────
-  var addBtn  = document.getElementById('sec-add-btn');
-  var addMenu = document.getElementById('sec-add-menu');
-  if (addBtn && addMenu) {
-    addBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      addMenu.hidden = !addMenu.hidden;
+  // ── Add section: three buttons (+ Hero / + Curated / + Filtered) ────
+  form.querySelectorAll('button[data-add-type]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      appendSectionFromTemplate(btn.getAttribute('data-add-type'));
     });
-    document.addEventListener('click', function (e) {
-      if (!addMenu.contains(e.target) && e.target !== addBtn) addMenu.hidden = true;
-    });
-    addMenu.querySelectorAll('.sec-add-opt').forEach(function (opt) {
-      opt.addEventListener('click', function () {
-        addMenu.hidden = true;
-        appendSectionFromTemplate(opt.getAttribute('data-add-type'));
-      });
-    });
-  }
+  });
 
   function appendSectionFromTemplate(type) {
     var tpl = document.getElementById('sec-tpl-' + type);

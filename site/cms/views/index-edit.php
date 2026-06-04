@@ -78,8 +78,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if (!$res['ok']) {
                 $errors[] = $res['error'];
             } else {
-                // Editorial: also persist the section stack from $_POST['sections'].
-                if ($newLayout === 'editorial') {
+                // Editorial: persist the section stack ONLY when the form
+                // explicitly carried it. The marker prevents a layout toggle
+                // (Editorial → Basic → Editorial) from wiping all sections,
+                // since the Basic branch's form has no sections[] data.
+                if ($newLayout === 'editorial' && !empty($_POST['sections_submitted'])) {
                     save_editorial_sections_from_post($id, (array)($_POST['sections'] ?? []));
                 }
                 header('Location: /cms/indexes/edit?id=' . $id . '&flash=' . rawurlencode('Saved.'));
@@ -360,15 +363,16 @@ require __DIR__ . '/../partials/topbar.php';
 
 <?php if ($isEditorial): /* ─── EDITORIAL SECTION STACK BUILDER ───── */ ?>
 
-        <div class="content-block-label" style="margin:var(--space-24) 0 var(--space-8);display:flex;gap:var(--space-8);align-items:baseline">
-          <span>Sections</span>
-          <span style="color:var(--ink-30)">·</span>
-          <span id="sec-count"><?= count($sections) ?></span>
-          <span style="color:var(--ink-30)">·</span>
-          <span style="font-weight:400;color:var(--muted);font-family:var(--font-mono);text-transform:none;letter-spacing:0">drag to reorder</span>
+        <input type="hidden" name="sections_submitted" value="1">
+
+        <div class="content-block-header">
+          <div>
+            <span class="content-block-label">Sections</span>
+            <span class="content-block-sublabel">drag to reorder</span>
+          </div>
         </div>
 
-        <div id="sec-stack" style="display:flex;flex-direction:column;gap:var(--space-12)">
+        <div id="sec-stack" class="sec-list">
           <?php
           $i = 0;
           foreach ($sections as $s):
@@ -392,25 +396,10 @@ require __DIR__ . '/../partials/topbar.php';
           <?php $i++; endforeach; ?>
         </div>
 
-        <!-- + Add section -->
-        <div style="position:relative;margin-top:var(--space-16)">
-          <button type="button" id="sec-add-btn" style="width:100%;padding:16px var(--space-20);border:1px dashed var(--ink-30);border-radius:4px;background:transparent;color:var(--secondary);font-family:var(--font-cond);font-size:var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer">
-            + Add section
-          </button>
-          <div id="sec-add-menu" hidden style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:var(--space-8);background:var(--surface);border:1px solid var(--ink-18);border-radius:var(--r-card);box-shadow:0 8px 24px rgba(0,0,0,0.06);z-index:20;min-width:300px;padding:var(--space-4)">
-            <button type="button" class="sec-add-opt" data-add-type="hero" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
-              <span class="content-block-label">Hero</span>
-              <span style="font-size:var(--text-meta);color:var(--muted)">One hand-picked item, full-width banner.</span>
-            </button>
-            <button type="button" class="sec-add-opt" data-add-type="curated" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
-              <span class="content-block-label">Curated</span>
-              <span style="font-size:var(--text-meta);color:var(--muted)">Hand-picked posts in a grid or carousel.</span>
-            </button>
-            <button type="button" class="sec-add-opt" data-add-type="feed" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
-              <span class="content-block-label">Filtered</span>
-              <span style="font-size:var(--text-meta);color:var(--muted)">Self-updating set driven by type / category / sort.</span>
-            </button>
-          </div>
+        <div class="form-actions">
+          <button type="button" class="btn-sec" data-add-type="hero">+ Hero</button>
+          <button type="button" class="btn-sec" data-add-type="curated">+ Curated</button>
+          <button type="button" class="btn-sec" data-add-type="feed">+ Filtered</button>
         </div>
 
         <!-- Section templates for JS-driven Add. Hidden; the JS clones,
@@ -433,7 +422,9 @@ require __DIR__ . '/../partials/topbar.php';
         <template id="sec-tpl-<?= $tplType ?>"><?php require __DIR__ . '/index-edit-section.php'; ?></template>
         <?php endforeach; ?>
 
-<?php else: /* ─── BASIC LISTING (legacy form, untouched) ─────────────── */ ?>
+<?php else: /* ─── BASIC LISTING (legacy form, wrapped in a single sec-card) ── */ ?>
+
+        <div class="sec-card"><div class="sec-card-body">
 
         <!-- Hero Feature -->
         <div class="content-block" id="block-hero" style="display:none">
@@ -553,6 +544,8 @@ require __DIR__ . '/../partials/topbar.php';
             </div>
           </div>
         </div>
+
+        </div></div><!-- /.sec-card-body / .sec-card -->
 
 <?php endif; ?>
 

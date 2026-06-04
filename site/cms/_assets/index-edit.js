@@ -57,17 +57,22 @@
   });
 
   // ── Collapse / expand ───────────────────────────────────────────────
+  // The chevron button explicitly toggles. Clicks on the head bar
+  // (anywhere outside an interactive control) also toggle. Clicks on
+  // the grip, delete, or any input/select inside the body don't.
   form.addEventListener('click', function (e) {
-    if (e.target.closest('button, input, select, textarea, a, [data-section-delete], [data-grip]')) {
-      // Header chevron is the explicit toggle — handled below by its data attr.
-      var chevron = e.target.closest('[data-collapse-chevron]');
-      if (!chevron) return;
+    var chevron = e.target.closest('[data-collapse-chevron]');
+    if (chevron) {
+      var card = chevron.closest('.sec-card');
+      if (card) card.classList.toggle('is-collapsed');
+      return;
     }
+    // Clicks on other interactive elements should NOT toggle.
+    if (e.target.closest('button, input, select, textarea, a, [data-section-delete], [data-grip]')) return;
     var head = e.target.closest('[data-collapse-toggle]');
     if (!head) return;
-    var block = head.parentElement;
-    if (!block || !block.classList.contains('is-collapsible')) return;
-    block.classList.toggle('is-collapsed');
+    var card2 = head.closest('.sec-card');
+    if (card2) card2.classList.toggle('is-collapsed');
   });
 
   // ── Delete section ──────────────────────────────────────────────────

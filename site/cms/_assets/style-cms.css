@@ -1938,6 +1938,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    are full-width, so the global 720px cap on .cms-form field-groups
    creates a visual mismatch. Scoped override. */
 #view-index-edit .field-group { max-width: none; }
+/* Pill groups inside index-edit wrap — the 3-column Filtered layout is
+   narrow per column, so long category lists need to flow onto a new line. */
+#view-index-edit .filter-group { flex-wrap: wrap; row-gap: 6px; }
 
 /* Three-equal-column body grid — extends .form-grid for the Filtered section. */
 .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-32); }

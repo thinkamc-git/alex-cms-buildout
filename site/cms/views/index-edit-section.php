@@ -329,7 +329,7 @@ $catsForThis = $catsForTypes($ftypes);
       <!-- Col 3 — Show Filter -->
       <div>
         <div class="content-block-label" style="margin-bottom:var(--space-12);display:flex;align-items:center;letter-spacing:0.16em">
-          <span>Show filter row</span>
+          <span>Show Filter Toggles</span>
           <label class="switch-filled" style="margin-left:auto">
             <input type="checkbox" name="<?= $inputBase ?>[filter_show]" value="1" <?= $fshow ? 'checked' : '' ?> data-filter-toggle>
             <span class="slider"></span>
@@ -337,7 +337,7 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div data-filter-detail style="<?= $fshow ? '' : 'display:none' ?>">
           <div class="field-group">
-            <label class="field-label">Types</label>
+            <label class="field-label">Visible Types</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="filter-group">
                 <?php foreach ($typeLabels as $slug => $label):
@@ -352,7 +352,7 @@ $catsForThis = $catsForTypes($ftypes);
             </div>
           </div>
           <div class="field-group" style="margin-bottom:0">
-            <label class="field-label">Categories</label>
+            <label class="field-label">Visible Categories</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="filter-group">
                 <?php foreach ($catsForThis as $cat):

@@ -285,6 +285,10 @@
     container.addEventListener('dragover', function (e) {
       if (!dragging) return;
       e.preventDefault();
+      // Clear stale drop indicators.
+      container.querySelectorAll('.is-drop-before, .is-drop-after').forEach(function (el) {
+        el.classList.remove('is-drop-before', 'is-drop-after');
+      });
       var siblings = Array.prototype.slice.call(
         container.querySelectorAll(itemSel + ':not(.is-dragging)')
       );
@@ -292,8 +296,19 @@
         var box = sib.getBoundingClientRect();
         return e.clientY < box.top + box.height / 2;
       });
-      if (after) container.insertBefore(dragging, after);
-      else       container.appendChild(dragging);
+      if (after) after.classList.add('is-drop-before');
+      else if (siblings.length) siblings[siblings.length - 1].classList.add('is-drop-after');
+    });
+    container.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!dragging) return;
+      var before = container.querySelector('.is-drop-before');
+      var after  = container.querySelector('.is-drop-after');
+      if (before) container.insertBefore(dragging, before);
+      else        container.appendChild(dragging);
+      container.querySelectorAll('.is-drop-before, .is-drop-after').forEach(function (el) {
+        el.classList.remove('is-drop-before', 'is-drop-after');
+      });
     });
   }
 

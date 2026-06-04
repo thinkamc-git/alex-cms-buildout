@@ -426,128 +426,73 @@ require __DIR__ . '/../partials/topbar.php';
         <template id="sec-tpl-<?= $tplType ?>"><?php require __DIR__ . '/index-edit-section.php'; ?></template>
         <?php endforeach; ?>
 
-<?php else: /* ─── BASIC LISTING (legacy form, wrapped in a single sec-card) ── */ ?>
+<?php else: /* ─── BASIC LISTING (single config card, no sections) ──────── */ ?>
+
+        <?php
+        // Map the legacy flat filter_mode (enum: 'none' | 'types' | 'categories')
+        // to the toggle+choice UX. The hidden filter_mode input is set on
+        // submit by JS based on the toggle + the Pills represent choice.
+        $bl_filter_on = $filterMode !== 'none';
+        $bl_filter_by = $bl_filter_on ? $filterMode : 'categories';
+        ?>
 
         <div class="sec-card"><div class="sec-card-body">
 
-        <!-- Hero Feature -->
-        <div class="content-block" id="block-hero" style="display:none">
-          <div class="content-block-header">
-            <div><span class="content-block-label">Hero feature</span></div>
-          </div>
-          <div style="padding:var(--space-16) var(--space-20)">
-            <select name="hero_content_id" class="field-input" style="width:100%;max-width:600px">
-              <option value="0">— None —</option>
-              <?php foreach ($pickList as $row): ?>
-                <option value="<?= (int)$row['id'] ?>" <?= (int)$row['id'] === $heroId ? 'selected' : '' ?>><?= $pickLabel($row) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-        </div>
-
-        <div class="content-block" id="block-featured" style="display:none">
-          <div class="content-block-header"><div><span class="content-block-label">Featured</span></div></div>
-          <div style="padding:var(--space-16) var(--space-20)">
-            <div id="featured-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--space-12)">
-              <?php foreach ($featuredIds as $fid):
-                $r = $pickById[$fid] ?? null;
-                if ($r === null) continue;
-              ?>
-                <div class="rowform-row" draggable="true" data-id="<?= (int)$r['id'] ?>">
-                  <span class="cms-grip">&#8942;&#8942;</span>
-                  <span style="flex:1"><?= $pickLabel($r) ?></span>
-                  <button type="button" class="featured-remove btn-icon btn-icon-danger" title="Remove" aria-label="Remove">
-                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                </div>
-              <?php endforeach; ?>
-            </div>
-            <div style="display:flex;gap:6px;align-items:center">
-              <select id="featured-add" class="field-input" style="flex:1">
-                <option value="">+ Add to featured…</option>
-                <?php foreach ($pickList as $row): ?>
-                  <option value="<?= (int)$row['id'] ?>" data-label="<?= $pickLabel($row) ?>"><?= $pickLabel($row) ?></option>
+          <div class="field-group">
+            <label class="field-label">Types</label>
+            <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none">
+              <div class="filter-group">
+                <?php foreach ($typeLabels as $slug => $label):
+                  $on = in_array($slug, $feedTypes, true);
+                ?>
+                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
+                    <input type="checkbox" name="feed_types[]" value="<?= $e($slug) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                    <?= $e($label) ?>
+                  </label>
                 <?php endforeach; ?>
-              </select>
-              <button type="button" id="featured-add-btn" class="btn-sec btn-tiny">Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Content feed -->
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Content feed</span>
-              <span class="content-block-sublabel">The main grid of cards.</span>
-            </div>
-          </div>
-          <div style="padding:var(--space-16) var(--space-20)">
-            <div class="field-group">
-              <label class="field-label">Types</label>
-              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
-                <div class="filter-group">
-                  <?php foreach ($typeLabels as $slug => $label):
-                    $on = in_array($slug, $feedTypes, true);
-                  ?>
-                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                      <input type="checkbox" name="feed_types[]" value="<?= $e($slug) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                      <?= $e($label) ?>
-                    </label>
-                  <?php endforeach; ?>
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label">Sort</label>
-              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-                <div class="filter-group">
-                  <?php foreach (['newest' => 'Newest first', 'oldest' => 'Oldest first'] as $val => $label):
-                    $on = $sort === $val;
-                  ?>
-                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                      <input type="radio" name="feed_sort" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                      <?= $e($label) ?>
-                    </label>
-                  <?php endforeach; ?>
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label class="field-label">Rows shown</label>
-              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-                <div class="filter-group">
-                  <?php foreach (['1', '2', '3', '4', 'all'] as $val):
-                    $on = $rowsShown === $val;
-                  ?>
-                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                      <input type="radio" name="feed_rows_shown" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                      <?= $e($val === 'all' ? 'All' : $val) ?>
-                    </label>
-                  <?php endforeach; ?>
-                </div>
-              </div>
-            </div>
-
-            <div class="field-group" style="margin-bottom:0">
-              <label class="field-label">Filter pills</label>
-              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-                <div class="filter-group">
-                  <?php foreach (['categories' => 'Categories', 'types' => 'Types', 'none' => 'None'] as $val => $label):
-                    $on = $filterMode === $val;
-                  ?>
-                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
-                      <input type="radio" name="filter_mode" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
-                      <?= $e($label) ?>
-                    </label>
-                  <?php endforeach; ?>
-                </div>
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="field-group">
+            <label class="field-label">Sort</label>
+            <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none">
+              <div class="filter-group">
+                <?php foreach (['newest' => 'Newest first', 'oldest' => 'Oldest first'] as $val => $label):
+                  $on = $sort === $val;
+                ?>
+                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
+                    <input type="radio" name="feed_sort" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                    <?= $e($label) ?>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" name="feed_rows_shown" value="<?= $e($rowsShown) ?>">
+
+          <div class="field-group">
+            <label class="field-label" style="display:flex;align-items:center;gap:var(--space-8)">
+              <span>Show Filters</span>
+              <label class="switch-filled">
+                <input type="checkbox" id="bl-filter-toggle" <?= $bl_filter_on ? 'checked' : '' ?>>
+                <span class="slider"></span>
+              </label>
+            </label>
+            <div id="bl-filter-detail" style="<?= $bl_filter_on ? '' : 'display:none' ?>">
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none">
+                <div class="filter-group" data-bl-by>
+                  <?php foreach (['types' => 'Types', 'categories' => 'Categories'] as $val => $label): ?>
+                    <button type="button" class="filter-pill <?= $bl_filter_by === $val ? 'active' : '' ?>" data-bl-by-value="<?= $e($val) ?>"><?= $e($label) ?></button>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            </div>
+            <!-- Server-facing hidden input — JS rewrites on submit based on the
+                 toggle + the Pills-represent choice. -->
+            <input type="hidden" name="filter_mode" id="bl-filter-mode" value="<?= $e($filterMode) ?>">
+          </div>
 
         </div></div><!-- /.sec-card-body / .sec-card -->
 

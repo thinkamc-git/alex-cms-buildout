@@ -76,7 +76,7 @@ $catsForThis = $catsForTypes($ftypes);
     <span class="cms-divider-v"></span>
     <span style="font-family:var(--font);font-size:var(--text-meta);font-weight:600;color:var(--primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" data-section-name><?= $e($displayName) ?></span>
     <span style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" data-section-summary><?= $e($summary) ?></span>
-    <div style="display:flex;gap:var(--space-4);align-items:center;flex-shrink:0;margin-left:auto" onclick="event.stopPropagation()">
+    <div style="display:flex;gap:var(--space-4);align-items:center;flex-shrink:0;margin-left:auto">
       <button type="button" class="btn-icon btn-icon-danger" title="Delete section" data-section-delete>
         <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -329,7 +329,7 @@ $catsForThis = $catsForTypes($ftypes);
       <!-- Col 3 — Show Filter -->
       <div>
         <div class="content-block-label" style="margin-bottom:var(--space-12);display:flex;align-items:center;letter-spacing:0.16em">
-          <span>Show Filter Toggles</span>
+          <span>Show Filters</span>
           <label class="switch-filled" style="margin-left:auto">
             <input type="checkbox" name="<?= $inputBase ?>[filter_show]" value="1" <?= $fshow ? 'checked' : '' ?> data-filter-toggle>
             <span class="slider"></span>
@@ -337,7 +337,7 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div data-filter-detail style="<?= $fshow ? '' : 'display:none' ?>">
           <div class="field-group">
-            <label class="field-label">Visible Types</label>
+            <label class="field-label">Type Toggles</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="filter-group">
                 <?php foreach ($typeLabels as $slug => $label):
@@ -352,7 +352,7 @@ $catsForThis = $catsForTypes($ftypes);
             </div>
           </div>
           <div class="field-group" style="margin-bottom:0">
-            <label class="field-label">Visible Categories</label>
+            <label class="field-label">Category Toggles</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="filter-group">
                 <?php foreach ($catsForThis as $cat):

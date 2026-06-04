@@ -239,7 +239,7 @@ require __DIR__ . '/../partials/topbar.php';
 
         <form method="post"
               action="/cms/series/edit?id=<?= $isNew ? 'new' : (int)$id ?>"
-              class="cms-form cms-form-wide">
+              class="cms-form cms-form-wide reveal-page">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <input type="hidden" name="action" value="save">
 

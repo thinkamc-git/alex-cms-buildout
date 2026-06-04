@@ -554,7 +554,7 @@ require __DIR__ . '/../partials/topbar.php';
         <form method="post"
               action="/cms/live-sessions/edit?id=<?= (int)$id ?>"
               enctype="multipart/form-data"
-              class="cms-form cms-form-wide"
+              class="cms-form cms-form-wide reveal-page"
               data-preview-source-form>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 

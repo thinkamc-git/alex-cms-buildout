@@ -100,7 +100,7 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-      <div class="content-area">
+      <div class="content-area reveal-page">
         <?php
         $heading = "Couldn't create:";
         require __DIR__ . '/../partials/form-errors.php';

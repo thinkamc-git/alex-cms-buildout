@@ -798,7 +798,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php if ($isIdea): ?>
         <form method="post"
               action="/cms/articles/edit?id=<?= (int)$id ?>"
-              class="cms-form">
+              class="cms-form reveal-page">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <div class="info-box"><strong>Idea stage</strong> — capture the title and any early notes. Slug and full editor unlock once you advance to Concept.</div>
@@ -878,7 +878,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php else: ?>
         <form method="post"
               action="/cms/articles/edit?id=<?= (int)$id ?>"
-              class="cms-form cms-form-wide"
+              class="cms-form cms-form-wide reveal-page"
               data-preview-source-form
               enctype="multipart/form-data">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">

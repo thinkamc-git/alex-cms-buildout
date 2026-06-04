@@ -118,7 +118,7 @@ require __DIR__ . '/../partials/topbar.php';
               <span class="type-badge <?= $e($lane['badge']) ?>"><?= $e($lane['label']) ?></span>
               <div class="lane-count"><?= (int)count($cards) ?></div>
             </div>
-            <div class="lane-cards">
+            <div class="lane-cards reveal">
               <?php if (count($cards) === 0): ?>
                 <div class="idea-lane-empty">Drop here</div>
               <?php else: foreach ($cards as $card):

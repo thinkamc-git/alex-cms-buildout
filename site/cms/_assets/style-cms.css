@@ -1751,6 +1751,49 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 @media (prefers-reduced-motion: reduce) {
   .cms-live-dot { animation: none; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   LAYER 8 — Load reveal (see docs/MOTION.md)
+   Progressive cascade: content blocks fade + rise on page load.
+   Per-group scope → nth-child resets per container → no JS.
+   Rise distance varies per archetype via --rise (cards 6px, rows 3px).
+   ───────────────────────────────────────────────────────────── */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(var(--rise)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* per-archetype lift — set on the container, inherited by children */
+.reveal                 { --rise: 6px; }   /* cards / boards / dashboard stats */
+.cms-table tbody.reveal,
+.rowform-list.reveal    { --rise: 3px; }   /* data tables + row-forms — shorter */
+
+.reveal > * {
+  opacity: 0;
+  animation: rise-in 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.reveal > *:nth-child(1)   { animation-delay:   0ms; }
+.reveal > *:nth-child(2)   { animation-delay:  60ms; }
+.reveal > *:nth-child(3)   { animation-delay: 120ms; }
+.reveal > *:nth-child(4)   { animation-delay: 180ms; }
+.reveal > *:nth-child(5)   { animation-delay: 240ms; }
+.reveal > *:nth-child(n+6) { animation-delay: 300ms; }
+
+/* UNIFIED RISE — forms / editors: the whole panel lifts in together, no stagger.
+   Apply .reveal-page to the form/content wrapper (one element, one motion). */
+@keyframes rise-in-block {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal-page {
+  opacity: 0;
+  animation: rise-in-block 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal > *, .reveal-page { animation: none; opacity: 1; transform: none; }
+}
+
 .cms-publish-toggle { display: flex; align-items: center; gap: var(--space-8); }
 .cms-publish-check { display: flex; align-items: center; gap: var(--space-8); cursor: pointer; font-family: var(--font); font-size: var(--text-meta); color: var(--primary); }
 .cms-publish-check input[type="checkbox"] { margin: 0; }

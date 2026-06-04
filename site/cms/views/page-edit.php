@@ -321,7 +321,7 @@ require __DIR__ . '/../partials/topbar.php';
         <?php endif; ?>
       </div>
 
-      <div class="content-area">
+      <div class="content-area reveal-page">
         <?php
         $heading = "Couldn't save:";
         require __DIR__ . '/../partials/form-errors.php';

@@ -463,7 +463,7 @@ require __DIR__ . '/../partials/topbar.php';
 
         <form method="post"
               action="/cms/journals/edit?id=<?= (int)$id ?>"
-              class="cms-form cms-form-wide"
+              class="cms-form cms-form-wide reveal-page"
               data-preview-source-form>
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 

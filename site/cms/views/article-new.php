@@ -118,7 +118,7 @@ require __DIR__ . '/../partials/topbar.php';
         require __DIR__ . '/../partials/form-errors.php';
         ?>
 
-        <form method="post" action="/cms/articles/new" class="cms-form">
+        <form method="post" action="/cms/articles/new" class="cms-form reveal-page">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
 
           <div class="field-group">

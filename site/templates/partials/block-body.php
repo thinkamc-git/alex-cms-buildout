@@ -33,6 +33,13 @@ if ($bodyMode === 'html-body') {
     <div class="article-prose" data-block="body" data-body-mode="html-body">
     <?php readfile($path); ?>
     </div>
+    <script>
+    // docs/MOTION.md §5 — fade in once DOM is parsed, not on full asset load.
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.article-prose[data-body-mode="html-body"]')
+              .forEach(function (el) { el.classList.add('is-loaded'); });
+    });
+    </script>
     <?php
     return;
 }

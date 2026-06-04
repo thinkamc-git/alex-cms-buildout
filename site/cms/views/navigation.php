@@ -275,7 +275,7 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= count($items) ?> item<?= count($items)===1?'':'s' ?></span>
           </div>
 
-          <div class="rowform-list nav-list" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
+          <div class="rowform-list nav-list reveal" data-zone="<?= $e($zone) ?>" data-csrf="<?= $e($csrf_token) ?>">
             <div class="rowform-headers">
               <span></span>
               <span>Label</span>

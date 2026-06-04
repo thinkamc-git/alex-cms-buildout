@@ -60,7 +60,7 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
         </tr>
       </thead>
     <?php endif; ?>
-    <tbody>
+    <tbody class="reveal">
       <?php if (count($rows) === 0): ?>
         <tr>
           <td colspan="<?= $colCount ?>" style="text-align:center;color:var(--muted);padding:var(--space-24)">

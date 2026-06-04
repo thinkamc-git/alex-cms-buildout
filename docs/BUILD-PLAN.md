@@ -118,6 +118,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 - [x] **Phase 21.5** — CMS copy audit (scrub "Phase X" refs, tighten labels) · *Semi-auto* · 2h · **Staging-only**
 - [x] **Phase 21.7** — Editorial Index section-stack rework (schema + builder + render) · *Manual* · ~8–12h (multi-session) · **Staging-only**
+- [x] **Phase 21.8** — CMS load motion (cascade reveal + html-body fade) · *Auto* · ~45min · **Ships:** with next deploy
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
@@ -1716,6 +1717,40 @@ CREATE TABLE settings (
 4. The four built-in Basic Listing indexes render identically to pre-rework.
 5. Series indexes still auto-render via `/series/<slug>/` from the `series` table.
 6. Existing Editorial pages survived the migration (hero/featured/feed mapped to sections) with no data loss.
+
+---
+
+## 24.8. Phase 21.8 — CMS load motion (cascade reveal + html-body fade)
+
+**Session brief**
+
+- **Autonomy:** Auto *(pure CSS + mechanical class additions against a locked spec)*
+- **Ships:** With the next deploy (no extra prod-cutover work — Phase 24 already lifted the freeze)
+
+**Spec:** `docs/MOTION.md` §1–§5 (locked). All values tuned against the live CMS in the now-archived `docs/design-mockups/_completed/motion-mock.html` sandbox.
+
+**Read at start (only):** `docs/MOTION.md` (entire file — it's the contract).
+
+**Touch:**
+- `site/cms/_assets/style-cms.css` — append LAYER 8 (cascade `.reveal` + unified `.reveal-page`)
+- `site/_templates/style-articles.css` — append §5 (html-body article fade-in)
+- `site/cms/partials/table.php` — `class="reveal"` on `<tbody>` (covers every table-partial list view)
+- `site/cms/views/navigation.php`, `redirects.php` — `reveal` on `.rowform-list`
+- `site/cms/views/pipeline.php`, `ideation.php` — `reveal` on `.dash-meta` + each `.lane-cards`
+- Every editor form (`*-edit.php` / `*-new.php` / `settings.php`) — `reveal-page` on the `.cms-form` wrapper (or `.content-area` for `index-new.php` + `page-edit.php`)
+- `site/templates/partials/block-body.php` — `DOMContentLoaded` script that toggles `.is-loaded` on html-body bodies
+
+**Don't touch:** PHP logic, JS hooks (drag-drop, autosave), schema. Pure presentational.
+
+**On exit:** Phase 21.8 checked in §3. Cascade fires on cold load of every list/board view; editors lift in as one panel; html-body articles fade in calmly; reduced-motion respected. `motion-mock.html` archived under `_completed/`.
+
+**Goal:** Every CMS page animates on load (cascade for scannable surfaces, unified rise for editors); html-body articles fade in instead of popping. No JS for the CMS reveal — pure CSS, per-group scope via `nth-child`.
+
+**Verification:** Run through `docs/MOTION.md` §4 acceptance checklist.
+
+**Out of scope:**
+- `MOTION.md` §3.1 anti-layout-shift hardening (recommended fast-follow)
+- `MOTION.md` §3.2 view-transition crossfade (polish fast-follow)
 
 ---
 

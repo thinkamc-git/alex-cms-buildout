@@ -261,7 +261,7 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/view-header.php';
       ?>
       <?php require __DIR__ . '/../partials/flash.php'; ?>
-      <div class="dash-meta">
+      <div class="dash-meta reveal">
         <div class="dash-stat"><span class="num"><?= (int)$inFlight ?></span><span class="lbl">In flight</span></div>
         <div class="dash-stat-div"></div>
         <div class="dash-stat"><span class="num" style="color:var(--stage-concept)"><?= (int)count($byStage['concept']) ?></span><span class="lbl">Concept</span></div>
@@ -290,7 +290,7 @@ require __DIR__ . '/../partials/topbar.php';
               <div class="lane-title" style="color:var(--stage-<?= $e($lane['token']) ?>)"><?= $e($lane['label']) ?></div>
               <div class="lane-count"><?= (int)count($cards) ?></div>
             </div>
-            <div class="lane-cards">
+            <div class="lane-cards reveal">
               <?php if (count($cards) === 0): ?>
                 <div class="idea-lane-empty">No drafts yet</div>
               <?php else:
@@ -308,7 +308,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="lane-title" style="color:var(--stage-concept)">Scheduled</div>
             <div class="lane-count"><?= (int)$scheduledTotal ?></div>
           </div>
-          <div class="lane-cards">
+          <div class="lane-cards reveal">
             <?php if ($scheduledTotal === 0): ?>
               <div class="idea-lane-empty">Nothing scheduled</div>
             <?php else:
@@ -329,7 +329,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="lane-title" style="color:var(--stage-published)">Recently Published</div>
             <div class="lane-count"><?= (int)count($recentlyPublished) ?></div>
           </div>
-          <div class="lane-cards">
+          <div class="lane-cards reveal">
             <?php if (count($recentlyPublished) === 0): ?>
               <div class="idea-lane-empty">Nothing published yet</div>
             <?php else:

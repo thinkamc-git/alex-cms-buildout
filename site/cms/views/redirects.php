@@ -152,7 +152,7 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= count($rows) ?> redirect<?= count($rows)===1?'':'s' ?></span>
           </div>
 
-          <div class="rowform-list red-list">
+          <div class="rowform-list red-list reveal">
             <div class="rowform-headers">
               <span>From URL</span>
               <span>New URL</span>

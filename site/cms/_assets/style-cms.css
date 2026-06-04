@@ -2110,6 +2110,10 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   border-radius: 2px;
   overflow: hidden;
 }
+/* Dotted border on the empty image slot in Image Container layout. */
+.hero-img-preview--within .hero-img-preview-imgwrap:has(.hero-img-preview-empty) {
+  border: 1px dotted var(--ink-18);
+}
 
 /* ── Bleed — image fills, text overlays, gradient on top. ── */
 .hero-img-preview--bleed-dark,

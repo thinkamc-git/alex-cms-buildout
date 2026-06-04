@@ -152,7 +152,7 @@ $grid_rows_for = static function (array $sec): int {
         <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
           <div class="editorial-hero-text">
             <?php if ($eyebrowBits !== []): ?>
-              <div class="editorial-hero-eyebrow"><?= $e('— ' . strtoupper(implode(' · ', $eyebrowBits))) ?></div>
+              <div class="editorial-hero-eyebrow"><?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?></div>
             <?php endif; ?>
             <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>
             <?php if ($hSummary !== ''): ?>
@@ -171,7 +171,7 @@ $grid_rows_for = static function (array $sec): int {
           <div class="editorial-hero-text">
             <?php if ($eyebrowBits !== []): ?>
               <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
-                &mdash; <?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?>
+                <?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?>
               </div>
             <?php endif; ?>
             <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>

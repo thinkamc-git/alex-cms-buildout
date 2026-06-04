@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorial Index Builder — sandbox v4</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Real CMS stylesheets -->
+<link rel="stylesheet" href="../../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../../site/_design-system/css/tables.css">
+<link rel="stylesheet" href="../../site/_design-system/css/status.css">
+<link rel="stylesheet" href="../../site/_design-system/css/views.css">
+<link rel="stylesheet" href="../../site/cms/_assets/style-cms.css">
+
+<style>
+/* ─────────────────────────────────────────────────────────────────────
+   MOCKUP-ONLY (Phase 21.7 sandbox v4 — matching Alex's design inspo)
+   ───────────────────────────────────────────────────────────────── */
+
+/* Section list header — "SECTIONS · 3 · DRAG TO REORDER" */
+.sec-list-header {
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-12);
+  display: flex;
+  gap: var(--space-8);
+  align-items: baseline;
+}
+.sec-list-header .sep { color: var(--ink-30); }
+.sec-list-header .hint { font-weight: 400; }
+
+/* Section stack — vertical list of cards. */
+.sec-stack { display: flex; flex-direction: column; gap: var(--space-12); }
+
+/* A section card — matches the existing CMS card treatment used by
+   .kcard / .idea-card / .pub-card. Editorial mode: hover darkens the
+   border (1px ink). Basic Listing: no hover (the .is-headerless variant
+   below opts out). */
+.sec-card {
+  background: var(--surface);
+  border: 1px solid var(--ink-18);
+  border-radius: var(--r-card);
+  overflow: hidden;
+  box-shadow: 0 1px 3px var(--ink-08);
+  transition: border-color 0.15s;
+}
+.sec-card:hover { border-color: var(--ink); }
+.sec-card.is-headerless:hover { border-color: var(--ink-18); }
+.sec-card.is-dragging { opacity: 0.4; }
+
+/* Card header bar — grip | TYPE | divider | NAME | summary | (actions on hover) */
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: 14px var(--space-20);
+  cursor: pointer;
+  background: var(--surface);
+  position: relative;
+  transition: border-color 0.15s;
+}
+
+/* Drag handle — matches navigation.php's pattern: ⋮⋮ glyph with
+   cursor:grab + muted colour + the same 14px sizing. */
+.grip {
+  cursor: grab;
+  color: var(--muted);
+  user-select: none;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.grip:active { cursor: grabbing; }
+
+/* Type label — uses .content-block-label typography exactly. */
+.sec-type-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  flex-shrink: 0;
+  min-width: 70px;
+}
+
+/* Vertical divider between TYPE and section name. */
+.sec-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--ink-18);
+  flex-shrink: 0;
+}
+
+/* Section name — matches .kcard-title (the canonical CMS card title). */
+.sec-name {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+.sec-name.is-untitled { font-style: italic; font-weight: 400; color: var(--muted); }
+
+/* Summary line — mono caps muted, follows the name with dot separators. */
+.sec-summary {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Right-side action cluster — hover-reveal pattern, but the chevron stays
+   visible always. */
+.sec-actions {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.sec-actions .sec-action-hover { opacity: 0; transition: opacity 0.15s; }
+.sec-card:hover .sec-actions .sec-action-hover,
+.sec-card.is-expanded .sec-actions .sec-action-hover { opacity: 1; }
+
+/* Card body — hidden when collapsed. */
+.sec-body {
+  display: none;
+  padding: var(--space-20) var(--space-24) var(--space-24);
+  border-top: var(--rule-faint);
+  background: var(--surface);
+}
+.sec-card.is-expanded .sec-body { display: block; }
+/* Basic Listing variant — the Filtered section keeps its card chrome
+   (white box, border, shadow) but loses the header bar AND the entire
+   first column of the 3-split. Basic Listing IS the page: section title,
+   Display, and Trailing Card are all redundant. Grid collapses from
+   3 columns to 2 (Content Query + Show Filter). */
+.sec-card.is-headerless .sec-head { display: none; }
+.sec-card.is-headerless .sec-body { border-top: none; }
+.sec-card.is-headerless .sec-split-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sec-card.is-headerless .sec-split-3 > div:first-child { display: none; }
+
+/* Inside the body: a 2-column split — narrower side on the LEFT
+   (Section title + Display + See more + Visitor filter), wider main
+   on the RIGHT (Posts table / Content query). Mirrors the .form-grid
+   pattern from article-edit but with the columns flipped, since the
+   author works in the wider Posts column most of the time. */
+.sec-body .sec-split {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: var(--space-32);
+}
+.sec-body .sec-main { min-width: 0; order: 2; }
+.sec-body .sec-side { display: flex; flex-direction: column; gap: var(--space-12); order: 1; }
+.sec-body .sec-side .field-subgroup:first-child { margin-top: 0; }
+
+/* 3-equal-column variant — used by Filtered (the old "Feed") section
+   where the body has Section title/display + Content query + Show filter
+   side by side. */
+.sec-body .sec-split-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-32);
+}
+.sec-body .sec-split-3 > div { min-width: 0; display: flex; flex-direction: column; gap: var(--space-12); }
+.sec-body .sec-split-3 .field-subgroup:first-child { margin-top: 0; }
+
+/* Field labels inside the body — uppercase mono caps, smaller than v3's. */
+.sec-body .field-label {
+  font-size: var(--text-micro);
+  letter-spacing: 0.16em;
+  margin-bottom: var(--space-8);
+}
+.sec-body .field-hint-inline {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-left: var(--space-8);
+}
+
+/* Field subgroup divider (between Posts / Content query / Show filter) —
+   uses .content-block-label typography exactly. */
+.field-subgroup {
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-top: var(--space-20);
+  margin-bottom: var(--space-12);
+}
+.field-subgroup .hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-left: var(--space-8);
+}
+
+/* Posts table inside Curated — matches the .table-card wrapper pattern
+   the rest of the CMS uses for list tables (border-radius + overflow:hidden
+   on the wrapper, rule-faint outline). */
+.posts-table-wrap { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; }
+.posts-table { width: 100%; border-collapse: collapse; }
+.posts-table th {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: var(--space-8) var(--space-12);
+  border-bottom: var(--rule-faint);
+  background: var(--canvas-raised);
+  white-space: nowrap;
+}
+.posts-table td {
+  padding: 10px var(--space-12);
+  border-bottom: 1px solid var(--ink-12);
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  color: var(--secondary);
+  vertical-align: middle;
+}
+.posts-table tr:last-child td { border-bottom: none; }
+.posts-table .cell-grip { width: 28px; padding-right: 0; }
+.posts-table .cell-grip .grip { color: var(--ink-30); font-size: 14px; }
+.posts-table .cell-num { width: 44px; padding-right: 0; }
+
+/* Clearable input — text input with an X button overlaid on the right
+   that clears the field on click. Used for section title fields so the
+   author can quickly drop back to the "no title" state. */
+.field-clearable { position: relative; display: block; }
+.field-clearable .field-input { padding-right: 32px; }
+.field-clearable .clear-x {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--ink-30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: color 0.15s, background 0.15s;
+}
+.field-clearable .clear-x:hover { color: var(--primary); background: var(--ink-08); }
+/* Hide the X when the field is empty — nothing to clear. */
+.field-clearable .field-input:placeholder-shown + .clear-x { display: none; }
+.posts-table .cell-title { font-weight: 600; color: var(--primary); }
+.posts-table .cell-date { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); white-space: nowrap; }
+.posts-table .cell-remove { width: 32px; text-align: right; padding-right: var(--space-12); }
+.posts-table tr.is-dragging { opacity: 0.5; }
+.posts-table tr:hover td { background: var(--canvas-bg); }
+
+/* Add-post row — sits below the posts table. */
+.posts-add {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  padding: var(--space-8) var(--space-12);
+  background: var(--canvas-raised);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  margin-top: 6px;
+}
+
+/* + Add new section — full-width dashed button below the stack. */
+.sec-add-wrap { position: relative; margin-top: var(--space-16); }
+.sec-add-btn {
+  width: 100%;
+  padding: 16px var(--space-20);
+  border: 1px dashed var(--ink-30);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--secondary);
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.sec-add-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+
+.sec-add-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--space-8);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  z-index: 20;
+  min-width: 320px;
+  padding: var(--space-4);
+}
+.sec-add-menu[hidden] { display: none; }
+.sec-add-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  padding: var(--space-12) var(--space-16);
+  cursor: pointer;
+  font-family: inherit;
+}
+.sec-add-opt:hover { background: var(--canvas-bg); }
+.sec-add-opt .opt-type {
+  font-family: var(--font-cond);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secondary);
+}
+.sec-add-opt .opt-hint { font-size: var(--text-meta); color: var(--muted); }
+
+/* Page header row — Show toggle on the left, Layout pill toggle on
+   the right (Editorial vs Basic Listing). */
+.show-header-row { display: flex; gap: var(--space-12); align-items: center; margin-bottom: var(--space-24); }
+.show-header-row > label[for] { font-family: var(--font); font-size: var(--text-meta); color: var(--secondary); cursor: pointer; }
+
+/* Filled toggle switch — track + thumb both pill-shaped using --r-pill,
+   matching the button family's roundedness. */
+.switch-filled { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+.switch-filled input { opacity: 0; width: 0; height: 0; }
+.switch-filled .slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--ink-18);
+  border-radius: var(--r-pill);
+  transition: 0.18s;
+}
+.switch-filled .slider::before {
+  position: absolute; content: '';
+  width: 16px; height: 16px;
+  left: 3px; top: 3px;
+  background: var(--surface);
+  border-radius: var(--r-pill);
+  transition: 0.18s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.switch-filled input:checked + .slider { background: var(--primary); }
+.switch-filled input:checked + .slider::before { transform: translateX(18px); }
+
+/* Visitor filter detail block hidden when toggle is off. */
+.sec-card.f-off .sec-filter-detail { display: none; }
+
+/* "Last saved" timestamp inside the sticky save bar. */
+.last-saved {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+</style>
+</head>
+<body class="dot-surface">
+
+<!-- Topbar — simplified -->
+<header class="topbar" style="display:flex;align-items:center;gap:var(--space-12);padding:0 var(--space-20);height:48px;background:var(--surface);border-bottom:var(--rule-faint)">
+  <span class="env-badge env-badge-staging">STAGING</span>
+  <span style="color:var(--muted);font-family:var(--font-mono);font-size:var(--text-meta)">|</span>
+  <span style="font-family:var(--font-mono);font-size:var(--text-meta);color:var(--secondary)">Indexes &rarr; Edit</span>
+  <span style="flex:1"></span>
+  <span style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted)">SANDBOX MOCKUP v4 — matched to design inspo</span>
+</header>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <nav class="sidebar dot-surface" aria-label="CMS navigation" style="padding:var(--space-20) var(--space-12);width:200px;flex-shrink:0">
+    <div class="nav-section">
+      <span class="nav-label">Collections</span>
+      <a class="nav-item active" href="#" data-nav-id="indexes" aria-current="page">
+        <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
+        Indexes
+      </a>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+    <div class="view active">
+
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Digital Garden</h2>
+          <p class="view-subtitle">/digital-garden/ · Editorial index built from a stack of sections.</p>
+        </div>
+        <div class="view-header-actions">
+          <a href="#" class="btn-sec">&larr; Back to Indexes</a>
+          <a href="#" class="btn-sec" target="_blank" rel="noopener">Live &nearr;</a>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="pe-tabs" role="tablist">
+        <a class="pe-tab is-active" data-tab-target="edit"    role="tab" aria-selected="true"  href="#">Edit</a>
+        <a class="pe-tab"           data-tab-target="preview" role="tab" aria-selected="false" href="#">Preview</a>
+      </div>
+
+      <div class="content-area">
+
+        <!-- ── EDIT PANEL ──────────────────────────────────────────────── -->
+        <div data-tab-panel="edit">
+          <form class="cms-form cms-form-wide" onsubmit="event.preventDefault()" id="builder-form">
+
+            <!-- Page title -->
+            <div class="field-group">
+              <label class="field-label" for="idx-title">Page title <span class="field-hint-inline">supports *italic emphasis*</span></label>
+              <input type="text" class="field-input large" id="idx-title" value="Latest thinking">
+            </div>
+
+            <!-- Subtitle -->
+            <div class="field-group">
+              <label class="field-label" for="idx-subtitle">Subtitle</label>
+              <input type="text" class="field-input" id="idx-subtitle" value="Essays, experiments, and things I'm reading lately.">
+            </div>
+
+            <!-- Show page header + Layout toggle -->
+            <div class="show-header-row">
+              <label class="switch-filled"><input type="checkbox" id="idx-show-title" checked><span class="slider"></span></label>
+              <label for="idx-show-title">Show page header on the public page</label>
+              <span style="flex:1"></span>
+              <span style="font-family:var(--font-cond);font-size:var(--text-micro);font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-right:var(--space-8)">Layout</span>
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                <div class="filter-group">
+                  <button type="button" class="filter-pill active" id="layout-editorial">Editorial</button>
+                  <button type="button" class="filter-pill" id="layout-listing">Basic Listing</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Section list header ─────────────────────────────── -->
+            <div class="sec-list-header">
+              <span>Sections</span>
+              <span class="sep">·</span>
+              <span id="sec-count">3</span>
+              <span class="sep">·</span>
+              <span class="hint">drag to reorder</span>
+            </div>
+
+            <!-- ── Section stack ──────────────────────────────────── -->
+            <div class="sec-stack" id="sec-stack">
+
+              <!-- HERO — collapsed -->
+              <div class="sec-card" data-section-id="s-1" data-type="hero" draggable="true">
+                <div class="sec-head">
+                  <span class="grip" title="Drag to reorder">&#8942;&#8942;</span>
+                  <span class="sec-type-label">Hero</span>
+                  <span class="sec-divider"></span>
+                  <span class="sec-name">Featured</span>
+                  <span class="sec-summary">1 item · The garden as a way of thinking</span>
+                  <div class="sec-actions">
+                    <button type="button" class="btn-icon sec-action-hover" title="Preview"><svg viewBox="0 0 14 14" fill="none"><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2"/></svg></button>
+                    <button type="button" class="btn-icon btn-icon-danger sec-action-hover" title="Delete section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" class="btn-icon sec-toggle-btn" title="Expand"><svg viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                  </div>
+                </div>
+                <div class="sec-body">
+                  <div class="field-group">
+                    <label class="field-label" for="s1-title">Section title <span class="field-hint-inline">optional</span></label>
+                    <span class="field-clearable">
+                      <input type="text" class="field-input" id="s1-title" placeholder="no title" value="Featured">
+                      <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+                    </span>
+                  </div>
+                  <div class="field-group" style="margin-bottom:0">
+                    <label class="field-label">Pick a post</label>
+                    <input type="text" class="field-input" id="s1-pick-search" list="s1-pick-options" placeholder="Search posts…" value="The garden as a way of thinking">
+                    <datalist id="s1-pick-options">
+                      <option value="The garden as a way of thinking">Article · 2025-11-04</option>
+                      <option value="Notes on slow software">Journal · 2025-09-21</option>
+                      <option value="Why I rebuilt my CMS">Article · 2025-08-15</option>
+                      <option value="The reading layer talk">Live Session · 2025-07-10</option>
+                    </datalist>
+                    <p class="field-hint">Type to search published posts. One pick — renders as the section's full-width banner.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CURATED — expanded -->
+              <div class="sec-card is-expanded" data-section-id="s-2" data-type="curated" draggable="true">
+                <div class="sec-head">
+                  <span class="grip" title="Drag to reorder">&#8942;&#8942;</span>
+                  <span class="sec-type-label">Curated</span>
+                  <span class="sec-divider"></span>
+                  <span class="sec-name">Recommended reading</span>
+                  <span class="sec-summary">4 picks · Grid · 2 rows</span>
+                  <div class="sec-actions">
+                    <button type="button" class="btn-icon sec-action-hover" title="Preview"><svg viewBox="0 0 14 14" fill="none"><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2"/></svg></button>
+                    <button type="button" class="btn-icon btn-icon-danger sec-action-hover" title="Delete section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" class="btn-icon sec-toggle-btn" title="Collapse" style="transform:rotate(180deg)"><svg viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                  </div>
+                </div>
+                <div class="sec-body">
+
+                  <div class="sec-split">
+                  <div class="sec-main">
+                  <div class="field-subgroup">Posts <span class="hint">drag to reorder · mix types freely</span></div>
+                  <div class="posts-table-wrap">
+                  <table class="posts-table">
+                    <thead>
+                      <tr>
+                        <th class="cell-grip"></th>
+                        <th class="cell-num">#</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Date</th>
+                        <th class="cell-remove"></th>
+                      </tr>
+                    </thead>
+                    <tbody id="picks-s-2">
+                      <tr draggable="true">
+                        <td class="cell-grip"><span class="grip">&#8942;&#8942;</span></td>
+                        <td class="cell-num"><span class="val-pill">01</span></td>
+                        <td class="cell-title">Notes on slow software</td>
+                        <td><span class="pill tb-journal">Journal</span></td>
+                        <td class="cell-date">2025-09-21</td>
+                        <td class="cell-remove"><button type="button" class="btn-icon" title="Remove from this section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>
+                      </tr>
+                      <tr draggable="true">
+                        <td class="cell-grip"><span class="grip">&#8942;&#8942;</span></td>
+                        <td class="cell-num"><span class="val-pill">02</span></td>
+                        <td class="cell-title">Why I rebuilt my CMS</td>
+                        <td><span class="pill tb-article">Article</span></td>
+                        <td class="cell-date">2025-11-04</td>
+                        <td class="cell-remove"><button type="button" class="btn-icon" title="Remove from this section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>
+                      </tr>
+                      <tr draggable="true">
+                        <td class="cell-grip"><span class="grip">&#8942;&#8942;</span></td>
+                        <td class="cell-num"><span class="val-pill">03</span></td>
+                        <td class="cell-title">The reading layer talk</td>
+                        <td><span class="pill tb-live-session">Live</span></td>
+                        <td class="cell-date">2025-07-10</td>
+                        <td class="cell-remove"><button type="button" class="btn-icon" title="Remove from this section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>
+                      </tr>
+                      <tr draggable="true">
+                        <td class="cell-grip"><span class="grip">&#8942;&#8942;</span></td>
+                        <td class="cell-num"><span class="val-pill">04</span></td>
+                        <td class="cell-title">The weather postcard</td>
+                        <td><span class="pill tb-experiment">Lab</span></td>
+                        <td class="cell-date">2025-03-15</td>
+                        <td class="cell-remove"><button type="button" class="btn-icon" title="Remove from this section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </div><!-- /.posts-table-wrap -->
+                  <div class="posts-add">
+                    <input type="text" class="field-input" id="s2-add-search" list="s2-add-options" placeholder="Search to add a post…">
+                    <datalist id="s2-add-options">
+                      <option value="Working with Constraints">Article · 2025-12-01</option>
+                      <option value="#14 Reading in Public">Journal · 2025-11-22</option>
+                      <option value="The Weather Postcard">Experiment · 2025-10-30</option>
+                      <option value="The Workshop Was the Point">Journal · 2025-10-15</option>
+                    </datalist>
+                  </div>
+                  </div><!-- /.sec-main -->
+
+                  <div class="sec-side">
+                    <div class="field-group">
+                      <label class="field-label" for="s2-title">Section title <span class="field-hint-inline">optional</span></label>
+                      <span class="field-clearable">
+                        <input type="text" class="field-input" id="s2-title" placeholder="no title" value="Recommended reading">
+                        <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+                      </span>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">Format</label>
+                      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                        <div class="filter-group">
+                          <button type="button" class="filter-pill active">Grid</button>
+                          <button type="button" class="filter-pill">Carousel</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label">Grid rows</label>
+                      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                        <div class="filter-group">
+                          <button type="button" class="filter-pill">1</button>
+                          <button type="button" class="filter-pill active">2</button>
+                          <button type="button" class="filter-pill">3</button>
+                          <button type="button" class="filter-pill">4</button>
+                          <button type="button" class="filter-pill">All</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="field-group">
+                      <label class="field-label" for="s2-see-label">Trailing Card Label <span class="field-hint-inline">i.e. See More</span></label>
+                      <input type="text" class="field-input" id="s2-see-label" placeholder="See more">
+                    </div>
+                    <div class="field-group" style="margin-bottom:0">
+                      <label class="field-label" for="s2-see-type">Trailing Card URL</label>
+                      <select class="field-input" id="s2-see-type" onchange="seeMoreTypeChanged(this)">
+                        <option value="index">Index</option>
+                        <option value="custom">Custom link</option>
+                      </select>
+                      <span class="see-picker" style="display:block;margin-top:6px">
+                        <select class="field-input" data-picker="index">
+                          <option value="">— Pick an index —</option>
+                          <option value="writing">Writing (/writing/)</option>
+                          <option value="journal">Journal (/journal/)</option>
+                          <option value="live-sessions">Talks (/live-sessions/)</option>
+                          <option value="experiments">Experiments (/experiments/)</option>
+                        </select>
+                        <input type="text" class="field-input" data-picker="custom" placeholder="https://…" style="display:none">
+                      </span>
+                    </div>
+                  </div><!-- /.sec-side -->
+                  </div><!-- /.sec-split -->
+
+                </div>
+              </div>
+
+              <!-- FILTERED — collapsed -->
+              <div class="sec-card" data-section-id="s-3" data-type="filtered" data-filter="on" draggable="true">
+                <div class="sec-head">
+                  <span class="grip" title="Drag to reorder">&#8942;&#8942;</span>
+                  <span class="sec-type-label">Filtered</span>
+                  <span class="sec-divider"></span>
+                  <span class="sec-name">Everything else</span>
+                  <span class="sec-summary">Articles + Journals · Newest · Grid 2 rows · Filter shown</span>
+                  <div class="sec-actions">
+                    <button type="button" class="btn-icon sec-action-hover" title="Preview"><svg viewBox="0 0 14 14" fill="none"><path d="M1 7s2.5-4 6-4 6 4 6 4-2.5 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.2"/></svg></button>
+                    <button type="button" class="btn-icon btn-icon-danger sec-action-hover" title="Delete section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                    <button type="button" class="btn-icon sec-toggle-btn" title="Expand"><svg viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                  </div>
+                </div>
+                <div class="sec-body">
+
+                  <div class="sec-split-3">
+
+                    <!-- Col 1 — section title + display + trailing card (matches Curated's left column) -->
+                    <div>
+                      <div class="field-group sec-title-field">
+                        <label class="field-label" for="s3-title">Section title <span class="field-hint-inline">optional</span></label>
+                        <span class="field-clearable">
+                          <input type="text" class="field-input" id="s3-title" placeholder="no title" value="Everything else">
+                          <button type="button" class="clear-x" title="Clear" aria-label="Clear" onclick="var i=this.previousElementSibling; i.value=''; i.dispatchEvent(new Event('input',{bubbles:true})); i.focus();"><svg viewBox="0 0 14 14" fill="none" width="12" height="12"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+                        </span>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Format</label>
+                        <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                          <div class="filter-group">
+                            <button type="button" class="filter-pill active">Grid</button>
+                            <button type="button" class="filter-pill">Carousel</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Grid rows</label>
+                        <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                          <div class="filter-group">
+                            <button type="button" class="filter-pill">1</button>
+                            <button type="button" class="filter-pill active">2</button>
+                            <button type="button" class="filter-pill">3</button>
+                            <button type="button" class="filter-pill">4</button>
+                            <button type="button" class="filter-pill">All</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label" for="s3-see-label">Trailing Card Label <span class="field-hint-inline">i.e. See More</span></label>
+                        <input type="text" class="field-input" id="s3-see-label" placeholder="See more" value="See all writing">
+                      </div>
+                      <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label" for="s3-see-type">Trailing Card URL</label>
+                        <select class="field-input" id="s3-see-type" onchange="seeMoreTypeChanged(this)">
+                          <option value="index" selected>Index</option>
+                          <option value="custom">Custom link</option>
+                        </select>
+                        <span class="see-picker" style="display:block;margin-top:6px">
+                          <select class="field-input" data-picker="index">
+                            <option value="">— Pick an index —</option>
+                            <option value="writing" selected>Writing (/writing/)</option>
+                            <option value="journal">Journal (/journal/)</option>
+                            <option value="live-sessions">Talks (/live-sessions/)</option>
+                            <option value="experiments">Experiments (/experiments/)</option>
+                          </select>
+                          <input type="text" class="field-input" data-picker="custom" placeholder="https://…" style="display:none">
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Col 2 — Content query: defines the pool the section pulls from -->
+                    <div>
+                      <div class="field-subgroup">Content Query <span class="hint">never shown to visitors</span></div>
+                      <div class="field-group">
+                        <label class="field-label">Types</label>
+                        <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                          <div class="filter-group">
+                            <button type="button" class="filter-pill active">Articles</button>
+                            <button type="button" class="filter-pill active">Journals</button>
+                            <button type="button" class="filter-pill">Talks</button>
+                            <button type="button" class="filter-pill">Experiments</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Categories <span class="field-hint-inline">based on selected types</span></label>
+                        <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                          <div class="filter-group">
+                            <button type="button" class="filter-pill">UX Industry</button>
+                            <button type="button" class="filter-pill">Coaching</button>
+                            <button type="button" class="filter-pill">Practice</button>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label">Sort</label>
+                        <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                          <div class="filter-group">
+                            <button type="button" class="filter-pill active">Newest</button>
+                            <button type="button" class="filter-pill">Oldest</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Col 3 — Show Filter: visitor-facing filter rail config -->
+                    <div>
+                      <div class="field-subgroup" style="display:flex;align-items:center">
+                        <span>Show Filter</span>
+                        <label class="switch-filled" style="margin-left:auto"><input type="checkbox" id="s3-fshow" checked onchange="this.closest('.sec-card').classList.toggle('f-off', !this.checked)"><span class="slider"></span></label>
+                      </div>
+                      <div class="sec-filter-detail">
+                        <div class="field-group">
+                          <label class="field-label">Type Filters <span class="field-hint-inline">selectable</span></label>
+                          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                            <div class="filter-group">
+                              <button type="button" class="filter-pill active">Articles</button>
+                              <button type="button" class="filter-pill active">Journals</button>
+                              <button type="button" class="filter-pill">Talks</button>
+                              <button type="button" class="filter-pill">Experiments</button>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="field-group" style="margin-bottom:0">
+                          <label class="field-label">Category Filters <span class="field-hint-inline">based on selected types</span></label>
+                          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                            <div class="filter-group">
+                              <button type="button" class="filter-pill">UX Industry</button>
+                              <button type="button" class="filter-pill">Coaching</button>
+                              <button type="button" class="filter-pill">Practice</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div><!-- /.sec-split-3 -->
+
+                </div>
+              </div>
+
+            </div><!-- /.sec-stack -->
+
+            <!-- + Add new section -->
+            <div class="sec-add-wrap">
+              <button type="button" class="sec-add-btn" id="sec-add-btn">
+                <svg viewBox="0 0 14 14" fill="none" width="14" height="14"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v6M4 7h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                Add new section
+              </button>
+              <div class="sec-add-menu" id="sec-add-menu" hidden>
+                <button type="button" class="sec-add-opt" data-add-type="hero">
+                  <span class="opt-type">Hero</span>
+                  <span class="opt-hint">One hand-picked item, full-width banner.</span>
+                </button>
+                <button type="button" class="sec-add-opt" data-add-type="curated">
+                  <span class="opt-type">Curated</span>
+                  <span class="opt-hint">Hand-picked items in a grid or carousel.</span>
+                </button>
+                <button type="button" class="sec-add-opt" data-add-type="filtered">
+                  <span class="opt-type">Filtered</span>
+                  <span class="opt-hint">Self-updating set driven by type / category / sort.</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sticky save bar -->
+            <div class="form-actions form-actions-sticky" style="display:flex;align-items:center;gap:var(--space-12)">
+              <span class="last-saved">Last saved: 2 minutes ago</span>
+              <span style="flex:1"></span>
+              <button type="button" class="btn-sec btn-danger">Delete</button>
+              <a href="#" class="btn-sec">Cancel</a>
+              <button type="submit" class="btn-sec" data-save-btn>Save changes</button>
+            </div>
+
+          </form>
+        </div><!-- /[data-tab-panel=edit] -->
+
+        <!-- ── PREVIEW PANEL ───────────────────────────────────────────── -->
+        <div data-tab-panel="preview" class="is-hidden-tab">
+          <div style="padding:var(--space-24);background:var(--canvas-bg);min-height:400px;border-radius:4px">
+            <p style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);text-align:center;margin:0 0 var(--space-16)">
+              Mock render — would iframe the real <code>/digital-garden/</code> in the live CMS.
+            </p>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:var(--space-32);max-width:1100px;margin:0 auto;color:var(--muted);text-align:center;font-family:var(--font-mono);font-size:var(--text-meta)">
+              [public-render preview iframe]
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── Tabs ─────────────────────────────────────────────────────────────
+  document.querySelectorAll('[data-tab-target]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = a.getAttribute('data-tab-target');
+      document.querySelectorAll('[data-tab-target]').forEach(function (t) {
+        var on = t.getAttribute('data-tab-target') === target;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-tab-panel]').forEach(function (p) {
+        p.classList.toggle('is-hidden-tab', p.getAttribute('data-tab-panel') !== target);
+      });
+    });
+  });
+
+  // ── Card expand/collapse — click the header bar (outside controls)
+  // ── or the chevron button.
+  document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('.sec-toggle-btn');
+    if (toggle) {
+      var card = toggle.closest('.sec-card');
+      var nowOpen = !card.classList.contains('is-expanded');
+      card.classList.toggle('is-expanded', nowOpen);
+      toggle.style.transform = nowOpen ? 'rotate(180deg)' : '';
+      return;
+    }
+    var head = e.target.closest('.sec-head');
+    if (head && !e.target.closest('button, .grip, input, select')) {
+      var card2 = head.closest('.sec-card');
+      var nowOpen2 = !card2.classList.contains('is-expanded');
+      card2.classList.toggle('is-expanded', nowOpen2);
+      var t = card2.querySelector('.sec-toggle-btn');
+      if (t) t.style.transform = nowOpen2 ? 'rotate(180deg)' : '';
+    }
+  });
+
+  // ── Filter-pill toggles ──────────────────────────────────────────────
+  document.addEventListener('click', function (e) {
+    var p = e.target.closest('.filter-pill');
+    if (!p) return;
+    var grp = p.closest('.filter-group');
+    if (!grp) return;
+    var fg = p.closest('.field-group');
+    var lbl = fg ? (fg.querySelector('.field-label') || {}).textContent || '' : '';
+    if (/types|categories|pill subset/i.test(lbl)) {
+      p.classList.toggle('active');
+    } else {
+      grp.querySelectorAll('.filter-pill').forEach(function (x) { x.classList.remove('active'); });
+      p.classList.add('active');
+    }
+  });
+
+  // ── Drag-reorder ─────────────────────────────────────────────────────
+  var stack = document.getElementById('sec-stack');
+  if (stack && window.Sortable) Sortable.create(stack, { handle: '.sec-head .grip', animation: 150, ghostClass: 'is-dragging' });
+  document.querySelectorAll('.posts-table tbody').forEach(function (list) {
+    if (window.Sortable) Sortable.create(list, { handle: '.posts-table .grip', animation: 150 });
+  });
+
+  // ── Layout toggle: Editorial ↔ Basic Listing ────────────────────────
+  // Editorial = full section stack + Add button.
+  // Basic Listing = collapse the stack to a single always-expanded Filtered
+  // section, hide the section-list header + Add button.
+  (function () {
+    var ed = document.getElementById('layout-editorial');
+    var bl = document.getElementById('layout-listing');
+    if (!ed || !bl) return;
+    function setLayout(mode) {
+      ed.classList.toggle('active', mode === 'editorial');
+      bl.classList.toggle('active', mode === 'listing');
+      document.body.classList.toggle('layout-listing', mode === 'listing');
+      // In listing mode: keep only the Filtered section, expanded, no
+      // Add button, no list header. Mockup-only — production uses a
+      // separate template path.
+      var listing = mode === 'listing';
+      var stackHeader = document.querySelector('.sec-list-header');
+      if (stackHeader) stackHeader.style.display = listing ? 'none' : '';
+      var addWrap = document.querySelector('.sec-add-wrap');
+      if (addWrap) addWrap.style.display = listing ? 'none' : '';
+      document.querySelectorAll('.sec-card').forEach(function (c) {
+        var isFiltered = c.dataset.type === 'filtered';
+        if (listing) {
+          c.style.display = isFiltered ? '' : 'none';
+          if (isFiltered) c.classList.add('is-expanded', 'is-headerless');
+        } else {
+          c.style.display = '';
+          c.classList.remove('is-headerless');
+        }
+      });
+    }
+    ed.addEventListener('click', function () { setLayout('editorial'); });
+    bl.addEventListener('click', function () { setLayout('listing'); });
+  })();
+
+  // ── See More: Index ↔ Custom picker (matches navigation.php pattern) ─
+  window.seeMoreTypeChanged = function (sel) {
+    var wrap = sel.parentElement.querySelector('.see-picker');
+    if (!wrap) return;
+    var t = sel.value;
+    wrap.querySelectorAll('[data-picker]').forEach(function (el) {
+      el.style.display = el.getAttribute('data-picker') === t ? '' : 'none';
+    });
+  };
+
+  // ── Add Section ──────────────────────────────────────────────────────
+  var addBtn  = document.getElementById('sec-add-btn');
+  var addMenu = document.getElementById('sec-add-menu');
+  if (addBtn && addMenu) {
+    addBtn.addEventListener('click', function (e) { e.stopPropagation(); addMenu.hidden = !addMenu.hidden; });
+    document.addEventListener('click', function (e) { if (!addMenu.contains(e.target) && e.target !== addBtn) addMenu.hidden = true; });
+    addMenu.querySelectorAll('.sec-add-opt').forEach(function (opt) {
+      opt.addEventListener('click', function () {
+        var type = opt.getAttribute('data-add-type');
+        addMenu.hidden = true;
+        appendSection(type);
+      });
+    });
+  }
+
+  function appendSection(type) {
+    var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+    var summary = type === 'hero' ? 'no item yet'
+                : type === 'curated' ? '0 picks · Grid · all rows'
+                                     : 'All types · Newest · Grid · all rows';
+    var card = document.createElement('div');
+    card.className = 'sec-card is-expanded';
+    card.dataset.sectionId = 's-' + Math.random().toString(36).slice(2,7);
+    card.dataset.type = type;
+    card.draggable = true;
+    card.innerHTML =
+      '<div class="sec-head">' +
+        '<span class="grip">&#8942;&#8942;</span>' +
+        '<span class="sec-type-label">' + typeLabel + '</span>' +
+        '<span class="sec-divider"></span>' +
+        '<span class="sec-name is-untitled">Untitled ' + typeLabel + '</span>' +
+        '<span class="sec-summary">' + summary + '</span>' +
+        '<div class="sec-actions">' +
+          '<button type="button" class="btn-icon btn-icon-danger sec-action-hover" title="Delete section"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+          '<button type="button" class="btn-icon sec-toggle-btn" title="Collapse" style="transform:rotate(180deg)"><svg viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sec-body">' +
+        '<p class="field-hint" style="margin:0">(new ' + type + ' section — its config form would render here, same shape as the others)</p>' +
+      '</div>';
+    stack.appendChild(card);
+    refreshCount();
+    card.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function refreshCount() {
+    document.getElementById('sec-count').textContent = stack.querySelectorAll('.sec-card').length;
+  }
+
+  // ── Delete section ──────────────────────────────────────────────────
+  document.addEventListener('click', function (e) {
+    var del = e.target.closest('.sec-actions .btn-icon-danger');
+    if (!del) return;
+    if (confirm('Delete this section?')) {
+      del.closest('.sec-card').remove();
+      refreshCount();
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

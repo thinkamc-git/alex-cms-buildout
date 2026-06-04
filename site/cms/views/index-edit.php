@@ -1,17 +1,18 @@
 <?php
 /**
- * cms/views/index-edit.php — Index editor.
+ * cms/views/index-edit.php — Index editor (Phase 21.7).
  *
- * Two layouts:
- *   - Editorial Page — composed of typed sections (Hero / Curated / Feed)
- *     stored in the index_sections table. Skeleton in this iteration:
- *     section list renders as collapsed .sec-card rows showing type +
- *     title + delete + expand chevron. Per-type editor bodies land in
- *     the next iteration.
- *   - Basic Listing — single filtered feed using the flat hero_/feed_/
- *     filter_mode columns on the indexes row. Form unchanged.
+ * Two layouts via a single view + a pill-toggle:
+ *   - Editorial Page   → section-stack builder (Phase 21.7 model).
+ *                        Each section is a .content-block with its own
+ *                        type-specific form; drag-reorder, add, delete
+ *                        all client-side; one Save submits the whole
+ *                        stack via $_POST['sections'].
+ *   - Basic Listing    → the existing flat hero/featured/feed form
+ *                        (CMS-STRUCTURE.md §16 keeps the flat columns
+ *                        authoritative for this layout). Untouched.
  *
- * Slug is permanent (URL contract).
+ * Slug stays permanent (URL contract).
  */
 
 declare(strict_types=1);
@@ -23,9 +24,11 @@ require_once __DIR__ . '/../../lib/indexes.php';
 require_once __DIR__ . '/../../lib/content.php';
 
 Auth::require_login();
+$user       = Auth::current_user();
+$email      = (string)($user['email'] ?? '');
 $csrf_token = Csrf::token();
 
-$id    = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+$id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
 $index = $id > 0 ? get_index($id) : null;
 if ($index === null) {
     http_response_code(404);
@@ -36,18 +39,20 @@ if ($index === null) {
 
 $errors = [];
 
-// POST — save the index row. Section CRUD will be wired in a follow-up
-// iteration of Phase 21.7 once the skeleton renders cleanly.
+// ─── POST: save ─────────────────────────────────────────────────────────
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
     } else {
+        // featured_ids arrives as a comma-separated string from the hidden
+        // input the legacy drag-drop JS keeps in sync (Basic Listing only).
         $featuredRaw = (string)($_POST['featured_ids'] ?? '');
         $featuredArr = [];
         foreach (explode(',', $featuredRaw) as $piece) {
             $n = (int)trim($piece);
             if ($n > 0) $featuredArr[] = $n;
         }
+
         $typesArr = $_POST['feed_types'] ?? [];
         if (!is_array($typesArr)) $typesArr = [];
 
@@ -67,17 +72,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'feed_rows_shown' => (string)($_POST['feed_rows_shown'] ?? 'all'),
             'filter_mode'     => (string)($_POST['filter_mode']     ?? 'categories'),
         ];
+
         try {
             $res = save_index($data);
-            if ($res['ok']) {
+            if (!$res['ok']) {
+                $errors[] = $res['error'];
+            } else {
+                // Editorial: also persist the section stack from $_POST['sections'].
+                if ($newLayout === 'editorial') {
+                    save_editorial_sections_from_post($id, (array)($_POST['sections'] ?? []));
+                }
                 header('Location: /cms/indexes/edit?id=' . $id . '&flash=' . rawurlencode('Saved.'));
                 exit;
             }
-            $errors[] = $res['error'];
         } catch (\Throwable $ex) {
-            error_log('[index-edit] save_index threw: ' . $ex->getMessage());
+            error_log('[index-edit] save threw: ' . $ex->getMessage());
             $errors[] = 'Could not save index: ' . $ex->getMessage();
         }
+
+        // Reload state from POST values so the form re-renders with what
+        // the user typed when there's an error.
         $index = array_merge($index, [
             'layout'          => $data['layout'],
             'title'           => $data['title'],
@@ -93,9 +107,70 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     }
 }
 
+/**
+ * Persist a section-stack POST. Iterates $_POST['sections'] in order,
+ * upserts each section, then deletes any pre-existing sections whose
+ * id wasn't seen in the POST. New sections have no `id` and get one.
+ */
+function save_editorial_sections_from_post(int $index_id, array $posted): void
+{
+    $existing = list_index_sections($index_id);
+    $seenIds  = [];
+
+    foreach (array_values($posted) as $position => $row) {
+        if (!is_array($row)) continue;
+        $type = (string)($row['type'] ?? '');
+        if (!in_array($type, INDEX_SECTION_TYPES, true)) continue;
+
+        // item_ids arrives as a comma-separated string of int ids.
+        $itemIds = [];
+        if (isset($row['item_ids'])) {
+            foreach (explode(',', (string)$row['item_ids']) as $piece) {
+                $n = (int)trim($piece);
+                if ($n > 0) $itemIds[] = $n;
+            }
+        }
+
+        $feedTypes = (array)($row['feed_types']      ?? []);
+        $feedCats  = (array)($row['feed_categories'] ?? []);
+        $filtOpts  = (array)($row['filter_options']  ?? []);
+
+        $payload = [
+            'id'              => (int)($row['id'] ?? 0),
+            'index_id'        => $index_id,
+            'position'        => $position,
+            'section_type'    => $type,
+            'title'           => (string)($row['title'] ?? ''),
+            'display_format'  => (string)($row['display_format'] ?? 'grid'),
+            'item_limit'      => ($row['item_limit'] ?? '') !== '' ? (int)$row['item_limit'] : null,
+            'grid_rows'       => (string)($row['grid_rows'] ?? 'all'),
+            'see_more_label'  => (string)($row['see_more_label'] ?? ''),
+            'see_more_target' => (string)($row['see_more_target'] ?? ''),
+            'feed_types'      => $feedTypes,
+            'feed_categories' => $feedCats,
+            'feed_sort'       => (string)($row['feed_sort'] ?? 'newest'),
+            'filter_show'     => !empty($row['filter_show']),
+            'filter_by'       => (string)($row['filter_by'] ?? ''),
+            'filter_options'  => $filtOpts,
+            'item_ids'        => $itemIds,
+        ];
+
+        $res = save_index_section($payload);
+        if ($res['ok']) $seenIds[] = (int)$res['id'];
+    }
+
+    // Delete any DB sections the user removed in the UI.
+    foreach ($existing as $s) {
+        $sid = (int)$s['id'];
+        if (!in_array($sid, $seenIds, true)) {
+            delete_index_section($sid);
+        }
+    }
+}
+
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
-// Picklist for the legacy hero/featured selectors (Basic Listing).
+// All published content rows — drives Hero/Curated pickers.
 $pickList = list_index_feed([
     'feed_types'      => null,
     'feed_sort'       => 'newest',
@@ -104,7 +179,10 @@ $pickList = list_index_feed([
 $pickById = [];
 foreach ($pickList as $p) $pickById[(int)$p['id']] = $p;
 
-// Decode JSON columns for the Basic Listing form.
+// All categories (for the Filtered section's categories pill rail).
+$allCats = list_categories();
+
+// Decode legacy JSON columns for the Basic Listing form.
 $featuredIds = $index['featured_ids'] ?? null;
 if (is_string($featuredIds)) {
     $decoded = json_decode($featuredIds, true);
@@ -128,7 +206,7 @@ $sort        = (string)($index['feed_sort']       ?? 'newest');
 $rowsShown   = (string)($index['feed_rows_shown'] ?? 'all');
 $filterMode  = (string)($index['filter_mode']     ?? 'categories');
 
-// Section stack (Editorial only).
+// Existing section stack (Editorial only).
 $sections = $isEditorial ? list_index_sections($id) : [];
 
 define('CMS_PARTIAL_OK', true);
@@ -144,21 +222,57 @@ $typeLabels = [
 ];
 
 $pickLabel = static function (array $row) use ($e): string {
-    $title  = (string)($row['title'] ?? '(untitled)');
     $type   = (string)($row['type']  ?? '');
+    $title  = (string)($row['title'] ?? '(untitled)');
     $pub    = (string)($row['published_at'] ?? '');
     $date   = $pub !== '' ? date('Y-m-d', strtotime($pub)) : '';
     $tlabel = ucfirst(str_replace('-', ' ', $type));
     return $e($title) . ' — ' . $e($tlabel) . ($date !== '' ? ' · ' . $e($date) : '');
 };
 
-// UI labels for section types. The 'feed' DB value renders as "Filtered"
-// in the UI per current preference.
+/** Pretty UI labels for section types. 'feed' stores in the DB; 'Filtered' shows in the UI. */
 $secTypeLabel = static function (string $t): string {
     if ($t === 'hero')    return 'Hero';
     if ($t === 'curated') return 'Curated';
     if ($t === 'feed')    return 'Filtered';
     return ucfirst($t);
+};
+
+/** Build a 1-line summary of a section's current config, for the
+    collapsed header bar. Caller passes a normalized section row. */
+$sectionSummary = static function (array $s) use ($typeLabels): string {
+    $type = (string)$s['section_type'];
+    $items = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
+    if ($type === 'hero') {
+        return $items !== [] ? '1 item picked' : 'no pick yet';
+    }
+    if ($type === 'curated') {
+        $n = count($items);
+        $rows = (string)($s['grid_rows'] ?? 'all');
+        $fmt  = (string)($s['display_format'] ?? 'grid');
+        return $n . ($n === 1 ? ' pick' : ' picks') . ' · '
+             . ucfirst($fmt) . ($fmt === 'grid' ? ' · ' . $rows . ($rows !== 'all' ? ' rows' : ' rows') : '');
+    }
+    // feed
+    $fts = is_array($s['feed_types'] ?? null) ? $s['feed_types'] : [];
+    $tlabels = array_map(static fn($t) => $typeLabels[$t] ?? ucfirst($t), $fts);
+    $tstr = $tlabels === [] ? 'All types' : implode(' + ', $tlabels);
+    $sort = (string)($s['feed_sort'] ?? 'newest');
+    $fmt  = (string)($s['display_format'] ?? 'grid');
+    $rows = (string)($s['grid_rows'] ?? 'all');
+    return $tstr . ' · ' . ucfirst($sort) . ' · ' . ucfirst($fmt) . ($fmt === 'grid' ? ' · ' . $rows . ' rows' : '');
+};
+
+/** Categories the author can pick / filter by for a feed section.
+    Returns rows with value_slug + label + colour. When $types is non-
+    empty, restrict to categories whose type matches one of those. */
+$catsForTypes = static function (array $types) use ($allCats): array {
+    if ($types === []) return $allCats;
+    $out = [];
+    foreach ($allCats as $c) {
+        if (in_array((string)$c['type'], $types, true)) $out[] = $c;
+    }
+    return $out;
 };
 ?><!doctype html>
 <html lang="en">
@@ -199,8 +313,8 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = '/' . (string)$index['slug'] . '/';
       $subtitle = $isEditorial
-          ? 'Editorial Page'
-          : 'Basic Listing';
+          ? 'Editorial Page · composed of typed sections (Hero / Curated / Filtered).'
+          : 'Basic Listing · single filtered feed.';
       $actions  = '<a href="/' . $e((string)$index['slug']) . '/" target="_blank" rel="noopener" class="btn-sec">View</a>'
                 . '<a href="/cms/indexes" class="btn-sec">All indexes</a>';
       require __DIR__ . '/../partials/view-header.php';
@@ -212,15 +326,17 @@ require __DIR__ . '/../partials/topbar.php';
       require __DIR__ . '/../partials/flash.php';
       ?>
 
-      <form method="post" action="/cms/indexes/edit" class="content-area" id="index-edit-form">
+      <form method="post" action="/cms/indexes/edit" class="cms-form cms-form-wide" id="index-edit-form">
         <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
         <input type="hidden" name="id" value="<?= $id ?>">
         <input type="hidden" name="layout" id="layout-input" value="<?= $e($layout) ?>">
         <input type="hidden" name="featured_ids" id="featured-ids-input" value="<?= $e(implode(',', $featuredIds)) ?>">
 
+        <!-- Page-level fields: title, subtitle, show_title toggle on the
+             left, Layout pill toggle on the right. -->
         <div class="field-group">
           <label class="field-label" for="title-input">Title</label>
-          <input id="title-input" type="text" name="title" class="field-input" value="<?= $e((string)($index['title'] ?? '')) ?>" maxlength="500">
+          <input id="title-input" type="text" name="title" class="field-input large" value="<?= $e((string)($index['title'] ?? '')) ?>" maxlength="500">
         </div>
 
         <div class="field-group">
@@ -228,69 +344,103 @@ require __DIR__ . '/../partials/topbar.php';
           <input id="subtitle-input" type="text" name="subtitle" class="field-input" value="<?= $e((string)($index['subtitle'] ?? '')) ?>" maxlength="500">
         </div>
 
-        <div class="field-group">
-          <label class="field-label">
-            <input type="checkbox" name="show_title" value="1" <?= $showTitle ? 'checked' : '' ?>>
-            Show title
-          </label>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Layout</label>
-          <div class="filter-bar">
-            <div class="filter-group">
-              <button type="button" class="filter-pill <?= $isEditorial ? 'active' : '' ?>" data-layout="editorial">Editorial Page</button>
+        <div class="field-group" style="display:flex;gap:var(--space-12);align-items:center;flex-wrap:wrap">
+          <label class="switch-filled"><input type="checkbox" name="show_title" id="show-title-toggle" value="1" <?= $showTitle ? 'checked' : '' ?>><span class="slider"></span></label>
+          <label for="show-title-toggle" style="font-family:var(--font);font-size:var(--text-meta);color:var(--secondary);cursor:pointer;margin:0">Show title</label>
+          <span style="flex:1"></span>
+          <span class="content-block-label" style="margin-right:var(--space-8)">Layout</span>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-layout-toggle>
+              <button type="button" class="filter-pill <?= $isEditorial ? 'active' : '' ?>" data-layout="editorial">Editorial</button>
               <button type="button" class="filter-pill <?= !$isEditorial ? 'active' : '' ?>" data-layout="listing">Basic Listing</button>
             </div>
           </div>
         </div>
 
-<?php if ($isEditorial): /* ── Editorial: section stack (skeleton) ───── */ ?>
+<?php if ($isEditorial): /* ─── EDITORIAL SECTION STACK BUILDER ───── */ ?>
 
-        <div class="content-block">
-          <div class="content-block-header">
-            <div>
-              <span class="content-block-label">Sections</span>
-              <span class="content-block-sublabel">drag to reorder</span>
-            </div>
-            <span class="content-block-count"><?= count($sections) ?></span>
-          </div>
+        <div class="content-block-label" style="margin:var(--space-24) 0 var(--space-8);display:flex;gap:var(--space-8);align-items:baseline">
+          <span>Sections</span>
+          <span style="color:var(--ink-30)">·</span>
+          <span id="sec-count"><?= count($sections) ?></span>
+          <span style="color:var(--ink-30)">·</span>
+          <span style="font-weight:400;color:var(--muted);font-family:var(--font-mono);text-transform:none;letter-spacing:0">drag to reorder</span>
+        </div>
 
-          <div class="sec-list" id="sec-list">
-            <?php foreach ($sections as $s):
-                $sid   = (int)$s['id'];
-                $stype = (string)$s['section_type'];
-                $stit  = trim((string)($s['title'] ?? ''));
-                $name  = $stit !== '' ? $stit : '(no title)';
-            ?>
-              <div class="sec-card is-collapsed" data-section data-section-type="<?= $e($stype) ?>" data-section-id="<?= $sid ?>">
-                <input type="hidden" name="sections[<?= $sid ?>][id]"   value="<?= $sid ?>">
-                <input type="hidden" name="sections[<?= $sid ?>][type]" value="<?= $e($stype) ?>">
-                <div class="sec-card-head" data-section-toggle>
-                  <span class="content-block-label"><?= $e($secTypeLabel($stype)) ?></span>
-                  <span class="filter-sep"></span>
-                  <span class="kcard-title"><?= $e($name) ?></span>
-                  <button type="button" class="btn-icon btn-icon-danger" title="Delete section" data-section-delete>
-                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                  <button type="button" class="btn-icon" title="Expand">
-                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  </button>
-                </div>
-                <div class="sec-card-body">
-                  <p class="field-hint">Editor for this section type lands in the next iteration.</p>
-                </div>
-              </div>
-            <?php endforeach; ?>
+        <div id="sec-stack" style="display:flex;flex-direction:column;gap:var(--space-12)">
+          <?php
+          $i = 0;
+          foreach ($sections as $s):
+              $sid     = (int)$s['id'];
+              $stype   = (string)$s['section_type'];
+              $stitle  = (string)($s['title'] ?? '');
+              $items   = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
+              $ftypes  = is_array($s['feed_types'] ?? null) ? $s['feed_types'] : [];
+              $fcats   = is_array($s['feed_categories'] ?? null) ? $s['feed_categories'] : [];
+              $fopts   = is_array($s['filter_options'] ?? null) ? $s['filter_options'] : [];
+              $fshow   = !empty($s['filter_show']);
+              $fby     = (string)($s['filter_by'] ?? 'types');
+              $fmt     = (string)($s['display_format'] ?? 'grid');
+              $gridR   = (string)($s['grid_rows'] ?? 'all');
+              $limit   = $s['item_limit'] ?? '';
+              $seeLab  = (string)($s['see_more_label']  ?? '');
+              $seeTgt  = (string)($s['see_more_target'] ?? '');
+              $fsort   = (string)($s['feed_sort'] ?? 'newest');
+          ?>
+          <?php require __DIR__ . '/index-edit-section.php'; ?>
+          <?php $i++; endforeach; ?>
+        </div>
+
+        <!-- + Add section -->
+        <div style="position:relative;margin-top:var(--space-16)">
+          <button type="button" id="sec-add-btn" style="width:100%;padding:16px var(--space-20);border:1px dashed var(--ink-30);border-radius:4px;background:transparent;color:var(--secondary);font-family:var(--font-cond);font-size:var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer">
+            + Add section
+          </button>
+          <div id="sec-add-menu" hidden style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:var(--space-8);background:var(--surface);border:1px solid var(--ink-18);border-radius:var(--r-card);box-shadow:0 8px 24px rgba(0,0,0,0.06);z-index:20;min-width:300px;padding:var(--space-4)">
+            <button type="button" class="sec-add-opt" data-add-type="hero" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
+              <span class="content-block-label">Hero</span>
+              <span style="font-size:var(--text-meta);color:var(--muted)">One hand-picked item, full-width banner.</span>
+            </button>
+            <button type="button" class="sec-add-opt" data-add-type="curated" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
+              <span class="content-block-label">Curated</span>
+              <span style="font-size:var(--text-meta);color:var(--muted)">Hand-picked posts in a grid or carousel.</span>
+            </button>
+            <button type="button" class="sec-add-opt" data-add-type="feed" style="display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;background:transparent;border:none;border-radius:3px;padding:var(--space-12) var(--space-16);cursor:pointer;font-family:inherit">
+              <span class="content-block-label">Filtered</span>
+              <span style="font-size:var(--text-meta);color:var(--muted)">Self-updating set driven by type / category / sort.</span>
+            </button>
           </div>
         </div>
 
-<?php else: /* ── Basic Listing: existing form (unchanged) ────────────── */ ?>
+        <!-- Section templates for JS-driven Add. Hidden; the JS clones,
+             swaps placeholders, and appends to #sec-stack. -->
+        <?php foreach (['hero', 'curated', 'feed'] as $tplType):
+            $s = [
+                'id' => 0, 'section_type' => $tplType, 'title' => '',
+                'item_ids' => [], 'feed_types' => [], 'feed_categories' => [],
+                'filter_options' => [], 'filter_show' => false, 'filter_by' => 'types',
+                'display_format' => 'grid', 'grid_rows' => 'all',
+                'item_limit' => '', 'see_more_label' => '', 'see_more_target' => '',
+                'feed_sort' => 'newest',
+            ];
+            $sid = 0; $stype = $tplType; $stitle = ''; $items = [];
+            $ftypes = []; $fcats = []; $fopts = []; $fshow = false; $fby = 'types';
+            $fmt = 'grid'; $gridR = 'all'; $limit = ''; $seeLab = ''; $seeTgt = '';
+            $fsort = 'newest';
+            $i = '__TPL__';
+        ?>
+        <template id="sec-tpl-<?= $tplType ?>"><?php require __DIR__ . '/index-edit-section.php'; ?></template>
+        <?php endforeach; ?>
 
-        <div class="content-block" id="block-hero">
-          <div class="content-block-header"><div><span class="content-block-label">Hero feature</span></div></div>
-          <div class="field-group">
-            <select name="hero_content_id" class="field-input">
+<?php else: /* ─── BASIC LISTING (legacy form, untouched) ─────────────── */ ?>
+
+        <!-- Hero Feature -->
+        <div class="content-block" id="block-hero" style="display:none">
+          <div class="content-block-header">
+            <div><span class="content-block-label">Hero feature</span></div>
+          </div>
+          <div style="padding:var(--space-16) var(--space-20)">
+            <select name="hero_content_id" class="field-input" style="width:100%;max-width:600px">
               <option value="0">— None —</option>
               <?php foreach ($pickList as $row): ?>
                 <option value="<?= (int)$row['id'] ?>" <?= (int)$row['id'] === $heroId ? 'selected' : '' ?>><?= $pickLabel($row) ?></option>
@@ -299,95 +449,105 @@ require __DIR__ . '/../partials/topbar.php';
           </div>
         </div>
 
-        <div class="content-block" id="block-featured">
+        <div class="content-block" id="block-featured" style="display:none">
           <div class="content-block-header"><div><span class="content-block-label">Featured</span></div></div>
-          <div id="featured-list">
-            <?php foreach ($featuredIds as $fid):
-              $r = $pickById[$fid] ?? null;
-              if ($r === null) continue;
-            ?>
-              <div class="rowform-row" draggable="true" data-id="<?= (int)$r['id'] ?>">
-                <span><?= $pickLabel($r) ?></span>
-                <button type="button" class="featured-remove btn-icon btn-icon-danger" title="Remove">
-                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-              </div>
-            <?php endforeach; ?>
-          </div>
-          <div class="field-group">
-            <select id="featured-add" class="field-input">
-              <option value="">+ Add to featured…</option>
-              <?php foreach ($pickList as $row): ?>
-                <option value="<?= (int)$row['id'] ?>" data-label="<?= $pickLabel($row) ?>"><?= $pickLabel($row) ?></option>
+          <div style="padding:var(--space-16) var(--space-20)">
+            <div id="featured-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:var(--space-12)">
+              <?php foreach ($featuredIds as $fid):
+                $r = $pickById[$fid] ?? null;
+                if ($r === null) continue;
+              ?>
+                <div class="rowform-row" draggable="true" data-id="<?= (int)$r['id'] ?>">
+                  <span class="cms-grip">&#8942;&#8942;</span>
+                  <span style="flex:1"><?= $pickLabel($r) ?></span>
+                  <button type="button" class="featured-remove btn-icon btn-icon-danger" title="Remove" aria-label="Remove">
+                    <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
               <?php endforeach; ?>
-            </select>
-            <button type="button" id="featured-add-btn" class="btn-sec btn-tiny">Add</button>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center">
+              <select id="featured-add" class="field-input" style="flex:1">
+                <option value="">+ Add to featured…</option>
+                <?php foreach ($pickList as $row): ?>
+                  <option value="<?= (int)$row['id'] ?>" data-label="<?= $pickLabel($row) ?>"><?= $pickLabel($row) ?></option>
+                <?php endforeach; ?>
+              </select>
+              <button type="button" id="featured-add-btn" class="btn-sec btn-tiny">Add</button>
+            </div>
           </div>
         </div>
 
+        <!-- Content feed -->
         <div class="content-block">
-          <div class="content-block-header"><div><span class="content-block-label">Content feed</span></div></div>
-
-          <div class="field-group">
-            <label class="field-label">Types</label>
-            <div class="filter-bar">
-              <div class="filter-group">
-                <?php foreach ($typeLabels as $slug => $label):
-                  $on = in_array($slug, $feedTypes, true);
-                ?>
-                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
-                    <input type="checkbox" name="feed_types[]" value="<?= $e($slug) ?>" <?= $on ? 'checked' : '' ?>>
-                    <?= $e($label) ?>
-                  </label>
-                <?php endforeach; ?>
-              </div>
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Content feed</span>
+              <span class="content-block-sublabel">The main grid of cards.</span>
             </div>
           </div>
-
-          <div class="field-group">
-            <label class="field-label">Sort</label>
-            <div class="filter-bar">
-              <div class="filter-group">
-                <?php foreach (['newest' => 'Newest first', 'oldest' => 'Oldest first'] as $val => $label):
-                  $on = $sort === $val;
-                ?>
-                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
-                    <input type="radio" name="feed_sort" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?>>
-                    <?= $e($label) ?>
-                  </label>
-                <?php endforeach; ?>
+          <div style="padding:var(--space-16) var(--space-20)">
+            <div class="field-group">
+              <label class="field-label">Types</label>
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+                <div class="filter-group">
+                  <?php foreach ($typeLabels as $slug => $label):
+                    $on = in_array($slug, $feedTypes, true);
+                  ?>
+                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
+                      <input type="checkbox" name="feed_types[]" value="<?= $e($slug) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                      <?= $e($label) ?>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="field-group">
-            <label class="field-label">Rows shown</label>
-            <div class="filter-bar">
-              <div class="filter-group">
-                <?php foreach (['1', '2', '3', '4', 'all'] as $val):
-                  $on = $rowsShown === $val;
-                ?>
-                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
-                    <input type="radio" name="feed_rows_shown" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?>>
-                    <?= $e($val === 'all' ? 'All' : $val) ?>
-                  </label>
-                <?php endforeach; ?>
+            <div class="field-group">
+              <label class="field-label">Sort</label>
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                <div class="filter-group">
+                  <?php foreach (['newest' => 'Newest first', 'oldest' => 'Oldest first'] as $val => $label):
+                    $on = $sort === $val;
+                  ?>
+                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
+                      <input type="radio" name="feed_sort" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                      <?= $e($label) ?>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="field-group">
-            <label class="field-label">Filter pills</label>
-            <div class="filter-bar">
-              <div class="filter-group">
-                <?php foreach (['categories' => 'Categories', 'types' => 'Types', 'none' => 'None'] as $val => $label):
-                  $on = $filterMode === $val;
-                ?>
-                  <label class="filter-pill <?= $on ? 'active' : '' ?>">
-                    <input type="radio" name="filter_mode" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?>>
-                    <?= $e($label) ?>
-                  </label>
-                <?php endforeach; ?>
+            <div class="field-group">
+              <label class="field-label">Rows shown</label>
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                <div class="filter-group">
+                  <?php foreach (['1', '2', '3', '4', 'all'] as $val):
+                    $on = $rowsShown === $val;
+                  ?>
+                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
+                      <input type="radio" name="feed_rows_shown" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                      <?= $e($val === 'all' ? 'All' : $val) ?>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-group" style="margin-bottom:0">
+              <label class="field-label">Filter pills</label>
+              <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+                <div class="filter-group">
+                  <?php foreach (['categories' => 'Categories', 'types' => 'Types', 'none' => 'None'] as $val => $label):
+                    $on = $filterMode === $val;
+                  ?>
+                    <label class="filter-pill <?= $on ? 'active' : '' ?>" style="cursor:pointer">
+                      <input type="radio" name="filter_mode" value="<?= $e($val) ?>" <?= $on ? 'checked' : '' ?> style="display:none">
+                      <?= $e($label) ?>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
               </div>
             </div>
           </div>
@@ -395,9 +555,10 @@ require __DIR__ . '/../partials/topbar.php';
 
 <?php endif; ?>
 
-        <div class="form-actions">
+        <div class="form-actions form-actions-sticky" style="display:flex;align-items:center;gap:var(--space-12)">
           <a href="/cms/indexes" class="btn-sec">Cancel</a>
-          <button type="submit" class="btn-pri">Save</button>
+          <span style="flex:1"></span>
+          <button type="submit" class="btn-sec" data-save-btn>Save</button>
         </div>
 
       </form>
@@ -405,43 +566,9 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
-<script>
-// Skeleton interactions only — toggle collapse, layout pill, delete.
-(function () {
-  'use strict';
-  var form = document.getElementById('index-edit-form');
-  if (!form) return;
-
-  // Collapse / expand a section card when its head is clicked.
-  form.addEventListener('click', function (e) {
-    if (e.target.closest('button, input, select, a')) return;
-    var head = e.target.closest('[data-section-toggle]');
-    if (!head) return;
-    var card = head.closest('[data-section]');
-    if (card) card.classList.toggle('is-collapsed');
-  });
-
-  // Delete a section (DOM-only for now; server dedupe lands with section CRUD).
-  form.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-section-delete]');
-    if (!btn) return;
-    if (!confirm('Delete this section?')) return;
-    var card = btn.closest('[data-section]');
-    if (card) card.remove();
-  });
-
-  // Layout pill toggle — submit on change so the server re-renders the right form.
-  form.addEventListener('click', function (e) {
-    var p = e.target.closest('[data-layout]');
-    if (!p) return;
-    var hidden = document.getElementById('layout-input');
-    if (!hidden) return;
-    if (hidden.value === p.getAttribute('data-layout')) return;
-    hidden.value = p.getAttribute('data-layout');
-    form.submit();
-  });
-})();
-</script>
+<script src="/cms/_assets/index-edit.js" defer></script>
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
+<script src="/cms/_assets/dirty-flip.js" defer></script>
 
 </body>
 </html>

@@ -127,9 +127,14 @@ $grid_rows_for = static function (array $sec): int {
           } elseif ($hImgMode === 'auto') {
               $hImage = (string)($hcard['hero_image'] ?? '');
           }
-          $eyebrowBits = [];
-          if ($stitle !== '') $eyebrowBits[] = $stitle;
-          if ($hCatLabel !== '') $eyebrowBits[] = $hCatLabel;
+          // Eyebrow format: "— {section title} — {category}"
+          // The section title sits between two em-dashes; the category
+          // (if present) follows after the trailing dash with a single
+          // space, no extra separator.
+          $eyebrowParts = [];
+          if ($stitle !== '')    $eyebrowParts[] = '— ' . $stitle . ' —';
+          if ($hCatLabel !== '') $eyebrowParts[] = $hCatLabel;
+          $eyebrowText = $eyebrowParts !== [] ? strtoupper(implode(' ', $eyebrowParts)) : '';
           $hUrlBase = [
               'article'      => '/writing/',
               'journal'      => '/journal/',
@@ -151,8 +156,8 @@ $grid_rows_for = static function (array $sec): int {
       <?php if ($isBleed): ?>
         <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
           <div class="editorial-hero-text">
-            <?php if ($eyebrowBits !== []): ?>
-              <div class="editorial-hero-eyebrow"><?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?></div>
+            <?php if ($eyebrowText !== ''): ?>
+              <div class="editorial-hero-eyebrow"><?= $e($eyebrowText) ?></div>
             <?php endif; ?>
             <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>
             <?php if ($hSummary !== ''): ?>
@@ -169,9 +174,9 @@ $grid_rows_for = static function (array $sec): int {
       <?php else: ?>
         <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?> editorial-hero--bg-<?= $e($hBg) ?><?= $hHasSide ? '' : ' is-solo' ?>">
           <div class="editorial-hero-text">
-            <?php if ($eyebrowBits !== []): ?>
+            <?php if ($eyebrowText !== ''): ?>
               <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
-                <?= $e(strtoupper(implode(' · ', $eyebrowBits))) ?>
+                <?= $e($eyebrowText) ?>
               </div>
             <?php endif; ?>
             <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>

@@ -499,7 +499,7 @@ require __DIR__ . '/../partials/topbar.php';
 <?php endif; ?>
 
         <div class="form-actions form-actions-sticky">
-          <button type="submit" class="btn-sec" data-save-btn>Save</button>
+          <button type="submit" class="btn-sec" data-save-btn>Publish</button>
           <a href="/cms/indexes" class="btn-sec">Cancel</a>
         </div>
 

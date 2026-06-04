@@ -397,7 +397,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php if ($isNew): ?>
               <button type="submit" name="action" value="save" class="btn-pri">Create series</button>
             <?php else: ?>
-              <button type="submit" name="action" value="save" class="btn-sec" data-save-btn>Save</button>
+              <button type="submit" name="action" value="save" class="btn-sec" data-save-btn>Publish</button>
             <?php endif; ?>
             <a href="/cms/series" class="btn-sec">Cancel</a>
             <?php if (!$isNew && $canDelete): ?>

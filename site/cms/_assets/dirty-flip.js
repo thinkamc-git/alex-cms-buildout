@@ -90,6 +90,12 @@
       el.addEventListener(evt, flip);
     }
 
+    // Also bind a delegated form-level listener so inputs added AFTER
+    // init (e.g. dynamically cloned section cards in index-edit.js) and
+    // synthetic change events dispatched on the form itself still flip.
+    form.addEventListener('input',  flip);
+    form.addEventListener('change', flip);
+
     btn.addEventListener('click', function (e) {
       if (!btn.classList.contains('btn-pri')) return; // nothing to save
       e.preventDefault();

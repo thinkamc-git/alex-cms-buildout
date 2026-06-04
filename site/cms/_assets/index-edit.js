@@ -23,6 +23,13 @@
   var form = document.getElementById('index-edit-form');
   if (!form) return;
 
+  // Signal dirty to dirty-flip after non-input mutations (add/delete/
+  // reorder/post add/remove). dirty-flip listens for `change` bubbling
+  // up to the form element.
+  function markDirty() {
+    form.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
   // ── Pill single-select (data-pill-group="single") ───────────────────
   // Each .filter-group with data-pill-group="single" pairs with a hidden
   // <input name=...> that captures the active pill's data-pill-value.
@@ -33,8 +40,10 @@
     if (!grp) return;
     grp.querySelectorAll('.filter-pill').forEach(function (p) { p.classList.remove('active'); });
     pill.classList.add('active');
-    // Find the sibling hidden input.
-    var hidden = grp.parentElement.querySelector('input[type="hidden"]');
+    // The hidden input is a sibling of .filter-bar inside the same
+    // .field-group, not inside .filter-bar — go up to the field-group.
+    var fieldGroup = grp.closest('.field-group');
+    var hidden = fieldGroup ? fieldGroup.querySelector('input[type="hidden"]') : null;
     if (hidden) {
       hidden.value = pill.getAttribute('data-pill-value');
       hidden.dispatchEvent(new Event('change', { bubbles: true }));
@@ -85,6 +94,7 @@
     reindexSections();
     updateSectionCount();
     toggleSecEmpty();
+    markDirty();
   });
 
   // ── Add section: three buttons (+ Hero / + Curated / + Filtered) ────
@@ -114,6 +124,7 @@
     toggleSecEmpty();
     card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     setTimeout(function () { card.classList.remove('is-fresh'); }, 1300);
+    markDirty();
   }
 
   function toggleSecEmpty() {
@@ -280,6 +291,7 @@
       if (dragging) dragging.classList.remove('is-dragging');
       dragging = null;
       if (onReorder) onReorder();
+      markDirty();
     });
     // Drop-line placeholder — a real 2px line element inserted into the
     // gap where the dragging item will land. Cleared on drop / dragend.

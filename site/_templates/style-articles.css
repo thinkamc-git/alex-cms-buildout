@@ -191,7 +191,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 28px var(--space-48);
-  background: var(--neutral);
+  background: transparent;
   border-top: var(--rule-30);
 }
 .layout-footer-left,

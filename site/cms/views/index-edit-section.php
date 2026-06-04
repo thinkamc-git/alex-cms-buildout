@@ -133,26 +133,6 @@ $catsForThis = $catsForTypes($ftypes);
                   data-meta="<?= $e($rMeta) ?>"><?= $pickLabel($row) ?></option>
         <?php endforeach; ?>
       </select>
-      <?php
-        $selOpt = null;
-        if ($items !== []) {
-            foreach ($pickList as $r) {
-                if ((int)$r['id'] === (int)$items[0]) { $selOpt = $r; break; }
-            }
-        }
-        $selTitle = $selOpt ? (string)($selOpt['title'] ?? '') : '';
-        $selMeta  = '';
-        if ($selOpt) {
-            $st = (string)($selOpt['type'] ?? '');
-            $sp = (string)($selOpt['published_at'] ?? '');
-            $sd = $sp !== '' ? date('Y-m-d', strtotime($sp)) : '';
-            $selMeta = trim(ucfirst(str_replace('-', ' ', $st)) . ($sd !== '' ? ' · ' . $sd : ''));
-        }
-      ?>
-      <div class="hero-pick-display" data-hero-pick-display style="<?= $selTitle === '' ? 'display:none' : '' ?>">
-        <strong data-hero-pick-title><?= $e($selTitle) ?></strong>
-        <span data-hero-pick-meta><?= $selMeta !== '' ? '— ' . $e($selMeta) : '' ?></span>
-      </div>
     </div>
 
     <div class="field-group">
@@ -211,7 +191,7 @@ $catsForThis = $catsForTypes($ftypes);
         <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
           <div class="hero-img-preview-text" aria-hidden="true">
             <div class="hero-img-preview-title">Title Example</div>
-            <div class="hero-img-preview-caption">An example of the summary text that will appear below.</div>
+            <div class="hero-img-preview-caption">An example of the summary text.</div>
           </div>
           <div class="hero-img-preview-imgwrap" data-hero-preview-imgwrap>
             <?php if ($previewSrc !== ''): ?>

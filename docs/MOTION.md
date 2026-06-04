@@ -31,7 +31,7 @@ re-opening the sandbox.
 | Duration        | `580ms`                            | per element                   |
 | Stagger step    | `60ms`                             | delay between siblings        |
 | Easing          | `cubic-bezier(0.22, 1, 0.36, 1)`   | easeOutQuint — soft landing   |
-| Stagger cap     | `6` (index 0–5, then flat)         | tail siblings share last beat |
+| Stagger cap     | `10` (index 0–9, then flat)        | tail siblings share last beat (max delay 540ms) |
 | Scope           | per-group (`nth-child` resets)     | **no JavaScript required**    |
 
 **Per-archetype — motion + rise distance are NOT universal:**
@@ -70,12 +70,16 @@ cascade archetype. Adding a new cascade archetype = one `--rise` override.
   opacity: 0;
   animation: rise-in 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.reveal > *:nth-child(1)   { animation-delay:   0ms; }
-.reveal > *:nth-child(2)   { animation-delay:  60ms; }
-.reveal > *:nth-child(3)   { animation-delay: 120ms; }
-.reveal > *:nth-child(4)   { animation-delay: 180ms; }
-.reveal > *:nth-child(5)   { animation-delay: 240ms; }
-.reveal > *:nth-child(n+6) { animation-delay: 300ms; }
+.reveal > *:nth-child(1)    { animation-delay:   0ms; }
+.reveal > *:nth-child(2)    { animation-delay:  60ms; }
+.reveal > *:nth-child(3)    { animation-delay: 120ms; }
+.reveal > *:nth-child(4)    { animation-delay: 180ms; }
+.reveal > *:nth-child(5)    { animation-delay: 240ms; }
+.reveal > *:nth-child(6)    { animation-delay: 300ms; }
+.reveal > *:nth-child(7)    { animation-delay: 360ms; }
+.reveal > *:nth-child(8)    { animation-delay: 420ms; }
+.reveal > *:nth-child(9)    { animation-delay: 480ms; }
+.reveal > *:nth-child(n+10) { animation-delay: 540ms; }
 
 /* UNIFIED RISE — forms / editors: the whole panel lifts in together, no stagger.
    Apply .reveal-page to the form/content wrapper (one element, one motion). */

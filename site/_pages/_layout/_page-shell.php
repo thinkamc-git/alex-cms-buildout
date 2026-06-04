@@ -213,7 +213,8 @@ if (!$_has_pmeta_title && $_site_title !== '' && $_page_title_part !== ''
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/_layout/style-pages.css" />
   <link rel="icon" type="image/png" href="/_layout/favicon<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png" />
-  <script src="/_layout/analytics.js" async></script>
+  <!-- Phase 21: analytics moved to settings.analytics_script (injected before </body> below).
+       Other entry points (master-layout, 404, ux2.0) still use /_layout/analytics.js. -->
 </head>
 <body>
 

@@ -489,8 +489,9 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .view > .dash-meta { padding:0 var(--space-24); margin-top:var(--space-12); border-bottom:var(--rule-faint); padding-bottom:var(--space-16); }
 /* Phase 21.7 — when dash-meta sits directly above the canonical filter
    bar partial, drop its bottom margin + border so the two bars stack
-   cleanly (the filter-bar's own border-bottom provides the separator). */
-.view > .dash-meta:has(+ .filter-bar) { margin-bottom:0; padding-bottom:var(--space-8); border-bottom:none; }
+   cleanly (the filter-bar's own border-bottom provides the separator).
+   Keep the default padding-bottom so the stats keep their breathing room. */
+.view > .dash-meta:has(+ .filter-bar) { margin-bottom:0; border-bottom:none; }
 .view > .dash-meta + .filter-bar { border-top: var(--rule-faint); }
 .dash-stat { display:flex; align-items:baseline; gap:6px; }
 .dash-stat .num { font-family:var(--font-serif); font-style:italic; font-size:26px; line-height:1; letter-spacing:-0.03em; color:var(--primary); }

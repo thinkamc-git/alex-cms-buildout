@@ -115,7 +115,7 @@ $catsForThis = $catsForTypes($ftypes);
       <label class="field-label">Layout</label>
       <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
         <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
-          <?php foreach (['plain' => 'Plain', 'within' => 'Hero Within', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
+          <?php foreach (['plain' => 'Plain', 'within' => 'Image Container', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
             <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
           <?php endforeach; ?>
         </div>
@@ -148,7 +148,8 @@ $catsForThis = $catsForTypes($ftypes);
       <p class="field-hint">Auto: use the picked post's hero image. Custom: upload or paste a URL. None: gradient over canvas (bleed) or no side image (within).</p>
     </div>
 
-    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
+    <?php $showCustomImg = $hlayout !== 'plain' && $himode === 'custom'; ?>
+    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $showCustomImg ? '' : 'display:none' ?>">
       <label class="field-label">Custom image</label>
       <div style="display:flex;gap:var(--space-8);align-items:center">
         <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg or paste URL" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1">

@@ -30,6 +30,23 @@
     form.dispatchEvent(new Event('change', { bubbles: true }));
   }
 
+  // Apply visibility rules for the Hero section editor fields based on
+  // the section's current hero_layout and hero_image_mode hidden inputs.
+  function syncHeroFieldVisibility(sec) {
+    if (!sec) return;
+    var layoutH = sec.querySelector('input[type="hidden"][name$="[hero_layout]"]');
+    var modeH   = sec.querySelector('input[type="hidden"][name$="[hero_image_mode]"]');
+    if (!layoutH || !modeH) return;
+    var layout = layoutH.value;
+    var mode   = modeH.value;
+    var bgField = sec.querySelector('[data-hero-bg-field]');
+    var imgMode = sec.querySelector('[data-hero-image-mode-field]');
+    var imgUrl  = sec.querySelector('[data-hero-image-url]');
+    if (bgField) bgField.style.display = (layout === 'plain' || layout === 'within') ? '' : 'none';
+    if (imgMode) imgMode.style.display = (layout === 'plain') ? 'none' : '';
+    if (imgUrl)  imgUrl.style.display  = (layout !== 'plain' && mode === 'custom') ? '' : 'none';
+  }
+
   // ── Pill single-select (data-pill-group="single") ───────────────────
   // Each .filter-group with data-pill-group="single" pairs with a hidden
   // <input name=...> that captures the active pill's data-pill-value.
@@ -56,19 +73,17 @@
         if (rowsField) rowsField.style.display = hidden.value === 'carousel' ? 'none' : '';
       }
     }
-    // Hero Layout change: show Background field only for plain/within;
-    // show Image-source + Custom image fields only for non-plain.
-    if (hidden && hidden.name && hidden.name.indexOf('[hero_layout]') > -1) {
+    // Hero Layout / Image-source visibility rules:
+    //   Plain  → Background visible; no image source or custom URL.
+    //   Within → Background visible; image source visible; custom URL
+    //            visible only when source = Custom.
+    //   Bleed* → Background hidden;  image source visible; custom URL
+    //            visible only when source = Custom.
+    if (hidden && hidden.name &&
+        (hidden.name.indexOf('[hero_layout]') > -1 ||
+         hidden.name.indexOf('[hero_image_mode]') > -1)) {
       var sec3 = pill.closest('[data-section]');
-      if (sec3) {
-        var v = hidden.value;
-        var bgField  = sec3.querySelector('[data-hero-bg-field]');
-        var imgMode  = sec3.querySelector('[data-hero-image-mode-field]');
-        var imgUrl   = sec3.querySelector('[data-hero-image-url]');
-        if (bgField) bgField.style.display = (v === 'plain' || v === 'within') ? '' : 'none';
-        if (imgMode) imgMode.style.display = (v === 'plain') ? 'none' : '';
-        if (imgUrl)  imgUrl.style.display  = (v === 'plain') ? 'none' : '';
-      }
+      if (sec3) syncHeroFieldVisibility(sec3);
     }
     updateSummaryFor(pill.closest('[data-section]'));
   });
@@ -452,6 +467,11 @@
 
   // Initial render of all rails on the page.
   document.querySelectorAll('[data-cat-rail]').forEach(renderCatRail);
+
+  // Initial pass on every Hero section so its field visibility lines
+  // up with the saved layout + image_mode (covers both server-rendered
+  // sections and cloned templates on Add).
+  document.querySelectorAll('[data-section][data-section-type="hero"]').forEach(syncHeroFieldVisibility);
 
   // When any Content Query Types pill changes, refresh that section's rails.
   form.addEventListener('change', function (e) {

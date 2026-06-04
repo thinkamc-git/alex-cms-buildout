@@ -116,17 +116,17 @@ $grid_rows_for = static function (array $sec): int {
           $hSeriesNm  = (string)($hcard['series_name'] ?? '');
           $hSeriesOrd = (int)($hcard['series_order'] ?? 0);
           $hSeriesTot = $hSeriesId > 0 ? count_series_published($hSeriesId) : 0;
+          $hLayout    = (string)($sec['hero_layout']     ?? 'within');
+          $hBg        = (string)($sec['hero_background'] ?? 'transparent');
           $hImgMode   = (string)($sec['hero_image_mode'] ?? 'auto');
           $hImgCustom = (string)($sec['hero_image_url']  ?? '');
-          // Resolve which image (if any) renders on the right side.
+          // Resolve the image — used as side panel (within) or full bg (bleed).
           $hImage = '';
           if ($hImgMode === 'custom') {
               $hImage = $hImgCustom;
           } elseif ($hImgMode === 'auto') {
               $hImage = (string)($hcard['hero_image'] ?? '');
           }
-          $hHasSeriesCard = $hImage === '' && $hImgMode !== 'none' && $hSeriesNm !== '';
-          $hHasSide       = $hImage !== '' || $hHasSeriesCard;
           $eyebrowBits = [];
           if ($stitle !== '') $eyebrowBits[] = $stitle;
           if ($hCatLabel !== '') $eyebrowBits[] = $hCatLabel;
@@ -139,8 +139,35 @@ $grid_rows_for = static function (array $sec): int {
           $hUrl   = $hSlug !== '' ? $hUrlBase . $hSlug : '#';
           $hDate  = $hPub !== '' ? strtoupper(date('M j, Y', strtotime($hPub))) : '';
           $hMeta  = trim($hDate . ($hRead ? ' · ' . (int)$hRead . ' MIN READ' : ''));
+          $isBleed = $hLayout === 'bleed-dark' || $hLayout === 'bleed-light';
+          $isWithin = $hLayout === 'within';
+          $hHasSeriesCard = $isWithin && $hImage === '' && $hImgMode !== 'none' && $hSeriesNm !== '';
+          $hHasSide       = $isWithin && ($hImage !== '' || $hHasSeriesCard);
+          // Helper: build inline style for bleed bg image.
+          $bleedStyle = $isBleed && $hImage !== ''
+              ? 'background-image:url(\'' . $e($hImage) . '\')'
+              : '';
       ?>
-        <div class="editorial-hero<?= $hHasSide ? '' : ' is-solo' ?>">
+      <?php if ($isBleed): ?>
+        <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
+          <div class="editorial-hero-text">
+            <?php if ($eyebrowBits !== []): ?>
+              <div class="editorial-hero-eyebrow"><?= $e('— ' . strtoupper(implode(' · ', $eyebrowBits))) ?></div>
+            <?php endif; ?>
+            <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>
+            <?php if ($hSummary !== ''): ?>
+              <p class="editorial-hero-summary"><?= $e($hSummary) ?></p>
+            <?php endif; ?>
+            <div class="editorial-hero-foot">
+              <?php if ($hMeta !== ''): ?>
+                <span class="editorial-hero-meta"><?= $e($hMeta) ?></span>
+              <?php endif; ?>
+              <a href="<?= $e($hUrl) ?>" class="editorial-hero-cta">Read &rarr;</a>
+            </div>
+          </div>
+        </div>
+      <?php else: ?>
+        <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?> editorial-hero--bg-<?= $e($hBg) ?><?= $hHasSide ? '' : ' is-solo' ?>">
           <div class="editorial-hero-text">
             <?php if ($eyebrowBits !== []): ?>
               <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
@@ -176,6 +203,7 @@ $grid_rows_for = static function (array $sec): int {
             </aside>
           <?php endif; ?>
         </div>
+      <?php endif; ?>
 
       <?php elseif ($cards !== []): ?>
         <?php

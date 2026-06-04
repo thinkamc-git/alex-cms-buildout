@@ -147,6 +147,8 @@ function save_editorial_sections_from_post(int $index_id, array $posted): void
             'header_style'    => (string)($row['header_style'] ?? 'small'),
             'hero_image_mode' => (string)($row['hero_image_mode'] ?? 'auto'),
             'hero_image_url'  => (string)($row['hero_image_url']  ?? ''),
+            'hero_layout'     => (string)($row['hero_layout']     ?? 'within'),
+            'hero_background' => (string)($row['hero_background'] ?? 'transparent'),
             'display_format'  => (string)($row['display_format'] ?? 'grid'),
             'item_limit'      => ($row['item_limit'] ?? '') !== '' ? (int)$row['item_limit'] : null,
             'grid_rows'       => (string)($row['grid_rows'] ?? 'all'),
@@ -406,6 +408,8 @@ require __DIR__ . '/../partials/topbar.php';
               $hstyle  = (string)($s['header_style'] ?? 'small');
               $himode  = (string)($s['hero_image_mode'] ?? 'auto');
               $himgUrl = (string)($s['hero_image_url']  ?? '');
+              $hlayout = (string)($s['hero_layout']     ?? 'within');
+              $hbg     = (string)($s['hero_background'] ?? 'transparent');
               $items   = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
               $ftypes  = is_array($s['feed_types'] ?? null) ? $s['feed_types'] : [];
               $fcats   = is_array($s['feed_categories'] ?? null) ? $s['feed_categories'] : [];
@@ -441,7 +445,8 @@ require __DIR__ . '/../partials/topbar.php';
                 'feed_sort' => 'newest',
             ];
             $sid = 0; $stype = $tplType; $stitle = ''; $hstyle = 'small';
-            $himode = 'auto'; $himgUrl = ''; $items = [];
+            $himode = 'auto'; $himgUrl = ''; $hlayout = 'within'; $hbg = 'transparent';
+            $items = [];
             $ftypes = []; $fcats = []; $fopts = []; $fshow = false; $fby = 'types';
             $fmt = 'grid'; $gridR = 'all'; $limit = ''; $seeLab = ''; $seeTgt = '';
             $fsort = 'newest';

@@ -56,6 +56,20 @@
         if (rowsField) rowsField.style.display = hidden.value === 'carousel' ? 'none' : '';
       }
     }
+    // Hero Layout change: show Background field only for plain/within;
+    // show Image-source + Custom image fields only for non-plain.
+    if (hidden && hidden.name && hidden.name.indexOf('[hero_layout]') > -1) {
+      var sec3 = pill.closest('[data-section]');
+      if (sec3) {
+        var v = hidden.value;
+        var bgField  = sec3.querySelector('[data-hero-bg-field]');
+        var imgMode  = sec3.querySelector('[data-hero-image-mode-field]');
+        var imgUrl   = sec3.querySelector('[data-hero-image-url]');
+        if (bgField) bgField.style.display = (v === 'plain' || v === 'within') ? '' : 'none';
+        if (imgMode) imgMode.style.display = (v === 'plain') ? 'none' : '';
+        if (imgUrl)  imgUrl.style.display  = (v === 'plain') ? 'none' : '';
+      }
+    }
     updateSummaryFor(pill.closest('[data-section]'));
   });
 

@@ -499,6 +499,8 @@ const INDEX_SECTION_SORTS   = ['newest', 'oldest'];
 const INDEX_SECTION_FILTERS = ['types', 'categories'];
 const INDEX_SECTION_HEADERS = ['small', 'big'];
 const INDEX_SECTION_HERO_IMG = ['auto', 'custom', 'none'];
+const INDEX_SECTION_HERO_LAYOUTS = ['plain', 'within', 'bleed-dark', 'bleed-light'];
+const INDEX_SECTION_HERO_BGS     = ['transparent', 'surface'];
 
 /**
  * Decode a JSON column that may arrive as either a string (raw from
@@ -530,6 +532,8 @@ function _index_section_normalize(array $row): array
     $row['header_style']    = (string)($row['header_style'] ?? 'small');
     $row['hero_image_mode'] = (string)($row['hero_image_mode'] ?? 'auto');
     $row['hero_image_url']  = (string)($row['hero_image_url']  ?? '');
+    $row['hero_layout']     = (string)($row['hero_layout']     ?? 'within');
+    $row['hero_background'] = (string)($row['hero_background'] ?? 'transparent');
     $row['item_limit']      = isset($row['item_limit']) && $row['item_limit'] !== null
                               ? (int)$row['item_limit'] : null;
     return $row;
@@ -612,6 +616,11 @@ function save_index_section(array $data): array
     if (!in_array($heroImgMode, INDEX_SECTION_HERO_IMG, true)) $heroImgMode = 'auto';
     $heroImgUrl  = trim((string)($data['hero_image_url'] ?? ($existing['hero_image_url'] ?? ''))) ?: null;
 
+    $heroLayout = (string)($data['hero_layout'] ?? ($existing['hero_layout'] ?? 'within'));
+    if (!in_array($heroLayout, INDEX_SECTION_HERO_LAYOUTS, true)) $heroLayout = 'within';
+    $heroBg = (string)($data['hero_background'] ?? ($existing['hero_background'] ?? 'transparent'));
+    if (!in_array($heroBg, INDEX_SECTION_HERO_BGS, true)) $heroBg = 'transparent';
+
     // Display layer — only meaningful for curated/feed. Hero ignores it
     // but we still store sane defaults so the row is consistent.
     $format = (string)($data['display_format'] ?? ($existing['display_format'] ?? 'grid'));
@@ -685,6 +694,8 @@ function save_index_section(array $data): array
         ':hstyle'      => $headerStyle,
         ':himode'      => $heroImgMode,
         ':himg'        => $heroImgUrl,
+        ':hlayout'     => $heroLayout,
+        ':hbg'         => $heroBg,
         ':fmt'         => $format,
         ':limit'       => $item_limit,
         ':rows'        => $grid_rows,
@@ -702,14 +713,14 @@ function save_index_section(array $data): array
     if ($id === 0) {
         $sql = 'INSERT INTO index_sections
                   (index_id, position, section_type, title, header_style,
-                   hero_image_mode, hero_image_url,
+                   hero_image_mode, hero_image_url, hero_layout, hero_background,
                    display_format, item_limit, grid_rows, see_more_label, see_more_target,
                    feed_types, feed_categories, feed_sort,
                    filter_show, filter_by, filter_options,
                    item_ids)
                 VALUES
                   (:iid, :pos, :type, :title, :hstyle,
-                   :himode, :himg,
+                   :himode, :himg, :hlayout, :hbg,
                    :fmt, :limit, :rows, :see_label, :see_target,
                    :ftypes, :fcats, :fsort,
                    :fshow, :fby, :fopts,
@@ -725,6 +736,8 @@ function save_index_section(array $data): array
               header_style = :hstyle,
               hero_image_mode = :himode,
               hero_image_url = :himg,
+              hero_layout = :hlayout,
+              hero_background = :hbg,
               display_format = :fmt,
               item_limit = :limit,
               grid_rows = :rows,

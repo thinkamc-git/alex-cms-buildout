@@ -140,7 +140,6 @@ body { background: var(--canvas, #ececea); margin: 0; }
   font-size: 19px;
   line-height: 1.55;
   margin: 0;
-  max-width: 56ch;
 }
 .bleed-hero-foot {
   display: flex;
@@ -149,7 +148,6 @@ body { background: var(--canvas, #ececea); margin: 0; }
   gap: var(--space-24);
   margin-top: var(--space-16);
   flex-wrap: wrap;
-  max-width: 56ch;
 }
 .bleed-hero-meta {
   font-family: var(--font-cond);
@@ -235,6 +233,38 @@ body { background: var(--canvas, #ececea); margin: 0; }
 <section class="variant">
   <div class="variant-label"><span>D</span>Full-bleed background · light image · light overlay · dark text</div>
   <div class="bleed-hero bleed-hero--light" style="background-image:url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?auto=format&fit=crop&w=1600&q=70')">
+    <div class="bleed-hero-text">
+      <div class="bleed-hero-eyebrow">— FEATURED · UX INDUSTRY</div>
+      <h1 class="bleed-hero-title">A Discipline Reset</h1>
+      <p class="bleed-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+      <div class="bleed-hero-foot">
+        <span class="bleed-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+        <a href="#" class="bleed-hero-cta">Read →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ E — Same gradient as C, no image, LIGHT grey solid bg ═════ -->
+<section class="variant">
+  <div class="variant-label"><span>E</span>Dark gradient (white text) over solid light grey — gradient must carry legibility</div>
+  <div class="bleed-hero bleed-hero--dark" style="background-image:none;background-color:#d4d4d2">
+    <div class="bleed-hero-text">
+      <div class="bleed-hero-eyebrow">— FEATURED · UX INDUSTRY</div>
+      <h1 class="bleed-hero-title">A Discipline Reset</h1>
+      <p class="bleed-hero-summary">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+      <div class="bleed-hero-foot">
+        <span class="bleed-hero-meta">MAR 4, 2026 · 14 MIN READ</span>
+        <a href="#" class="bleed-hero-cta">Read →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ F — Same gradient as D, no image, DARK grey solid bg ══════ -->
+<section class="variant">
+  <div class="variant-label"><span>F</span>Light gradient (dark text) over solid dark grey — gradient must carry legibility</div>
+  <div class="bleed-hero bleed-hero--light" style="background-image:none;background-color:#3a3a3a">
     <div class="bleed-hero-text">
       <div class="bleed-hero-eyebrow">— FEATURED · UX INDUSTRY</div>
       <h1 class="bleed-hero-title">A Discipline Reset</h1>

@@ -1435,8 +1435,70 @@ a.article-series-pill:hover {
   padding: var(--space-64) var(--space-48);
   align-items: stretch;
 }
-.editorial-hero.is-solo {
+.editorial-hero.is-solo,
+.editorial-hero--plain {
   grid-template-columns: 1fr;
+}
+
+/* ── Background variants for plain + within ── */
+.editorial-hero--bg-surface { background: var(--surface); }
+
+/* ── Bleed variants — full-bleed bg image with gradient overlay ── */
+.editorial-hero--bleed-dark,
+.editorial-hero--bleed-light {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  grid-template-columns: none;
+  min-height: 480px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  gap: 0;
+}
+.editorial-hero--bleed-dark::before,
+.editorial-hero--bleed-light::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.editorial-hero--bleed-dark::before {
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.55) 65%,
+    rgba(0,0,0,0.85) 100%
+  );
+}
+.editorial-hero--bleed-light::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.55) 55%,
+    rgba(255,255,255,0.92) 100%
+  );
+}
+.editorial-hero--bleed-dark .editorial-hero-text,
+.editorial-hero--bleed-light .editorial-hero-text {
+  position: relative;
+  z-index: 1;
+}
+.editorial-hero--bleed-dark .editorial-hero-text   { color: #fff; }
+.editorial-hero--bleed-dark .editorial-hero-eyebrow { color: #f4a4a4; }
+.editorial-hero--bleed-dark .editorial-hero-summary { color: rgba(255,255,255,0.86); }
+.editorial-hero--bleed-dark .editorial-hero-meta    { color: rgba(255,255,255,0.65); }
+.editorial-hero--bleed-dark .editorial-hero-cta {
+  background: #fff;
+  color: #000;
+}
+.editorial-hero--bleed-light .editorial-hero-text   { color: var(--ink); }
+.editorial-hero--bleed-light .editorial-hero-eyebrow { color: var(--c-terracotta); }
+.editorial-hero--bleed-light .editorial-hero-summary { color: var(--secondary); }
+.editorial-hero--bleed-light .editorial-hero-meta    { color: var(--muted); }
+.editorial-hero--bleed-light .editorial-hero-cta {
+  background: var(--primary);
+  color: var(--surface);
 }
 
 .editorial-hero-text {

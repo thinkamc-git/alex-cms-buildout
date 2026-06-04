@@ -112,7 +112,31 @@ $catsForThis = $catsForTypes($ftypes);
     </div>
 
     <div class="field-group">
-      <label class="field-label">Side image</label>
+      <label class="field-label">Layout</label>
+      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
+          <?php foreach (['plain' => 'Plain', 'within' => 'Hero Within', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
+            <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <input type="hidden" name="<?= $inputBase ?>[hero_layout]" value="<?= $e($hlayout) ?>">
+    </div>
+
+    <div class="field-group" data-hero-bg-field style="<?= in_array($hlayout, ['plain','within'], true) ? '' : 'display:none' ?>">
+      <label class="field-label">Background</label>
+      <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+        <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
+          <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid'] as $v => $l): ?>
+            <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+          <?php endforeach; ?>
+        </div>
+      </div>
+      <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
+    </div>
+
+    <div class="field-group" data-hero-image-mode-field style="<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
+      <label class="field-label">Image source</label>
       <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
         <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
           <?php foreach (['auto' => 'Auto', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
@@ -121,10 +145,10 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
       </div>
       <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
-      <p class="field-hint">Auto: use the picked post's hero image (falls back to series card if none). Custom: upload or paste a URL. None: omit the side panel.</p>
+      <p class="field-hint">Auto: use the picked post's hero image. Custom: upload or paste a URL. None: gradient over canvas (bleed) or no side image (within).</p>
     </div>
 
-    <div class="field-group" data-hero-image-url style="margin-bottom:0">
+    <div class="field-group" data-hero-image-url style="margin-bottom:0;<?= $hlayout === 'plain' ? 'display:none' : '' ?>">
       <label class="field-label">Custom image</label>
       <div style="display:flex;gap:var(--space-8);align-items:center">
         <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/2026/03/cover.jpg or paste URL" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1">

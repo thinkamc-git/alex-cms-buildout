@@ -1367,15 +1367,15 @@ a.article-series-pill:hover {
   padding-bottom: var(--space-20);
 }
 .index-section-title-big {
-  font-family: var(--font-display);
-  font-size: var(--text-h2);
-  font-weight: 600;
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.05;
+  line-height: 1.1;
   margin: 0;
   color: var(--ink);
 }
-.index-section-title-big em { font-style: italic; font-weight: 400; }
+.index-section-title-big em { font-style: italic; }
 .index-section-view-all {
   font-family: var(--font-cond);
   font-size: var(--text-label);
@@ -1427,11 +1427,11 @@ a.article-series-pill:hover {
   color: var(--c-current, var(--c-terracotta, var(--primary)));
 }
 .editorial-hero-title {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(40px, 5.4vw, 72px);
-  line-height: 1.02;
+  font-size: clamp(34px, 3.8vw, 54px);
+  line-height: 1.05;
   letter-spacing: -0.01em;
   color: var(--ink);
   margin: 0;
@@ -1501,10 +1501,10 @@ a.article-series-pill:hover {
   margin-bottom: var(--space-12);
 }
 .editorial-hero-card-title {
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-style: italic;
-  font-size: var(--text-h3);
-  line-height: 1.2;
+  font-size: var(--text-h4);
+  line-height: 1.25;
   color: var(--ink);
 }
 .editorial-hero-card-part {

@@ -104,7 +104,7 @@ $catsForThis = $catsForTypes($ftypes);
         $previewSrc = $pickedHero;
     }
 ?>
-    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 290px; gap: var(--space-24)">
+    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 360px; gap: var(--space-24)">
       <div class="form-side" data-hero-form>
         <div class="field-group sec-title-field">
           <label class="field-label">Title</label>
@@ -162,30 +162,6 @@ $catsForThis = $catsForTypes($ftypes);
 
       <div class="form-side" data-hero-preview-pane>
         <div class="field-group">
-          <label class="field-label">Layout</label>
-          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
-            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
-              <?php foreach (['plain' => 'Plain', 'within' => 'Image Container', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
-                <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
-              <?php endforeach; ?>
-            </div>
-          </div>
-          <input type="hidden" name="<?= $inputBase ?>[hero_layout]" value="<?= $e($hlayout) ?>">
-        </div>
-
-        <div class="field-group" data-hero-bg-field style="<?= in_array($hlayout, ['plain','within'], true) ? '' : 'display:none' ?>">
-          <label class="field-label">Background</label>
-          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
-            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
-              <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid White'] as $v => $l): ?>
-                <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
-              <?php endforeach; ?>
-            </div>
-          </div>
-          <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
-        </div>
-
-        <div class="field-group" style="margin-bottom:0">
           <label class="field-label">Preview</label>
           <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
             <div class="hero-img-preview-text" aria-hidden="true">
@@ -200,6 +176,30 @@ $catsForThis = $catsForTypes($ftypes);
               <?php endif; ?>
             </div>
           </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Layout</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_layout]" data-hero-layout-pills>
+              <?php foreach (['plain' => 'Plain', 'within' => 'Image Container', 'bleed-dark' => 'Bleed · Dark', 'bleed-light' => 'Bleed · Light'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hlayout === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_layout]" value="<?= $e($hlayout) ?>">
+        </div>
+
+        <div class="field-group" data-hero-bg-field style="margin-bottom:0;<?= in_array($hlayout, ['plain','within'], true) ? '' : 'display:none' ?>">
+          <label class="field-label">Background</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_background]">
+              <?php foreach (['transparent' => 'Transparent', 'surface' => 'Solid White'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $hbg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
         </div>
       </div>
     </div><!-- /.form-grid hero 2-col -->

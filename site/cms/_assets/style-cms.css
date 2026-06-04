@@ -2016,13 +2016,13 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .cms-grip { cursor: grab; color: var(--muted); user-select: none; font-size: 14px; flex-shrink: 0; }
 
 /* Hero section editor — right-side mini preview pane.
-   Width: 290px column, aspect ~1.76:1 (kept the prior 4:3 height while
-   widening the pane ~30%). Border styling + bg / layout / gradient
-   come from modifier classes. */
+   Width follows the parent column (currently 360px). Height is
+   pinned to 165px regardless of column width so widening the column
+   only makes the preview proportionally flatter. */
 .hero-img-preview {
   position: relative;
   width: 100%;
-  aspect-ratio: 290 / 165;
+  height: 165px;
   border: 1px dashed var(--ink-18);
   border-radius: 3px;
   overflow: hidden;

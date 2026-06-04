@@ -117,7 +117,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 20.3** — HTML body variants (article-html-body, experiment-html-body) + RTF/HTML toggle · *Manual* · 4–5h · **Staging-only**
 - [x] **Phase 21** — Post Templates rename + Settings · *Semi-auto* · 2–3h · **Ships:** v2.0 public
 - [x] **Phase 21.5** — CMS copy audit (scrub "Phase X" refs, tighten labels) · *Semi-auto* · 2h · **Staging-only**
-- [ ] **Phase 21.7** — Editorial Index section-stack rework (schema + builder + render) · *Manual* · ~8–12h (multi-session) · **Staging-only**
+- [x] **Phase 21.7** — Editorial Index section-stack rework (schema + builder + render) · *Manual* · ~8–12h (multi-session) · **Staging-only**
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 

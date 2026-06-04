@@ -615,9 +615,13 @@ There is no separate page-level "hero feature" or "featured strip" — both are 
 
 ### 16.2 The three section types
 
-Every section carries a `section_type` and a `title` (optional heading). Beyond that:
+Every section carries a `section_type` and a `title` (optional heading). Curated + Feed sections also carry a `header_style` toggle — **Tiny** (small eyebrow + view-all link) or **Large** (full Instrument-Serif title; supports `<em>…</em>` for italic emphasis). Beyond that:
 
-**◆ Hero** — one hand-picked published item rendered as a large banner. No display/filter config; the single pick *is* the section. Used for the lead item at the top of a page.
+**◆ Hero** — one hand-picked published item rendered as a large banner. No display config and no visitor filter; the single pick *is* the section. Hero has its own variant set instead:
+- **Layout** — `plain` (text only, no side image), `within` (image in a right-side panel), `bleed-dark` (full-bleed image, dark overlay, white text), `bleed-light` (full-bleed image, light overlay, dark text).
+- **Background** — `transparent` (page canvas shows) or `surface` (solid white). Only applies to `plain` and `within`; bleed variants override.
+- **Image source** — `auto` (use the picked post's `hero_image`), `custom` (use an author-supplied URL), or `none` (omit the panel entirely; `within` collapses to full-width text).
+- **Eyebrow prefix** — optional short label that prefixes the rendered eyebrow line `— {prefix} — {category}`. Stored in the section's `title` column (re-purposed for hero).
 
 **◆ Curated** — a hand-picked, drag-ordered set of published items (a mix of types is allowed). The author controls the exact lineup; it does not self-update. Has **Display** config (below). No content query, no visitor filter.
 
@@ -625,7 +629,7 @@ Every section carries a `section_type` and a `title` (optional heading). Beyond 
 
 ### 16.3 The three layers of a section
 
-A section is built from up to three independent layers. Hero uses none of them (the pick is the section); Curated uses only Display; Feed uses all three.
+A section is built from up to three independent layers. Hero uses none of them (the pick is the section, plus its own layout/background/image variant set described in §16.2); Curated uses only Display; Feed uses all three.
 
 **1 · Content query** *(Feed only — authoring, never shown to visitors)*
 Defines the pool the section pulls from:
@@ -658,6 +662,16 @@ CREATE TABLE index_sections (
   position        INT NOT NULL DEFAULT 0,                -- order within the page
   section_type    ENUM('hero','curated','feed') NOT NULL,
   title           VARCHAR(500),                          -- optional section heading
+                                                         --  (or eyebrow prefix for hero)
+
+  -- Section header style (curated + feed; hero uses its own variant set below)
+  header_style    ENUM('small','big') NOT NULL DEFAULT 'small',  -- Tiny | Large
+
+  -- Hero variants (hero only; ignored otherwise)
+  hero_image_mode ENUM('auto','custom','none') NOT NULL DEFAULT 'auto',
+  hero_image_url  VARCHAR(500) NULL,                     -- when mode = 'custom'
+  hero_layout     ENUM('plain','within','bleed-dark','bleed-light') NOT NULL DEFAULT 'within',
+  hero_background ENUM('transparent','surface') NOT NULL DEFAULT 'transparent',
 
   -- Display (curated + feed; ignored for hero)
   display_format  ENUM('grid','carousel') NOT NULL DEFAULT 'grid',
@@ -686,11 +700,13 @@ CREATE TABLE index_sections (
 );
 ```
 
+**Migrations:** `0021_index_sections.sql` creates the table and backfills existing Editorial rows; `0022_index_sections_header_style.sql` adds `header_style`; `0023_index_sections_hero_image.sql` adds the hero image-source columns; `0024_index_sections_hero_layout.sql` adds the hero layout + background variants.
+
 The pre-section `indexes` columns (`hero_content_id`, `featured_ids`, `feed_types`, `feed_sort`, `feed_rows_shown`, `filter_mode`) remain in place and remain authoritative **for Basic Listing**. For Editorial pages they are superseded by `index_sections` and are migrated into sections during the build (hero_content_id → a hero section, featured_ids → a curated section, the flat feed → a feed section).
 
 ### 16.5 Series auto-index
 
-Series indexes are synthesized from the `series` table (no `indexes` row, no `index_sections` rows). The synthesizer emits an Editorial Page section stack on the fly: a hero section for the lead part and a feed/curated section for the remaining parts in `series_order`. Series pages have no visitor filter.
+Series indexes are synthesized from the `series` table (no `indexes` row, no `index_sections` rows). The synthesizer (`series_auto_index` in `site/lib/indexes.php`) emits an Editorial Page section stack on the fly: a single curated section containing every part in `series_order`. There is no hero section — the series title + description sit at the page level. Series pages have no visitor filter.
 
 ### 16.6 New Index creation
 

@@ -119,7 +119,7 @@ require __DIR__ . '/../partials/topbar.php';
               <label class="field-label" for="set-site-title">Site title</label>
               <input type="text" class="field-input" id="set-site-title" name="site_title"
                      value="<?= $e($settings['site_title']) ?>" maxlength="120" required>
-              <p class="field-hint">Appended to every page's <code>&lt;title&gt;</code> as the suffix. e.g. <em>About — Alex M. Chong</em>.</p>
+              <p class="field-hint">Appended to every page's <code>&lt;title&gt;</code> as the suffix. e.g. <em>About — <span id="set-site-title-preview"><?= $e($settings['site_title'] !== '' ? $settings['site_title'] : 'Alex M. Chong') ?></span></em>.</p>
             </div>
 
             <div class="field-group">
@@ -198,6 +198,17 @@ require __DIR__ . '/../partials/topbar.php';
 </div>
 
 <script src="/cms/_assets/dirty-flip.js" defer></script>
+<script>
+  // Mirror the live Site title value into the example shown in its hint.
+  (function () {
+    var inp = document.getElementById('set-site-title');
+    var out = document.getElementById('set-site-title-preview');
+    if (!inp || !out) return;
+    inp.addEventListener('input', function () {
+      out.textContent = inp.value.trim() !== '' ? inp.value : 'Alex M. Chong';
+    });
+  })();
+</script>
 
 </body>
 </html>

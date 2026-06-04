@@ -1646,10 +1646,10 @@ a.article-series-pill:hover {
   margin-right: calc(-1 * var(--space-48));
   padding-left: var(--space-48);
   scroll-padding-left: var(--space-48);
-  /* Soft fade-out on the right matching the negative margin — cards
+  /* Soft fade on both edges matching the negative margin — cards
      fade into the page bg rather than slamming into the viewport. */
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--space-48)), transparent 100%);
-          mask-image: linear-gradient(to right, #000 calc(100% - var(--space-48)), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), transparent 100%);
 }
 .cards-grid.is-carousel > .card {
   flex: 0 0 320px;

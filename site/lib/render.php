@@ -211,27 +211,18 @@ function render_index(string $slug): void
     }
 
     // Editorial layout: resolve the section stack into rendered cards.
-    // Each section walks the prior exclude list so an item picked above
-    // can't reappear in a feed below it.
+    // Each section's query is self-contained — no cross-section dedup,
+    // so a filtered feed below a curated row still surfaces its full
+    // result set even if items appear above. Author manages overlap.
     $sections = [];
-    $exclude  = [];
     if ((string)$idx['layout'] === 'editorial') {
         foreach (list_index_sections((int)$idx['id']) as $sec) {
             $type  = (string)$sec['section_type'];
             $cards = [];
             if ($type === 'hero' || $type === 'curated') {
-                foreach (list_section_items($sec) as $card) {
-                    $cid = (int)($card['id'] ?? 0);
-                    if ($cid > 0 && in_array($cid, $exclude, true)) continue;
-                    $cards[] = $card;
-                    if ($cid > 0) $exclude[] = $cid;
-                }
+                $cards = list_section_items($sec);
             } elseif ($type === 'feed') {
-                foreach (list_section_feed($sec, $exclude) as $card) {
-                    $cards[] = $card;
-                    $cid = (int)($card['id'] ?? 0);
-                    if ($cid > 0) $exclude[] = $cid;
-                }
+                $cards = list_section_feed($sec, []);
             }
             $sec['_cards'] = $cards;
             $sec['_pills'] = $type === 'feed' ? build_section_pills($sec) : null;

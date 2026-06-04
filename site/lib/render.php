@@ -210,45 +210,49 @@ function render_index(string $slug): void
         return;
     }
 
-    // Build the feed once. For editorial, exclude the hero + featured ids
-    // so the same row doesn't appear twice on the page.
-    $exclude = [];
-    $heroCard      = null;
-    $featuredCards = [];
+    // Editorial layout: resolve the section stack into rendered cards.
+    // Each section walks the prior exclude list so an item picked above
+    // can't reappear in a feed below it.
+    $sections = [];
+    $exclude  = [];
     if ((string)$idx['layout'] === 'editorial') {
-        $heroId = (int)($idx['hero_content_id'] ?? 0);
-        if ($heroId > 0) {
-            $heroCard = get_index_content_card($heroId);
-            if ($heroCard !== null) $exclude[] = $heroId;
-        }
-        $featuredIds = $idx['featured_ids'] ?? null;
-        if (is_string($featuredIds)) {
-            $decoded = json_decode($featuredIds, true);
-            $featuredIds = is_array($decoded) ? $decoded : [];
-        }
-        if (is_array($featuredIds)) {
-            foreach ($featuredIds as $fid) {
-                $card = get_index_content_card((int)$fid);
-                if ($card !== null) {
-                    $featuredCards[] = $card;
-                    $exclude[] = (int)$fid;
+        foreach (list_index_sections((int)$idx['id']) as $sec) {
+            $type  = (string)$sec['section_type'];
+            $cards = [];
+            if ($type === 'hero' || $type === 'curated') {
+                foreach (list_section_items($sec) as $card) {
+                    $cid = (int)($card['id'] ?? 0);
+                    if ($cid > 0 && in_array($cid, $exclude, true)) continue;
+                    $cards[] = $card;
+                    if ($cid > 0) $exclude[] = $cid;
+                }
+            } elseif ($type === 'feed') {
+                foreach (list_section_feed($sec, $exclude) as $card) {
+                    $cards[] = $card;
+                    $cid = (int)($card['id'] ?? 0);
+                    if ($cid > 0) $exclude[] = $cid;
                 }
             }
+            $sec['_cards'] = $cards;
+            $sec['_pills'] = $type === 'feed' ? build_section_pills($sec) : null;
+            $sections[]    = $sec;
         }
     }
 
-    $feedRows = list_index_feed([
-        'feed_types'       => $idx['feed_types'],
-        'feed_sort'        => $idx['feed_sort'],
-        'feed_rows_shown'  => $idx['feed_rows_shown'],
-    ], $exclude);
+    // Listing layout still uses the legacy single-feed query.
+    $feedRows = (string)$idx['layout'] === 'listing'
+        ? list_index_feed([
+            'feed_types'       => $idx['feed_types'],
+            'feed_sort'        => $idx['feed_sort'],
+            'feed_rows_shown'  => $idx['feed_rows_shown'],
+        ])
+        : [];
 
     $ctx = [
-        'index'          => $idx,
-        'hero_card'      => $heroCard,
-        'featured_cards' => $featuredCards,
-        'feed_rows'      => $feedRows,
-        'is_series'      => false,
+        'index'     => $idx,
+        'sections'  => $sections,
+        'feed_rows' => $feedRows,
+        'is_series' => false,
     ];
 
     $page_title       = (string)($idx['title']    ?? $slug);
@@ -295,12 +299,20 @@ function render_series_index(string $slug): void
         return;
     }
 
+    // series_auto_index pre-resolves each section's items into `_items`;
+    // surface them under `_cards` to match the editorial template.
+    $sections = $idx['sections'] ?? [];
+    foreach ($sections as &$sec) {
+        $sec['_cards'] = $sec['_items'] ?? [];
+        $sec['_pills'] = null;
+    }
+    unset($sec);
+
     $ctx = [
-        'index'          => $idx,
-        'hero_card'      => $idx['hero_card']      ?? null,
-        'featured_cards' => $idx['featured_cards'] ?? [],
-        'feed_rows'      => $idx['feed_rows']      ?? [],
-        'is_series'      => true,
+        'index'     => $idx,
+        'sections'  => $sections,
+        'feed_rows' => $idx['feed_rows'] ?? [],
+        'is_series' => true,
     ];
 
     $page_title       = (string)($idx['title']    ?? $slug);

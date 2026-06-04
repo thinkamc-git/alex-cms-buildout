@@ -4,22 +4,18 @@ if (!defined('TEMPLATE_OK')) { http_response_code(404); exit; }
 /**
  * templates/index-editorial.php — Editorial Page layout (CMS-STRUCTURE §16).
  *
- * Same header treatment as the Basic Listing (mirrors the DS Full Page
- * Index showcase), with an extra hero card above the feed and an
- * optional row of curated picks. No invented section labels.
+ * Iterates the resolved section stack ($ctx['sections']). Each section
+ * carries:
+ *   _cards : resolved card rows (drives the grid)
+ *   _pills : visitor-filter pills (feed sections only, may be null)
  *
- * Expects $ctx (set by render_index):
- *   $ctx['index']           — index row (or synthetic series_auto_index)
- *   $ctx['hero_card']       — single content row (or null)
- *   $ctx['featured_cards']  — array of content rows
- *   $ctx['feed_rows']       — array of content rows
- *   $ctx['is_series']       — bool: true when this is /series/[slug]/
+ * Hero      → single full-width card.
+ * Curated   → grid OR carousel of picked cards.
+ * Feed      → grid OR carousel of query-resolved cards, optional pills.
  */
-$idx            = $ctx['index']           ?? [];
-$heroCard       = $ctx['hero_card']       ?? null;
-$featuredCards  = $ctx['featured_cards']  ?? [];
-$feedRows       = $ctx['feed_rows']       ?? [];
-$isSeries       = (bool)($ctx['is_series'] ?? false);
+$idx       = $ctx['index']    ?? [];
+$sections  = $ctx['sections'] ?? [];
+$isSeries  = (bool)($ctx['is_series'] ?? false);
 
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
@@ -27,15 +23,14 @@ $showTitle = !empty($idx['show_title']) || $isSeries;
 $title     = (string)($idx['title']    ?? '');
 $subtitle  = (string)($idx['subtitle'] ?? '');
 $eyebrow   = $isSeries ? 'Series' : humanize_slug((string)($idx['slug'] ?? ''));
-$count     = count($feedRows) + ($heroCard ? 1 : 0) + count($featuredCards);
 
-// Series indexes force no pill row. Custom/built-in indexes go through the
-// usual builder.
-$pillRow = $isSeries
-    ? ['mode' => 'none', 'pills' => []]
-    : build_index_pills($idx);
+$count = 0;
+foreach ($sections as $s) $count += count($s['_cards'] ?? []);
 
-$catMap = [];
+$grid_rows_for = static function (array $sec): int {
+    $r = (string)($sec['grid_rows'] ?? 'all');
+    return ctype_digit($r) ? max(1, (int)$r) : 0;
+};
 ?>
 <div class="index-page index-page--editorial<?= $isSeries ? ' index-page--series' : '' ?>">
 
@@ -54,109 +49,129 @@ $catMap = [];
           <?php endif; ?>
         </div>
         <div class="index-page-header-right">
-          <span class="index-count" data-count-target><?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
+          <span class="index-count"><?= $count ?> <?= $count === 1 ? 'item' : 'items' ?></span>
         </div>
       </div>
-
     </header>
   <?php endif; ?>
 
-  <?php if ($pillRow['mode'] !== 'none' && $pillRow['pills'] !== []): ?>
-    <div class="controller" data-pill-mode="<?= $e($pillRow['mode']) ?>">
-      <div class="controller-row">
-        <span class="ctrl-label"><?= $pillRow['mode'] === 'types' ? 'Type' : 'Topic' ?></span>
-        <div class="pill-group">
-          <button type="button" class="fp on" data-cat="all">All</button>
-          <?php foreach ($pillRow['pills'] as $p): ?>
-            <button type="button"
-                    class="fp"
-                    data-cat="<?= $e($p['key']) ?>"><?= $e($p['label']) ?></button>
+  <?php if ($sections === []): ?>
+    <p class="index-empty">Nothing here yet.</p>
+  <?php endif; ?>
+
+  <?php foreach ($sections as $sec):
+      $stype   = (string)$sec['section_type'];
+      $stitle  = (string)($sec['title'] ?? '');
+      $cards   = $sec['_cards'] ?? [];
+      $format  = (string)($sec['display_format'] ?? 'grid');
+      $seeLab  = (string)($sec['see_more_label']  ?? '');
+      $seeTgt  = (string)($sec['see_more_target'] ?? '');
+      if ($cards === [] && $stype !== 'feed') continue; // empty hero / curated → skip silently
+  ?>
+    <section class="index-section index-section--<?= $e($stype) ?>">
+      <?php if ($stitle !== '' || ($seeLab !== '' && $seeTgt !== '')): ?>
+        <div class="index-section-header">
+          <?php if ($stitle !== ''): ?>
+            <h2 class="index-section-title"><?= $e($stitle) ?></h2>
+          <?php endif; ?>
+          <?php if ($seeLab !== '' && $seeTgt !== ''): ?>
+            <a class="index-section-see-more" href="<?= $e($seeTgt) ?>"><?= $e($seeLab) ?> →</a>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
+      <?php
+      // Visitor pills for feed sections.
+      $pills = $sec['_pills'] ?? null;
+      if ($pills && !empty($pills['show']) && $pills['pills'] !== []):
+          $mode = (string)$pills['by'];
+      ?>
+        <div class="controller" data-pill-mode="<?= $e($mode) ?>">
+          <div class="controller-row">
+            <span class="ctrl-label"><?= $mode === 'types' ? 'Type' : 'Topic' ?></span>
+            <div class="pill-group">
+              <button type="button" class="fp on" data-cat="all">All</button>
+              <?php foreach ($pills['pills'] as $p): ?>
+                <button type="button" class="fp" data-cat="<?= $e((string)$p['key']) ?>"><?= $e((string)$p['label']) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <?php if ($stype === 'hero' && $cards !== []): ?>
+        <div class="cards-grid" style="grid-template-columns:1fr">
+          <?php $card = $cards[0]; require __DIR__ . '/partials/index-card.php'; ?>
+        </div>
+
+      <?php elseif ($cards !== []): ?>
+        <?php
+        $gridStyle = '';
+        $rowLimit  = $grid_rows_for($sec);
+        if ($format === 'grid' && $rowLimit > 0) {
+            // Cap rendered cards at rowLimit * 4 (matches the lib's v1 cap).
+            $cards = array_slice($cards, 0, $rowLimit * 4);
+        }
+        ?>
+        <div class="cards-grid<?= $format === 'carousel' ? ' is-carousel' : '' ?>"<?= $gridStyle ?>>
+          <?php foreach ($cards as $card): ?>
+            <?php require __DIR__ . '/partials/index-card.php'; ?>
           <?php endforeach; ?>
         </div>
-      </div>
-    </div>
-  <?php endif; ?>
 
-  <?php if (is_array($heroCard)): ?>
-    <div class="index-hero">
-      <div class="cards-grid" style="grid-template-columns:1fr">
-        <?php $card = $heroCard; require __DIR__ . '/partials/index-card.php'; ?>
-      </div>
-    </div>
-  <?php endif; ?>
+      <?php else: /* empty feed */ ?>
+        <p class="index-empty">No matching items.</p>
+      <?php endif; ?>
+    </section>
+  <?php endforeach; ?>
 
-  <?php if ($featuredCards !== []): ?>
-    <div class="index-featured">
-      <div class="cards-grid">
-        <?php foreach ($featuredCards as $card): ?>
-          <?php require __DIR__ . '/partials/index-card.php'; ?>
-        <?php endforeach; ?>
-      </div>
-    </div>
-  <?php endif; ?>
-
-  <?php if ($feedRows === []): ?>
-    <?php if ($heroCard === null && $featuredCards === []): ?>
-      <p class="index-empty">Nothing here yet.</p>
-    <?php endif; ?>
-  <?php else: ?>
-    <div class="index-grid cards-grid">
-      <?php foreach ($feedRows as $card): ?>
-        <?php require __DIR__ . '/partials/index-card.php'; ?>
-      <?php endforeach; ?>
-    </div>
-  <?php endif; ?>
-
-  <?php if ($pillRow['mode'] !== 'none' && $pillRow['pills'] !== []): ?>
+  <?php
+  // Per-section visitor pills get one shared script — same OR-semantics
+  // as the listing template, scoped to each .index-section.
+  $hasPills = false;
+  foreach ($sections as $s) {
+      if (($s['_pills']['show'] ?? false) && ($s['_pills']['pills'] ?? []) !== []) { $hasPills = true; break; }
+  }
+  if ($hasPills):
+  ?>
   <script>
   (function () {
     'use strict';
-    // See index-listing.php for the full docstring. Same OR-semantic
-    // pill logic; cards are toggled via .is-filtered-out class so the
-    // views.css .card{display:flex !important} rule doesn't block us.
-    var page = document.currentScript.closest('.index-page');
-    if (!page) return;
-    var ctrl = page.querySelector('.controller');
-    if (!ctrl) return;
-    var attr = ctrl.getAttribute('data-pill-mode') === 'types' ? 'type' : 'category';
-    var pills = Array.prototype.slice.call(ctrl.querySelectorAll('.fp'));
-    var cards = Array.prototype.slice.call(page.querySelectorAll('.cards-grid > .card'));
-    var countTarget = page.querySelector('[data-count-target]');
-
-    function activeKeys() {
-      return pills
-        .filter(function (p) { return p.classList.contains('on') && p.getAttribute('data-cat') !== 'all'; })
-        .map(function (p) { return p.getAttribute('data-cat'); });
-    }
-    function apply() {
-      var keys = activeKeys();
-      var allOn = pills.some(function (p) { return p.getAttribute('data-cat') === 'all' && p.classList.contains('on'); });
-      var visible = 0;
-      cards.forEach(function (c) {
-        var v = c.getAttribute('data-' + attr) || '';
-        var show = allOn || (keys.length > 0 && keys.indexOf(v) !== -1);
-        c.classList.toggle('is-filtered-out', !show);
-        if (show) visible++;
-      });
-      if (countTarget) {
-        countTarget.textContent = visible + ' ' + (visible === 1 ? 'item' : 'items');
+    document.querySelectorAll('.index-section .controller').forEach(function (ctrl) {
+      var section = ctrl.closest('.index-section');
+      if (!section) return;
+      var attr  = ctrl.getAttribute('data-pill-mode') === 'types' ? 'type' : 'category';
+      var pills = Array.prototype.slice.call(ctrl.querySelectorAll('.fp'));
+      var cards = Array.prototype.slice.call(section.querySelectorAll('.cards-grid > .card'));
+      function activeKeys() {
+        return pills.filter(function (p) { return p.classList.contains('on') && p.getAttribute('data-cat') !== 'all'; })
+                    .map(function (p) { return p.getAttribute('data-cat'); });
       }
-    }
-    pills.forEach(function (p) {
-      p.addEventListener('click', function () {
-        var key = p.getAttribute('data-cat');
-        if (key === 'all') {
-          pills.forEach(function (q) { q.classList.toggle('on', q === p); });
-        } else {
-          var allPill = pills.find(function (q) { return q.getAttribute('data-cat') === 'all'; });
-          if (allPill) allPill.classList.remove('on');
-          p.classList.toggle('on');
-          if (activeKeys().length === 0 && allPill) allPill.classList.add('on');
-        }
-        apply();
+      function apply() {
+        var keys = activeKeys();
+        var allOn = pills.some(function (p) { return p.getAttribute('data-cat') === 'all' && p.classList.contains('on'); });
+        cards.forEach(function (c) {
+          var v = c.getAttribute('data-' + attr) || '';
+          var show = allOn || (keys.length > 0 && keys.indexOf(v) !== -1);
+          c.classList.toggle('is-filtered-out', !show);
+        });
+      }
+      pills.forEach(function (p) {
+        p.addEventListener('click', function () {
+          var key = p.getAttribute('data-cat');
+          if (key === 'all') {
+            pills.forEach(function (q) { q.classList.toggle('on', q === p); });
+          } else {
+            var allPill = pills.find(function (q) { return q.getAttribute('data-cat') === 'all'; });
+            if (allPill) allPill.classList.remove('on');
+            p.classList.toggle('on');
+            if (activeKeys().length === 0 && allPill) allPill.classList.add('on');
+          }
+          apply();
+        });
       });
+      apply();
     });
-    apply();
   })();
   </script>
   <?php endif; ?>

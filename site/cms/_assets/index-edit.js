@@ -67,20 +67,32 @@
       var opt = pickSel.options[pickSel.selectedIndex];
       src = opt ? (opt.getAttribute('data-hero-image') || '') : '';
     }
-    pane.innerHTML = '';
+    // Mirror the layout onto the pane as a modifier class so CSS can
+    // swap the gradient overlay + text colour per variant.
+    ['plain', 'within', 'bleed-dark', 'bleed-light'].forEach(function (k) {
+      pane.classList.remove('hero-img-preview--' + k);
+    });
+    pane.classList.add('hero-img-preview--' + layout);
+
+    // Rebuild the image (or empty placeholder) but PRESERVE the
+    // overlay element so the placeholder Title / Caption stay put.
+    var overlay = pane.querySelector('.hero-img-preview-overlay');
+    pane.querySelectorAll('img, .hero-img-preview-empty').forEach(function (el) { el.remove(); });
+    var inserted = null;
     if (src) {
-      var img = document.createElement('img');
-      img.src = src;
-      img.alt = '';
-      img.setAttribute('data-hero-preview-img', '');
-      pane.appendChild(img);
+      inserted = document.createElement('img');
+      inserted.src = src;
+      inserted.alt = '';
+      inserted.setAttribute('data-hero-preview-img', '');
     } else {
-      var span = document.createElement('span');
-      span.className = 'hero-img-preview-empty';
-      span.setAttribute('data-hero-preview-empty', '');
-      span.textContent = layout === 'plain' ? 'No side image (Plain)' : 'No image';
-      pane.appendChild(span);
+      inserted = document.createElement('span');
+      inserted.className = 'hero-img-preview-empty';
+      inserted.setAttribute('data-hero-preview-empty', '');
+      inserted.textContent = layout === 'plain' ? 'No side image (Plain)' : 'No image';
     }
+    // Insert before the overlay so the overlay always sits on top.
+    if (overlay) pane.insertBefore(inserted, overlay);
+    else         pane.appendChild(inserted);
   }
 
   // Refresh preview when the URL input changes (paste or upload-fill)

@@ -1993,18 +1993,19 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    promoted to a global utility for the section stack + posts list. */
 .cms-grip { cursor: grab; color: var(--muted); user-select: none; font-size: 14px; flex-shrink: 0; }
 
-/* Hero section editor — right-side mini preview pane. */
+/* Hero section editor — right-side mini preview pane.
+   Width: 290px column, aspect ~1.76:1 (kept the prior 4:3 height while
+   widening the pane ~30%). Solid border once an image is loaded. */
 .hero-img-preview {
+  position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 290 / 165;
   background: var(--canvas-raised, #f1f0ee);
   border: 1px dashed var(--ink-18);
   border-radius: 3px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
+.hero-img-preview:has(img) { border-style: solid; }
 .hero-img-preview img {
   width: 100%;
   height: 100%;
@@ -2012,6 +2013,11 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   display: block;
 }
 .hero-img-preview-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   color: var(--muted);
@@ -2019,6 +2025,67 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   padding: var(--space-8);
   text-align: center;
 }
+
+/* Overlay — "Title" + "Caption text" placeholders, bottom-left,
+   always visible. Bleed variants swap the gradient + text colour. */
+.hero-img-preview-overlay {
+  position: absolute;
+  inset: 0;
+  padding: var(--space-12) var(--space-16);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-img-preview-title {
+  font-family: var(--font-serif, 'Instrument Serif', serif);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.05;
+  color: var(--ink);
+}
+.hero-img-preview-caption {
+  font-family: var(--font-serif, 'Instrument Serif', serif);
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--secondary);
+}
+
+/* Bleed-dark — dark gradient + white text. */
+.hero-img-preview--bleed-dark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.55) 65%,
+    rgba(0,0,0,0.85) 100%
+  );
+}
+.hero-img-preview--bleed-dark .hero-img-preview-overlay { z-index: 2; }
+.hero-img-preview--bleed-dark .hero-img-preview-title   { color: #fff; }
+.hero-img-preview--bleed-dark .hero-img-preview-caption { color: rgba(255,255,255,0.78); }
+
+/* Bleed-light — light gradient + dark text. */
+.hero-img-preview--bleed-light::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.55) 55%,
+    rgba(255,255,255,0.92) 100%
+  );
+}
+.hero-img-preview--bleed-light .hero-img-preview-overlay { z-index: 2; }
+.hero-img-preview--bleed-light .hero-img-preview-title   { color: var(--ink); }
+.hero-img-preview--bleed-light .hero-img-preview-caption { color: var(--secondary); }
 .cms-grip:active { cursor: grabbing; }
 
 /* Vertical 1px divider used inside the section header. */

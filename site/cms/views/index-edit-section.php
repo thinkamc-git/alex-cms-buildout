@@ -104,7 +104,7 @@ $catsForThis = $catsForTypes($ftypes);
         $previewSrc = $pickedHero;
     }
 ?>
-    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 220px; gap: var(--space-24)">
+    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 290px; gap: var(--space-24)">
       <div class="form-side" data-hero-form>
     <div class="field-group sec-title-field">
       <label class="field-label">Title</label>
@@ -114,7 +114,7 @@ $catsForThis = $catsForTypes($ftypes);
       </span>
     </div>
     <div class="field-group">
-      <label class="field-label">Pick</label>
+      <label class="field-label">Select a post</label>
       <select class="field-input" name="<?= $inputBase ?>[item_ids]" data-hero-pick>
         <option value="" data-hero-image="">— pick a published post —</option>
         <?php foreach ($pickList as $row):
@@ -180,12 +180,16 @@ $catsForThis = $catsForTypes($ftypes);
 
       <div class="form-side" data-hero-preview-pane>
         <label class="field-label" style="margin-bottom:var(--space-8);display:block">Preview</label>
-        <div class="hero-img-preview" data-hero-preview>
+        <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?>" data-hero-preview>
           <?php if ($previewSrc !== ''): ?>
             <img src="<?= $e($previewSrc) ?>" alt="" data-hero-preview-img>
           <?php else: ?>
             <span class="hero-img-preview-empty" data-hero-preview-empty>No image</span>
           <?php endif; ?>
+          <div class="hero-img-preview-overlay" aria-hidden="true">
+            <div class="hero-img-preview-title">Title</div>
+            <div class="hero-img-preview-caption">Caption text</div>
+          </div>
         </div>
       </div>
     </div><!-- /.form-grid hero 2-col -->

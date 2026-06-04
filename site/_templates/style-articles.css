@@ -1377,13 +1377,14 @@ a.article-series-pill:hover {
 }
 .index-section-title-big em { font-style: italic; }
 
-/* Bump the small (group-header) eyebrow up one step from the DS
-   default — index sections want a bit more presence than the inline
-   tag chips the eyebrow style was originally tuned for. */
-.index-section .group-header-eyebrow { font-size: var(--text-meta); }
+/* Bump the small (group-header) eyebrow + link up one step from the
+   DS default — index sections want a bit more presence than the
+   inline tag chips the eyebrow style was originally tuned for. */
+.index-section .group-header-eyebrow,
+.index-section .group-header-link { font-size: var(--text-meta); }
 .index-section-view-all {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1446,7 +1447,7 @@ a.article-series-pill:hover {
 }
 .editorial-hero-eyebrow {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;

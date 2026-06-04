@@ -580,10 +580,11 @@
       sumEl.textContent = ts + ' · ' + cap(fsort) + ' · ' + cap(fmt2) + (fmt2 === 'grid' ? ' · ' + rows2 + ' rows' : '');
     }
     // Also keep the displayed section name in sync with its title input.
+    // Strip any <em>…</em> wrappers so the CMS header reads clean.
     var nameEl = sec.querySelector('[data-section-name]');
     var titleInput = sec.querySelector('input[name$="[title]"]');
     if (nameEl && titleInput) {
-      var v = titleInput.value.trim();
+      var v = titleInput.value.replace(/<\/?em[^>]*>/gi, '').trim();
       nameEl.textContent = v !== '' ? v : '(no title)';
     }
   }

@@ -321,6 +321,9 @@ function render_title_emphasis(string $title): string
 {
     $title = trim($title);
     if ($title === '') return '';
+    // Allow <em>…</em> as an alias for *…* so authors can use either
+    // syntax in the Title field. Everything else stays escaped.
+    $title = preg_replace('/<em>([^<]+)<\/em>/i', '*$1*', $title) ?? $title;
     // Split into segments: odd indexes are inside *…* markers.
     $parts = preg_split('/\*([^*]+)\*/', $title, -1, PREG_SPLIT_DELIM_CAPTURE);
     $out = '';

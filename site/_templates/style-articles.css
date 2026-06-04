@@ -1346,3 +1346,65 @@ a.article-series-pill:hover {
   .index-featured { padding: var(--space-24); }
   .index-title { font-size: var(--text-h4); }
 }
+
+/* ── Editorial section stack (Phase 21.7) ──
+   Each authored section renders as <section class="index-section
+   index-section--{hero|curated|feed}">. The .cards-grid inside follows
+   the same vocab as .index-grid (responsive 4/2/1 columns set by
+   views.css), so we just need section-level padding + the optional
+   header bar (title + see-more link). Hero variant matches .index-hero.
+*/
+.index-section { padding: var(--space-32) var(--space-48); }
+.index-section + .index-section { padding-top: 0; }
+
+.index-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+.index-section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h4);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+.index-section-see-more {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  color: var(--muted);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.index-section-see-more:hover { color: var(--primary); }
+
+.index-section--hero .card { min-height: 320px; }
+.index-section--hero .card .title,
+.index-section--hero .card .ev-title,
+.index-section--hero .card .od-title { font-size: var(--text-h3); }
+
+/* Carousel: horizontal scroll, native scrollbar. v1 — no controls. */
+.cards-grid.is-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-24);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-8);
+}
+.cards-grid.is-carousel > .card {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 900px) {
+  .index-section { padding: var(--space-24) var(--space-32); }
+}
+@media (max-width: 600px) {
+  .index-section { padding: var(--space-24); }
+  .index-section-header { flex-direction: column; align-items: flex-start; gap: var(--space-8); }
+}

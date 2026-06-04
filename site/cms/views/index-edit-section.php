@@ -210,8 +210,8 @@ $catsForThis = $catsForTypes($ftypes);
         <label class="field-label" style="margin-bottom:var(--space-8);display:block">Preview</label>
         <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
           <div class="hero-img-preview-text" aria-hidden="true">
-            <div class="hero-img-preview-title">Title</div>
-            <div class="hero-img-preview-caption">Caption text</div>
+            <div class="hero-img-preview-title">Title Example</div>
+            <div class="hero-img-preview-caption">An example of the summary text that will appear below.</div>
           </div>
           <div class="hero-img-preview-imgwrap" data-hero-preview-imgwrap>
             <?php if ($previewSrc !== ''): ?>

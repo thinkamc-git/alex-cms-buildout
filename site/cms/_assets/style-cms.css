@@ -2099,12 +2099,14 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   padding: 0;
 }
 
-/* ── Image Container (within) — text left, mini image right. Both
-   sit inset from the pane edges so the image isn't flush — mirrors
-   the real .editorial-hero padding. ── */
+/* ── Image Container (within) — text left, mini image right.
+   Image shrinks to 70% of the pane height and centres vertically;
+   text centres vertically in its column. Both sit inset from the
+   pane edges so the image isn't flush — mirrors the real
+   .editorial-hero padding. ── */
 .hero-img-preview--within {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: var(--space-12);
   padding: var(--space-12) var(--space-16);
 }
@@ -2116,6 +2118,7 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 }
 .hero-img-preview--within .hero-img-preview-imgwrap {
   width: 38%;
+  height: 70%;
   flex-shrink: 0;
   border-radius: 2px;
   overflow: hidden;

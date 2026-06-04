@@ -431,6 +431,7 @@ require __DIR__ . '/../partials/topbar.php';
           <button type="button" class="btn-sec" data-add-type="hero">+ Hero</button>
           <button type="button" class="btn-sec" data-add-type="curated">+ Curated</button>
           <button type="button" class="btn-sec" data-add-type="feed">+ Filtered</button>
+          <button type="button" class="btn-sec" disabled title="Coming soon" aria-disabled="true">+ Hero Multi</button>
         </div>
 
         <!-- Section templates for JS-driven Add. Hidden; the JS clones,

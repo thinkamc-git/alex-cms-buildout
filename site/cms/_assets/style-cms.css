@@ -1923,6 +1923,18 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    tokens) without the cursor:pointer (sections aren't clickable as a
    whole — the header is the toggle, body is the editor). */
 .sec-list { display: flex; flex-direction: column; gap: var(--space-12); }
+
+/* Add-section button row — keep clear of the sticky save bar below. */
+#view-index-edit .form-actions:not(.form-actions-sticky) {
+  margin-bottom: var(--space-48);
+}
+/* Disabled-state for "+ Hero Multi" (future feature) — visually muted,
+   unclickable, no hover lift. */
+#view-index-edit .form-actions .btn-sec[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .sec-card { background: var(--surface); border: 1px solid var(--ink-18); border-radius: var(--r-card); box-shadow: 0 1px 3px var(--ink-08); transition: border-color 0.15s; }
 .sec-card:hover { border-color: var(--ink); }
 .sec-card-head { display: flex; align-items: center; gap: var(--space-12); padding: var(--space-12) var(--space-20); cursor: pointer; }

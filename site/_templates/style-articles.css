@@ -1630,9 +1630,11 @@ a.article-series-pill:hover {
 }
 
 /* Carousel: horizontal scroll, native scrollbar. v1 — no controls.
-   Right side extends to the viewport edge (cancels the parent
-   section's right padding via negative margin) so the last visible
-   card clips at the browser edge — a scroll affordance. */
+   Both sides bleed past the parent .index-section's horizontal
+   padding (negative margins) so cards clip at both browser edges
+   when scrolled. The matching padding-left keeps the FIRST card
+   aligned with the section header in the initial scroll position;
+   scroll-padding-left keeps snap alignment correct after scrolling. */
 .cards-grid.is-carousel {
   display: flex;
   flex-wrap: nowrap;
@@ -1640,17 +1642,30 @@ a.article-series-pill:hover {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding-bottom: var(--space-8);
+  margin-left: calc(-1 * var(--space-48));
   margin-right: calc(-1 * var(--space-48));
+  padding-left: var(--space-48);
+  scroll-padding-left: var(--space-48);
 }
 .cards-grid.is-carousel > .card {
   flex: 0 0 320px;
   scroll-snap-align: start;
 }
 @media (max-width: 900px) {
-  .cards-grid.is-carousel { margin-right: calc(-1 * var(--space-32)); }
+  .cards-grid.is-carousel {
+    margin-left:  calc(-1 * var(--space-32));
+    margin-right: calc(-1 * var(--space-32));
+    padding-left: var(--space-32);
+    scroll-padding-left: var(--space-32);
+  }
 }
 @media (max-width: 600px) {
-  .cards-grid.is-carousel { margin-right: calc(-1 * var(--space-24)); }
+  .cards-grid.is-carousel {
+    margin-left:  calc(-1 * var(--space-24));
+    margin-right: calc(-1 * var(--space-24));
+    padding-left: var(--space-24);
+    scroll-padding-left: var(--space-24);
+  }
 }
 
 @media (max-width: 900px) {

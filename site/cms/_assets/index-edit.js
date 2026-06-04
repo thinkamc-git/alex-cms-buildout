@@ -56,10 +56,12 @@
     if (!pane) return;
     var layoutH = sec.querySelector('input[type="hidden"][name$="[hero_layout]"]');
     var modeH   = sec.querySelector('input[type="hidden"][name$="[hero_image_mode]"]');
+    var bgH     = sec.querySelector('input[type="hidden"][name$="[hero_background]"]');
     var urlIn   = sec.querySelector('[data-hero-img-url-input]');
     var pickSel = sec.querySelector('[data-hero-pick]');
     var layout = layoutH ? layoutH.value : 'within';
     var mode   = modeH ? modeH.value : 'auto';
+    var bg     = bgH ? bgH.value : 'transparent';
     var src = '';
     if (layout !== 'plain' && mode === 'custom' && urlIn) {
       src = (urlIn.value || '').trim();
@@ -67,32 +69,34 @@
       var opt = pickSel.options[pickSel.selectedIndex];
       src = opt ? (opt.getAttribute('data-hero-image') || '') : '';
     }
-    // Mirror the layout onto the pane as a modifier class so CSS can
-    // swap the gradient overlay + text colour per variant.
+    // Mirror layout + background onto the pane as modifier classes.
     ['plain', 'within', 'bleed-dark', 'bleed-light'].forEach(function (k) {
       pane.classList.remove('hero-img-preview--' + k);
     });
     pane.classList.add('hero-img-preview--' + layout);
+    ['transparent', 'surface'].forEach(function (k) {
+      pane.classList.remove('hero-img-preview--bg-' + k);
+    });
+    pane.classList.add('hero-img-preview--bg-' + bg);
 
-    // Rebuild the image (or empty placeholder) but PRESERVE the
-    // overlay element so the placeholder Title / Caption stay put.
-    var overlay = pane.querySelector('.hero-img-preview-overlay');
-    pane.querySelectorAll('img, .hero-img-preview-empty').forEach(function (el) { el.remove(); });
-    var inserted = null;
+    // Repopulate the imgwrap; leave the .hero-img-preview-text overlay
+    // alone so the placeholder Title / Caption stay rendered.
+    var imgwrap = pane.querySelector('[data-hero-preview-imgwrap]');
+    if (!imgwrap) return;
+    imgwrap.innerHTML = '';
     if (src) {
-      inserted = document.createElement('img');
-      inserted.src = src;
-      inserted.alt = '';
-      inserted.setAttribute('data-hero-preview-img', '');
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      img.setAttribute('data-hero-preview-img', '');
+      imgwrap.appendChild(img);
     } else {
-      inserted = document.createElement('span');
-      inserted.className = 'hero-img-preview-empty';
-      inserted.setAttribute('data-hero-preview-empty', '');
-      inserted.textContent = layout === 'plain' ? 'No side image (Plain)' : 'No image';
+      var span = document.createElement('span');
+      span.className = 'hero-img-preview-empty';
+      span.setAttribute('data-hero-preview-empty', '');
+      span.textContent = layout === 'plain' ? 'Plain' : 'No image';
+      imgwrap.appendChild(span);
     }
-    // Insert before the overlay so the overlay always sits on top.
-    if (overlay) pane.insertBefore(inserted, overlay);
-    else         pane.appendChild(inserted);
   }
 
   // Refresh preview when the URL input changes (paste or upload-fill)
@@ -142,7 +146,8 @@
     //            visible only when source = Custom.
     if (hidden && hidden.name &&
         (hidden.name.indexOf('[hero_layout]') > -1 ||
-         hidden.name.indexOf('[hero_image_mode]') > -1)) {
+         hidden.name.indexOf('[hero_image_mode]') > -1 ||
+         hidden.name.indexOf('[hero_background]') > -1)) {
       var sec3 = pill.closest('[data-section]');
       if (sec3) syncHeroFieldVisibility(sec3);
     }

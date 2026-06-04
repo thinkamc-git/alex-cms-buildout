@@ -1648,10 +1648,11 @@ a.article-series-pill:hover {
   padding-right: var(--space-48);
   scroll-padding-left: var(--space-48);
   scroll-padding-right: var(--space-48);
-  /* Soft fade on both edges matching the negative margin — cards
-     fade into the page bg rather than slamming into the viewport. */
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), transparent 100%);
-          mask-image: linear-gradient(to right, transparent 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), transparent 100%);
+  /* Soft fade on both edges matching the negative margin. Bottoms
+     out at 20% opacity (80% faded) rather than fully transparent so
+     edge cards still register as content. */
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), rgba(0,0,0,0.2) 100%);
+          mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), rgba(0,0,0,0.2) 100%);
 }
 .cards-grid.is-carousel > .card {
   flex: 0 0 320px;

@@ -153,9 +153,6 @@ function save_index(array $data): array
     }
 
     $showTitle = !empty($data['show_title']) ? 1 : 0;
-    if ($layout === 'listing') {
-        $showTitle = 1; // Basic Listing always shows title per §16.
-    }
 
     // Hero + featured only make sense for editorial; null them otherwise.
     $heroId      = null;

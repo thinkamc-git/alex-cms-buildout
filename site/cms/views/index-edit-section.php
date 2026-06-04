@@ -333,6 +333,7 @@ $catsForThis = $catsForTypes($ftypes);
     <div class="form-grid-3">
       <!-- Col 1 — title + display + trailing card -->
       <div>
+        <div class="content-block-label" style="margin-bottom:var(--space-12);letter-spacing:0.16em">Configure section</div>
         <div class="field-group sec-title-field">
           <label class="field-label">Title</label>
           <span class="field-clearable">
@@ -374,10 +375,6 @@ $catsForThis = $catsForTypes($ftypes);
           <input type="hidden" name="<?= $inputBase ?>[grid_rows]" value="<?= $e($gridR) ?>">
         </div>
         <div class="field-group">
-          <label class="field-label">View all label</label>
-          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="View all" value="<?= $e($seeLab) ?>">
-        </div>
-        <div class="field-group" style="margin-bottom:0">
           <label class="field-label">View all target</label>
           <div class="see-target-row">
             <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
@@ -397,6 +394,10 @@ $catsForThis = $catsForTypes($ftypes);
             </span>
           </div>
           <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
+        </div>
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Custom View All Label</label>
+          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="View all" value="<?= $e($seeLab) ?>">
         </div>
       </div>
 

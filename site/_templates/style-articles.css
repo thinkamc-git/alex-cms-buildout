@@ -1367,15 +1367,19 @@ a.article-series-pill:hover {
   padding-bottom: var(--space-20);
 }
 .index-section-title-big {
-  font-family: var(--font-serif);
+  font-family: var(--font);
   font-size: clamp(24px, 2.4vw, 32px);
-  font-weight: 400;
+  font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.1;
   margin: 0;
   color: var(--primary);
 }
-.index-section-title-big em { font-style: italic; }
+.index-section-title-big em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
 
 /* Bump the small (group-header) eyebrow + link up one step from the
    DS default — index sections want a bit more presence than the

@@ -394,8 +394,7 @@ $catsForThis = $catsForTypes($ftypes);
           <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
         </div>
         <div class="field-group" style="margin-bottom:0">
-          <label class="field-label">Custom View All Label</label>
-          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="View all" value="<?= $e($seeLab) ?>">
+          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="Custom View All Label" value="<?= $e($seeLab) ?>">
         </div>
       </div>
 

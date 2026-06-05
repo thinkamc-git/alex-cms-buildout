@@ -50,40 +50,55 @@ header('Content-Type: text/html; charset=utf-8');
 <title>Account — alexmchong.ca CMS</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<!-- Phase 22.6: was /_ds/system.css (deleted long ago → 404). Tokens only —
-     this page styles itself via the inline <style> below; just needs var() to resolve. -->
-<link rel="stylesheet" href="/_ds/css/tokens.css">
+<!-- Phase 22.6: CMS auth pages now follow the CMS design system (was a dangling
+     /_ds/system.css 404). Loads the system-cms.css barrel + style-cms.css, then a
+     small layout-only block below. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  body { max-width: 32rem; margin: 4rem auto; padding: 0 1.5rem; font-family: var(--font-body, system-ui, sans-serif); }
-  h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-  .meta { color: #555; margin-bottom: 1.5rem; font-size: 0.875rem; }
-  label { display: block; margin-top: 1rem; font-size: 0.875rem; }
-  input[type=password] { display: block; width: 100%; padding: 0.5rem 0.75rem; margin-top: 0.25rem; border: 1px solid #999; border-radius: 4px; font-size: 1rem; }
-  button { margin-top: 1.5rem; padding: 0.625rem 1.25rem; border: 0; border-radius: 4px; background: #111; color: #fff; font-size: 1rem; cursor: pointer; }
-  .error { color: #a00; background: #fee; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-  .success { color: #060; background: #efe; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-  .rules { font-size: 0.8125rem; color: #555; margin-top: 0.5rem; }
-  nav a { margin-right: 1rem; font-size: 0.875rem; }
+  /* Layout-only: centre a CMS card on the canvas. Components come from the DS. */
+  body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background: var(--canvas-bg); }
+  .auth-card { width: 100%; max-width: 400px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); box-shadow: var(--shadow); padding: var(--space-32); }
+  .auth-back { display: inline-block; font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; margin-bottom: var(--space-20); transition: color 0.15s; }
+  .auth-back:hover { color: var(--primary); }
+  .auth-brand { font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--primary); line-height: 1; }
+  .auth-brand em { font-style: normal; font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); vertical-align: middle; margin-left: var(--space-8); }
+  .auth-eyebrow { font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-4) 0 var(--space-8); }
+  .auth-meta { font-size: var(--text-meta); color: var(--muted); margin: 0 0 var(--space-24); }
+  .auth-meta strong { color: var(--secondary); font-weight: 600; }
+  .auth-card .btn-pri { width: 100%; justify-content: center; margin-top: var(--space-8); padding: 9px 16px; }
+  .error { font-size: var(--text-meta); color: var(--c-terracotta); background: color-mix(in srgb, var(--c-terracotta) 7%, transparent); border: 1px solid color-mix(in srgb, var(--c-terracotta) 25%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
+  .success { font-size: var(--text-meta); color: var(--stage-published); background: color-mix(in srgb, var(--stage-published) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-published) 28%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
+  .rules { font-size: var(--text-tiny); color: var(--muted); line-height: 1.6; margin: 0 0 var(--space-16); }
 </style>
 </head>
 <body>
-<nav><a href="/cms/">← Dashboard</a></nav>
-<h1>Account</h1>
-<p class="meta">Signed in as <strong><?= $email ?></strong></p>
-<?= $error_html ?><?= $success_html ?>
-<form method="post" action="">
-  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-  <label>Current password
-    <input type="password" name="current_password" autocomplete="current-password" required>
-  </label>
-  <label>New password
-    <input type="password" name="new_password" autocomplete="new-password" required minlength="12">
-  </label>
-  <label>Confirm new password
-    <input type="password" name="new_password_confirm" autocomplete="new-password" required minlength="12">
-  </label>
-  <p class="rules">At least 12 characters, with at least one uppercase letter, one lowercase letter, and one digit.</p>
-  <button type="submit">Change password</button>
-</form>
+<div class="auth-card">
+  <a class="auth-back" href="/cms/">← Dashboard</a>
+  <div class="auth-brand">alexmchong<em>cms</em></div>
+  <div class="auth-eyebrow">Account</div>
+  <p class="auth-meta">Signed in as <strong><?= $email ?></strong></p>
+  <?= $error_html ?><?= $success_html ?>
+  <form method="post" action="">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+    <div class="field-group">
+      <label class="field-label" for="acct-current">Current password</label>
+      <input class="field-input" id="acct-current" type="password" name="current_password" autocomplete="current-password" required>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="acct-new">New password</label>
+      <input class="field-input" id="acct-new" type="password" name="new_password" autocomplete="new-password" required minlength="12">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="acct-confirm">Confirm new password</label>
+      <input class="field-input" id="acct-confirm" type="password" name="new_password_confirm" autocomplete="new-password" required minlength="12">
+    </div>
+    <p class="rules">At least 12 characters, with at least one uppercase letter, one lowercase letter, and one digit.</p>
+    <button type="submit" class="btn-pri">Change password</button>
+  </form>
+</div>
 </body>
 </html>

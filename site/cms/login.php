@@ -69,47 +69,59 @@ header('Content-Type: text/html; charset=utf-8');
 <title><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<!-- Phase 22.6: was /_ds/system.css (deleted long ago → 404). Tokens only —
-     this page styles itself via the inline <style> below; just needs var() to resolve. -->
-<link rel="stylesheet" href="/_ds/css/tokens.css">
+<!-- Phase 22.6: CMS auth pages now follow the CMS design system (was a dangling
+     /_ds/system.css 404). Loads the system-cms.css barrel + style-cms.css — the
+     same stack the admin views use — then a small layout-only block below. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  body { max-width: 28rem; margin: 4rem auto; padding: 0 1.5rem; font-family: var(--font-body, system-ui, sans-serif); }
-  h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
-  label { display: block; margin-top: 1rem; font-size: 0.875rem; }
-  input[type=email], input[type=password] { display: block; width: 100%; padding: 0.5rem 0.75rem; margin-top: 0.25rem; border: 1px solid #999; border-radius: 4px; font-size: 1rem; }
-  button { margin-top: 1.5rem; padding: 0.625rem 1.25rem; border: 0; border-radius: 4px; background: #111; color: #fff; font-size: 1rem; cursor: pointer; }
-  .error { color: #a00; background: #fee; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-  .flash { color: #0a5; background: #eaf7ef; padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; }
-  .staging-tools { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px dashed #ccc; }
-  .staging-tools h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #777; margin-bottom: 0.75rem; }
-  .staging-tools p { font-size: 0.8125rem; color: #666; margin-bottom: 0.75rem; line-height: 1.5; }
-  .staging-tools button { margin-top: 0; padding: 0.5rem 1rem; background: #5a5a5a; font-size: 0.875rem; }
+  /* Layout-only: centre a CMS card on the canvas. Components (.field-input,
+     .btn-pri, .content-block-label) come from the CMS design system above. */
+  body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background: var(--canvas-bg); }
+  .auth-card { width: 100%; max-width: 360px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); box-shadow: var(--shadow); padding: var(--space-32); }
+  .auth-brand { font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--primary); line-height: 1; }
+  .auth-brand em { font-style: normal; font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); vertical-align: middle; margin-left: var(--space-8); }
+  .auth-eyebrow { font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-4) 0 var(--space-24); }
+  .auth-card .btn-pri { width: 100%; justify-content: center; margin-top: var(--space-8); padding: 9px 16px; }
+  .error { font-size: var(--text-meta); color: var(--c-terracotta); background: color-mix(in srgb, var(--c-terracotta) 7%, transparent); border: 1px solid color-mix(in srgb, var(--c-terracotta) 25%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
+  .flash { font-size: var(--text-meta); color: var(--stage-published); background: color-mix(in srgb, var(--stage-published) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-published) 28%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
+  .auth-staging { margin-top: var(--space-24); padding-top: var(--space-20); border-top: 1px dashed var(--ink-18); }
+  .auth-staging .content-block-label { display: block; margin-bottom: var(--space-8); }
+  .auth-staging p { font-size: var(--text-tiny); color: var(--muted); line-height: 1.6; margin-bottom: var(--space-12); }
 </style>
 </head>
 <body>
-<h1><?= $heading ?></h1>
-<?= $flash_html ?>
-<?= $error_html ?>
-<form method="post" action="">
-  <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-  <label>Email
-    <input type="email" name="email" autocomplete="username" required value="<?= $email_attr ?>">
-  </label>
-  <label>Password
-    <input type="password" name="password" autocomplete="current-password" required>
-  </label>
-  <button type="submit">Sign in</button>
-</form>
-
-<?php if ($is_staging): ?>
-<div class="staging-tools">
-  <h2>Staging tools</h2>
-  <p>Locked out after too many bad guesses? Clear the lock and try again. Staging only — the production login never shows this button.</p>
-  <form method="post" action="/cms/unlock-account">
+<div class="auth-card">
+  <div class="auth-brand">alexmchong<em>cms</em></div>
+  <div class="auth-eyebrow"><?= $heading ?></div>
+  <?= $flash_html ?>
+  <?= $error_html ?>
+  <form method="post" action="">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-    <button type="submit">Unlock account</button>
+    <div class="field-group">
+      <label class="field-label" for="login-email">Email</label>
+      <input class="field-input" id="login-email" type="email" name="email" autocomplete="username" required value="<?= $email_attr ?>">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="login-password">Password</label>
+      <input class="field-input" id="login-password" type="password" name="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn-pri">Sign in</button>
   </form>
+
+  <?php if ($is_staging): ?>
+  <div class="auth-staging">
+    <span class="content-block-label">Staging tools</span>
+    <p>Locked out after too many bad guesses? Clear the lock and try again. Staging only — the production login never shows this button.</p>
+    <form method="post" action="/cms/unlock-account">
+      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+      <button type="submit" class="btn-sec">Unlock account</button>
+    </form>
+  </div>
+  <?php endif; ?>
 </div>
-<?php endif; ?>
 </body>
 </html>

@@ -74,7 +74,7 @@ $TYPE_SCALE = [
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" type="image/png" href="/_layout/favicon-cms<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png">
-<title>Design System — alexmchong.ca CMS</title>
+<title>CMS Design System — alexmchong.ca CMS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -119,7 +119,7 @@ $TYPE_SCALE = [
 <body>
 
 <?php
-$breadcrumb = 'Design System';
+$breadcrumb = 'CMS Design System';
 require __DIR__ . '/../partials/topbar.php';
 ?>
 
@@ -133,8 +133,8 @@ require __DIR__ . '/../partials/topbar.php';
   <main class="main" id="main" tabindex="-1">
     <div class="view active" id="view-design-system">
       <?php
-      $title    = 'Design System';
-      $subtitle = 'Live catalogue of the admin design system — every component with its canonical class name and the slice it lives in. Read-only reference; edit the CSS in _design-system/css/ to change anything here.';
+      $title    = 'CMS Design System';
+      $subtitle = 'Live catalogue of the admin (CMS) design system — distinct from the public website design system. Every component with its canonical class name and the slice it lives in. Read-only reference; edit the CSS in _design-system/css/ to change anything here.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 

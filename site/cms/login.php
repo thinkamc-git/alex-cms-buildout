@@ -80,11 +80,13 @@ header('Content-Type: text/html; charset=utf-8');
 <style>
   /* Layout-only: centre a CMS card on the canvas. Components (.field-input,
      .btn-pri, .content-block-label) come from the CMS design system above. */
-  body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background: var(--canvas-bg); }
+  /* Same dot-grid surface the rest of the CMS uses (base.css / .dot-surface). */
+  body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background-color: var(--neutral); background-image: var(--dot-grid); background-size: 4px 4px; }
   .auth-card { width: 100%; max-width: 360px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); box-shadow: var(--shadow); padding: var(--space-32); }
-  .auth-brand { font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--primary); line-height: 1; }
-  .auth-brand em { font-style: normal; font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); vertical-align: middle; margin-left: var(--space-8); }
-  .auth-eyebrow { font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-4) 0 var(--space-24); }
+  /* Mirrors the CMS topbar logo: sans "alexmchong" + small italic-serif "cms". */
+  .auth-brand { font-family: var(--font); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; color: var(--primary); line-height: 1; margin-bottom: var(--space-24); }
+  .auth-brand em { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 1.1em; color: var(--muted); margin-left: 4px; }
+  .auth-brand .topbar-env-pill { vertical-align: middle; }
   .auth-card .btn-pri { width: 100%; justify-content: center; margin-top: var(--space-8); padding: 9px 16px; }
   .error { font-size: var(--text-meta); color: var(--c-terracotta); background: color-mix(in srgb, var(--c-terracotta) 7%, transparent); border: 1px solid color-mix(in srgb, var(--c-terracotta) 25%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
   .flash { font-size: var(--text-meta); color: var(--stage-published); background: color-mix(in srgb, var(--stage-published) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-published) 28%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
@@ -96,7 +98,6 @@ header('Content-Type: text/html; charset=utf-8');
 <body>
 <div class="auth-card">
   <div class="auth-brand">alexmchong<em>cms</em><?php if ($is_staging): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php endif; ?></div>
-  <div class="auth-eyebrow"><?= $heading ?></div>
   <?= $flash_html ?>
   <?= $error_html ?>
   <form method="post" action="">

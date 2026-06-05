@@ -127,7 +127,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [x] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
 - [x] **Phase 22.5** — CMS migration · *Semi-auto* · ~1–1.5h · **Staging-only**
-- [ ] **Phase 22.6** — Cleanup + sunset · *Manual* · ~1.5–2h · **Ships:** v2.1 public
+- [~] **Phase 22.6** — Cleanup + sunset · *Manual* · **Ships:** v2.1 public — **22.6a SHIPPED to prod 2026-06-05** (old CSS sunset + consumer rewire + auth-page DS restyle; the full DS reorg v2.1 went live at once since prod hadn't received the additive phases). **22.6b pending:** rebuild `/_ds/index.html` as the 4-tab showcase.
 
 **═══ PROJECT: Mobile (v2.2) — public-site mobile optimization ═══**
 

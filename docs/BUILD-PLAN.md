@@ -2584,6 +2584,20 @@ polish, scale, or developer-quality concerns.
   by decision during the 22.4 side quest (clock added inline for now).
   *Cost:* ~2–3h. Pairs naturally with a future DS phase.
 
+- **Prod: new posts appear at Idea stage (unreproduced).** Alex observed on
+  **production** that creating a new post defaults to Idea instead of Draft.
+  *Investigated 2026-06-05 and could NOT reproduce in code:* the deployed prod
+  files (`cms/views/{article,journal,live-session,experiment}-new.php`) all
+  create at `status='draft'`, matching staging + source; the journal library
+  even hides idea rows (`if ($st==='idea') continue;`); the only `idea`-writing
+  path anywhere is the Ideation board quick-capture (by design). *Next step:*
+  read the prod `content` table (id/type/status of recent rows) — needs explicit
+  prod-DB authorization — OR get an exact repro (which type, "+ New" button vs
+  Ideation board, screenshot). Possible benign cause: rows were ideation-
+  captured, or predate the draft-default. Secondary hardening if real: flip the
+  `?? 'idea'` display fallbacks (`journals.php`, `live-sessions.php`,
+  `pills.php`, `article-edit.php`) to `?? 'draft'`. *Cost:* ~30m once repro'd.
+
 ### "Author Line" index section + author-info relocation (captured 2026-06-05)
 
 A cohesive future phase — one new index section type plus three changes that

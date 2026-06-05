@@ -122,7 +122,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
-- [ ] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~1h · **No code** (deliverable: `docs/DS-AUDIT.md`)
+- [ ] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~4–6h (multi-session) · **No code** (deliverable: `docs/DS-AUDIT.md`)
 - [ ] **Phase 22.2** — Root tokens · *Semi-auto* · ~1h · **Staging-only**
 - [ ] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [ ] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
@@ -1756,9 +1756,15 @@ CREATE TABLE settings (
 
 ## 25. DS Reorganization (v2.1) — project intro
 
-The next six phases (22.1 through 22.6) reorganize the design system into a clean three-branch structure: **Root** (shared tokens), **Pages** (marketing-page slice), **Blocks** (article-template slice), **CMS** (admin slice). Redundancy across the three branches is intentional — the goal is *clarity*, not deduplication.
+The next six phases (22.1 through 22.6) reorganize the design system into a clean three-branch structure (locked pre-22 planning, June 2026):
 
-**Why this project exists.** The CSS surface grew organically during v1.0. System tokens, marketing-page styles, article-template styles, and admin styles are scattered across `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, and inline `<style>` blocks in `cms/views/*.php`. There's no clean ownership boundary. This project draws those lines.
+- **`tokens.css`** — shared tokens (colors, fonts, spacing, radii) consumed by both systems
+- **`system-public.css`** — public-site DS: marketing pages + article templates + post cards + header/footer. Future page-builder primitives live here.
+- **`system-cms.css`** — admin DS: tables, dropdowns, buttons, section headers, form patterns, pills, the whole editor toolkit
+
+Per-surface stylesheets (`style-pages.css`, `style-articles.css`, `style-cms.css`) become thin shells that import from the right system file. Naming convention is semantic with `.component--modifier` suffix (e.g. `.card`, `.card--featured`, `.card__title`) — no BEM, no utility-first. The CMS-side DS showcase ships at `/cms/design-system` (sidebar slot adjacent to Settings) as the canonical reference; the public mirror (`ds.alexmchong.ca`) is deferred post-v2.1.
+
+**Why this project exists.** The CSS surface grew organically during v1.0. System tokens, marketing-page styles, article-template styles, and admin styles are scattered across `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, and inline `<style>` blocks in `cms/views/*.php`. There's no clean ownership boundary, no naming consistency, and visible drift across families (buttons mix `var(--font-cond)` uppercase with `var(--font-mono)` lowercase; titles vary 22→26px for the same role; info-boxes and sticky bars are hand-rolled in 3+ places). This project draws those lines — the goal is a strong system where someone reading the CSS sees best practice, not manual overrides or sloppy tag-targeted styles.
 
 **Risk posture.** This is a refactor that touches every visual surface — public pages, articles, CMS. High blast radius if done as a single phase. We split into six phases with these safety patterns:
 - **Audit-first** — Phase 22.1 produces a complete map (CSS + mobile findings) before any code moves
@@ -1779,11 +1785,16 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - **Autonomy:** Semi-auto
 - **Ships:** Nothing — deliverable is `docs/DS-AUDIT.md`.
 
-**Decisions to capture before starting**
-- Audit document location: `docs/DS-AUDIT.md` (markdown, committed)
-- Categorization buckets: `Root · Pages · Blocks · CMS · Dead`
-- Files in scope: `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, `site/cms/_assets/style-cms.css`, all inline `<style>` blocks in `site/cms/views/*.php`. *(Note: `docs/design-mockups/cms-ui.html` is retired — `site/cms/` is the source of truth for admin UI. Pristine original at `docs/design-mockups/_completed/cms-ui.html` is reference-only.)*
-- Audit row format: markdown table with columns `Selector · File · Category · Notes · Move-To-Path`
+**Decisions to capture before starting** *(all locked in the pre-22 planning session — see §25 intro)*
+- **Audit document:** `docs/DS-AUDIT.md` (markdown, committed)
+- **File architecture target:** `tokens.css` (shared) + `system-public.css` (marketing pages + article templates) + `system-cms.css` (admin panel). Per-surface stylesheets become thin import shells.
+- **Naming convention:** semantic + `.component--modifier` (e.g. `.card`, `.card--featured`, `.card__title`). Not BEM, not utility-first.
+- **Categorization buckets:** `tokens · system-public · system-cms · Dead` — maps 1:1 to the target files.
+- **CMS-side showcase home:** `/cms/design-system` — new sidebar item adjacent to Settings. (Implemented in Phase 22.6, not 22.1; the audit just notes it as the showcase target.)
+- **Public mirror (`ds.alexmchong.ca`):** deferred post-v2.1.
+- **Files in scope:** `_design-system/system.css`, `_pages/_layout/style-pages.css`, `_templates/style-articles.css`, `site/cms/_assets/style-cms.css`, all inline `<style>` blocks in `site/cms/views/*.php`. *(Note: `docs/design-mockups/cms-ui.html` is retired — `site/cms/` is the source of truth for admin UI. Pristine original at `docs/design-mockups/_completed/cms-ui.html` is reference-only.)*
+- **Audit row format:** markdown table with columns `Selector · File · Bucket · Drift · Move-To-Path · Notes`
+- **Scope confirmed comprehensive:** all 5 deliverables in one phase (categorization · drift reconciliation · family unification · repeated-element scan · mobile audit) — no trimming, no split. ~4–6h multi-session.
 
 **Read at start (only):** This phase section. `docs/BUILD-PLAN.md` §26 (project intro). Every CSS file listed above.
 
@@ -1797,10 +1808,9 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 
 **Scope:**
 - Inventory every CSS file and inline block listed above
-- For each selector, decide: Root / Pages / Blocks / CMS / Dead, with one-line reasoning
-- Sketch the proposed `_design-system/` directory layout
-- Flag selectors that span categories and propose resolution
-- Capture naming conventions: prefix scheme per slice, file naming, token-vs-class boundaries
+- For each selector, decide its bucket: `tokens` / `system-public` / `system-cms` / Dead, with one-line reasoning
+- For each surviving selector, propose its target name under the locked convention (semantic + `.component--modifier`) and its Move-To-Path
+- Flag selectors that span buckets (e.g. shared between public + CMS) and propose resolution — usually promote to `tokens.css` if it's a token, or duplicate intentionally per branch (clarity > deduplication)
 - Identify dead code (grep-verify before flagging)
 - **Inconsistency reconciliation (added Phase 20.2):** for every selector, compare its rendered output against the canonical DS reference. Where they drift (e.g. `.pipeline-title` was 22px but `.view-title` was 26px before Phase 20.2 unified them), flag for unification and note the proposed canonical values. The audit output must distinguish "matches DS" / "drifts from DS" / "no DS equivalent yet" so Phase 22.2+ knows which selectors to consolidate vs. promote.
 - **Unification pass (added Phase 20.2):** beyond per-selector categorisation, look for *families* of selectors doing the same job at different scales — buttons (`.btn-pri` / `.btn-ghost` / `.btn-row-action` / `.btn-tiny` / `.btn-danger` / inline `<button>` styles in views), titles (`.view-title` / `.pipeline-title` / `.cms-page-title` / `.cat-block-title`), pills, cards. For each family, propose: (1) which variants survive, (2) which collapse into the survivors, (3) a one-line rationale. The goal is to reduce variant count, not just rename things. Cross-reference live HTML to confirm each "merge" target is visually compatible before recommending.

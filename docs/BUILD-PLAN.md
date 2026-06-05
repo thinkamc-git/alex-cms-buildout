@@ -2630,3 +2630,33 @@ contract, render templates, CMS editor) per the §"most important rule".
      migration of existing bio content).
   3. **Move "Indexes" under Navigation in the CMS sidebar**, positioned
      **above Redirects.** Pure admin-nav reorder. *Cost:* ~20m.
+
+### CMS editor chrome — spacing + dangling tokens (caught during Phase 22.6a, 2026-06-05)
+
+Pre-existing CMS-editor layout bugs surfaced while verifying the 22.6a sunset
+(confirmed unrelated to the CSS migration — they predate it). All live in
+`site/cms/_assets/style-cms.css` (the post-edit / preview chrome). A good small
+standalone polish pass; do it as one fix and sweep every edit view, not just
+article-edit.
+
+- **Gap above the edit tabs.** The `.post-edit-tabs` tab row has excess space
+  *above* it in the Article editor (and likely the other edit views). Caused by
+  **conflicting margin rules** — `.post-edit-tabs` is declared at least twice
+  (~line 621/625 and ~line 695) with different `margin` values. Consolidate to a
+  single rule and verify spacing in article / journal / live-session / experiment
+  edit, plus page-edit (`.pe-tabs`).
+- **Gap between the tabs and the preview pane.** In the Preview tab, a gap sits
+  between `.post-edit-tabs` and `.post-preview-frame` — same margin-stacking
+  cause.
+- **Sticky save bar covers the bottom of the preview.** `.post-preview-iframe`
+  is a fixed `height:820px` and the surrounding content area has **no bottom
+  padding** to clear the sticky publish/save bar, so the preview page's bottom
+  gutter is hidden behind it. Add bottom padding (≈ save-bar height) and/or make
+  the iframe height account for the bar.
+- **Dangling tokens.** `.post-preview-frame` (and the inline `<style>` blocks in
+  `page-edit.php` / `post-template.php`) reference `var(--border)`,
+  `var(--bg-soft)`, `var(--ink)` — **none are defined** in `tokens.css`. They
+  fall back to `currentColor` / invalid. Map them to real tokens
+  (`--ink-18`/`--rule-faint`, `--canvas-bg`, `--primary`) during the same pass.
+
+*Cost:* ~30–45m CSS, plus a per-edit-view visual check.

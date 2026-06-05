@@ -95,7 +95,7 @@ header('Content-Type: text/html; charset=utf-8');
 </head>
 <body>
 <div class="auth-card">
-  <div class="auth-brand">alexmchong<em>cms</em></div>
+  <div class="auth-brand">alexmchong<em>cms</em><?php if ($is_staging): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php endif; ?></div>
   <div class="auth-eyebrow"><?= $heading ?></div>
   <?= $flash_html ?>
   <?= $error_html ?>

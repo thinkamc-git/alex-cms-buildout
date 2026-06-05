@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root token test · DS v2.1</title>
+
+<!-- Phase 22.2 verification page.
+     Imports ONLY the shared root layer (tokens.css) + the brand webfonts.
+     Renders every token so the root layer can be verified in isolation,
+     independent of any consumer stylesheet. Served at /_ds/__root-test.html.
+     The layout CSS below is intentionally minimal and consumes the tokens
+     themselves, so this page also doubles as a consumption smoke-test. -->
+
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css?v=5">
+
+<style>
+  /* Minimal scaffolding — every value here pulls from a token in tokens.css. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--primary);
+    background: var(--neutral);
+    padding: var(--space-48);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: var(--space-48); }
+  h1 { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: var(--text-h1); }
+  .sub { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); margin-top: var(--space-8); }
+  h2 {
+    font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: var(--text-label); font-weight: 700; color: var(--secondary);
+    margin: var(--space-48) 0 var(--space-16); padding-bottom: var(--space-8);
+    border-bottom: var(--rule-faint);
+  }
+  .legend { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); margin-bottom: var(--space-24); }
+  .badge-new {
+    font-family: var(--font-cond); font-size: var(--text-micro); font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--white);
+    background: var(--accent); border-radius: var(--r-tag);
+    padding: 1px 5px; margin-left: var(--space-8); vertical-align: middle;
+  }
+
+  /* Color swatches */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-16); }
+  .sw { border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; background: var(--surface); }
+  .sw .chip { height: 64px; }
+  .sw.on-dark .chip { background-image: linear-gradient(45deg, #222 25%, #444 25% 50%, #222 50% 75%, #444 75%); background-size: 16px 16px; }
+  .sw .meta { padding: var(--space-8) var(--space-12); }
+  .sw .name { font-family: var(--font-mono); font-size: var(--text-tiny); font-weight: 500; }
+  .sw .val  { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); margin-top: 2px; }
+
+  /* Type families + scale */
+  .type-row { display: flex; align-items: baseline; gap: var(--space-24); padding: var(--space-12) 0; border-bottom: var(--rule-faint); }
+  .type-tag { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); width: 150px; flex-shrink: 0; }
+  .fam { padding: var(--space-12) 0; border-bottom: var(--rule-faint); }
+  .fam .label { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); margin-bottom: var(--space-4); }
+
+  /* Spacing rulers */
+  .ruler-row { display: flex; align-items: center; gap: var(--space-16); padding: 6px 0; }
+  .ruler-tag { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); width: 150px; flex-shrink: 0; }
+  .ruler-bar { height: 14px; background: var(--accent); border-radius: var(--radius-sm); }
+
+  /* Radii / shadow / rule samples */
+  .box-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: var(--space-24); }
+  .box-sample { background: var(--surface); border: var(--rule-faint); height: 80px; display: flex; align-items: center; justify-content: center; }
+  .box-sample .lbl { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  .shadow-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-32); padding: var(--space-16) 0; }
+  .shadow-sample { background: var(--surface); height: 80px; border-radius: var(--r-card); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  .rule-sample { padding: var(--space-12) 0; }
+  .rule-sample .lbl { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); margin-bottom: var(--space-8); }
+  .focus-grid { display: flex; gap: var(--space-48); padding: var(--space-24) var(--space-12); }
+  .focus-box { width: 120px; height: 48px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Root token test</h1>
+    <div class="sub">DS v2.1 · Phase 22.2 · imports only css/tokens.css · 91 tokens</div>
+  </header>
+
+  <!-- ─────────────  COLORS  ───────────── -->
+  <h2>Foundation</h2>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:var(--primary)"></div><div class="meta"><div class="name">--primary</div><div class="val">#191715</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--secondary)"></div><div class="meta"><div class="name">--secondary</div><div class="val">#494846</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--muted)"></div><div class="meta"><div class="name">--muted</div><div class="val">#818080</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--neutral)"></div><div class="meta"><div class="name">--neutral</div><div class="val">#E8E8E8</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="name">--surface</div><div class="val">#F8F8F8</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--canvas-bg)"></div><div class="meta"><div class="name">--canvas-bg</div><div class="val">#F3F2F1</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--canvas-raised)"></div><div class="meta"><div class="name">--canvas-raised<span class="badge-new">new</span></div><div class="val">#ECEAE8</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--accent)"></div><div class="meta"><div class="name">--accent</div><div class="val">#6B7F6E</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--white)"></div><div class="meta"><div class="name">--white</div><div class="val">#ffffff</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--primary-hover)"></div><div class="meta"><div class="name">--primary-hover</div><div class="val">#333333</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-mid)"></div><div class="meta"><div class="name">--ink-mid</div><div class="val">#646361</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-faint)"></div><div class="meta"><div class="name">--ink-faint</div><div class="val">#716F6E</div></div></div>
+  </div>
+
+  <h2>Ink tints (on white)</h2>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:var(--ink-08)"></div><div class="meta"><div class="name">--ink-08</div><div class="val">8%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-12)"></div><div class="meta"><div class="name">--ink-12</div><div class="val">12%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-16)"></div><div class="meta"><div class="name">--ink-16<span class="badge-new">new</span></div><div class="val">16%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-18)"></div><div class="meta"><div class="name">--ink-18</div><div class="val">18%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-20)"></div><div class="meta"><div class="name">--ink-20<span class="badge-new">new</span></div><div class="val">20%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-30)"></div><div class="meta"><div class="name">--ink-30</div><div class="val">30%</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink-72)"></div><div class="meta"><div class="name">--ink-72</div><div class="val">72%</div></div></div>
+  </div>
+
+  <h2>White tints (on dark)</h2>
+  <div class="grid">
+    <div class="sw on-dark"><div class="chip" style="background:var(--white-06)"></div><div class="meta"><div class="name">--white-06</div><div class="val">6%</div></div></div>
+    <div class="sw on-dark"><div class="chip" style="background:var(--white-15)"></div><div class="meta"><div class="name">--white-15</div><div class="val">15%</div></div></div>
+    <div class="sw on-dark"><div class="chip" style="background:var(--white-45)"></div><div class="meta"><div class="name">--white-45</div><div class="val">45%</div></div></div>
+    <div class="sw on-dark"><div class="chip" style="background:var(--white-85)"></div><div class="meta"><div class="name">--white-85</div><div class="val">85%</div></div></div>
+  </div>
+
+  <h2>Category colour pool (18)</h2>
+  <div class="grid">
+    <div class="sw"><div class="chip" style="background:var(--c-rust)"></div><div class="meta"><div class="name">--c-rust</div><div class="val">#765150</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-terracotta)"></div><div class="meta"><div class="name">--c-terracotta</div><div class="val">#7d4631</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-clay)"></div><div class="meta"><div class="name">--c-clay</div><div class="val">#765e44</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-amber)"></div><div class="meta"><div class="name">--c-amber</div><div class="val">#81642a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-ochre)"></div><div class="meta"><div class="name">--c-ochre</div><div class="val">#786e4a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-olive)"></div><div class="meta"><div class="name">--c-olive</div><div class="val">#6e7448</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-moss)"></div><div class="meta"><div class="name">--c-moss</div><div class="val">#607549</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-forest)"></div><div class="meta"><div class="name">--c-forest</div><div class="val">#49634b</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-sage)"></div><div class="meta"><div class="name">--c-sage</div><div class="val">#4d705a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-teal)"></div><div class="meta"><div class="name">--c-teal</div><div class="val">#4a716e</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-ocean)"></div><div class="meta"><div class="name">--c-ocean</div><div class="val">#4a6677</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-denim)"></div><div class="meta"><div class="name">--c-denim</div><div class="val">#46556a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-indigo)"></div><div class="meta"><div class="name">--c-indigo</div><div class="val">#4d567a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-purple)"></div><div class="meta"><div class="name">--c-purple</div><div class="val">#5d5376</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-violet)"></div><div class="meta"><div class="name">--c-violet</div><div class="val">#6c4d7a</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-plum)"></div><div class="meta"><div class="name">--c-plum</div><div class="val">#785071</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-mauve)"></div><div class="meta"><div class="name">--c-mauve</div><div class="val">#6f4b61</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-rose)"></div><div class="meta"><div class="name">--c-rose</div><div class="val">#7a5160</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-experiment-prototype)"></div><div class="meta"><div class="name">--c-experiment-prototype</div><div class="val">#1c1028</div></div></div>
+    <div class="sw"><div class="chip" style="background:var(--c-experiment-concept)"></div><div class="meta"><div class="name">--c-experiment-concept</div><div class="val">#0a1f1a</div></div></div>
+  </div>
+
+  <!-- ─────────────  TYPE  ───────────── -->
+  <h2>Type families</h2>
+  <div class="fam"><div class="label">--font · Barlow</div><div style="font-family:var(--font);font-size:var(--text-h3)">The quick brown fox jumps over the lazy dog 0123</div></div>
+  <div class="fam"><div class="label">--font-cond · Barlow Condensed</div><div style="font-family:var(--font-cond);font-size:var(--text-h3);text-transform:uppercase;letter-spacing:0.08em">The quick brown fox jumps over the lazy dog 0123</div></div>
+  <div class="fam"><div class="label">--font-serif · Instrument Serif (italic)</div><div style="font-family:var(--font-serif);font-style:italic;font-size:var(--text-h3)">The quick brown fox jumps over the lazy dog 0123</div></div>
+  <div class="fam"><div class="label">--font-mono · JetBrains Mono</div><div style="font-family:var(--font-mono);font-size:var(--text-h4)">The quick brown fox 0123</div></div>
+
+  <h2>Type scale (16)</h2>
+  <div class="legend">Each line set at its token size, Barlow.</div>
+  <div class="type-row"><div class="type-tag">--text-display · 54</div><div style="font-size:var(--text-display)">Display</div></div>
+  <div class="type-row"><div class="type-tag">--text-h0 · 48</div><div style="font-size:var(--text-h0)">Heading 0</div></div>
+  <div class="type-row"><div class="type-tag">--text-h1 · 40</div><div style="font-size:var(--text-h1)">Heading 1</div></div>
+  <div class="type-row"><div class="type-tag">--text-h2 · 32</div><div style="font-size:var(--text-h2)">Heading 2</div></div>
+  <div class="type-row"><div class="type-tag">--text-h3 · 28</div><div style="font-size:var(--text-h3)">Heading 3</div></div>
+  <div class="type-row"><div class="type-tag">--text-h4 · 24</div><div style="font-size:var(--text-h4)">Heading 4</div></div>
+  <div class="type-row"><div class="type-tag">--text-h5 · 22</div><div style="font-size:var(--text-h5)">Heading 5</div></div>
+  <div class="type-row"><div class="type-tag">--text-body-lg · 20</div><div style="font-size:var(--text-body-lg)">Body large</div></div>
+  <div class="type-row"><div class="type-tag">--text-body · 18</div><div style="font-size:var(--text-body)">Body</div></div>
+  <div class="type-row"><div class="type-tag">--text-md · 16</div><div style="font-size:var(--text-md)">Medium body</div></div>
+  <div class="type-row"><div class="type-tag">--text-sm · 15</div><div style="font-size:var(--text-sm)">Small body</div></div>
+  <div class="type-row"><div class="type-tag">--text-base · 14</div><div style="font-size:var(--text-base)">Base UI</div></div>
+  <div class="type-row"><div class="type-tag">--text-meta · 13</div><div style="font-size:var(--text-meta)">Metadata</div></div>
+  <div class="type-row"><div class="type-tag">--text-pill · 12</div><div style="font-size:var(--text-pill)">Pill / micro body</div></div>
+  <div class="type-row"><div class="type-tag">--text-label · 11</div><div style="font-size:var(--text-label)">Eyebrow label</div></div>
+  <div class="type-row"><div class="type-tag">--text-tiny · 10</div><div style="font-size:var(--text-tiny)">Status badge</div></div>
+  <div class="type-row"><div class="type-tag">--text-micro · 9</div><div style="font-size:var(--text-micro)">Extreme micro</div></div>
+
+  <!-- ─────────────  SPACING  ───────────── -->
+  <h2>Spacing scale (13)</h2>
+  <div class="legend">Bar width = token value. New: 40 / 56 / 80.</div>
+  <div class="ruler-row"><div class="ruler-tag">--space-4 · 4</div><div class="ruler-bar" style="width:var(--space-4)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-8 · 8</div><div class="ruler-bar" style="width:var(--space-8)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-12 · 12</div><div class="ruler-bar" style="width:var(--space-12)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-16 · 16</div><div class="ruler-bar" style="width:var(--space-16)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-20 · 20</div><div class="ruler-bar" style="width:var(--space-20)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-24 · 24</div><div class="ruler-bar" style="width:var(--space-24)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-32 · 32</div><div class="ruler-bar" style="width:var(--space-32)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-40 · 40 <span class="badge-new">new</span></div><div class="ruler-bar" style="width:var(--space-40)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-48 · 48</div><div class="ruler-bar" style="width:var(--space-48)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-56 · 56 <span class="badge-new">new</span></div><div class="ruler-bar" style="width:var(--space-56)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-64 · 64</div><div class="ruler-bar" style="width:var(--space-64)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-80 · 80 <span class="badge-new">new</span></div><div class="ruler-bar" style="width:var(--space-80)"></div></div>
+  <div class="ruler-row"><div class="ruler-tag">--space-96 · 96</div><div class="ruler-bar" style="width:var(--space-96)"></div></div>
+
+  <!-- ─────────────  RADII  ───────────── -->
+  <h2>Radii (5)</h2>
+  <div class="box-grid">
+    <div><div class="box-sample" style="border-radius:var(--r-card)"><span class="lbl">--r-card · 4</span></div></div>
+    <div><div class="box-sample" style="border-radius:var(--r-pill)"><span class="lbl">--r-pill · 4</span></div></div>
+    <div><div class="box-sample" style="border-radius:var(--r-tag)"><span class="lbl">--r-tag · 3</span></div><div style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);text-align:center;margin-top:4px">new</div></div>
+    <div><div class="box-sample" style="border-radius:var(--radius-sm)"><span class="lbl">--radius-sm · 3</span></div><div style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);text-align:center;margin-top:4px">new</div></div>
+    <div><div class="box-sample" style="border-radius:var(--radius-md)"><span class="lbl">--radius-md · 6</span></div><div style="font-family:var(--font-mono);font-size:var(--text-micro);color:var(--muted);text-align:center;margin-top:4px">new · fixes tiptap</div></div>
+  </div>
+
+  <!-- ─────────────  RULES / SHADOWS / FOCUS  ───────────── -->
+  <h2>Rule weights (3)</h2>
+  <div class="rule-sample"><div class="lbl">--rule · 1px solid --primary</div><div style="border-top:var(--rule)"></div></div>
+  <div class="rule-sample"><div class="lbl">--rule-30 · 1px solid --ink-30</div><div style="border-top:var(--rule-30)"></div></div>
+  <div class="rule-sample"><div class="lbl">--rule-faint · 1px solid --ink-18</div><div style="border-top:var(--rule-faint)"></div></div>
+
+  <h2>Shadows (2)</h2>
+  <div class="shadow-grid">
+    <div class="shadow-sample" style="box-shadow:var(--shadow)">--shadow</div>
+    <div class="shadow-sample" style="box-shadow:var(--shadow-h)">--shadow-h</div>
+  </div>
+
+  <h2>Focus rings (2)</h2>
+  <div class="focus-grid">
+    <div class="focus-box" style="box-shadow:var(--focus-ring)">--focus-ring</div>
+    <div class="focus-box" style="box-shadow:var(--focus-ring-off)">--focus-ring-off</div>
+  </div>
+
+  <h2>Layout</h2>
+  <div class="legend">--max · 1400px (max content width) &nbsp;·&nbsp; --c-focus → --c-denim (#46556a)</div>
+
+</div>
+</body>
+</html>

@@ -122,9 +122,9 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 
 **═══ PROJECT: DS Reorganization (v2.1) — design-system separation ═══**
 
-- [ ] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~4–6h (multi-session) · **No code** (deliverable: `docs/DS-AUDIT.md`)
-- [ ] **Phase 22.2** — Root tokens · *Semi-auto* · ~1h · **Staging-only**
-- [ ] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
+- [x] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~4–6h (multi-session) · **No code** (deliverable: `docs/DS-AUDIT.md`)
+- [x] **Phase 22.2** — Root tokens · *Semi-auto* · ~1h · **Staging-only**
+- [x] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [ ] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
 - [ ] **Phase 22.5** — CMS migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [ ] **Phase 22.6** — Cleanup + sunset · *Manual* · ~1.5–2h · **Ships:** v2.1 public
@@ -1844,25 +1844,22 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - **Autonomy:** Semi-auto
 - **Ships:** Staging-only. Additive — no consumer rewiring yet.
 
-**Decisions to capture before starting**
-- New directory: `site/_design-system/root/` with `colors.css`, `fonts.css`, `base.css`
-- Approach: additive — existing `system.css` continues to load alongside new root files
-- Verification page: `/_ds/__root-test.html` — imports only root, renders every token
-- Old `system.css`: untouched (deletion happens in Phase 22.6)
+**Decisions to capture before starting** *(reconciled 2026-06-04 to the locked v2.1 architecture — see §25 + DS-AUDIT §3. The original "root/ dir with colors/fonts/base.css" scheme predated Phase 2's CSS split and is superseded.)*
+- Single shared file: **`site/_design-system/css/tokens.css`** (already exists, 82 tokens) — enhanced in place, not a new `root/` directory. There is no `system.css` (Phase 2 split it into `css/*`).
+- Approach: additive — new tokens added to `tokens.css`; no consumer rewiring. Per-surface `:root` blocks (style-pages/articles/cms) stay untouched until the import-shells land in 22.3+.
+- Verification page: `/_ds/__root-test.html` — imports only `tokens.css`, renders every token.
+- Decisions 22.1 #1–4 applied: `--surface` stays `#F8F8F8` shared (CMS `#FFFFFF` override deferred to 22.5); `--radius-md/sm` = 6px/3px; `--r-pill` stays 4px (CMS 3px dropped later); event-format colours handled in 22.4.
 
-**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Root-tier rows). `_design-system/system.css`.
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (§5 token spec). `_design-system/css/tokens.css`.
 
 **Touch:**
-- `site/_design-system/root/colors.css` (new)
-- `site/_design-system/root/fonts.css` (new)
-- `site/_design-system/root/base.css` (new)
+- `site/_design-system/css/tokens.css` — add `--r-tag`, `--canvas-raised`, `--ink-16`, `--ink-20`, `--space-40/56/80`, `--radius-md`, `--radius-sm`
 - `site/_design-system/__root-test.html` (new)
-- `bin/deploy.sh` — extend to ship new root files
+- `bin/deploy.sh` — **no change needed** (line 93 already `cp -R site/_design-system/.` → `/_ds/`, so tokens.css + the test page ship automatically)
 
 **Don't touch:**
-- `system.css`
-- Any consumer CSS or PHP
-- DS showcase site (Phase 22.6 work)
+- Per-surface `:root` blocks / any consumer CSS or PHP (rewired in 22.3+)
+- DS showcase site rebuild (Phase 22.6 work)
 
 **On exit:** Phase 22.2 checked in §3. Root files deployed to staging. `/_ds/__root-test.html` renders every token. No visual regression elsewhere.
 
@@ -1897,21 +1894,20 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - **Autonomy:** Semi-auto
 - **Ships:** Staging-only. Additive — old `style-pages.css` keeps loading.
 
-**Decisions to capture before starting**
-- New directory: `site/_design-system/pages/` with `typography.css`, `layouts.css`
-- Migration approach: copy Pages-categorized rules into new files; leave `style-pages.css` intact (additive)
-- Consumer change: `_pages/_layout/_page-shell.php` adds new `<link>` tags alongside existing ones
-- Visual diff: screenshot each marketing page before/after, save pairs to `docs/DS-VERIFY/pages/`
+**Decisions to capture before starting** *(reconciled 2026-06-05 to the locked v2.1 barrel architecture — see §25 + the 22.3 build. The original "pages/ dir with typography/layouts.css importing root/" predated Phase 2's split and the barrel decision; superseded.)*
+- Barrel architecture: `css/system-public.css` is a thin barrel that `@import`s `tokens.css` + `css/public/pages.css` (Blocks slice added in 22.4). Consumers load the single `system-public.css`.
+- Migration approach: copy Pages-categorized rules **verbatim** (no class renames — those need coordinated HTML changes, deferred) into `css/public/pages.css`; drop the duplicate `:root` (tokens come from `tokens.css`); leave `style-pages.css` intact (additive safety net).
+- Consumer change: `_pages/_layout/_page-shell.php` adds one `<link>` to `/_ds/css/system-public.css` after the existing `style-pages.css` link.
+- Visual diff: screenshot each marketing page on staging (Alex's verification step — Semi-auto).
 
-**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Pages-tier rows). `_pages/_layout/style-pages.css`.
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (§6.2 Pages rows). `_pages/_layout/style-pages.css`.
 
 **Touch:**
-- `site/_design-system/pages/typography.css` (new)
-- `site/_design-system/pages/layouts.css` (new)
-- `site/_pages/_layout/_page-shell.php` — add new `<link>` imports
+- `site/_design-system/css/public/pages.css` (new — verbatim Pages rules, minus `:root`)
+- `site/_design-system/css/system-public.css` (new — barrel)
+- `site/_pages/_layout/_page-shell.php` — add `system-public.css` link
 - `docs/DS-AUDIT.md` — annotate Pages migration complete
-- `bin/deploy.sh` — ship new pages slice files
-- `docs/DS-VERIFY/pages/` (new directory) — screenshot pairs
+- `bin/deploy.sh` — **no change needed** (`_design-system/` ships wholesale)
 
 **Don't touch:**
 - `style-pages.css`

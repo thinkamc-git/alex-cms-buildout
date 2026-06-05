@@ -212,6 +212,10 @@ if (!$_has_pmeta_title && $_site_title !== '' && $_page_title_part !== ''
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/_layout/style-pages.css" />
+  <!-- Phase 22.3 (DS v2.1): public design system, additive. Loads after style-pages.css
+       above as a safety net during migration. To verify this slice holds on its own,
+       toggle OFF style-pages.css in DevTools (gaps, if any, are Phase 22.6 cleanup). -->
+  <link rel="stylesheet" href="/_ds/css/system-public.css" />
   <link rel="icon" type="image/png" href="/_layout/favicon<?= (defined('APP_ENV') && APP_ENV === 'staging') ? '-stage' : '' ?>.png" />
   <!-- Phase 21: analytics moved to settings.analytics_script (injected before </body> below).
        Other entry points (master-layout, 404, ux2.0) still use /_layout/analytics.js. -->

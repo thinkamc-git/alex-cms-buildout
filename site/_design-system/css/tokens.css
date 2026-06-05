@@ -12,12 +12,15 @@
   --neutral:    #E8E8E8;   /* body / page background */
   --surface:    #F8F8F8;
   --canvas-bg:  #F3F2F1;   /* mid-gutter surface in canvas */
+  --canvas-raised: #ECEAE8;/* raised surface — CMS sidebar / filter bars (promoted 22.2) */
   --accent:     #6B7F6E;
 
   /* Primary tints — derived from --primary RGB (25,23,21) */
   --ink-08: rgba(25,23,21,0.08);   /* subtle hover, zebra-stripe */
   --ink-12: rgba(25,23,21,0.12);   /* faint divider */
+  --ink-16: rgba(25,23,21,0.16);   /* faint divider — CMS (promoted 22.2) */
   --ink-18: rgba(25,23,21,0.18);   /* visible border (= rule-faint colour) */
+  --ink-20: rgba(25,23,21,0.20);   /* clickable-row hover outline — CMS (promoted 22.2) */
   --ink-30: rgba(25,23,21,0.30);   /* stronger divider (= rule-30 colour) */
   --ink-72: rgba(25,23,21,0.72);   /* past-card overlay */
 
@@ -69,8 +72,11 @@
   --space-20: 20px;
   --space-24: 24px;   /* default card padding */
   --space-32: 32px;
+  --space-40: 40px;   /* (promoted 22.2 — used by pages/articles) */
   --space-48: 48px;   /* page gutter / outer canvas padding */
+  --space-56: 56px;   /* (promoted 22.2 — used by pages/articles) */
   --space-64: 64px;
+  --space-80: 80px;   /* (promoted 22.2 — used by pages/articles) */
   --space-96: 96px;   /* major section spacing */
 
   /* Layout */
@@ -78,7 +84,10 @@
   --shadow:     0 1px 8px rgba(0,0,0,0.07), 0 0 0 1px var(--ink-08);
   --shadow-h:   0 4px 20px rgba(0,0,0,0.11), 0 0 0 1px var(--ink-12);
   --r-card:     4px;
-  --r-pill:     4px;
+  --r-pill:     4px;   /* canonical pill radius (CMS 3px drift dropped — decision 22.1 #4) */
+  --r-tag:      3px;   /* tag / small pill radius (promoted 22.2 — used by pages/articles) */
+  --radius-sm:  3px;   /* generic small radius (defined 22.2 — was dangling in tiptap.css) */
+  --radius-md:  6px;   /* generic medium radius — editor wrap (defined 22.2 — was dangling) */
 
   /* ── Category colour pool — 18 hues at consistent saturation/darkness.
      Names describe the colour, not the category. Categories pick from this

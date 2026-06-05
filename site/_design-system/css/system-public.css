@@ -1,0 +1,18 @@
+/* ============================================================
+   Alex M. Chong — Design System · system-public.css (barrel)
+
+   The public-site design system. Marketing pages, article/index
+   templates, post cards, header/footer. Consumers load THIS file
+   (plus nothing else from the DS) to get the full public surface.
+
+   Structure (v2.1):
+     tokens.css        — shared primitives (also imported here)
+     public/pages.css  — marketing-page primitives        [Phase 22.3]
+     public/blocks.css — article/index/card templates      [Phase 22.4]
+
+   @import order matters: tokens first so the slices can resolve vars.
+   ============================================================ */
+
+@import url("tokens.css");
+@import url("public/pages.css");
+/* @import url("public/blocks.css");   ← added in Phase 22.4 */

@@ -49,7 +49,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'template' => 'journal-entry',
             ]);
 
-            header('Location: /cms/journals/edit?id=' . $id . '&flash=' . rawurlencode('Draft created — write the Key Statement next.'));
+            header('Location: /cms/journals/edit?id=' . $id . '&from=journals&flash=' . rawurlencode('Draft created — write the Key Statement next.'));
             exit;
         }
     }

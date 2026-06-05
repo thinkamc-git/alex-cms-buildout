@@ -59,7 +59,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             ]);
 
             // POST-then-redirect.
-            header('Location: /cms/articles/edit?id=' . $id . '&flash=' . rawurlencode('Draft created — keep going.'));
+            header('Location: /cms/articles/edit?id=' . $id . '&from=articles&flash=' . rawurlencode('Draft created — keep going.'));
             exit;
         }
     }

@@ -63,7 +63,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'body_mode' => $form['body_mode'],
             ]);
 
-            header('Location: /cms/experiments/edit?id=' . $id . '&flash=' . rawurlencode('Draft created.'));
+            header('Location: /cms/experiments/edit?id=' . $id . '&from=experiments&flash=' . rawurlencode('Draft created.'));
             exit;
         }
     }

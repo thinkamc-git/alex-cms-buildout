@@ -119,6 +119,10 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
       Pages<?= $count('pages') ?>
     </a>
+    <a class="nav-item<?= $activeClass('indexes') ?>"<?= $activeAria('indexes') ?> href="/cms/indexes" data-nav-id="indexes">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
+      Indexes<?= $count('indexes') ?>
+    </a>
     <a class="nav-item<?= $activeClass('navigation') ?>"<?= $activeAria('navigation') ?> href="/cms/navigation" data-nav-id="navigation">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       Navigation<?= $count('navigation') ?>
@@ -138,10 +142,6 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
     <a class="nav-item<?= $activeClass('series') ?>"<?= $activeAria('series') ?> href="/cms/series" data-nav-id="series">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h1M8.5 7h1" stroke="currentColor" stroke-width="1.2"/></svg>
       Series<?= $count('series') ?>
-    </a>
-    <a class="nav-item<?= $activeClass('indexes') ?>"<?= $activeAria('indexes') ?> href="/cms/indexes" data-nav-id="indexes">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
-      Indexes<?= $count('indexes') ?>
     </a>
   </div>
 

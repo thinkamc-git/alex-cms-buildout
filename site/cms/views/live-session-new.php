@@ -46,7 +46,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'template' => 'live-session',
             ]);
 
-            header('Location: /cms/live-sessions/edit?id=' . $id . '&flash=' . rawurlencode('Draft created — add the event details.'));
+            header('Location: /cms/live-sessions/edit?id=' . $id . '&from=live-sessions&flash=' . rawurlencode('Draft created — add the event details.'));
             exit;
         }
     }

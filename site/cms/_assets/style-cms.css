@@ -522,7 +522,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .kcard { background:var(--surface); border:1px solid var(--ink-18); border-radius:var(--r-card); padding:var(--space-16); cursor:pointer; transition:border-color 0.15s; box-shadow:0 1px 3px var(--ink-08); }
 /* Phase 21.7 — 20% black on hover (was --primary at 100%) to match
    the clickable-table-row hover spec. Kanban cards are clickable. */
-.kcard:hover { border-color: var(--ink-20); }
+/* Visible hover border. The kanban lane clips shadows (overflow:hidden +
+   overflow-y:auto), so unlike clickable table rows the card can't lift with a
+   box-shadow — a full --primary border is the clear affordance instead. */
+.kcard:hover { border-color: var(--primary); }
 .kcard-head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-8); margin-bottom:var(--space-8); }
 .kcard-title { font-family:var(--font); font-size:var(--text-meta); font-weight:600; color:var(--primary); line-height:1.4; flex:1; }
 .kcard-summary { font-family:var(--font); font-size:var(--text-tiny); font-weight:400; color:var(--muted); line-height:1.65; margin-top:var(--space-4); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }

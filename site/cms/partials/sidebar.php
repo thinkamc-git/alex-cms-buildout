@@ -163,6 +163,10 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l.85.6 1.05-.15.45.96.95.46-.15 1.05.6.85-.6.85.15 1.05-.95.46-.45.96-1.05-.15L7 12.5l-.85-.6-1.05.15-.45-.96-.95-.46.15-1.05-.6-.85.6-.85-.15-1.05.95-.46.45-.96 1.05.15z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg>
       Settings
     </a>
+    <a class="nav-item<?= $activeClass('design-system') ?>"<?= $activeAria('design-system') ?> href="/cms/design-system" data-nav-id="design-system">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="4.5" r="3" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><path d="M8.5 1.5h4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Design System
+    </a>
   </div>
 
 </nav>

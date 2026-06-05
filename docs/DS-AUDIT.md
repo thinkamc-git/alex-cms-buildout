@@ -119,6 +119,23 @@ Deleted at sunset (Phase 22.6): the duplicate :root blocks, the inline <style> b
 and the showcase-scaffolding selectors (rebuilt at /cms/design-system).
 ```
 
+> **✅ MIGRATED — Phase 22.5 (2026-06-05, staging-only).** `system-cms.css` barrel
+> shipped at `_design-system/css/system-cms.css` — a thin `@import` of `tokens.css`
+> + the 7 CMS slices (`base, typography, shell, components, tables, status, views`),
+> mirroring `system-public.css`. **Reconciliation:** the original brief assumed the
+> CMS DS had to be *built* from inline `<style>` blocks into 6 new files. In fact the
+> CMS DS already existed, decomposed, as those 7 modules under `/_ds/css/` (loaded
+> individually by every view) + `style-cms.css` overrides — so 22.5 only had to wrap
+> them in a barrel, not author them. `style-cms.css` and `tiptap.css` stay loaded as
+> the override layer; folding those in + thinning `style-cms.css` to the import-shell
+> above is **22.6**. **Dogfood:** the new in-CMS viewer at `/cms/design-system` is the
+> barrel's first (and only, this phase) consumer — it loads `system-cms.css` alone,
+> proving the barrel resolves before 22.6 flips the remaining ~30 views. The other
+> views were left **byte-untouched** (zero-regression by construction). The viewer is
+> a *lean* catalogue (tokens · buttons · pills/badges · tags · fields · table · cards
+> · titles, each with class name + Root/CMS slice tag); the exhaustive showcase +
+> scaffolding rebuild remain 22.6.
+
 ### 3.2 Buckets (locked) → move-to-path
 
 | Bucket | Meaning | Move-to-path |

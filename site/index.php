@@ -187,6 +187,11 @@ $router->post('/cms/navigation/reorder',  $cms('views/navigation-reorder.php'));
 $router->get ('/cms/settings', $cms('views/settings.php'));
 $router->post('/cms/settings', $cms('views/settings.php'));
 
+// Phase 22.5: in-CMS Design System viewer. Read-only catalogue of the
+// admin DS (tokens, buttons, pills, badges, cards, titles) with class
+// names + slice tags. First consumer of the system-cms.css barrel.
+$router->get ('/cms/design-system', $cms('views/design-system.php'));
+
 // ── Public subscribe (Phase 14) ─────────────────────────────────────
 // POST /subscribe handles the newsletter-form submission: honeypot,
 // rate-limit (1/min, 10/day per IP), email validation, upsert.

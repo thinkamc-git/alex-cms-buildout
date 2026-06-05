@@ -48,6 +48,13 @@ $bs = (string)($body_slot ?? '');
   <link rel="stylesheet" href="/_ds/css/status.css<?= $cssVer('/_ds/css/status.css') ?>">
   <link rel="stylesheet" href="/_ds/css/views.css<?= $cssVer('/_ds/css/views.css') ?>">
   <link rel="stylesheet" href="/_templates/style-articles.css<?= $cssVer('/_templates/style-articles.css') ?>">
+  <!-- Phase 22.4 (DS v2.1): Blocks slice of the design system, additive. Linked
+       DIRECTLY here (not via system-public.css) so pages.css marketing chrome
+       doesn't bleed onto articles. Loads after style-articles.css above (wins on
+       equal specificity) and is the migration target; style-articles.css stays as
+       a safety net until Phase 22.6. To verify the slice holds on its own, toggle
+       OFF style-articles.css in DevTools (gaps, if any, are 22.6 cleanup). -->
+  <link rel="stylesheet" href="/_ds/css/public/blocks.css<?= $cssVer('/_ds/css/public/blocks.css') ?>">
   <script src="/_layout/analytics.js" async></script>
 </head>
 <body>

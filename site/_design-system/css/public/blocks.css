@@ -1,0 +1,1660 @@
+/* ============================================================
+   Alex M. Chong — Article Templates Stylesheet
+   File: style-articles.css (renamed from style.css for clarity)
+
+   Scope: the article-style content templates only — the rendering
+   surfaces for article, journal-entry, live-session, experiment,
+   and experiment-html. Page-style chrome (landing, about, resume,
+   etc.) lives in style-pages.css.
+
+   When a new layout introduces a token or component, extend the
+   relevant section below — don't pull from the design system
+   wholesale. Every rule here should be reachable from a page.
+   ------------------------------------------------------------
+   Sections:
+     1. Reset
+     2. Tokens
+     3. Base shell
+     4. Layout chrome (.layout-nav, .layout-footer)
+     5. Article layout
+   ============================================================ */
+
+
+/* ── 1. Reset ───────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+a { color: inherit; }
+
+
+/* ── 2. Tokens ──────────────────────────────────────────── */
+
+
+/* ── DS v2.1 (Phase 22.4) ───────────────────────────────────
+   Blocks slice of the design system. Copied VERBATIM from
+   _templates/style-articles.css, MINUS its :root token block
+   (tokens now come from tokens.css, loaded ahead of this file).
+
+   Two exceptions to "verbatim":
+     1. The single self-containment :root below — --dot-grid is the
+        only local token not yet in tokens.css (asset URL; → 22.6).
+     2. .event-format-tag colours swapped from raw hex to --c-*
+        tokens (decision 22.1 #3 / audit D8) — see those rules.
+
+   Linked DIRECTLY on master-layout.php (not via the system-public
+   barrel) to avoid pages.css marketing chrome bleeding onto
+   articles. Old style-articles.css still loads as a safety net
+   until Phase 22.6.
+   ──────────────────────────────────────────────────────────── */
+:root {
+  --dot-grid: url("/_layout/background.png");
+}
+
+
+
+/* ── 3. Base shell ──────────────────────────────────────── */
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font);
+  font-weight: 500;
+  color: var(--primary);
+  background-color: var(--neutral);
+  background-image: var(--dot-grid);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip; /* contain viewport-width hero figures */
+}
+
+
+/* ── 4. Layout chrome ───────────────────────────────────── */
+
+.layout-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 var(--space-48);
+  /* Frosted nav matching marketing pages — translucent + backdrop-blur,
+     with the body's dot-grid texture layered in via the ::before below
+     so the header reacts to scrolled content rather than sitting flat. */
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  isolation: isolate;
+  border-bottom: var(--rule-30);
+}
+.layout-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--dot-grid);
+  background-size: 200px 200px;
+  background-repeat: repeat;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.layout-nav > * {
+  position: relative;
+  z-index: 1;
+}
+.layout-nav-logo {
+  display: inline-flex;
+  align-items: center;
+  min-width: 100px;
+  height: 100%;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-body-lg);
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-nav-logo img {
+  display: block;
+  height: 28px;
+  width: auto;
+}
+.layout-nav-links { display: flex; gap: var(--space-4); }
+.layout-nav-links a {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--canvas-bg);
+  border: var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--text-pill);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--primary);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.layout-nav-links a:hover,
+.layout-nav-links a.is-active { background: var(--primary); color: var(--surface); }
+
+.layout-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px var(--space-48);
+  background: transparent;
+  border-top: var(--rule-30);
+}
+.layout-footer-left,
+.layout-footer-right a {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  text-decoration: none;
+}
+.layout-footer-right { display: flex; gap: var(--space-16); }
+
+
+/* ── 5. Article layout ──────────────────────────────────────
+   Long-form reading template. Single centred column, generous
+   line-height, opening serif, pull quote, tag footer. Category
+   tint is driven by [data-category] on the <article> root —
+   adding a new category is one mapping line below.
+   ──────────────────────────────────────────────────────── */
+
+/* Category mapping — one line per hue, driven by data-category. The CMS
+   stores the colour slug on the category row; templates set the matching
+   attribute on the <article> root; every category-tinted element below
+   reads var(--c-current, var(--primary)). Matches every brand --c-* token
+   defined in _design-system/css/tokens.css. */
+.article[data-category="rust"]       { --c-current: var(--c-rust); }
+.article[data-category="terracotta"] { --c-current: var(--c-terracotta); }
+.article[data-category="clay"]       { --c-current: var(--c-clay); }
+.article[data-category="amber"]      { --c-current: var(--c-amber); }
+.article[data-category="ochre"]      { --c-current: var(--c-ochre); }
+.article[data-category="olive"]      { --c-current: var(--c-olive); }
+.article[data-category="moss"]       { --c-current: var(--c-moss); }
+.article[data-category="forest"]     { --c-current: var(--c-forest); }
+.article[data-category="sage"]       { --c-current: var(--c-sage); }
+.article[data-category="teal"]       { --c-current: var(--c-teal); }
+.article[data-category="ocean"]      { --c-current: var(--c-ocean); }
+.article[data-category="denim"]      { --c-current: var(--c-denim); }
+.article[data-category="indigo"]     { --c-current: var(--c-indigo); }
+.article[data-category="purple"]     { --c-current: var(--c-purple); }
+.article[data-category="violet"]     { --c-current: var(--c-violet); }
+.article[data-category="plum"]       { --c-current: var(--c-plum); }
+.article[data-category="mauve"]      { --c-current: var(--c-mauve); }
+.article[data-category="rose"]       { --c-current: var(--c-rose); }
+
+.article-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-64);
+  background: var(--surface);
+  border-bottom: var(--rule-faint);
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.article-breadcrumb-root {
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+}
+.article-breadcrumb-root:hover { color: var(--primary); }
+.article-breadcrumb-sep { color: var(--muted); }
+.article-breadcrumb-current { font-weight: 700; color: var(--primary); }
+
+.article {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-56) var(--space-40) var(--space-80);
+}
+
+.article-header { margin-bottom: var(--space-40); }
+
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-bottom: var(--space-20);
+  font-family: var(--font-cond);
+  text-transform: uppercase;
+}
+.article-category {
+  font-size: var(--text-pill);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--c-current, var(--primary));
+}
+.article-meta-sep { color: var(--ink-18); }
+.article-meta-date,
+.article-meta-updated {
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: var(--muted);
+}
+
+.article-title {
+  font-size: var(--text-h0);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin-bottom: var(--space-20);
+}
+.article-title-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  display: inline-block; /* prevents descender clipping */
+}
+
+/* Modifier: full Instrument Serif italic title (no Barlow base) */
+.article-title.is-serif {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/* Summary: optional short deck rendered as a larger-body paragraph
+   below the title. Drawn from the `summary` field. Hide when empty. */
+.article-summary {
+  font-size: var(--text-body-lg);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--secondary);
+  margin-bottom: var(--space-32);
+}
+
+/* Author byline: avatar + name + short tagline, rendered as a single
+   inline line ("Alex M. Chong – UX Design Director & Career Coach").
+   Drawn from the Author config (single-author site today; injected into
+   every page). The full Author config has four fields — image, name,
+   short_description, extended_description. The byline uses the first
+   three; the footer Author Bio block uses image + extended_description. */
+.article-author {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-32);
+  padding-bottom: var(--space-24);
+  border-bottom: var(--rule-faint);
+}
+.article-author-info {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  min-width: 0;
+}
+.article-author-name { font-weight: 600; color: var(--primary); }
+.article-author-separator { color: var(--muted); margin: 0 4px; }
+.article-author-tagline { font-weight: 500; color: var(--secondary); }
+
+/* Author Bio: extended description block in the footer area. Image plus
+   the long-form bio paragraph. Independently toggleable from the byline. */
+.article-author-bio {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-24);
+  margin: var(--space-48) 0 var(--space-24);
+  padding: var(--space-32);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.article-author-bio-extended {
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: var(--secondary);
+  margin: 0;
+}
+
+/* Shared avatar styling for both byline (48px) and bio (80px). */
+.article-author-avatar,
+.article-author-bio-avatar {
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--canvas-bg);
+  border: var(--rule-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--secondary);
+  overflow: hidden;
+}
+.article-author-avatar { width: 48px; height: 48px; font-size: var(--text-body-lg); }
+.article-author-bio-avatar { width: 80px; height: 80px; font-size: 32px; }
+.article-author-avatar img,
+.article-author-bio-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.article-series {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: var(--space-32);
+  border-bottom: var(--rule-faint);
+}
+.article-series-pill {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 35%, transparent);
+  color: var(--c-current, var(--primary));
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+a.article-series-pill:hover {
+  background-color: color-mix(in srgb, var(--c-current, var(--primary)) 8%, transparent);
+  border-color: color-mix(in srgb, var(--c-current, var(--primary)) 60%, transparent);
+}
+.article-series-progress {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.article-series-dots { display: flex; gap: 3px; align-items: center; }
+.article-series-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-current, var(--primary)) 20%, transparent);
+}
+.article-series-dot.is-active {
+  background: var(--c-current, var(--primary));
+}
+
+/* Special tag (Principle / Framework) — articles only. Renders inline with
+   the series row when set. Tinted by the active category colour. */
+.article-special-tag {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 40%, transparent);
+  color: var(--c-current, var(--primary));
+  background: transparent;
+}
+
+/* ── Article hero image ─────────────────────────────────────
+   Optional hero figure that sits between the article header and
+   the prose body. Rendered as its own block so the CMS can toggle
+   it independently of inline images in the body. The data-size
+   attribute drives the same default / wide / full variants used
+   by figures inside .article-prose.
+   ──────────────────────────────────────────────────────── */
+
+.article-hero {
+  margin: 0 0 var(--space-40);
+}
+.article-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
+.article-hero figcaption {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+.article-hero[data-size="wide"],
+.article-hero[data-size="full"] {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+}
+.article-hero[data-size="wide"] {
+  width: min(1080px, calc(100vw - var(--space-32) * 2));
+}
+.article-hero[data-size="full"] {
+  width: 100vw;
+}
+.article-hero[data-size="full"] img {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+.article-hero[data-size="wide"] figcaption,
+.article-hero[data-size="full"] figcaption {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ── Article prose ──────────────────────────────────────────
+   Wraps the rich-text body. The selectors below style the bare
+   HTML the CMS editor (Tiptap) emits — no per-paragraph classes
+   needed in the body. Add new tag styles here as the editor's
+   block library grows.
+   ──────────────────────────────────────────────────────── */
+
+.article-prose { margin-top: var(--space-40); }
+.article-prose > * + * { margin-top: var(--space-20); }
+
+/* Default paragraph */
+.article-prose p {
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.8;
+  color: var(--secondary);
+}
+
+/* Lede: the first paragraph styled as Instrument Serif italic intro.
+   `:first-of-type` matches the first <p> in the prose, so the rule still
+   applies when a hero figure precedes it. */
+.article-prose > p:first-of-type {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h4);
+  line-height: 1.5;
+  color: var(--secondary);
+}
+
+/* Headings — body content only (article H1 is outside .article-prose) */
+.article-prose h2 {
+  font-size: var(--text-h4);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--primary);
+  margin-top: var(--space-48);
+}
+.article-prose h3 {
+  font-size: var(--text-body-lg);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.35;
+  color: var(--primary);
+  margin-top: var(--space-32);
+}
+.article-prose h4 {
+  font-family: var(--font-cond);
+  font-size: var(--text-base);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-top: var(--space-32);
+}
+
+/* Pull quote */
+.article-prose blockquote {
+  border-left: 2px solid var(--primary);
+  padding-left: 28px;
+  margin: 36px 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-h5);
+  line-height: 1.45;
+  color: var(--primary);
+}
+
+/* Lists */
+.article-prose ul,
+.article-prose ol {
+  padding-left: var(--space-24);
+  font-size: var(--text-md);
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--secondary);
+}
+.article-prose li + li { margin-top: var(--space-8); }
+.article-prose li::marker { color: var(--muted); }
+
+/* Inline elements */
+.article-prose a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-30);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.article-prose a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.article-prose strong { font-weight: 700; color: var(--primary); }
+.article-prose em { font-style: italic; }
+
+/* Inline + block code */
+.article-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--canvas-bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: var(--rule-faint);
+  color: var(--primary);
+}
+.article-prose pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  background: var(--canvas-bg);
+  padding: var(--space-16) var(--space-20);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+  overflow-x: auto;
+  color: var(--primary);
+}
+.article-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Section break */
+.article-prose hr {
+  border: 0;
+  border-top: var(--rule-faint);
+  margin: var(--space-48) 0;
+}
+
+/* Figures (img + caption) */
+.article-prose figure { margin: var(--space-32) 0; }
+.article-prose figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
+/* Bare <img> (no <figure> wrap) — caps width so an oversized upload doesn't
+   blow past the column. TipTap can insert bare images via the toolbar
+   Image button when the author doesn't add a caption. */
+.article-prose > img,
+.article-prose p > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--space-32) auto;
+  border-radius: var(--r-card);
+  border: var(--rule-faint);
+}
+.article-prose figcaption {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+
+/* Figure size variants — author-toggleable per image (CMS sets data-size).
+   Default: figure fills the article column (~640px content width).
+   wide:    extends beyond the column, capped at 1080px or viewport.
+   full:    viewport-width hero (NYT-style oversized image).
+   The position:relative + left:50% + translateX(-50%) trick centres
+   the figure in the viewport regardless of its constrained parent. */
+.article-prose figure[data-size="wide"],
+.article-prose figure[data-size="full"] {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+}
+.article-prose figure[data-size="wide"] {
+  width: min(1080px, calc(100vw - var(--space-32) * 2));
+}
+.article-prose figure[data-size="full"] {
+  width: 100vw;
+}
+.article-prose figure[data-size="full"] img {
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+}
+/* Caption stays at column-readable width even when the image is wide. */
+.article-prose figure[data-size="wide"] figcaption,
+.article-prose figure[data-size="full"] figcaption {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Figure size toggle (demo only) ──────────────────────────
+   Authoring affordance to preview each size on this static page.
+   In the CMS this control lives in the Tiptap floating menu —
+   it does NOT render on the public article page. Styled as
+   editor scaffolding (mono, dashed) so it reads as not-content. */
+.figure-size-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: 6px var(--space-12);
+  margin-top: var(--space-32);
+  border: 1px dashed var(--ink-30);
+  border-radius: var(--r-card);
+  background: var(--canvas-bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--muted);
+}
+.figure-size-toggle-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.figure-size-toggle button {
+  padding: 3px 8px;
+  border: 1px solid var(--ink-18);
+  border-radius: 3px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--secondary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.figure-size-toggle button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.figure-size-toggle button[aria-pressed="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
+}
+.article-prose .figure-size-toggle + figure { margin-top: var(--space-12); }
+
+/* Series prev/next navigation — rendered only when template = series.
+   Sits between the body end and the tag footer. Tinted by --c-current. */
+.article-series-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  margin-top: var(--space-40);
+  padding-top: var(--space-32);
+  border-top: var(--rule-faint);
+}
+.article-series-nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-20);
+  border: 1px solid color-mix(in srgb, var(--c-current, var(--primary)) 25%, transparent);
+  border-radius: var(--r-card);
+  text-decoration: none;
+  color: var(--primary);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+.article-series-nav-link:hover {
+  border-color: var(--c-current, var(--primary));
+  background: color-mix(in srgb, var(--c-current, var(--primary)) 4%, transparent);
+}
+.article-series-nav-link.is-next {
+  text-align: right;
+  align-items: flex-end;
+}
+.article-series-nav-direction {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.article-series-nav-title {
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--primary);
+}
+
+.article-tags {
+  margin-top: var(--space-40);
+  padding-top: var(--space-24);
+  border-top: var(--rule-faint);
+}
+.article-tags-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-12);
+}
+.article-tags-list { display: flex; gap: 6px; flex-wrap: wrap; }
+.article-tag {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-tag);
+  border: 1px solid var(--ink-18);
+  color: var(--muted);
+  background: transparent;
+}
+
+
+/* ============================================================
+   6. Editorial layout (Phase 6b)
+   Promoted from site/_templates/article.html's inline <style>.
+   Overrides earlier rules where necessary via cascade order.
+   The article-standard PHP template renders blocks in this
+   shape: split topstrip → title → summary → tag row → date row
+   → byline-row-with-rules → hero → body → author bio → tags.
+   ============================================================ */
+
+/* Top split bar — category (left) · series row (right) */
+.article-topstrip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-24);
+  margin-bottom: var(--space-40);
+}
+.article-topstrip .article-category {
+  font-family: var(--font-cond);
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-current, var(--primary));
+}
+.article-topstrip-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Title — bumped to 56px in the editorial layout */
+.article-title.is-serif {
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-32);
+}
+
+/* Summary — restated so the new spacing token applies */
+.article-summary {
+  font-size: var(--text-body-lg);
+  line-height: 1.5;
+  color: var(--secondary);
+  margin-bottom: var(--space-32);
+}
+
+/* Special Tag — own row */
+.article-tag-row {
+  margin-bottom: var(--space-32);
+}
+
+/* Date row — publish + updated, condensed uppercase */
+.article-dates {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+  flex-wrap: wrap;
+}
+.article-pub-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.article-updated-date {
+  font-family: var(--font-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Byline row with rules above and below — wraps the author block
+   and the read-time slot. The .article-author overrides strip the
+   legacy standalone border/padding so the row owns the framing. */
+.article-byline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  padding: var(--space-20) 0;
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+  margin-bottom: var(--space-40);
+}
+.article-byline-row .article-author {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* Stack name + tagline in the byline (inline "Name – Tagline" form
+   only applies when .article-author is rendered standalone). */
+.article-byline-row .article-author-info {
+  display: block;
+  line-height: 1.3;
+}
+.article-byline-row .article-author-name {
+  display: block;
+  font-weight: 700;
+  font-size: var(--text-md);
+}
+.article-byline-row .article-author-separator { display: none; }
+.article-byline-row .article-author-tagline {
+  display: block;
+  font-size: var(--text-base);
+  color: var(--secondary);
+  margin-top: 2px;
+}
+.article-read-time {
+  font-family: var(--font);
+  font-size: var(--text-base);
+  color: var(--secondary);
+  flex-shrink: 0;
+}
+
+/* Author Bio — dark footer block (replaces the legacy light card).
+   Smaller, less prominent than the §5 default; reads as a sign-off. */
+.article-author-bio {
+  align-items: center;
+  gap: var(--space-16);
+  padding: var(--space-20) var(--space-24);
+  background: var(--primary);
+  border: 0;
+  margin-top: var(--space-48);
+}
+.article-author-bio-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: var(--text-md);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.85);
+}
+.article-author-bio-extended {
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: rgba(255,255,255,0.72);
+}
+
+
+/* ── Responsive ─────────────────────────────────────────────
+   Tablet (≤768px) and small mobile (≤480px) — keeps the
+   editorial layout breathing on narrow screens.
+   ──────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .article {
+    padding: var(--space-32) var(--space-20) var(--space-48);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-20);
+  }
+  .article-topstrip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-8);
+    margin-bottom: var(--space-32);
+  }
+  .article-topstrip-right {
+    max-width: 100%;
+  }
+  .article-title.is-serif {
+    font-size: 40px;
+    line-height: 1.1;
+    margin-bottom: var(--space-24);
+  }
+  .article-summary {
+    font-size: 17px;
+    margin-bottom: var(--space-24);
+  }
+  .article-dates {
+    margin-bottom: var(--space-20);
+  }
+  .article-byline-row {
+    padding: var(--space-16) 0;
+    gap: var(--space-12);
+    flex-wrap: wrap;
+  }
+  .article-byline-row .article-author {
+    gap: var(--space-12);
+  }
+  .article-hero[data-size="wide"] {
+    width: 100%;
+    position: static;
+    left: auto;
+    transform: none;
+    max-width: 100%;
+  }
+  .article-hero[data-size="wide"] figcaption {
+    max-width: 100%;
+  }
+  .article-prose h2 {
+    font-size: 22px;
+    margin-top: var(--space-32);
+  }
+  .article-prose h3 {
+    font-size: 18px;
+  }
+  .article-prose blockquote {
+    font-size: 18px;
+    padding-left: var(--space-20);
+    margin: var(--space-32) 0;
+  }
+  .article-series-nav {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+  .article-series-nav-link.is-next {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .article-author-bio {
+    padding: var(--space-16) var(--space-20);
+    gap: var(--space-12);
+  }
+  .article-author-bio-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: var(--text-base);
+  }
+  .article-author-bio-extended {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .article-tags { margin-top: var(--space-32); }
+}
+
+@media (max-width: 480px) {
+  .article {
+    padding: var(--space-24) var(--space-16) var(--space-40);
+  }
+  .article-breadcrumb {
+    padding: var(--space-12) var(--space-16);
+  }
+  .article-title.is-serif {
+    font-size: 32px;
+  }
+  .article-summary {
+    font-size: 16px;
+  }
+}
+
+/* ─── Journal — Phase 8 ─────────────────────────────────────────────── */
+/* Key Statement replaces the title block: Instrument Serif italic with
+   a left rule in the category colour. Falls back to muted ink when no
+   category is set (Phase 8 ships before Categories admin, so this is
+   the common path until categories land). */
+.article-key-statement {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  padding-left: var(--space-24);
+  border-left: 4px solid var(--c-current, var(--ink-30));
+  margin: var(--space-16) 0 var(--space-32);
+}
+
+/* Entry Number — small monospace label in the topstrip right slot. */
+.article-entry-number {
+  font-family: var(--font-mono);
+  font-size: var(--text-tiny);
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Journal byline row — only the author appears (no read-time slot), so
+   the row collapses to a single-column layout. */
+.article-byline-row--journal { grid-template-columns: 1fr; }
+.article-byline-row--journal .article-author { justify-content: flex-start; }
+
+@media (max-width: 768px) {
+  .article-key-statement {
+    font-size: 28px;
+    padding-left: var(--space-16);
+  }
+}
+@media (max-width: 480px) {
+  .article-key-statement {
+    font-size: 22px;
+  }
+}
+
+/* ─── Live Session — Phase 9 ───────────────────────────────────────── */
+/* Event Card combines Event Details + Format Tags into one white panel,
+   per BLOCKS.md §7. Same surface treatment as Author Bio: a faint-bordered
+   card sitting between the publish date and the byline row. */
+/* Event card — combined When/Where + format tags in a single white card
+   with the same surface treatment as the author bio block. Date and
+   location render in Instrument Serif italic at 28px for editorial
+   flair. Format tags fill the bottom row across both columns with a
+   top rule separator. Design ported from site/_templates/layouts.html. */
+.event-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-32);
+  margin: var(--space-24) 0 var(--space-32);
+  padding: var(--space-32);
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+}
+.event-meta-block-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-12);
+}
+.event-date,
+.event-location {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+}
+.event-time,
+.event-cost-detail {
+  font-family: var(--font);
+  font-size: var(--text-md);
+  color: var(--secondary);
+  margin-top: var(--space-8);
+}
+.event-card-tags {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-top: var(--space-24);
+  border-top: var(--rule-faint);
+}
+.event-format-tag {
+  font-family: var(--font-cond);
+  font-size: var(--text-pill);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--ink-18);
+  color: var(--secondary);
+  background: transparent;
+}
+.event-format-tag.is-free {
+  color: var(--c-forest);
+  border-color: rgba(36,102,54,0.4);
+  background: rgba(36,102,54,0.08);
+}
+.event-format-tag.is-in-person {
+  color: var(--c-clay);
+  border-color: rgba(107,64,16,0.4);
+  background: rgba(107,64,16,0.07);
+}
+
+/* PAST badge — small chip in the topstrip right slot when the event has
+   passed. Mutes the live session without hiding it (per Decisions). */
+.article-past-badge {
+  display: inline-block;
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--ink-18);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+}
+
+@media (max-width: 480px) {
+  /* Event card stacks (When over Where), tighter padding, smaller dates. */
+  .event-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-20);
+    padding: var(--space-24);
+  }
+  .event-date,
+  .event-location {
+    font-size: 24px;
+  }
+}
+
+
+/* ─── 12. Index pages — /writing/, /journal/, /live-sessions/,
+        /experiments/, /series/[slug]/.
+
+   Mirrors the "Full Page Index" treatment in the DS showcase
+   (site/_design-system/index.html §04): left-aligned eyebrow + title
+   with serif-italic emphasis, count chip on the right, header divider,
+   3-col card grid below. Card chrome itself lives in views.css; this
+   section owns only the page-level wrapper, header, and filter row.
+   ───────────────────────────────────────────────────────────────── */
+
+.index-page {
+  display: block;
+}
+
+/* ── Page header (matches DS showcase inline rules) ── */
+.index-page-header {
+  padding: var(--space-56) var(--space-48) var(--space-40);
+  border-bottom: 1px solid var(--ink-18);
+}
+.index-page-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-24);
+  margin-bottom: var(--space-24);
+}
+.index-page-header-left {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.index-eyebrow {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.index-title {
+  font-family: var(--font);
+  font-size: var(--text-h2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--primary);
+  margin: 0;
+}
+/* Asterisk-wrapped words render as <em class="serif-em"> — Instrument
+   Serif italic at the same size, weight 400 (lighter than the Barlow
+   600 around it), so it reads as a graceful emphasis rather than a
+   second voice. */
+.index-title .serif-em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1em;
+  display: inline-block;
+}
+.index-subtitle {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--secondary);
+  margin: 12px 0 0;
+  max-width: 56ch;
+}
+.index-count {
+  font-family: var(--font);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ── Card grid sections ── */
+.index-grid,
+.index-hero,
+.index-featured {
+  padding: var(--space-32) var(--space-48);
+}
+.index-grid + .index-grid,
+.index-featured + .index-grid,
+.index-hero + .index-featured,
+.index-hero + .index-grid {
+  padding-top: 0;
+}
+
+/* Hero card spans the full width and reads larger so it anchors the
+   page. The inner grid passes grid-template-columns:1fr inline. */
+.index-hero .card { min-height: 320px; }
+.index-hero .card .title,
+.index-hero .card .ev-title,
+.index-hero .card .od-title { font-size: var(--text-h3); }
+
+.index-empty {
+  font-family: var(--font);
+  font-size: var(--text-body);
+  color: var(--muted);
+  font-style: italic;
+  padding: var(--space-48);
+}
+
+/* Cards are <a> elements — strip default link colour/underline so the
+   internal .card-* rules keep their own colour decisions. */
+.cards-grid a.card,
+.cards-grid a.card:hover,
+.cards-grid a.card:visited { color: inherit; text-decoration: none; }
+
+/* Filter-pill hide. views.css forces .card { display:flex !important },
+   so we need our own !important to override it when JS toggles a card
+   out of the active filter set. */
+.cards-grid .card.is-filtered-out { display: none !important; }
+
+@media (max-width: 900px) {
+  .index-page-header { padding: var(--space-40) var(--space-32) var(--space-32); }
+  .index-grid,
+  .index-hero,
+  .index-featured { padding: var(--space-24) var(--space-32); }
+}
+@media (max-width: 600px) {
+  .index-page-header { padding: var(--space-32) var(--space-24) var(--space-24); }
+  .index-page-header-row { flex-direction: column; align-items: flex-start; }
+  .index-grid,
+  .index-hero,
+  .index-featured { padding: var(--space-24); }
+  .index-title { font-size: var(--text-h4); }
+}
+
+/* ── Editorial section stack (Phase 21.7) ──
+   Each authored section renders as <section class="index-section
+   index-section--{hero|curated|feed}">. The .cards-grid inside follows
+   the same vocab as .index-grid (responsive 4/2/1 columns set by
+   views.css), so we just need section-level padding + the optional
+   header bar (title + see-more link). Hero variant matches .index-hero.
+*/
+.index-section { padding: var(--space-32) var(--space-48); }
+.index-section + .index-section { padding-top: 0; }
+
+/* Big section header — full serif title with italic-emphasis pair,
+   matches the "Latest *thinking*" treatment in landing mocks. */
+.index-section-header.is-big {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding-bottom: var(--space-20);
+}
+/* Big section title — mirrors /writing/'s .index-title treatment but
+   one step smaller so the page-level title stays dominant. */
+.index-section-title-big {
+  font-family: var(--font);
+  font-size: var(--text-h4);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--primary);
+}
+.index-section-title-big .serif-em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1em;
+  display: inline-block;
+}
+
+/* Bump the small (group-header) eyebrow + link up one step from the
+   DS default — index sections want a bit more presence than the
+   inline tag chips the eyebrow style was originally tuned for. */
+.index-section .group-header-eyebrow,
+.index-section .group-header-link { font-size: var(--text-meta); }
+.index-section-view-all {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.index-section-view-all:hover { opacity: 0.5; }
+
+/* Bare per-section visitor pills — no .controller white bar.
+   Override the colored category-tinted hovers from status.css; inside
+   editorial sections we want a single neutral hover treatment. */
+.index-section-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding-bottom: var(--space-20);
+}
+.index-section-pills .fp,
+.index-section-pills .fp:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--surface);
+}
+.index-section-pills .fp.on,
+.index-section-pills .fp.on:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--surface);
+}
+
+/* Hero section is a full-bleed editorial banner, not a card-grid. */
+.index-section--hero {
+  padding: 0;
+  border-bottom: 1px solid var(--ink-18);
+  background: transparent;
+}
+/* Restore breathing room for the section that follows the hero —
+   the global "+ .index-section { padding-top:0 }" collapse was
+   pushing the next section's header flush against the hero rule. */
+.index-section--hero + .index-section { padding-top: var(--space-48); }
+
+.editorial-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-48);
+  padding: var(--space-64) var(--space-48);
+  align-items: stretch;
+}
+.editorial-hero.is-solo,
+.editorial-hero--plain {
+  grid-template-columns: 1fr;
+}
+
+/* ── Background variants for plain + within ── */
+.editorial-hero--bg-surface { background: var(--surface); }
+
+/* ── Bleed variants — full-bleed bg image with gradient overlay ── */
+.editorial-hero--bleed-dark,
+.editorial-hero--bleed-light {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  grid-template-columns: none;
+  min-height: 480px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  gap: 0;
+}
+.editorial-hero--bleed-dark::before,
+.editorial-hero--bleed-light::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.editorial-hero--bleed-dark::before {
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.55) 65%,
+    rgba(0,0,0,0.85) 100%
+  );
+}
+.editorial-hero--bleed-light::before {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.55) 55%,
+    rgba(255,255,255,0.92) 100%
+  );
+}
+.editorial-hero--bleed-dark .editorial-hero-text,
+.editorial-hero--bleed-light .editorial-hero-text {
+  position: relative;
+  z-index: 1;
+}
+.editorial-hero--bleed-dark .editorial-hero-text    { color: #fff; }
+.editorial-hero--bleed-dark .editorial-hero-title   { color: #fff; }
+.editorial-hero--bleed-dark .editorial-hero-summary { color: rgba(255,255,255,0.86); }
+.editorial-hero--bleed-dark .editorial-hero-meta    { color: rgba(255,255,255,0.65); }
+.editorial-hero--bleed-dark .editorial-hero-cta {
+  background: #fff;
+  color: #000;
+}
+.editorial-hero--bleed-light .editorial-hero-text   { color: var(--primary); }
+.editorial-hero--bleed-light .editorial-hero-summary { color: var(--secondary); }
+.editorial-hero--bleed-light .editorial-hero-meta    { color: var(--muted); }
+.editorial-hero--bleed-light .editorial-hero-cta {
+  background: var(--primary);
+  color: var(--surface);
+}
+/* Eyebrow follows the post's category colour across every layout.
+   The inline style="--c-current: <hex>" set in the template overrides;
+   fallback is terracotta. */
+.editorial-hero-eyebrow { color: var(--c-current, var(--c-terracotta, var(--primary))); }
+
+.editorial-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+  min-width: 0;
+  max-width: 760px;
+}
+.editorial-hero-eyebrow {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-current, var(--c-terracotta, var(--primary)));
+}
+.editorial-hero-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(34px, 3.8vw, 54px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--primary);
+  margin: 0;
+}
+.editorial-hero-summary {
+  font-family: var(--font);
+  font-size: var(--text-h5, 19px);
+  line-height: 1.55;
+  color: var(--secondary);
+  margin: 0;
+}
+.editorial-hero-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  margin-top: var(--space-16);
+  flex-wrap: wrap;
+}
+.editorial-hero-meta {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.editorial-hero-cta {
+  font-family: var(--font);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  color: var(--surface);
+  background: var(--primary);
+  padding: 10px var(--space-20);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.editorial-hero-cta:hover { background: var(--primary-hover, #000); }
+
+.editorial-hero-side {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.editorial-hero-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--ink-12);
+  border-radius: 4px;
+  padding: var(--space-32);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 280px;
+}
+.editorial-hero-card--empty { background: var(--surface); }
+.editorial-hero-card-label {
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-12);
+}
+.editorial-hero-card-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--text-h4);
+  line-height: 1.25;
+  color: var(--primary);
+}
+.editorial-hero-card-part {
+  display: inline;
+  color: var(--secondary);
+  font-style: italic;
+}
+.editorial-hero-thumb {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  border-radius: 4px;
+  min-height: 280px;
+}
+
+@media (max-width: 900px) {
+  .editorial-hero {
+    grid-template-columns: 1fr;
+    padding: var(--space-40) var(--space-32);
+    gap: var(--space-32);
+  }
+}
+@media (max-width: 600px) {
+  .editorial-hero { padding: var(--space-32) var(--space-24); }
+}
+
+/* Carousel: horizontal scroll, native scrollbar. v1 — no controls.
+   Both sides bleed past the parent .index-section's horizontal
+   padding (negative margins) so cards clip at both browser edges
+   when scrolled. The matching padding-left keeps the FIRST card
+   aligned with the section header in the initial scroll position;
+   scroll-padding-left keeps snap alignment correct after scrolling. */
+.cards-grid.is-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-24);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--space-20);
+  margin-left: calc(-1 * var(--space-48));
+  margin-right: calc(-1 * var(--space-48));
+  padding-left: var(--space-48);
+  padding-right: var(--space-48);
+  scroll-padding-left: var(--space-48);
+  scroll-padding-right: var(--space-48);
+  /* Soft fade on both edges matching the negative margin. Bottoms
+     out at 20% opacity (80% faded) rather than fully transparent so
+     edge cards still register as content. */
+  -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), rgba(0,0,0,0.2) 100%);
+          mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-48), #000 calc(100% - var(--space-48)), rgba(0,0,0,0.2) 100%);
+}
+.cards-grid.is-carousel > .card {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
+}
+@media (max-width: 900px) {
+  .cards-grid.is-carousel {
+    margin-left:  calc(-1 * var(--space-32));
+    margin-right: calc(-1 * var(--space-32));
+    padding-left: var(--space-32);
+    padding-right: var(--space-32);
+    scroll-padding-left: var(--space-32);
+    scroll-padding-right: var(--space-32);
+  }
+}
+@media (max-width: 600px) {
+  .cards-grid.is-carousel {
+    margin-left:  calc(-1 * var(--space-24));
+    margin-right: calc(-1 * var(--space-24));
+    padding-left: var(--space-24);
+    padding-right: var(--space-24);
+    scroll-padding-left: var(--space-24);
+    scroll-padding-right: var(--space-24);
+  }
+}
+
+@media (max-width: 900px) {
+  .index-section { padding: var(--space-24) var(--space-32); }
+}
+@media (max-width: 600px) {
+  .index-section { padding: var(--space-24); }
+  .index-section-header { flex-direction: column; align-items: flex-start; gap: var(--space-8); }
+}
+
+/* docs/MOTION.md §5 — html-body article fade-in.
+   Initial opacity 0; .is-loaded toggles to 1 once DOM is ready. */
+.article-prose[data-body-mode="html-body"] {
+  opacity: 0;
+  transition: opacity 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.article-prose[data-body-mode="html-body"].is-loaded {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .article-prose[data-body-mode="html-body"] {
+    opacity: 1;
+    transition: none;
+  }
+}

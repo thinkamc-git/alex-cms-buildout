@@ -315,8 +315,73 @@ production rendering does not emit it.
 
 ---
 
+## 11. Recipe: Adding a new block
+
+A block touches the three linked surfaces (contract → render → editor) plus the
+shared CSS slice. Do all four or the block is half-wired. The order below keeps
+each step verifiable before the next. Worked example: a **"Takeaways"** block —
+a short bulleted summary that sits after the body on articles.
+
+**1. Define it in the contract (this file).**
+Add a row to §5 *Block reference* and §6 *Content type matrix*, and slot it into
+§7 *Block order* for each type that shows it.
+- **slug:** `takeaways` (kebab-case; this is the permanent identifier).
+- **mode:** pick from §4 — `optional` (renders only when its field is non-NULL,
+  Path A visibility) vs `always`. Takeaways = `optional`.
+- **composition:** the DB field(s) it reads, e.g. `$article['takeaways']` (a
+  newline- or JSON-list TEXT column).
+- Add the column to the schema (`content` table) and to `docs/CMS-STRUCTURE.md`
+  §9 in the same pass — see the "most important rule" in `CLAUDE.md`.
+
+**2. Add the CSS to the Blocks slice.**
+`site/_design-system/css/public/blocks.css` (the canonical Blocks stylesheet as
+of Phase 22.4 — *not* the legacy `_templates/style-articles.css`, which is the
+safety net until 22.6). Use tokens, never raw values:
+```css
+.article-takeaways { margin-top: var(--space-32); padding-top: var(--space-24); border-top: var(--rule-faint); }
+.article-takeaways__title { font-family: var(--font-cond); font-size: var(--text-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.article-takeaways li { font-size: var(--text-md); line-height: 1.6; }
+```
+Follow the §3 naming convention (`.component` + `.component__element`).
+
+**3. Add the HTML scaffold to the render template.**
+Two parts:
+- A render partial: `site/templates/partials/block-takeaways.php` (mirror an
+  existing one like `block-summary.php`). It reads `$ctx`/`$article` and emits
+  the markup, honouring Path A — render nothing when the field is empty.
+- A `render_block('takeaways', $ctx);` call in the type template(s) that show it
+  (e.g. `site/templates/article.php` / `master-layout.php` flow), placed to match
+  the §7 block order.
+- Register the block's composition in `site/lib/blocks_data.php` so `$ctx`
+  carries the field(s).
+
+**4. Add the CMS editor field.**
+In the relevant `site/cms/views/<type>-edit.php`, add the form control (textarea
+for Takeaways), include it in the `$post` collection + the `save_*` `$data`
+array (the save path is `save_article()` in `site/lib/content.php`, which only
+writes columns it knows about — add `takeaways` to its `$cols` list). Style with
+existing `style-cms.css` field classes; no new CSS unless the control is novel.
+
+**5. Add a DS showcase entry (forward-ref to Phase 22.6).**
+When the DS showcase is reorganized in 22.6, add a labelled example of the block
+to `site/_design-system/index.html` so it's discoverable. Until then, the static
+`site/_templates/article.html` "Master" tab is where annotated blocks live (see
+§9) — add a `data-block="takeaways"` annotated example there.
+
+**Verify:** create a draft with the field filled → it renders in the right order;
+clear the field → the block disappears (Path A); the slug, CSS class, and
+`data-block` value all read `takeaways`.
+
+---
+
 ## 10. Changelog
 
+- **2026-06-05** — Phase 22.4: Blocks CSS migrated into the design system as
+  `_design-system/css/public/blocks.css` (verbatim from `style-articles.css`
+  minus its `:root`, plus the two `.event-format-tag` colour swaps to
+  `--c-forest`/`--c-clay`). Linked directly on `master-layout.php` alongside the
+  legacy file (additive; legacy sunset in 22.6). Added §11 *Recipe: Adding a new
+  block*. See `docs/DS-AUDIT.md` §6.3.
 - **2026-05-09 (later)** — CMS schema decisions captured. Template enum
   landed (article-standard, article-series, journal-entry, live-session,
   experiment, experiment-html). Hero Image, Event Details, and Format

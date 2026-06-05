@@ -125,7 +125,7 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 22.1** — Audit (CSS + mobile findings) · *Semi-auto* · ~4–6h (multi-session) · **No code** (deliverable: `docs/DS-AUDIT.md`)
 - [x] **Phase 22.2** — Root tokens · *Semi-auto* · ~1h · **Staging-only**
 - [x] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
-- [ ] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
+- [x] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
 - [ ] **Phase 22.5** — CMS migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [ ] **Phase 22.6** — Cleanup + sunset · *Manual* · ~1.5–2h · **Ships:** v2.1 public
 
@@ -2544,3 +2544,75 @@ polish, scale, or developer-quality concerns.
   `event_date / event_time / event_end_time` back in Phase 9. The
   divergence cost a debug round trip during Phase 12. *Fix:* one-pass
   reconciliation against the real `DESCRIBE content` output.
+
+### Caught during Phase 22.4 side quest (2026-06-05)
+
+- **Browser `<title>` leaks `*…*` formatting markers.** Index/page titles
+  authored with asterisk emphasis (e.g. "Latest thinking") render the raw
+  `*` in the browser tab — the marker is a formatting cue, not literal text.
+  *Fix:* strip/transform the emphasis markers when composing `<title>`.
+  *Cost:* ~30m. Future tweak.
+
+- **`<title>` site-title suffix missing on CMS-rendered pages.** The
+  marketing shell (`_page-shell.php`) appends " — <site_title>" from the
+  settings table, but `master-layout.php` (articles / journals / live
+  sessions / experiments / indexes) builds its own `<title>` without that
+  suffix, so those tabs don't show "… — alexmchong.ca". *Fix:* scan every
+  entry point that emits `<title>` (master-layout, 404, any standalone), and
+  apply the same settings-driven suffix logic, skipping pages with a full
+  CMS meta_title override. *Cost:* ~1h. Real bug, not urgent.
+
+- **Bookmark (`.bm`) icons are non-functional.** The card bookmark icon has
+  no save/marked state. *Direction:* likely client-side `localStorage`
+  (per-browser, no cookies; clears if the user purges storage — acceptable).
+  If it proves fiddly, hide the icon until a real account system exists.
+  *Cost:* ~2–3h. Needs a design decision on marked-state UX first.
+
+- **Journal cards show no preview text + miss the Summary-fallback spec.**
+  Listing journal cards truncate/omit the body preview the DS showcase shows.
+  Per spec, a journal should have a **Summary** field: if filled, the card
+  shows the summary; if empty, the card pulls from the body and truncates.
+  *Fix:* add/confirm the journal `summary` field + the fallback-to-truncated-
+  body logic in `index-card.php` (journal case) and the editor. *Cost:* ~1–2h.
+  Touches the three linked surfaces (BLOCKS contract, render, editor).
+
+- **DS icon registry (audit → table/chart).** Icons are currently inline
+  SVGs scattered across templates (bookmark `.bm`, journal squiggle, clock,
+  experiment orbit, format/logistic glyphs). *Direction:* audit every inline
+  icon, normalize, and publish a named icon table/chart in the DS showcase
+  (`_design-system/index.html`) so they're reusable and consistent. Deferred
+  by decision during the 22.4 side quest (clock added inline for now).
+  *Cost:* ~2–3h. Pairs naturally with a future DS phase.
+
+### "Author Line" index section + author-info relocation (captured 2026-06-05)
+
+A cohesive future phase — one new index section type plus three changes that
+should ship with it. Touches the three linked surfaces (BLOCKS/CMS-STRUCTURE
+contract, render templates, CMS editor) per the §"most important rule".
+
+- **New index-editor section type: "Author Line"** (in the Editorial Index
+  section-stack builder, CMS-STRUCTURE §16). **Singleton** — usable at most
+  once per index. Modeled on the Hero full-bleed section:
+  - **Background option:** solid white · transparent · **DS black** (the
+    `--primary` token `#191715`, not true black). When black is chosen the
+    text/foreground flips to **DS white** (`--white`).
+  - **Profile photo on the left:** choose the default author photo · replace
+    with an upload · or hide it.
+  - **Body text:** free-input; **defaults to the author bio** when left blank.
+  - **Optional trailing link:** e.g. "Read More →" — same behaviour/styling as
+    the "View all / view more" link used elsewhere in the index sections.
+  *Cost:* ~3–4h (new section type end-to-end: contract + render + editor).
+
+  Ships with these three:
+  1. **Public post author image: drop the circle border.** The article-family
+     author avatar (`.article-author-avatar` / bio avatar) has a ring around
+     the circular crop; remove it so the photo stays crisp. *Cost:* ~10m CSS
+     (blocks slice + style-articles).
+  2. **Move Author Bio out of post templates → into Settings.** Author bio
+     becomes site-level data, not per-post. Settings UI gains **two tabs:**
+     *Site Settings* (the current screen) and a new *Author Info* tab holding
+     name / photo / bio. The post templates and the Author Line section read
+     from there. *Cost:* ~2–3h (settings schema + tabbed UI + render wiring +
+     migration of existing bio content).
+  3. **Move "Indexes" under Navigation in the CMS sidebar**, positioned
+     **above Redirects.** Pure admin-nav reorder. *Cost:* ~20m.

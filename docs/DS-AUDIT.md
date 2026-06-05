@@ -862,6 +862,18 @@ Locked column format: `Selector · File · Bucket · Drift · Move-To-Path · Pr
 
 ### 6.3 — `_templates/style-articles.css` (system-public · Blocks)
 
+> **✅ MIGRATED — Phase 22.4 (2026-06-05).** These Blocks rules now live in
+> `_design-system/css/public/blocks.css`, copied **verbatim minus the `:root`**
+> (tokens come from `tokens.css`), with one self-containment `:root { --dot-grid }`
+> and the two intentional `.event-format-tag` colour swaps (`#246636`→`--c-forest`,
+> `#6B4010`→`--c-clay`, decision 22.1 #3 / D8). Linked **directly** on
+> `site/templates/master-layout.php` (not via the `system-public.css` barrel, to
+> avoid `pages.css` marketing chrome bleeding onto articles). `style-articles.css`
+> still loads underneath as the safety net; both are deduped/sunset in Phase 22.6.
+> Watch-items D11 (series-pill/-dot/-tag dup) and D13 (layout-nav/footer triple
+> copy) remain deferred to 22.6. The selector tables below are the migration
+> source-of-record.
+
 #### style-articles.css — Design System Audit
 
 ##### Summary

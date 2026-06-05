@@ -1946,26 +1946,29 @@ The existing deferred Phase 17 ("Design system unification") was the single-phas
 - **Autonomy:** **Manual** *(highest-risk DS phase — touches every published article)*
 - **Ships:** Staging-only. Additive — old `style-articles.css` keeps loading.
 
-**Decisions to capture before starting**
-- New directory: `site/_design-system/blocks/` with `blocks.css` (single file unless audit suggests splitting)
-- Migration approach: copy Blocks-categorized rules from `style-articles.css` into `blocks.css`; leave original intact
-- Consumer change: article template loader adds new `<link>` alongside existing one
-- Visual diff: screenshot every published article + journal + live session + experiment (both variants); manual sign-off from Alex before phase exit
+**Decisions to capture before starting** *(reconciled 2026-06-05 to the locked barrel architecture + the actual article-loading setup — supersedes the original "blocks/ dir importing root/" wording. Follows the additive playbook proven in 22.2/22.3.)*
+- **Architecture (barrel):** new file `site/_design-system/css/public/blocks.css` = the Blocks-categorized rules from `style-articles.css`, copied **verbatim, minus its `:root`** (tokens come from `tokens.css`). **No class renames** — they need coordinated HTML changes, deferred to 22.6.
+- **How articles load CSS today** (verified): `site/templates/master-layout.php` lines 44–50 already link 6 DS modules (`tokens, base, typography, components, status, views`) **then** `/_templates/style-articles.css` (line 50), via a `$cssVer()` mtime cache-buster. So articles are already a hybrid: DS modules (incl. `views.css` = canonical `.card`) + style-articles block styles on top.
+- **⚠️ KEY RISK — pages/blocks bleed.** The verbatim slices each carry their own `body` / reset / `.layout-nav` / `.layout-footer`, and `pages.css` carries `--dot-grid: url("/_layout/background.png")` (the marketing PNG). If an article page loads the *full* `system-public.css` barrel (which `@import`s `pages.css`), the marketing body background + chrome **bleed onto articles → visible regression.** **Therefore: load the blocks slice on articles directly, NOT via the full barrel.** Recommended consumer change: in `master-layout.php`, add `<link rel="stylesheet" href="/_ds/css/public/blocks.css?<?= $cssVer ... ?>">` immediately **after** line 50 (so it wins over style-articles.css; tokens already loaded line 44). Do **not** route articles through `system-public.css` during the additive phase. (The symmetric end-state — one clean `system-public.css` with a shared base + Pages + Blocks regions, both shells linking it, no duplication/bleed — is **22.6** work, after old files are dropped and chrome is de-duplicated.) Leave the `blocks.css` line in the barrel commented for now, or omit it, to avoid dead block CSS bleeding onto marketing pages.
+- **The ONE intentional visual change (decision 22.1 #3):** `blocks.css` is *not* purely verbatim — change `.event-format-tag.is-free` / `.is-in-person` from raw `#246636` / `#6B4010` to `var(--c-forest)` / `var(--c-clay)`. These are visibly more muted → **screenshot-diff a live-session card specifically** and get Alex's eyes on it (audit D8).
+- **Cache-buster:** link `blocks.css` with `$cssVer()` like the others; @imports inside a barrel don't get stamped (another reason to link the slice directly).
+- Visual diff: screenshot every published article + journal + live session + experiment (both variants) + editorial & listing index pages; manual sign-off from Alex before exit.
 
-**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (Blocks-tier rows). `_templates/style-articles.css`. `docs/BLOCKS.md` (block contract).
+**Read at start (only):** This phase section. `docs/DS-AUDIT.md` (§6.3 Blocks rows + D8/D11/D13). `_templates/style-articles.css`. `site/templates/master-layout.php`. `docs/BLOCKS.md` (block contract).
 
 **Touch:**
-- `site/_design-system/blocks/blocks.css` (new)
-- `site/templates/master-layout.php` (or wherever article styles load) — add new `<link>`
-- `docs/DS-AUDIT.md` — annotate Blocks migration complete
-- `bin/deploy.sh` — ship new blocks slice
-- `docs/DS-VERIFY/blocks/` (new directory) — screenshot pairs
+- `site/_design-system/css/public/blocks.css` (new — verbatim Blocks rules minus `:root`, with the 2 event-format colour swaps)
+- `site/templates/master-layout.php` — add the `blocks.css` `<link>` after line 50 (direct, not via barrel)
+- `docs/BLOCKS.md` — add the "Recipe: Adding a new block" section
+- `docs/DS-AUDIT.md` — annotate §6.3 Blocks migration complete
+- `bin/deploy.sh` — **no change needed** (`_design-system/` ships wholesale)
 
 **Don't touch:**
-- `style-articles.css`
-- Block HTML structure (pure CSS reorganization)
-- Any Pages or CMS work
-- `docs/BLOCKS.md` — extend with the "Recipe: Adding a new block" section (folded in from the former DS-4.5)
+- `style-articles.css` (stays as safety net until 22.6)
+- Block HTML structure (the only change is CSS; event-format colour is CSS-only)
+- Any Pages or CMS work; the `system-public.css` barrel (leave blocks `@import` commented)
+
+**Watch-items from the audit:** D8 (event-format colour — the intentional change, diff it), D11 (`.article-series-pill/-dot/-tag` duplicate the canonical `.card .series-pill/.sdot/.tag` already in the loaded `views.css` — verbatim copy keeps both; harmless; consolidation deferred to 22.6), D13 (the triple `.layout-nav/.layout-footer` copies — the bleed risk above; handled by not loading pages.css on articles).
 
 **On exit:** Phase 22.4 checked in §3. New blocks slice loaded alongside old `style-articles.css`. Visual diff confirms zero regression on every published content row. BLOCKS.md now contains a self-contained "Recipe" section. **Manual sign-off from Alex before exit.** Staging-only.
 

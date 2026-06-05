@@ -664,8 +664,9 @@ $canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $myStatusIdx >
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
 <!-- The editor's contenteditable carries class="article-prose" so the SAME
      stylesheet that styles the public post page also styles the editor.
-     Loaded after tiptap.css so .article-prose rules win on cascade. -->
-<link rel="stylesheet" href="/_templates/style-articles.css">
+     Loaded after tiptap.css so .article-prose rules win on cascade.
+     Phase 22.6: now the blocks slice (style-articles.css deleted). -->
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
 <?php endif; ?>
 </head>
 <body>

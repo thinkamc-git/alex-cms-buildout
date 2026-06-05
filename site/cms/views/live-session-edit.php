@@ -433,7 +433,8 @@ $showIdeaNotesReadOnly = $status === 'draft';
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
-<link rel="stylesheet" href="/_templates/style-articles.css">
+<!-- Phase 22.6: blocks slice styles the .article-prose editor (style-articles.css deleted). -->
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
 </head>
 <body>
 

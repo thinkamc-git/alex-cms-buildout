@@ -69,7 +69,9 @@ header('Content-Type: text/html; charset=utf-8');
 <title><?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<link rel="stylesheet" href="/_ds/system.css">
+<!-- Phase 22.6: was /_ds/system.css (deleted long ago → 404). Tokens only —
+     this page styles itself via the inline <style> below; just needs var() to resolve. -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
 <style>
   body { max-width: 28rem; margin: 4rem auto; padding: 0 1.5rem; font-family: var(--font-body, system-ui, sans-serif); }
   h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }

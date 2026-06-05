@@ -154,9 +154,10 @@ cp site/cms/_assets/index-edit.js       "$STAGE/cms/_assets/"
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point
 # called from index.php's /writing/:slug route. lib/author.php hydrates
-# the single-row author config. The article stylesheet rides along at
-# /_templates/style-articles.css (only style-articles.css is shipped —
-# article.html and layouts.html are design references, never deployed).
+# the single-row author config. Article styling now lives in the blocks
+# slice (/_ds/css/public/blocks.css, shipped with _design-system); the old
+# /_templates/style-articles.css was deleted in Phase 22.6. (article.html and
+# layouts.html under _templates/ are design references, never deployed.)
 cp site/lib/author.php             "$STAGE/lib/"
 cp site/lib/render.php             "$STAGE/lib/"
 # Phase 20.1: synthetic $ctx factory for the CMS Post Templates Preview
@@ -192,7 +193,7 @@ cp site/lib/settings.php           "$STAGE/lib/"
 # of mock versions. ~280KB, no CDN dependency at runtime.
 mkdir -p "$STAGE/cms/_assets/codemirror"
 cp -R site/cms/_assets/codemirror/. "$STAGE/cms/_assets/codemirror/"
-mkdir -p "$STAGE/templates/partials" "$STAGE/_templates"
+mkdir -p "$STAGE/templates/partials"
 cp site/templates/.htaccess           "$STAGE/templates/"
 cp site/templates/master-layout.php   "$STAGE/templates/"
 cp site/templates/article-standard.php "$STAGE/templates/"
@@ -208,7 +209,8 @@ cp site/templates/index-listing.php    "$STAGE/templates/"
 # favicon) on both staging and prod. See site/index.php's not-found
 # handler + .htaccess ErrorDocument.
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
-cp site/_templates/style-articles.css "$STAGE/_templates/"
+# Phase 22.6: style-articles.css deleted — article styling now ships via the
+# blocks slice (/_ds/css/public/blocks.css), copied with _design-system above.
 
 # Phase 13: cron scripts (scheduled publish + daily backup). Run by the
 # DreamHost crontab — never reached from the web (cron/.htaccess denies

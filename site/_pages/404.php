@@ -17,7 +17,8 @@ if ($_is_staging && !function_exists('render_nav')) {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/_layout/style-pages.css" />
+  <!-- Phase 22.6: public design system barrel (replaces deleted style-pages.css). -->
+  <link rel="stylesheet" href="/_ds/css/system-public.css" />
   <link rel="icon" type="image/png" href="/_layout/favicon<?= $_is_staging ? '-stage' : '' ?>.png" />
 
   <style>

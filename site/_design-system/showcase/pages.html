@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DS · Pages slice</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- The Pages slice, via the public barrel (tokens + pages.css). This page is
+     iframed by /_ds/ (Pages tab) so pages.css's own body/reset/chrome stays
+     isolated from the showcase shell. -->
+<link rel="stylesheet" href="/_ds/css/system-public.css">
+<style>
+  /* Page-local demo chrome (NOT part of the DS). */
+  .sgx { max-width: 920px; margin: 0 auto; padding: var(--space-32); }
+  .sgx-item { margin-bottom: var(--space-40); }
+  .sgx-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin: 0 0 10px; }
+  .sgx-full { margin-bottom: var(--space-40); }
+  .sgx-full .sgx-label { padding: 0 var(--space-32); }
+</style>
+</head>
+<body>
+
+<!-- Nav (full width) -->
+<div class="sgx-full">
+  <p class="sgx-label" style="padding-top:var(--space-24)">.layout-nav · .layout-nav-logo · .layout-nav-links</p>
+  <nav class="layout-nav">
+    <span class="layout-nav-logo">alex m. chong</span>
+    <div class="layout-nav-links">
+      <a href="#">Thoughts</a>
+      <a href="#">Talks</a>
+      <a href="#">Experiments</a>
+      <a href="#">About</a>
+    </div>
+  </nav>
+</div>
+
+<div class="sgx">
+  <!-- Hero -->
+  <div class="sgx-item">
+    <p class="sgx-label">.hero · .eyebrow · .lead · .hero-byline</p>
+    <div class="hero">
+      <span class="eyebrow">Design · Writing · Coaching</span>
+      <h1>A discipline, reset.</h1>
+      <p class="lead">A longer introductory line that sets the tone — the editorial lead paragraph used at the top of marketing pages.</p>
+      <p class="hero-byline">By Alex M. Chong</p>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="sgx-item">
+    <p class="sgx-label">.btn-row · .btn-dark · .btn-light · .btn-ul</p>
+    <div class="btn-row">
+      <button class="btn-dark">Primary action</button>
+      <button class="btn-light">Secondary</button>
+      <button class="btn-ul">Underline link</button>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="sgx-item">
+    <p class="sgx-label">.form · .form-field · .form-label · .form-input · .form-help</p>
+    <div class="form" style="max-width:420px">
+      <div class="form-field">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" placeholder="you@example.com">
+        <p class="form-help">We'll only use this for the newsletter.</p>
+      </div>
+      <div class="form-actions">
+        <button class="btn-dark">Subscribe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="sgx-item">
+    <p class="sgx-label">.callout</p>
+    <div class="callout">A callout block — a highlighted aside used to draw attention to a key point on a marketing page.</div>
+  </div>
+
+  <!-- Eyebrow + lead typography -->
+  <div class="sgx-item">
+    <p class="sgx-label">.eyebrow · .lead (typography)</p>
+    <span class="eyebrow">Section eyebrow</span>
+    <p class="lead">The lead paragraph style on its own — larger, lighter, used to open a section.</p>
+  </div>
+</div>
+
+<!-- Footer (full width) -->
+<div class="sgx-full">
+  <p class="sgx-label" style="padding-top:var(--space-16)">.layout-footer · .layout-footer-left · .layout-footer-right</p>
+  <footer class="layout-footer">
+    <span class="layout-footer-left">© 2026 Alex M. Chong</span>
+    <div class="layout-footer-right">
+      <a href="#">Newsletter</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+</div>
+
+<p style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:var(--space-24) 0 var(--space-48)">
+  Also in this slice (not all shown): .detail-card · .faq-list · .bio-split · .ledger · .journey · .bars (capacity)
+</p>
+
+</body>
+</html>

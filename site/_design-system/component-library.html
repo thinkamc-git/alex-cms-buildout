@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Component Library — by CSS file</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     DS v2.1 showcase — rebuilt as four tabs mirroring the file
+     architecture: Root / Pages / Blocks / CMS. (Phase 22.6b)
+
+     Each tab loads ONLY the slice(s) it documents, to avoid the
+     cross-branch body/reset/chrome bleed (pages.css vs blocks.css
+     vs system-cms.css all carry their own body + reset). The Root
+     tab needs only tokens.css; the other three render their live
+     components inside per-tab <iframe>s loading the right barrel
+     (added in 22.6b-2/3/4).
+
+     The showcase CHROME below is page-local (.dsx-*) and self-
+     contained — it is NOT part of the design system (per DS-AUDIT:
+     scaffolding is rebuilt fresh here, never migrated). It styles
+     itself with DS tokens so it stays on-system.
+
+     Canonical in-CMS reference: /cms/design-system.
+     ============================================================ -->
+<link rel="stylesheet" href="css/tokens.css?v=5">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font); color: var(--primary); background: var(--neutral); }
+
+  /* ── Topbar + tabs ── */
+  .dsx-top { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: var(--space-32); padding: 0 var(--space-32); height: 52px; background: var(--neutral); border-bottom: 1px solid var(--ink-30); }
+  .dsx-brand { font-family: var(--font); font-weight: 600; font-size: var(--text-md); letter-spacing: -0.02em; color: var(--primary); white-space: nowrap; }
+  .dsx-brand em { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 1.1em; color: var(--muted); margin-left: 4px; }
+  .dsx-tabs { display: flex; gap: 2px; }
+  .dsx-tab { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: var(--space-16) var(--space-16) calc(var(--space-16) - 2px); color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; background: none; border-top: 0; border-left: 0; border-right: 0; transition: color 0.12s; }
+  .dsx-tab:hover { color: var(--primary); }
+  .dsx-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .dsx-tab .dsx-slice { font-size: 10px; opacity: 0.55; margin-left: 6px; }
+
+  /* ── Workspace ── */
+  .dsx-panel { display: none; max-width: 1100px; margin: 0 auto; padding: var(--space-48) var(--space-32) var(--space-96); }
+  .dsx-panel.active { display: block; }
+  .dsx-lede { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h3); color: var(--primary); margin: 0 0 var(--space-8); }
+  .dsx-sub { font-size: var(--text-sm); color: var(--muted); margin: 0 0 var(--space-40); max-width: 64ch; line-height: 1.6; }
+  .dsx-soon { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--canvas-raised); border: 1px dashed var(--ink-18); border-radius: var(--r-card); padding: var(--space-32); text-align: center; }
+  .dsx-frame { display: block; width: 100%; min-height: 320px; border: 1px solid var(--ink-12); border-radius: var(--r-card); background: var(--neutral); }
+
+  /* ── Section header ── */
+  .dsx-sec { margin: 0 0 var(--space-40); }
+  .dsx-sec-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); padding-bottom: var(--space-12); margin-bottom: var(--space-20); border-bottom: var(--rule-faint); }
+  .dsx-sec-title { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--secondary); }
+  .dsx-sec-note { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+  /* ── Swatch grid ── */
+  .dsx-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: var(--space-12); }
+  .dsx-sw { display: flex; flex-direction: column; }
+  .dsx-sw-chip { width: 100%; aspect-ratio: 1.7; border-radius: var(--r-tag); border: var(--rule-faint); }
+  .dsx-sw-name { font-family: var(--font-cond); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--primary); margin-top: 6px; }
+  .dsx-sw-tok { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .dsx-sw-hex { font-family: var(--font-mono); font-size: 11px; color: var(--ink-faint); }
+
+  /* ── Type scale rows ── */
+  .dsx-type-row { display: flex; align-items: baseline; gap: var(--space-16); padding: 7px 0; border-bottom: 1px solid var(--ink-08); }
+  .dsx-type-tok { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 140px; flex-shrink: 0; }
+  .dsx-type-px { font-family: var(--font-mono); font-size: 12px; color: var(--ink-faint); width: 44px; flex-shrink: 0; text-align: right; }
+  .dsx-type-sample { font-weight: 500; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Spacing ── */
+  .dsx-space-row { display: flex; align-items: center; gap: var(--space-16); padding: 5px 0; }
+  .dsx-space-bar { height: 14px; background: var(--accent); border-radius: 2px; }
+  .dsx-space-tok { font-family: var(--font-mono); font-size: 12px; color: var(--muted); width: 140px; flex-shrink: 0; }
+
+  /* ── Spec swatch rows (radii / shadows / rules / fonts) ── */
+  .dsx-specs { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-20); }
+  .dsx-spec { display: flex; flex-direction: column; gap: var(--space-8); }
+  .dsx-spec-demo { height: 56px; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+  .dsx-spec-tok { font-family: var(--font-mono); font-size: 12px; color: var(--primary); }
+  .dsx-spec-val { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="dsx-top">
+  <span class="dsx-brand">Component Library<em>by CSS file</em></span>
+  <nav class="dsx-tabs">
+    <button class="dsx-tab active" data-tab="root">Root<span class="dsx-slice">tokens.css</span></button>
+    <button class="dsx-tab" data-tab="pages">Pages<span class="dsx-slice">pages.css</span></button>
+    <button class="dsx-tab" data-tab="blocks">Blocks<span class="dsx-slice">blocks.css</span></button>
+    <button class="dsx-tab" data-tab="cms">CMS<span class="dsx-slice">system-cms.css</span></button>
+  </nav>
+</div>
+
+<!-- ═══════════════ ROOT ═══════════════ -->
+<section class="dsx-panel active" data-panel="root">
+  <h1 class="dsx-lede">Root — shared primitives</h1>
+  <p class="dsx-sub">The single source of truth: <code>tokens.css</code>. Every other slice (Pages, Blocks, CMS) reads from these — colours, type scale, spacing, radii, shadows, rules, fonts. No raw values live outside this file.</p>
+
+  <!-- Colour pool -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Colour pool</span><span class="dsx-sec-note">18 hues · --c-{name}</span></div>
+    <div class="dsx-swatches" id="pool"></div>
+  </div>
+
+  <!-- Foundation + experiment surfaces -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Foundation &amp; surfaces</span></div>
+    <div class="dsx-swatches" id="foundation"></div>
+  </div>
+
+  <!-- Ink + white tints -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Ink &amp; white tints</span><span class="dsx-sec-note">overlays on light / dark</span></div>
+    <div class="dsx-swatches" id="tints"></div>
+  </div>
+
+  <!-- Type scale -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Type scale</span><span class="dsx-sec-note">17 steps · --text-{role}</span></div>
+    <div id="typescale"></div>
+  </div>
+
+  <!-- Spacing -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Spacing scale</span><span class="dsx-sec-note">--space-{n}</span></div>
+    <div id="spacing"></div>
+  </div>
+
+  <!-- Radii -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Radii</span></div>
+    <div class="dsx-specs" id="radii"></div>
+  </div>
+
+  <!-- Shadows + rules -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Shadows &amp; rules</span></div>
+    <div class="dsx-specs" id="elevation"></div>
+  </div>
+
+  <!-- Fonts -->
+  <div class="dsx-sec">
+    <div class="dsx-sec-h"><span class="dsx-sec-title">Type families</span></div>
+    <div class="dsx-specs" id="fonts"></div>
+  </div>
+</section>
+
+<!-- ═══════════════ PAGES (22.6b-2) ═══════════════ -->
+<section class="dsx-panel" data-panel="pages">
+  <h1 class="dsx-lede">Pages — marketing primitives</h1>
+  <p class="dsx-sub">Marketing-page components from <code>public/pages.css</code> (via <code>system-public.css</code>): nav, footer, buttons, hero, form, callout. Rendered in an isolated frame so the marketing body/chrome doesn't bleed onto the showcase.</p>
+  <iframe class="dsx-frame" data-frame src="showcase/pages.html" title="Pages slice — live components"></iframe>
+</section>
+
+<!-- ═══════════════ BLOCKS (22.6b-3) ═══════════════ -->
+<section class="dsx-panel" data-panel="blocks">
+  <h1 class="dsx-lede">Blocks — article &amp; index templates</h1>
+  <p class="dsx-sub">Article/index/card components from <code>public/blocks.css</code>: post cards, article prose, event cards, series, author line.</p>
+  <div class="dsx-soon">Built in 22.6b-3.</div>
+</section>
+
+<!-- ═══════════════ CMS (22.6b-4) ═══════════════ -->
+<section class="dsx-panel" data-panel="cms">
+  <h1 class="dsx-lede">CMS — admin components</h1>
+  <p class="dsx-sub">Admin editor toolkit from <code>system-cms.css</code>: tables, forms, buttons, status/stage pills, cards. Mirrors the canonical in-CMS viewer at <code>/cms/design-system</code>.</p>
+  <div class="dsx-soon">Built in 22.6b-4.</div>
+</section>
+
+<script>
+  // Auto-size same-origin demo iframes to their content (no inner scrollbar).
+  function fitFrame(f) {
+    try {
+      var h = f.contentWindow.document.body.scrollHeight;
+      if (h > 40) f.style.height = (h + 8) + 'px';
+    } catch (e) { /* not yet loaded */ }
+  }
+  document.querySelectorAll('iframe[data-frame]').forEach(function (f) {
+    f.addEventListener('load', function () { fitFrame(f); });
+  });
+
+  // Tab switching. Re-fit frames in the panel being shown (display:none frames
+  // can report a stale height until they're visible).
+  document.querySelectorAll('.dsx-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var name = tab.dataset.tab;
+      document.querySelectorAll('.dsx-tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
+      document.querySelectorAll('.dsx-panel').forEach(function (p) { p.classList.toggle('active', p.dataset.panel === name); });
+      var panel = document.querySelector('.dsx-panel[data-panel="' + name + '"]');
+      if (panel) panel.querySelectorAll('iframe[data-frame]').forEach(function (f) { setTimeout(function () { fitFrame(f); }, 50); });
+    });
+  });
+
+  // ── Root tab data → DOM (kept in JS so the token lists stay terse) ──
+  var POOL = [
+    ['rust','#765150'],['terracotta','#7d4631'],['clay','#765e44'],['amber','#81642a'],
+    ['ochre','#786e4a'],['olive','#6e7448'],['moss','#607549'],['forest','#49634b'],
+    ['sage','#4d705a'],['teal','#4a716e'],['ocean','#4a6677'],['denim','#46556a'],
+    ['indigo','#4d567a'],['purple','#5d5376'],['violet','#6c4d7a'],['plum','#785071'],
+    ['mauve','#6f4b61'],['rose','#7a5160']
+  ];
+  var FOUNDATION = [
+    ['primary','--primary','#191715'],['secondary','--secondary','#494846'],['muted','--muted','#818080'],
+    ['ink-mid','--ink-mid','#646361'],['ink-faint','--ink-faint','#716F6E'],['primary-hover','--primary-hover','#333333'],
+    ['accent','--accent','#6B7F6E'],['neutral','--neutral','#E8E8E8'],['surface','--surface','#F8F8F8'],
+    ['canvas-bg','--canvas-bg','#F3F2F1'],['canvas-raised','--canvas-raised','#ECEAE8'],['white','--white','#FFFFFF'],
+    ['exp-prototype','--c-experiment-prototype','#1c1028'],['exp-concept','--c-experiment-concept','#0a1f1a']
+  ];
+  var TINTS = [
+    ['ink-08','--ink-08','rgba(25,23,21,.08)'],['ink-12','--ink-12','rgba(25,23,21,.12)'],
+    ['ink-16','--ink-16','rgba(25,23,21,.16)'],['ink-18','--ink-18','rgba(25,23,21,.18)'],
+    ['ink-20','--ink-20','rgba(25,23,21,.20)'],['ink-30','--ink-30','rgba(25,23,21,.30)'],
+    ['ink-72','--ink-72','rgba(25,23,21,.72)'],
+    ['white-06','--white-06','rgba(255,255,255,.06)'],['white-15','--white-15','rgba(255,255,255,.15)'],
+    ['white-45','--white-45','rgba(255,255,255,.45)'],['white-85','--white-85','rgba(255,255,255,.85)']
+  ];
+  var TYPE = [
+    ['--text-display',54],['--text-h0',48],['--text-h1',40],['--text-h2',32],['--text-h3',28],
+    ['--text-h4',24],['--text-h5',22],['--text-body-lg',20],['--text-body',18],['--text-md',16],
+    ['--text-sm',15],['--text-base',14],['--text-meta',13],['--text-pill',12],['--text-label',11],
+    ['--text-tiny',10],['--text-micro',9]
+  ];
+  var SPACE = [4,8,12,16,20,24,32,40,48,56,64,80,96];
+  var RADII = [['--r-card','4px'],['--r-pill','4px'],['--r-tag','3px'],['--radius-sm','3px'],['--radius-md','6px']];
+  var FONTS = [
+    ['--font','Barlow','sans · UI + body'],
+    ['--font-cond','Barlow Condensed','labels · buttons (uppercase)'],
+    ['--font-serif','Instrument Serif','italic display · titles'],
+    ['--font-mono','JetBrains Mono','slugs · meta · code']
+  ];
+
+  function el(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+
+  // Colour pool
+  var pool = document.getElementById('pool');
+  POOL.forEach(function (c) {
+    pool.appendChild(el('<div class="dsx-sw"><div class="dsx-sw-chip" style="background:var(--c-'+c[0]+')"></div><div class="dsx-sw-name">'+c[0]+'</div><div class="dsx-sw-tok">--c-'+c[0]+'</div><div class="dsx-sw-hex">'+c[1]+'</div></div>'));
+  });
+  // Foundation
+  var found = document.getElementById('foundation');
+  FOUNDATION.forEach(function (c) {
+    found.appendChild(el('<div class="dsx-sw"><div class="dsx-sw-chip" style="background:var('+c[1]+')"></div><div class="dsx-sw-name">'+c[0]+'</div><div class="dsx-sw-tok">'+c[1]+'</div><div class="dsx-sw-hex">'+c[2]+'</div></div>'));
+  });
+  // Tints — show over a split light/dark backing so alpha reads
+  var tints = document.getElementById('tints');
+  TINTS.forEach(function (c) {
+    var backing = c[0].indexOf('white') === 0 ? 'var(--primary)' : 'var(--surface)';
+    tints.appendChild(el('<div class="dsx-sw"><div class="dsx-sw-chip" style="background:'+backing+'"><div style="width:100%;height:100%;background:var('+c[1]+')"></div></div><div class="dsx-sw-name">'+c[0]+'</div><div class="dsx-sw-tok">'+c[1]+'</div><div class="dsx-sw-hex">'+c[2]+'</div></div>'));
+  });
+  // Type scale
+  var ts = document.getElementById('typescale');
+  TYPE.forEach(function (t) {
+    ts.appendChild(el('<div class="dsx-type-row"><span class="dsx-type-tok">'+t[0]+'</span><span class="dsx-type-px">'+t[1]+'px</span><span class="dsx-type-sample" style="font-size:var('+t[0]+')">The quick brown fox jumps</span></div>'));
+  });
+  // Spacing
+  var sp = document.getElementById('spacing');
+  SPACE.forEach(function (n) {
+    sp.appendChild(el('<div class="dsx-space-row"><span class="dsx-space-tok">--space-'+n+'</span><span class="dsx-space-bar" style="width:'+n+'px"></span><span class="dsx-sw-hex">'+n+'px</span></div>'));
+  });
+  // Radii
+  var rad = document.getElementById('radii');
+  RADII.forEach(function (r) {
+    rad.appendChild(el('<div class="dsx-spec"><div class="dsx-spec-demo"><div style="width:80px;height:40px;background:var(--accent);border-radius:var('+r[0]+')"></div></div><span class="dsx-spec-tok">'+r[0]+'</span><span class="dsx-spec-val">'+r[1]+'</span></div>'));
+  });
+  // Elevation: shadows + rules
+  var elev = document.getElementById('elevation');
+  [['--shadow','soft card'],['--shadow-h','raised / hover']].forEach(function (s) {
+    elev.appendChild(el('<div class="dsx-spec"><div class="dsx-spec-demo" style="background:var(--neutral)"><div style="width:90px;height:36px;background:var(--surface);box-shadow:var('+s[0]+')"></div></div><span class="dsx-spec-tok">'+s[0]+'</span><span class="dsx-spec-val">'+s[1]+'</span></div>'));
+  });
+  [['--rule','1px solid primary'],['--rule-30','1px · 30% ink'],['--rule-faint','1px · 18% ink']].forEach(function (r) {
+    elev.appendChild(el('<div class="dsx-spec"><div class="dsx-spec-demo"><div style="width:90px;border-top:var('+r[0]+')"></div></div><span class="dsx-spec-tok">'+r[0]+'</span><span class="dsx-spec-val">'+r[1]+'</span></div>'));
+  });
+  // Fonts
+  var fn = document.getElementById('fonts');
+  FONTS.forEach(function (f) {
+    var ital = f[0] === '--font-serif' ? 'font-style:italic;' : '';
+    fn.appendChild(el('<div class="dsx-spec"><div class="dsx-spec-demo" style="font-family:var('+f[0]+');'+ital+'font-size:22px">Ag 1234</div><span class="dsx-spec-tok">'+f[0]+'</span><span class="dsx-spec-val">'+f[2]+'</span></div>'));
+  });
+</script>
+</body>
+</html>

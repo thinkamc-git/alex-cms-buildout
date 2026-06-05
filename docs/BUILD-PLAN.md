@@ -2604,32 +2604,59 @@ A cohesive future phase — one new index section type plus three changes that
 should ship with it. Touches the three linked surfaces (BLOCKS/CMS-STRUCTURE
 contract, render templates, CMS editor) per the §"most important rule".
 
-- **New index-editor section type: "Author Line"** (in the Editorial Index
-  section-stack builder, CMS-STRUCTURE §16). **Singleton** — usable at most
-  once per index. Modeled on the Hero full-bleed section:
-  - **Background option:** solid white · transparent · **DS black** (the
-    `--primary` token `#191715`, not true black). When black is chosen the
-    text/foreground flips to **DS white** (`--white`).
-  - **Profile photo on the left:** choose the default author photo · replace
-    with an upload · or hide it.
-  - **Body text:** free-input; **defaults to the author bio** when left blank.
-  - **Optional trailing link:** e.g. "Read More →" — same behaviour/styling as
-    the "View all / view more" link used elsewhere in the index sections.
+- **New index-editor section type: "Author Info"** (Alex's name; was drafted as
+  "Author Line") (in the Editorial Index section-stack builder, CMS-STRUCTURE
+  §16). **Singleton** — once it's been added, the "Add" option for it is
+  **disabled**. Modeled on the Hero full-bleed section. **Reuse-only constraint
+  (Alex, 2026-06-05): do NOT invent new styling for specific elements — every
+  piece is an existing reusable component.** The one allowed new thing is a
+  header *type* that follows the same convention as the other section headers.
+  - **Background option (4):** **Plain** · **Transparent** · **Solid White**
+    (DS `--white`) · **Black** (DS `--primary` `#191715`, not true black). When
+    black is chosen the text/foreground flips to DS white. (Same set as Hero.)
+  - **Profile photo (circle), left:** **Auto** (pulls from the Settings →
+    Author Info photo) · **Custom** (uploaded/selected) · **None** (hidden).
+  - **Body text:** authorable; **defaults to the Author Info bio** when blank.
+  - **Trailing link — "Read More →":** same picker/behaviour as the index
+    "View All" link (pick a target index or a custom URL). **Link text defaults
+    to "Author Info"** and is editable.
   *Cost:* ~3–4h (new section type end-to-end: contract + render + editor).
 
-  Ships with these three:
-  1. **Public post author image: drop the circle border.** The article-family
-     author avatar (`.article-author-avatar` / bio avatar) has a ring around
-     the circular crop; remove it so the photo stays crisp. *Cost:* ~10m CSS
-     (blocks slice + style-articles).
-  2. **Move Author Bio out of post templates → into Settings.** Author bio
-     becomes site-level data, not per-post. Settings UI gains **two tabs:**
-     *Site Settings* (the current screen) and a new *Author Info* tab holding
-     name / photo / bio. The post templates and the Author Line section read
-     from there. *Cost:* ~2–3h (settings schema + tabbed UI + render wiring +
-     migration of existing bio content).
-  3. **Move "Indexes" under Navigation in the CMS sidebar**, positioned
-     **above Redirects.** Pure admin-nav reorder. *Cost:* ~20m.
+  Ships with these (status updated 2026-06-05):
+  1. ✅ **DONE (Phase 22.4 side quest).** Public post author image circle
+     border dropped — `.article-author-avatar:has(img)` / bio avatar border
+     removed in the blocks slice.
+  2. **Move Author Bio out of post templates → into Settings** *(Alex re-asked
+     2026-06-05).* Author bio becomes site-level data, not per-post. Settings UI
+     gains **two tabs:** *Site Settings* (the current screen) and a new *Author
+     Info* tab holding name / photo / bio. Post templates + the Author Info
+     index section read from there. *Cost:* ~2–3h (settings schema + tabbed UI +
+     render wiring + migration of existing bio content).
+  3. ✅ **DONE (2026-06-05).** "Indexes" moved in the CMS sidebar — now in the
+     **Site** section as **Pages · Indexes · Navigation · Redirects** (Alex
+     refined the target order from the original "above Redirects").
+
+### Journal table-only title (Working Title) — separate from Key Statement (captured 2026-06-05)
+
+Journals currently have no distinct title — the **Key Statement** does
+double-duty, so the entire (often long) key statement is what shows in the admin
+table. Alex wants a **short title used only in the admin table / lists**, while
+the **Key Statement stays exactly as-is** for card + post display.
+
+- The title field is the **same field as the "Working Title"** shown when
+  creating a journal from the journal view; keep calling it **"Working Title"**
+  inside draft + published editors.
+- Likely maps to the existing `content.title` column (all content has one) —
+  confirm journals aren't already storing the working title there; if so this is
+  mostly an admin-display + label change, not a new column.
+- **Data seed:** copy each existing journal's Key Statement → the title field so
+  rows aren't blank; **Alex will then adjust them manually.** (A one-off
+  UPDATE / migration over journal rows.)
+- Admin journal list table renders the title (not the Key Statement); the public
+  card + entry keep rendering the Key Statement unchanged.
+- *Cost:* ~1–1.5h (confirm schema, seed data, swap the admin table column,
+  surface "Working Title" in the journal editors). Touches the three linked
+  surfaces if the contract changes (likely admin-only).
 
 ### CMS editor chrome — spacing + dangling tokens (caught during Phase 22.6a, 2026-06-05)
 

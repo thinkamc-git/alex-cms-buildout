@@ -312,7 +312,7 @@ switch ($type):
       <div class="card-header">
         <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Masterclass') ?></span>
         <?php if ($isPast): ?>
-          <span class="ev-past-label">Past</span>
+          <span class="ev-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Past Event</span>
         <?php elseif ($countdown['label'] !== ''): ?>
           <span class="ev-countdown-label<?= $countdown['class'] ?>"><?= $e($countdown['label']) ?></span>
         <?php endif; ?>
@@ -356,10 +356,11 @@ switch ($type):
     }
   ?>
   <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>">
+    <div class="ev-top"><!-- dark top (header + location) — single block so the past hatch spans both seamlessly -->
     <div class="card-header">
       <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Talk') ?></span>
       <?php if ($isPast): ?>
-        <span class="ev-past-label">Past</span>
+        <span class="ev-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Past Event</span>
       <?php elseif ($countdown['label'] !== ''): ?>
         <span class="ev-countdown-label<?= $countdown['class'] ?>"><?= $e($countdown['label']) ?></span>
       <?php endif; ?>
@@ -386,6 +387,7 @@ switch ($type):
         </div>
       </div>
     <?php endif; ?>
+    </div><!-- /.ev-top -->
 
     <div class="ev-body">
       <?php if ($eventDate !== ''): ?>
@@ -426,19 +428,54 @@ switch ($type):
     $bgToken   = $catSlug !== '' ? ('var(--c-experiment-' . $e($catSlug) . ')') : 'var(--c-experiment-prototype)';
     $tagsRaw   = (string)($card['tags'] ?? '');
     $tags      = $tagsRaw !== '' ? array_filter(array_map('trim', explode(',', $tagsRaw))) : [];
+    // Constellation background — matches the DS showcase experiment card
+    // (concentric rings + satellite dots + connector lines). Seeded from a
+    // stable hash of the id, so each card differs but stays put across reloads.
+    // Three satellite arrangements × a per-card rotation + a wide translate
+    // give it real variance. Colours follow the DS: purple ramp on prototype,
+    // a forest ramp on concept (the two experiment background tokens).
+    $expSeed = crc32((string)($card['id'] ?? $card['slug'] ?? $title));
+    $expOX   = ($expSeed % 220) - 110;                  // -110..109  horizontal
+    $expOY   = (intdiv($expSeed, 223) % 180) - 90;      // -90..89    vertical
+    $expRot  = $expSeed % 360;                          // 0..359 rotation (rings are circular; rotates the satellites)
+    $ringRGB = $catSlug === 'concept' ? '73,99,75'   : '107,48,128';  // forest vs purple
+    $dotRGB  = $catSlug === 'concept' ? '130,180,150' : '180,120,220'; // mint vs lilac
+    // Satellite arrangements [dx, dy, r, alpha] relative to centre (190,140).
+    $expArrangements = [
+      [[58, -56, 5, 0.70], [-58, 48, 4, 0.52], [78, 28, 4, 0.44], [106, -16, 5, 0.58]],
+      [[-72, -40, 5, 0.66], [40, -72, 4, 0.50], [88, 52, 5, 0.55], [-30, 80, 4, 0.46]],
+      [[70, 60, 5, 0.60], [-86, 10, 4, 0.50], [24, -84, 5, 0.60], [110, -44, 4, 0.50]],
+    ];
+    $expSats = $expArrangements[$expSeed % 3];
   ?>
-  <div class="card card--experiment" data-type="experiment" data-category="<?= $e($catSlug) ?>" style="min-height:320px;background:<?= $bgToken ?>;position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="<?= $e($catSlug) ?>" style="background:<?= $bgToken ?>;position:relative">
+    <svg class="exp-bg" aria-hidden="true" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none">
+      <g transform="translate(<?= $expOX ?> <?= $expOY ?>) rotate(<?= $expRot ?> 190 140)">
+        <circle cx="190" cy="140" r="100" fill="none" stroke="rgba(<?= $ringRGB ?>,0.10)" stroke-width="1"/>
+        <circle cx="190" cy="140" r="64"  fill="none" stroke="rgba(<?= $ringRGB ?>,0.15)" stroke-width="1"/>
+        <circle cx="190" cy="140" r="30"  fill="none" stroke="rgba(<?= $ringRGB ?>,0.22)" stroke-width="1"/>
+        <circle cx="190" cy="140" r="8"   fill="rgba(<?= $ringRGB ?>,0.65)"/>
+        <?php foreach ($expSats as [$dx, $dy, $sr, $sa]): $sx = 190 + $dx; $sy = 140 + $dy; ?>
+        <line x1="190" y1="140" x2="<?= $sx ?>" y2="<?= $sy ?>" stroke="rgba(<?= $dotRGB ?>,0.12)" stroke-width="1"/>
+        <circle cx="<?= $sx ?>" cy="<?= $sy ?>" r="<?= $sr ?>" fill="rgba(<?= $dotRGB ?>,<?= $sa ?>)"/>
+        <?php endforeach; ?>
+      </g>
+    </svg>
     <div class="<?= $e($scrim) ?>"></div>
     <div class="exp-content">
+      <!-- Stretched link as a direct child of .exp-content (which fills the whole
+           card) so .card-link::before covers the ENTIRE card, not just the bottom
+           text block. The inner content sits at z-index:2; this link's ::before is
+           bumped to z-index:3 by the .card--experiment rule, so the full card is
+           clickable. Title is plain text — this anchor carries the destination. -->
+      <a class="card-link" href="<?= $e($href) ?>" aria-label="<?= $e($title !== '' ? 'Open experiment: ' . $title : 'Open experiment') ?>"></a>
       <div class="card-header" style="position:relative;z-index:2">
         <span class="od-type"><?= $e($catLabel !== '' ? $catLabel : 'Experiment') ?></span>
       </div>
       <div style="flex:1;min-height:80px"></div>
       <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
         <?php if ($title !== ''): ?>
-          <h2 class="od-title" style="margin-bottom: 10px"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></h2>
-        <?php else: ?>
-          <a class="card-link" href="<?= $e($href) ?>" aria-label="Open experiment"></a>
+          <h2 class="od-title" style="margin-bottom: 10px"><?= $e($title) ?></h2>
         <?php endif; ?>
         <?php if ($summary !== ''): ?>
           <p class="od-excerpt" style="margin-bottom:14px"><?= $e($summary) ?></p>

@@ -376,6 +376,14 @@ clear the field → the block disappears (Path A); the slug, CSS class, and
 
 ## 10. Changelog
 
+- **2026-06-05 (side quest)** — Event/experiment card render tweaks. Past
+  live-session cards keep full colour; "past" now reads from a single 45° hatch
+  over the dark top (header + location, wrapped in `.ev-top`) plus a clock icon +
+  "Past Event" label (was a grey-out + "PAST"). Experiment index cards gained the
+  DS constellation background (concentric rings + satellites + connectors), one
+  of 3 arrangements rotated/offset per card. Index cards now share a 320px
+  min-height; `.cards-grid` uses `auto-fill` for consistent card width. Public
+  author avatars drop the ring around the crop when a photo is present.
 - **2026-06-05** — Phase 22.4: Blocks CSS migrated into the design system as
   `_design-system/css/public/blocks.css` (verbatim from `style-articles.css`
   minus its `:root`, plus the two `.event-format-tag` colour swaps to

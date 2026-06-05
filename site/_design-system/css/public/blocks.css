@@ -344,6 +344,12 @@ body {
   height: 100%;
   object-fit: cover;
 }
+/* When a real photo is present, drop the ring around the circular crop so the
+   image stays crisp (Author Line bundle, companion #1). Initials-only avatars
+   keep their outline. :has() raises specificity above both the light
+   (--rule-faint) and dark (white-15) avatar borders. */
+.article-author-avatar:has(img),
+.article-author-bio-avatar:has(img) { border: none; }
 
 .article-series {
   display: flex;

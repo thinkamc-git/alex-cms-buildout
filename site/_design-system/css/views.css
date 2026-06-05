@@ -47,7 +47,14 @@
 .card.past[data-category="workshop"] .ev-type-past { color: var(--c-moss); }
 
 /* ── Cards-grid layout ── */
-.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-16); }
+/* auto-FILL (not auto-fit): keeps empty tracks so cards hold a consistent
+   ~280–340px width on sparse pages instead of stretching full-width. Applies
+   to every index — built-in listings and custom editorial alike. */
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-16); }
+/* Consistent card floor across every index (articles / journals / events /
+   experiments) so rows align even when content is short. Cards with more
+   content grow past it; the push-divider/footer keep the bottom edge tidy. */
+.cards-grid .card { min-height: 320px; }
 .card-body { padding: 14px var(--space-20) 18px; flex: 1; display: flex; flex-direction: column; }
 
 /* ── #tab-cards scope: cards have their own internal padding token ── */
@@ -158,7 +165,8 @@ a.card .series-pill, .card a.series-pill { /* defensive: ensure no underline whe
 
 /* ── Event variant ── */
 .card .ev-countdown-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white); border-radius: 3px; padding: 3px 9px; background: var(--c-indigo); white-space: nowrap; margin-left: auto; flex-shrink: 0; line-height: 1.4; display: inline-flex; align-items: center; }
-.card .ev-past-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); border-radius: 3px; padding: 3px 9px; background: var(--ink-30); border: 1px solid var(--white-15); white-space: nowrap; margin-left: auto; flex-shrink: 0; line-height: 1.4; display: inline-flex; align-items: center; }
+.card .ev-past-label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); border-radius: 3px; padding: 3px 9px; background: var(--ink-30); border: 1px solid var(--white-15); white-space: nowrap; margin-left: auto; flex-shrink: 0; line-height: 1.4; display: inline-flex; align-items: center; gap: 4px; }
+.card .ev-past-label svg { width: 12px; height: 12px; flex-shrink: 0; }
 .card .loc-zone { padding: var(--space-4) var(--pad) 22px; position: relative; overflow: hidden; display: flex; align-items: flex-start; background: var(--primary); }
 .card .remote-zone { padding: var(--space-4) var(--pad) 22px; position: relative; overflow: hidden; display: flex; align-items: flex-start; background: var(--primary); }
 .card .loc-ghost { font-family: 'Barlow Condensed', sans-serif; font-size: 68px; font-weight: 700; letter-spacing: -0.01em; text-transform: uppercase; color: var(--white-06); position: absolute; right: -6px; top: 50%; transform: translateY(-50%); line-height: 1; user-select: none; pointer-events: none; white-space: nowrap; }
@@ -170,10 +178,10 @@ a.card .series-pill, .card a.series-pill { /* defensive: ensure no underline whe
 .card .ev-body { padding: var(--space-24) var(--pad) var(--space-24); flex: 1; display: flex; flex-direction: column; }
 .card .ev-date-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
 .card .ev-date { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); line-height: 1.1; flex-shrink: 0; }
-.card .ev-date-past { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); line-height: 1.1; flex-shrink: 0; opacity: 0.7; }
+.card .ev-date-past { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-body-lg); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); line-height: 1.1; flex-shrink: 0; }
 .card .ev-time { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
 .card .ev-title { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--primary); margin-bottom: var(--space-12); }
-.card .ev-title-past { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--primary); opacity: 0.7; margin-bottom: var(--space-12); }
+.card .ev-title-past { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; font-size: var(--text-h3); line-height: 1.18; letter-spacing: -0.01em; color: var(--primary); margin-bottom: var(--space-12); }
 .card .ev-desc { font-size: var(--text-sm); font-weight: 400; line-height: 1.65; color: var(--ink-mid); margin-bottom: var(--space-24); }
 .card .ev-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .card .fmt-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -215,11 +223,31 @@ a.card .series-pill, .card a.series-pill { /* defensive: ensure no underline whe
 .cta-read .label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--white-45); }
 .cta-read .arrow { font-size: var(--text-body); font-weight: 300; color: var(--white-45); }
 
-/* ── Past card overlays ── */
-.card.past { background: rgba(250,250,248,0.7); }
-.card.past.card--event .card-header { background: var(--ink-72) !important; padding-bottom: 14px !important; }
-.card.past .loc-zone,
-.card.past .remote-zone { background: var(--ink-72) !important; padding-top: 0 !important; }
+/* ── Event card dark top (header + location strip, wrapped in .ev-top) ──
+   The wrapper owns the --primary fill so the two zones read as one dark block;
+   its children go transparent and sit above any overlay. This lets the past
+   hatch (below) span both zones as a SINGLE continuous texture rather than two
+   pseudo-elements that break phase at the seam. */
+.card--event .ev-top { position: relative; background: var(--primary); }
+.card--event .ev-top > .card-header,
+.card--event .ev-top > .loc-zone,
+.card--event .ev-top > .remote-zone { background: transparent; }
+.card--event .ev-top > * { position: relative; z-index: 1; }
+
+/* ── Past event treatment (2026-06-05) ──
+   Past cards keep FULL colour — the same vivid look as an upcoming card.
+   "Past" reads from one continuous 45° hatch over the dark top (.ev-top) plus
+   the clock + "Past Event" label, NOT from greying-out. Replaces the old
+   desaturation method (rgba wash, --ink-72 overrides, 0.7 text dim). */
+.card.past.card--event .ev-top { overflow: hidden; }
+.card.past.card--event .ev-top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-45deg, transparent 0 6px, var(--white-06) 6px 8px);
+  pointer-events: none;
+  z-index: 0;
+}
 
 /* Show all cards regardless of .hidden — JS controls visibility */
 .card { display: flex !important; }

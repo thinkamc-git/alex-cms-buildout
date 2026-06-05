@@ -52,7 +52,7 @@ if ($_eDate !== '') {
     <?php render_block('category', $ctx); ?>
     <?php if ($isPast): ?>
       <div class="article-topstrip-right">
-        <span class="article-past-badge" data-block="past">PAST</span>
+        <span class="article-past-badge" data-block="past"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1.5px;margin-right:5px"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Past Event</span>
       </div>
     <?php endif; ?>
   </div>

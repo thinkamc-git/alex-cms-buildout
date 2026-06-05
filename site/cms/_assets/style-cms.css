@@ -1383,6 +1383,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .content-block .cms-table { table-layout: fixed; }
 .content-block .cms-table th:first-child { width: unset; max-width: unset; }
 .content-block .cms-table td { overflow: hidden; text-overflow: ellipsis; }
+/* Pill cells (Stage / status) hold a fixed-width chip — never truncate them to
+   "…" when the fixed-layout table gets narrow; show the chip in full. */
+.content-block .cms-table td:has(.pill) { overflow: visible; text-overflow: clip; }
 
 /* Inline hint that sits on its own line under a chip (e.g. "no folder" /
    "no file picked" under the Content Type pill in experiments). */

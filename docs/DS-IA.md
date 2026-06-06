@@ -109,6 +109,39 @@ in the showcase, e.g.:
 
 ---
 
+## 0. PURPOSE & PHILOSOPHY OF THE DESIGN SYSTEM (from Alex, 2026-06-06)
+
+> **Read this first.** This is the *why* behind the whole `/_ds/` showcase and
+> every word written into it. It was lost across earlier compactions, which led
+> to hollow "vibe" copy. It is the grounding for all DS messaging.
+
+**Purpose — twofold:**
+1. A **structured system for building** alexmchong.ca and its parts — the CMS and
+   future tools. Constraints that create the freedom to maintain.
+2. A **public showcase of a systematic way of building** — shown, not just used.
+
+**What makes it real (the load-bearing distinction):**
+- It **pulls from the real, live CSS**. It is **referenceable**, not an aspirational
+  style guide; when the CSS changes, the showcase reflects it live. It is a source
+  of truth that stays true. This is the opposite of vibe-coding / vibe-design.
+
+**Aesthetic & philosophy:**
+- A structured, **Bauhaus** approach to the **basics of materiality** — texture,
+  structure, typography. **It does NOT mimic paper** (correction to earlier drafts).
+- Lineage of **1980s corporate computer manuals / brand guidelines**; the grey
+  alludes to that classic manual. It moves **off soulless fonts** to carry
+  personality, so the **message leads**.
+- A deliberate **stance against contemporary theatrics** — loud colour, bold lines,
+  thick text. *"Thick text doesn't communicate boldness if the message is thin."*
+- Reflects Alex as a **systems thinker**: structured and thoughtful, not theatrical.
+  **Authentic**, against portfolios that are vibecoded smokescreen.
+
+**Working process (Alex, 2026-06-06):** NO vibe iteration (implement → react).
+Always **outline / spec → confirm direction → implement**. Simpler plans, test on
+direction first.
+
+---
+
 ## 6. LOCKED PLAN — Phase 22.6b remaining (2026-06-06)
 
 > Captured before a context compact. This section is the source of truth for
@@ -124,7 +157,7 @@ in the showcase, e.g.:
 - Showcase load motion (cascade reveal) added.
 
 ### Remaining work (the plan)
-- **A · Foundations → Welcome section** (opens the tab): the philosophy/intent intro. Details + draft below.
+- **A · Foundations → Welcome section** ✅ DONE (on staging, 2026-06-06). Final approved copy is live in `index.html` #comp-welcome — lead + how-it-works (live/referenceable, constraints→freedom) + 2 philosophy paras (Bauhaus materiality, 80s brand-guideline structure not paper, grey=computer manual, message-over-theatrics "thick type doesn't make a point bold if the point is thin", systems thinker, anti-vibecoded-portfolio) + brief at-a-glance + purpose/map close. Voice: non-first-person. Built spec-first per [[feedback_no_vibe_spec_first]].
 - **B · CMS tab → rich documentation.** Rework to read like the **Components** tab — components shown *in context with writing/usage*, NOT class-name boxes. (Stays an isolated iframe; `style-cms.css` collides with showcase chrome.) The terse box-catalog belongs in **CSS Library → CMS slice**, not the CMS tab.
 - **C · Applied → light concept showcases.** Inspiration only — capture the *essence*, not a functional UI (depth = today's CMS Panel / Coaching). Each concept = one section, its own isolated `showcase/*.html` (DS CSS + page-scoped future CSS, never in production slices). **New components are documented inside their own concept's section** (not a separate global catalog). Parity first: reuse real components; only genuinely-new things get called out as new (e.g. Analytics' card + progress bars). Split a concept in two if it gets heavy.
   - Set: refresh **CMS Panel (✓ built), Coaching, Analytics, Mobile** + add **Command Center (View A)** + **Together (View B)** (specs below).
@@ -169,3 +202,29 @@ Insight pulled from Alex (2026-06-06):
 - New components: `Energy Indicator` · `Paired Presence` · `Shared Project Card`.
 
 Shared-across-views future components: `Accomplishment / progress bar` (Analytics + Command Center), `Energy Indicator` (Together + Command Center).
+
+---
+
+## 7. SITE-vs-SHOWCASE AUDIT — gap list (2026-06-06)
+
+> The real site has moved ahead of the showcase. Full read-only audit done 2026-06-06.
+> This is the spec for the new **AUDIT** step (added before B). Source files are
+> reference-only; the showcase to update is `site/_design-system/index.html`.
+
+**Priority 1 — missing product features:**
+- **Article Hero Image** — renders between byline and body; sizes default/wide/full + optional caption. Real: `site/templates/partials/block-hero-image.php`, `article-standard.php:58`, `css/public/blocks.css:417-474` (`.article-hero[data-size]`). → Patterns ▸ Heroes & Statements (new subsection, 3 size variants ± caption).
+- **Editorial Index full-bleed Hero** — 4+ variants: `--bleed-dark`, `--bleed-light`, `--within` (+ `--bg-surface`/`--bg-transparent`, with `editorial-hero-thumb` image OR `editorial-hero-card` series card), `.is-solo`. Real: `index-editorial.php:102-208`, `blocks.css:1399-1585`. → Patterns ▸ new "Editorial Index Heroes" subsection (all variants + responsive collapse).
+- **Icons** — no icon inventory exists. 7+ inline SVGs: bookmark `.bm` (24×24, all card headers), journal category glyphs introspection/contemplation/insight (14×14, colour = `var(--c-…)`), clock/past-event (24×24), experiment constellation bg (380×320, seeded), plus unicode `→ ◷ ○`. Real: `index-card.php:67,186-211,315,363,452-463`. → Foundations ▸ new "Icons" section (each icon, viewBox, usage, colour mapping).
+
+**Priority 2 — underrepresented:**
+- **Per-section Filter Pills (editorial)** — visitor type/category filters, OR-logic, "All" reset. Real: `index-editorial.php:88-100`, `blocks.css:1358-1385` (`.index-section-pills .fp`). → Components ▸ Nav & Filtering (distinct from global nav).
+- **Carousel display mode** — `.cards-grid.is-carousel` (`blocks.css:1600-1641`). → Pages ▸ Full Page Index note.
+- **Series watermark on cards** — two-digit position badge (`index-card.php:100-128`, `.card-series-number`). → Components ▸ Article Cards variant.
+- **Journal Key Statement block** — `.article-key-statement` (Instrument Serif italic + left rule, replaces title on journal entries). → Patterns/Blocks.
+
+**Priority 3 — clarifications:**
+- "Featured Article" pattern is a static card-hero; clarify vs the dynamic editorial hero family.
+- Editorial hero responsive collapse / bleed stacking notes.
+- `.event-card` (when/where/format white card) distinct from event *cards*.
+
+**Undocumented selector families** (in `blocks.css`, absent from showcase + CSS Library): `.index-page(--editorial/--series)`, `.index-section(--hero/--curated/--feed)`, `.index-section-header.is-big`, `.index-section-pills`, `.editorial-hero*` (~20), `.cards-grid(.is-carousel)`, `.article-hero*`, `.article-key-statement`.

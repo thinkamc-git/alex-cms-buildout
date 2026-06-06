@@ -32,14 +32,98 @@
 <section class="workspace active" id="tab-foundations" data-tab="foundations">
   <nav class="sidebar" id="sidebar-foundations">
     <div class="sidebar-group">
+      <span class="sidebar-group-label">Overview</span>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-welcome" class="sidebar-link active">Welcome</a>
+    </div>
+    <div class="sidebar-group">
       <span class="sidebar-group-label">Tokens</span>
-      <a data-scroll-panel="foundations" data-scroll-section="comp-colors" class="sidebar-link active">Colour</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-colors" class="sidebar-link">Colour</a>
       <a data-scroll-panel="foundations" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
       <a data-scroll-panel="foundations" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
       <a data-scroll-panel="foundations" data-scroll-section="comp-anatomy" class="sidebar-link">Rules & Dividers</a>
     </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Assets</span>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-icons" class="sidebar-link">Icons</a>
+    </div>
   </nav>
   <div class="canvas">
+<div class="section" id="comp-welcome">
+    <div class="welcome">
+      <div class="welcome-grid">
+        <div class="welcome-main">
+          <span class="welcome-eyebrow">Foundations — Welcome</span>
+          <p class="welcome-lead">One visual language runs the whole of alexmchong.ca, drawn from a single set of tokens.</p>
+          <p class="welcome-secondary">A living design system, drawn from the site's real CSS — it builds alexmchong.ca and shows the systematic method behind it.</p>
+          <p>Every example here is rendered by the same stylesheets that run the live site, so this is a referenceable system, not an aspirational style guide — when the CSS changes, the documentation changes with it. Each value is defined once and referenced by name: the kind of constraint that gives the system room to grow and stay maintainable.</p>
+          <p>The approach is Bauhaus in spirit — a structured attention to the basics of materiality: texture, structure, typography. It borrows the way brand guidelines were built in the 1980s and the discipline of a corporate computer manual, which is where the grey comes from. It takes that era's structure, not its surface; it doesn't imitate paper.</p>
+          <p>The type carries personality on purpose, so the message leads and the styling stays quiet. Much of contemporary design reaches for theatrics — loud colour, heavy lines, thick type — but thick type doesn't make a point bold if the point is thin. This is built the way the practice works: systems thinking, structured and thoughtful, never theatrical — meant to be authentic in a field of portfolios that lean on the smokescreen of vibecoded coolness.</p>
+        </div>
+        <aside class="welcome-specimen">
+          <div class="preview-frame welcome-preview">
+            <div class="welcome-page">
+              <div class="layout-nav">
+                <span class="layout-nav-logo">alex m. chong</span>
+              </div>
+
+              <div class="wp-sec" style="padding:var(--space-64) var(--space-64) var(--space-48)">
+                <div style="font-size:52px;font-weight:500;letter-spacing:-0.025em;line-height:1.2;max-width:1100px">Hi — I'm Alex, and I care deeply about <span class="m">leading</span> the <span class="m">discipline</span> of design and shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">future</em> <span class="ac">for organizations</span>.</div>
+                <div style="margin-top: 36px;font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">I coach and train design teams &amp; individuals to produce their strongest, most creatively invigorated work.</div>
+                <div class="hero-ctas" style="margin-top: 36px"><button class="cta-primary">Design Principles →</button><button class="cta-ghost">Design Services</button></div>
+              </div>
+
+              <div class="wp-sec" style="padding:var(--space-48) var(--space-64)">
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap: 0;border:var(--rule)">
+                  <div style="padding: 28px var(--space-32);border-right:var(--rule)"><div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">12<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div><div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Years Shipping</div></div>
+                  <div style="padding: 28px var(--space-32);border-right:var(--rule)"><div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">40<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div><div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Designers Coached</div></div>
+                  <div style="padding: 28px var(--space-32);border-right:var(--rule)"><div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">6</div><div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Industries</div></div>
+                  <div style="padding: 28px var(--space-32)"><div style="font-size:var(--space-48);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">3</div><div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Countries</div></div>
+                </div>
+              </div>
+
+              <div class="wp-sec" style="padding:var(--space-48) var(--space-64)">
+                <div class="wp-eyebrow">What I Offer</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap: 0">
+                  <div style="padding:28px 0;border-top:var(--rule);border-right:var(--rule-30);padding-right: 40px"><div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Fractional Design Leadership</div><div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Embedded design direction for early-stage and scaling startups. Strategic presence without the full-time overhead.</div></div>
+                  <div style="padding: 28px 0;border-top:var(--rule);padding-left: 40px"><div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Product Strategy</div><div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Shaping what gets built and why. From opportunity framing through to validated direction and roadmap.</div></div>
+                  <div style="padding: 28px 0;border-top:var(--rule-30);border-right:var(--rule-30);padding-right: 40px"><div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">1:1 Design Coaching</div><div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Structured coaching for mid-to-senior designers navigating career inflection points, leadership, and creative health.</div></div>
+                  <div style="padding: 28px 0;border-top:var(--rule-30);padding-left: 40px"><div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Workshops &amp; Talks</div><div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Live sessions on design leadership, post-AI workflows, and building a practice worth having.</div></div>
+                </div>
+              </div>
+
+              <div class="wp-sec" style="padding:var(--space-48) var(--space-64)">
+                <div style="max-width:760px;border-left:3px solid var(--primary);padding-left: var(--space-32)">
+                  <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);font-weight:400;line-height:1.45;color:var(--primary);margin-bottom: var(--space-16)">"The gap between strategist and executor sits openly in the room — and that gap is exactly where strong design leadership lives."</div>
+                  <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--primary)">alex m. chong — UX 2.0</div>
+                </div>
+              </div>
+
+              <div class="wp-sec" style="padding:var(--space-32) var(--space-64) var(--space-64)">
+                <div class="wp-eyebrow">What People Say</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-16)">
+                  <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;He has an unusual ability to make the abstract feel inevitable. The team trusted his direction because he always showed his reasoning.&rdquo;</div><div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div><div style="display:flex;align-items:center;gap: var(--space-12)"><div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div><div><div style="font-size: var(--text-meta);font-weight:600">Priya Nair</div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Founding Designer · Fintech</div></div></div></div>
+                  <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;The coaching sessions changed how I think about my own career — what I do next, and what kind of designer I want to be.&rdquo;</div><div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div><div style="display:flex;align-items:center;gap: var(--space-12)"><div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div><div><div style="font-size: var(--text-meta);font-weight:600">Marcus Chen</div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Senior UX Designer · Enterprise</div></div></div></div>
+                  <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px"><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;Our product direction became dramatically clearer. Alex brought both the strategic altitude and the craft-level precision we didn&rsquo;t know we needed.&rdquo;</div><div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div><div style="display:flex;align-items:center;gap: var(--space-12)"><div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div><div><div style="font-size: var(--text-meta);font-weight:600">Sam Okafor</div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">CEO · Early-Stage Startup</div></div></div></div>
+                </div>
+              </div>
+
+              <div class="layout-footer">
+                <span class="layout-footer-left">© 2026 alex m. chong</span>
+                <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <div class="welcome-glance">
+        <span class="welcome-glance-label">The system at a glance</span>
+        <p class="wg"><strong>Colour</strong> — a warm-neutral base, one sage accent used only in text, and a pool of eighteen category hues at a single intensity.</p>
+        <p class="wg"><strong>Type</strong> — Barlow for all structure; Instrument Serif, italic and rationed, for emphasis; a fixed 9–54px scale.</p>
+        <p class="wg"><strong>Structure</strong> — an 8px unit, near-square 4px corners, flat surfaces, and three rule weights from one ink.</p>
+      </div>
+      <p class="welcome-close"><strong>This reference is the single source of truth for the system, and a public record of a systematic way of building.</strong> Its seven sections move from the smallest pieces toward whole pages: Foundations holds the tokens; Components, the building blocks; Patterns and Pages compose them into sections and templates; CMS covers the tools that author the site, with room for more to come; Applied carries the system into new contexts; and CSS Library is the same system seen by source file.</p>
+    </div>
+</div>
 <div class="section" id="comp-colors">
     <div class="section-header">
       <div class="section-num">01</div>
@@ -364,6 +448,91 @@
       </div>
     </div>
   </div>
+
+<div class="section" id="comp-icons">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">Icons</div>
+      <div class="section-desc">A small set of inline SVG glyphs, drawn at the same hairline weight as the rules. Each renders with <code style="font-family:var(--font-mono);font-size:var(--text-meta);background:var(--ink-08);padding:1px 5px;border-radius:2px">currentColor</code>, so it inherits the surrounding text colour — the journal glyphs take their category colour. There is no icon font; icons live inline in the markup.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Card & Editorial Glyphs</span>
+      <div class="icon-grid">
+        <div class="icon-tile">
+          <div class="icon-art"><svg width="26" height="26" viewBox="0 0 24 24" fill="var(--primary)"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+          <div class="icon-name">Bookmark</div>
+          <div class="icon-meta"><code>.bm</code> · 24×24 · all card headers</div>
+        </div>
+        <div class="icon-tile">
+          <div class="icon-art"><svg width="28" height="28" viewBox="0 0 14 14" fill="none" style="color:var(--c-teal)"><path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></div>
+          <div class="icon-name">Introspection</div>
+          <div class="icon-meta">14×14 · journal · category colour</div>
+        </div>
+        <div class="icon-tile">
+          <div class="icon-art"><svg width="28" height="28" viewBox="0 0 14 14" fill="none" style="color:var(--c-forest)"><circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 2 A5 5 0 0 1 12 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M7 12 A5 5 0 0 1 2 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></div>
+          <div class="icon-name">Contemplation</div>
+          <div class="icon-meta">14×14 · journal · category colour</div>
+        </div>
+        <div class="icon-tile">
+          <div class="icon-art"><svg width="28" height="28" viewBox="0 0 14 14" fill="none" style="color:var(--c-amber)"><circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.4"/><line x1="7" y1="1.1" x2="7" y2="2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="7" y1="11.1" x2="7" y2="12.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="1.1" y1="7" x2="2.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11.1" y1="7" x2="12.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+          <div class="icon-name">Insight</div>
+          <div class="icon-meta">14×14 · journal · category colour</div>
+        </div>
+        <div class="icon-tile">
+          <div class="icon-art"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg></div>
+          <div class="icon-name">Clock · Past Event</div>
+          <div class="icon-meta">24×24 · event cards (past)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Text Glyphs — Unicode, not SVG</span>
+      <div class="icon-grid">
+        <div class="icon-tile"><div class="icon-art icon-glyph">→</div><div class="icon-name">Arrow</div><div class="icon-meta">U+2192 · meta strips · CTAs</div></div>
+        <div class="icon-tile"><div class="icon-art icon-glyph">◷</div><div class="icon-name">Time</div><div class="icon-meta">U+25F7 · masterclass logistics</div></div>
+        <div class="icon-tile"><div class="icon-art icon-glyph">○</div><div class="icon-name">Location</div><div class="icon-meta">U+25CB · masterclass logistics</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Experiment Constellation — generative background</span>
+      <p class="comp-rule">A generated background for experiment cards: concentric rings and satellite dots, seeded per card from a hash of its id, so rotation and arrangement vary card to card. The forest ramp marks concepts; the purple ramp marks prototypes.</p>
+      <div class="icon-constellation-row">
+        <div class="icon-constellation" style="background:#0A1F1A">
+          <svg viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
+            <g transform="rotate(20 190 140)">
+              <circle cx="190" cy="140" r="100" fill="none" stroke="rgba(73,99,75,0.10)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="64" fill="none" stroke="rgba(73,99,75,0.15)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="30" fill="none" stroke="rgba(73,99,75,0.22)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="8" fill="rgba(73,99,75,0.65)"/>
+              <line x1="190" y1="140" x2="248" y2="84" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="248" cy="84" r="5" fill="rgba(130,180,150,0.70)"/>
+              <line x1="190" y1="140" x2="132" y2="188" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="132" cy="188" r="4" fill="rgba(130,180,150,0.52)"/>
+              <line x1="190" y1="140" x2="268" y2="168" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="268" cy="168" r="4" fill="rgba(130,180,150,0.44)"/>
+              <line x1="190" y1="140" x2="296" y2="124" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="296" cy="124" r="5" fill="rgba(130,180,150,0.58)"/>
+            </g>
+          </svg>
+          <span class="icon-constellation-tag">Concept · forest</span>
+        </div>
+        <div class="icon-constellation" style="background:#1C1028">
+          <svg viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
+            <g transform="rotate(205 190 140)">
+              <circle cx="190" cy="140" r="100" fill="none" stroke="rgba(107,48,128,0.10)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="64" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="30" fill="none" stroke="rgba(107,48,128,0.22)" stroke-width="1"/>
+              <circle cx="190" cy="140" r="8" fill="rgba(107,48,128,0.65)"/>
+              <line x1="190" y1="140" x2="118" y2="100" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="118" cy="100" r="5" fill="rgba(180,120,220,0.66)"/>
+              <line x1="190" y1="140" x2="230" y2="68" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="230" cy="68" r="4" fill="rgba(180,120,220,0.50)"/>
+              <line x1="190" y1="140" x2="278" y2="192" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="278" cy="192" r="5" fill="rgba(180,120,220,0.55)"/>
+              <line x1="190" y1="140" x2="160" y2="220" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="160" cy="220" r="4" fill="rgba(180,120,220,0.46)"/>
+            </g>
+          </svg>
+          <span class="icon-constellation-tag">Prototype · purple</span>
+        </div>
+      </div>
+    </div>
+</div>
 
   <!-- ══ 05 BUTTONS & CTAs ══ -->
     </div>
@@ -1300,6 +1469,8 @@
       <a data-scroll-panel="patterns" data-scroll-section="pc-hero-writing" class="sidebar-link active">Hero Writing</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-feature" class="sidebar-link">Featured Article</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-statement" class="sidebar-link">Full-Width Statement</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-article-hero" class="sidebar-link">Article Hero</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-editorial-heroes" class="sidebar-link">Editorial Index Heroes</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Content Blocks</span>
@@ -1394,6 +1565,46 @@
     </div>
 
   </div>
+
+  <div class="section" id="pc-article-hero">
+    <div class="section-header"><div class="section-num">04</div><div class="section-title">Article Hero Image</div><div class="section-desc">An optional hero image between the byline and the prose body (Path A — renders only when set). Three sizes: default holds the text column, wide breaks out to ~1080px, full bleeds to the viewport. Rendered live from the real <code style="font-family:var(--font-mono);font-size:var(--text-meta)">blocks.css</code>.</div></div>
+    <div class="comp-section">
+      <span class="section-label">Live — default / wide / full, with optional caption</span>
+      <iframe class="live-frame" src="showcase/article-hero.html" title="Article hero variants"></iframe>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:800px">
+        <span class="spec-key">.article-hero</span><span class="spec-val">figure between byline and prose · Path A (renders iff hero_image set)</span>
+        <span class="spec-key">data-size</span><span class="spec-val">default · wide · full (ENUM)</span>
+        <span class="spec-key">wide</span><span class="spec-val">min(1080px, 100vw − 64px), centred via left:50% + translateX(-50%)</span>
+        <span class="spec-key">full</span><span class="spec-val">100vw · square corners · no side borders</span>
+        <span class="spec-key">figcaption</span><span class="spec-val">optional · condensed caps · caps at 640px even when image is wide/full</span>
+        <span class="spec-key">source</span><span class="spec-val">block-hero-image.php · blocks.css:417-464</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="pc-editorial-heroes">
+    <div class="section-header"><div class="section-num">05</div><div class="section-title">Editorial Index Heroes</div><div class="section-desc">The promoted-lead hero that can open an editorial index. Bleed variants carry a full-bleed image under a gradient; within variants pair the text with an image thumbnail or a series card; solo is text only. Rendered live from the real <code style="font-family:var(--font-mono);font-size:var(--text-meta)">blocks.css</code> (bleed images are stand-in gradients here).</div></div>
+    <div class="comp-section">
+      <span class="section-label">Live — bleed-dark · bleed-light · within (image / series card) · solo</span>
+      <iframe class="live-frame" src="showcase/editorial-heroes.html" title="Editorial index hero variants"></iframe>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:840px">
+        <span class="spec-key">.editorial-hero</span><span class="spec-val">opens an editorial index "hero" section · first card promoted</span>
+        <span class="spec-key">--bleed-dark / --bleed-light</span><span class="spec-val">full-bleed bg image + gradient overlay · min-height 480px · text bottom-aligned</span>
+        <span class="spec-key">--within</span><span class="spec-val">text + side panel grid (1.4fr / 1fr) · side = image thumb OR series card</span>
+        <span class="spec-key">--bg-surface</span><span class="spec-val">surface background for within / solo</span>
+        <span class="spec-key">.is-solo</span><span class="spec-val">single column · text only</span>
+        <span class="spec-key">eyebrow colour</span><span class="spec-val">--c-current = post category colour</span>
+        <span class="spec-key">source</span><span class="spec-val">index-editorial.php:102-208 · blocks.css:1399-1585</span>
+      </div>
+    </div>
+  </div>
+
   <div class="section" id="pc-divider">
     <div class="section-header">
       <div class="section-num">01</div>
@@ -2902,6 +3113,46 @@
   #sidebar-complib .cl-file { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
 
   @keyframes dsx-reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* Foundations — Welcome: an artist-statement intro to the system's intent. */
+  #comp-welcome .welcome { padding: var(--space-12) 0 var(--space-8); }
+  .welcome-eyebrow { font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .welcome-lead { font-family: var(--font-serif); font-size: var(--text-h1); line-height: 1.18; color: var(--primary); margin: var(--space-16) 0 var(--space-24); }
+  .welcome p:not(.welcome-lead):not(.welcome-close):not(.wg):not(.welcome-secondary) { font-size: var(--text-body); line-height: 1.72; color: var(--secondary); margin: 0 0 var(--space-16); }
+  .welcome-grid { display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: var(--space-48); align-items: start; }
+  .welcome-main { min-width: 0; max-width: 64ch; }
+  .welcome-secondary { font-size: var(--text-body-lg); line-height: 1.5; color: var(--primary); margin: var(--space-12) 0 var(--space-20); }
+  /* Overview — a real page from the system, shrunk to a mini preview on the right. */
+  .welcome-specimen .welcome-glance-label { margin-bottom: var(--space-12); }
+  .welcome-preview { padding: 0; overflow: hidden; }
+  /* width × zoom must stay <= the 460px column so the page never overflows/clips. */
+  .welcome-page { width: 820px; zoom: 0.55; }
+  .welcome-page .card { cursor: default; }
+  .welcome-page-hero { padding: 56px var(--space-48) var(--space-32); }
+  .wp-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--primary); margin-bottom: var(--space-16); }
+  .welcome-page-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-20); }
+  .welcome-page .wp-eyebrow { margin-bottom: var(--space-20); }
+  /* Foundations — Icons */
+  .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-16); max-width: 820px; }
+  .icon-tile { background: var(--surface); border: var(--rule-faint); border-radius: 4px; padding: var(--space-20); display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+  .icon-art { height: 40px; display: flex; align-items: center; margin-bottom: var(--space-8); }
+  .icon-glyph { font-size: 26px; line-height: 1; color: var(--primary); }
+  .icon-name { font-size: var(--text-sm); font-weight: 600; color: var(--primary); }
+  .icon-meta { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  .icon-meta code { background: var(--ink-08); padding: 1px 4px; border-radius: 2px; }
+  .icon-constellation-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); max-width: 620px; }
+  .icon-constellation { position: relative; aspect-ratio: 380 / 170; border-radius: 4px; overflow: hidden; }
+  .icon-constellation-tag { position: absolute; left: var(--space-12); bottom: var(--space-12); font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); }
+  /* Live, real-CSS examples embedded as isolated iframes (Patterns heroes). */
+  .live-frame { width: 100%; border: 1px solid var(--ink-12); border-radius: 4px; background: var(--canvas-bg); display: block; }
+  .welcome-glance { margin: var(--space-24) 0 0; padding-top: var(--space-20); border-top: var(--rule-faint); max-width: 80ch; }
+  .welcome-glance-label { display: block; font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-12); }
+  .welcome-glance .wg { font-size: var(--text-md); line-height: 1.55; color: var(--secondary); margin: 0 0 var(--space-8); }
+  .welcome-glance .wg:last-child { margin-bottom: 0; }
+  .welcome-glance .wg strong { color: var(--primary); font-weight: 600; }
+  .welcome-close { font-size: var(--text-body); line-height: 1.72; color: var(--secondary); margin: var(--space-24) 0 0; padding-top: var(--space-20); border-top: var(--rule-faint); max-width: 80ch; }
+  .welcome-close em { font-style: italic; color: var(--primary); }
+  .welcome p strong, .welcome-close strong { font-weight: 600; color: var(--primary); }
 </style>
 
 <script src="js/showcase.js?v=4"></script>
@@ -2940,6 +3191,19 @@
           if (sec) stage.scrollTo({ top: sec.offsetTop, behavior: "smooth" });
         } catch (e) {}
       });
+    });
+  })();
+</script>
+<script>
+  // Live example iframes (Patterns heroes): fit each to its content height so the
+  // canvas scrolls naturally. Only fit when visible (offsetParent != null), and
+  // re-fit when a tab is activated, since hidden iframes have no layout width.
+  (function () {
+    var frames = document.querySelectorAll('iframe.live-frame');
+    function fit(f) { try { if (f.offsetParent !== null) f.style.height = f.contentWindow.document.body.scrollHeight + 'px'; } catch (e) {} }
+    frames.forEach(function (f) { f.addEventListener('load', function () { fit(f); setTimeout(function () { fit(f); }, 300); }); });
+    document.querySelectorAll('.topbar-tabsbar-tab').forEach(function (t) {
+      t.addEventListener('click', function () { setTimeout(function () { frames.forEach(fit); }, 80); });
     });
   })();
 </script>

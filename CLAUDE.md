@@ -116,6 +116,19 @@ If a change touches only one of the three and not the others, it's almost certai
 
 ---
 
+## 🔒 Build & Maintenance Discipline — applies to EVERYTHING
+
+This governs **everything built or written in this repo** — code, styles, content, docs, CMS, future tools — not just the design system. The goal: the software stays **organized and lean**, built **systematically against the existing system**, never vibed into sloppiness that forces repeated refactors. It is honoured and managed **explicitly** on every change.
+
+- **Default to reuse.** Build every new thing by referencing and fitting what already exists (tokens, components, modules, conventions, helpers). No new raw values, no duplicate patterns, no one-offs when the system already expresses it. Lean = no dead code, no duplication, smallest change that fits.
+- **New things need explicit sign-off.** Introducing a new pattern / component / style, a raw value, or breaking a convention requires a brief **assessment** (what, why the system can't do it, where it belongs) **and Alex's explicit permission** before it counts as done. **No silent deviations** — surface and ask.
+- **Prototyping ≠ done.** You may prototype quickly (inline styles, a stub, a throwaway preview) to validate — but it's provisional and quarantined. To finish, promote it into the system properly (named, tokenized, placed, documented/shown) and remove the prototype.
+- **Done means:** fits the system; lean and organized; reusable additions documented where their kind lives (styles → the `/_ds/` showcase, rendered from the real CSS); linked surfaces updated; any exception assessed and approved.
+
+**Full rule + the design-system specifics: `docs/BUILD-DISCIPLINE.md`.** The three-way linkage rule below is one specific case of this.
+
+---
+
 ## What `site/_pages/` is (and isn't)
 
 `site/_pages/` holds **standalone marketing pages** for alexmchong.ca — `about.html`, `coaching.html`, `landing.html`, `resume.html`, `work-with-me.html`, `newsletter.html`, `newsletter-confirmed.html`, plus shared assets in `site/_pages/_layout/` (`style-pages.css` + brand images). These are hand-built pages that exist outside the CMS content flow.

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Article Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Article Hero — rendered live with the REAL public stylesheets so it stays
+     referenceable. Isolated in an iframe because blocks.css/pages.css collide
+     with the showcase chrome (.section, .card, etc.). -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
+<link rel="stylesheet" href="/_ds/css/public/pages.css">
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
+<style>
+  body { margin: 0; background: var(--neutral); overflow-x: hidden; }
+  .demo-article { max-width: 720px; margin: 0 auto; padding: var(--space-40) var(--space-32) var(--space-48); }
+  .demo-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: var(--space-40) 0 var(--space-16); }
+  .demo-label:first-child { margin-top: 0; }
+  .demo-prose p { font-family: var(--font); font-size: var(--text-md); font-weight: 500; line-height: 1.75; color: var(--secondary); max-width: 640px; margin: 0; }
+  a { cursor: default; }
+</style>
+</head>
+<body>
+<div class="demo-article">
+
+  <div class="demo-label">data-size="default" — sits within the text column</div>
+  <figure class="article-hero" data-size="default" data-block="hero-image">
+    <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1200'%20height='600'%3E%3Crect%20width='1200'%20height='600'%20fill='%23dcdbd8'/%3E%3Ccircle%20cx='600'%20cy='300'%20r='46'%20fill='%23bdbcb8'/%3E%3C/svg%3E" alt="">
+    <figcaption>An optional caption, set in condensed caps.</figcaption>
+  </figure>
+  <div class="demo-prose"><p>The hero renders between the byline and the prose body. Path A: it appears only when a hero image is set. The default size holds the article column width.</p></div>
+
+  <div class="demo-label">data-size="wide" — extends past the column to min(1080px, viewport)</div>
+  <figure class="article-hero" data-size="wide" data-block="hero-image">
+    <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='1600'%20height='640'%3E%3Crect%20width='1600'%20height='640'%20fill='%23d6d5d2'/%3E%3Ccircle%20cx='800'%20cy='320'%20r='50'%20fill='%23bdbcb8'/%3E%3C/svg%3E" alt="">
+    <figcaption>Wide caption stays at column width.</figcaption>
+  </figure>
+
+  <div class="demo-label">data-size="full" — full-viewport bleed, square corners</div>
+  <figure class="article-hero" data-size="full" data-block="hero-image">
+    <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='2000'%20height='700'%3E%3Crect%20width='2000'%20height='700'%20fill='%23d0cfcc'/%3E%3Ccircle%20cx='1000'%20cy='350'%20r='54'%20fill='%23bdbcb8'/%3E%3C/svg%3E" alt="">
+    <figcaption>Full-bleed caption also stays narrow.</figcaption>
+  </figure>
+
+</div>
+</body>
+</html>

@@ -2938,47 +2938,52 @@
   </div>
 </section>
 
-<!-- CSS Library — the technical/dev reference, indexed by CSS file. Native
-     sidebar convention (like every other tab); each section renders its slice in
-     an isolated frame loading the real CSS, so one edit propagates everywhere. -->
+<!-- CSS Library — the technical/dev reference, indexed by CSS file. Native left
+     sidebar; clicking a file SWITCHES the shown slice (one at a time, lazy-loaded)
+     rather than scrolling. Each slice is an isolated frame loading the real CSS,
+     so one edit propagates everywhere. -->
 <section class="workspace" id="tab-complib" data-tab="complib">  <nav class="sidebar" id="sidebar-complib">
     <div class="sidebar-group">
       <span class="sidebar-group-label">By CSS file</span>
-      <a data-scroll-panel="complib" data-scroll-section="cl-root" class="sidebar-link active">Root</a>
-      <a data-scroll-panel="complib" data-scroll-section="cl-pages" class="sidebar-link">Pages</a>
-      <a data-scroll-panel="complib" data-scroll-section="cl-blocks" class="sidebar-link">Blocks</a>
-      <a data-scroll-panel="complib" data-scroll-section="cl-cms" class="sidebar-link">CMS</a>
+      <a class="sidebar-link active" data-cl="root">Root <span class="cl-file">tokens.css</span></a>
+      <a class="sidebar-link" data-cl="pages">Pages <span class="cl-file">pages.css</span></a>
+      <a class="sidebar-link" data-cl="blocks">Blocks <span class="cl-file">blocks.css</span></a>
+      <a class="sidebar-link" data-cl="cms">CMS <span class="cl-file">system-cms.css</span></a>
     </div>
   </nav>
-  <div class="canvas">
-    <div class="section" id="cl-root">
-      <div class="section-header"><div class="section-num">R</div><div class="section-title">Root · tokens.css</div><div class="section-desc">Shared primitives — colours, type, spacing, radii, shadows, fonts. Every other slice reads from these.</div></div>
-      <iframe class="cl-frame" data-frame src="showcase/root.html" title="Root slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:300px"></iframe>
-    </div>
-    <div class="section" id="cl-pages">
-      <div class="section-header"><div class="section-num">P</div><div class="section-title">Pages · pages.css</div><div class="section-desc">Marketing-page primitives — nav, hero, buttons, form, callout, footer (via system-public.css).</div></div>
-      <iframe class="cl-frame" data-frame src="showcase/pages.html" title="Pages slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:300px"></iframe>
-    </div>
-    <div class="section" id="cl-blocks">
-      <div class="section-header"><div class="section-num">B</div><div class="section-title">Blocks · blocks.css</div><div class="section-desc">Article / index / card templates.</div></div>
-      <iframe class="cl-frame" data-frame src="showcase/blocks.html" title="Blocks slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:120px"></iframe>
-    </div>
-    <div class="section" id="cl-cms">
-      <div class="section-header"><div class="section-num">C</div><div class="section-title">CMS · system-cms.css</div><div class="section-desc">Admin editor toolkit. Mirrors the in-CMS viewer at /cms/design-system from one shared source.</div></div>
-      <iframe class="cl-frame" data-frame src="showcase/cms.html" title="CMS slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--canvas-bg);min-height:120px"></iframe>
-    </div>
+  <div class="cl-stage">
+    <iframe class="cl-frame active" data-cl-pane="root"   src="showcase/root.html"        title="Root slice"></iframe>
+    <iframe class="cl-frame"        data-cl-pane="pages"  data-src="showcase/pages.html"  title="Pages slice"></iframe>
+    <iframe class="cl-frame"        data-cl-pane="blocks" data-src="showcase/blocks.html" title="Blocks slice"></iframe>
+    <iframe class="cl-frame"        data-cl-pane="cms"    data-src="showcase/cms.html"    title="CMS slice"></iframe>
   </div>
 </section>
 
+<style>
+  /* CSS Library stage — one slice shown at a time, filling the panel. */
+  #tab-complib .cl-stage { flex: 1; height: 100%; min-width: 0; }
+  #tab-complib .cl-frame { display: none; width: 100%; height: 100%; border: 0; background: var(--neutral); }
+  #tab-complib .cl-frame.active { display: block; }
+  #sidebar-complib .cl-file { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+</style>
+
 <script src="js/showcase.js?v=4"></script>
 <script>
-  // Auto-size the same-origin CSS-Library slice frames to their content.
+  // CSS Library: sidebar switches the active slice (lazy-loads on first show).
   (function () {
-    function fit(f) { try { var h = f.contentWindow.document.body.scrollHeight; if (h > 40) f.style.height = (h + 8) + 'px'; } catch (e) {} }
-    function fitAll() { document.querySelectorAll('iframe[data-frame]').forEach(fit); }
-    document.querySelectorAll('iframe[data-frame]').forEach(function (f) { f.addEventListener('load', function () { fit(f); }); });
-    document.querySelectorAll('.topbar-tabsbar-tab').forEach(function (t) { t.addEventListener('click', function () { setTimeout(fitAll, 90); }); });
-    window.addEventListener('load', fitAll);
+    var links = document.querySelectorAll('#sidebar-complib .sidebar-link[data-cl]');
+    var frames = document.querySelectorAll('#tab-complib .cl-frame');
+    links.forEach(function (a) {
+      a.addEventListener('click', function () {
+        var key = a.dataset.cl;
+        links.forEach(function (l) { l.classList.toggle('active', l === a); });
+        frames.forEach(function (f) {
+          var on = f.dataset.clPane === key;
+          f.classList.toggle('active', on);
+          if (on && !f.src && f.dataset.src) f.src = f.dataset.src;  // lazy load
+        });
+      });
+    });
   })();
 </script>
 </body>

@@ -26,10 +26,10 @@
   .cms-cat-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--secondary); margin: 0 0 var(--space-20); padding-bottom: var(--space-12); border-bottom: var(--rule-faint); }
   .cms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-16); }
   .cms-grid.is-wide { grid-template-columns: 1fr; }
-  .cms-item { border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); overflow: hidden; }
+  .cms-item { border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
   .cms-render { padding: var(--space-20) var(--space-16); display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; min-height: 60px; }
-  .cms-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border-top: var(--rule-faint); }
-  .cms-class { font-family: var(--font-mono); font-size: 11px; color: var(--secondary); background: var(--ink-08); padding: 2px 6px; border-radius: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cms-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border-top: var(--rule-faint); margin-top: auto; }
+  .cms-class { font-family: var(--font-mono); font-size: 11px; color: var(--secondary); background: var(--ink-08); padding: 2px 6px; border-radius: 2px; white-space: normal; word-break: break-word; min-width: 0; }
   .cms-note { padding: 0 var(--space-12) var(--space-8); font-size: 11px; color: var(--muted); line-height: 1.5; }
 </style>
 </head>

@@ -87,6 +87,15 @@ under Components/Containment (recommended) or get their own tab.
   Coaching Dashboard / Analytics / Mobile = explorations that may introduce future
   components.
 
+**Build method — parity first, then promote (Alex, 2026-06-06):**
+1. **Parity:** when an Applied example uses something that's basically an existing
+   component, align it to the *real* component — don't reinvent a near-duplicate.
+2. **Define genuinely-new things as Future Components:** only the truly new
+   elements become Future Components. Example: **Analytics View introduces a
+   slightly-new card style + progress bars** → those are defined as new components
+   (scoped CSS in the example page, catalogued under Future Components), as
+   candidates to promote into the real DS later.
+
 **This protects production CSS:** exploratory styling is quarantined in Applied's
 iframe pages; nothing leaks to the live site.
 

@@ -2562,7 +2562,7 @@
       <a class="sidebar-link" data-cms="cms-cards">Cards</a>
     </div>
   </nav>
-  <div class="cms-stage" style="flex:1;height:calc(100vh - 53px);min-width:0"><iframe id="cms-frame" src="showcase/cms.html" title="CMS components" style="width:100%;height:calc(100vh - 53px);border:0;background:var(--canvas-bg);display:block"></iframe></div>
+  <div class="cms-stage" style="flex:1;height:calc(100vh - 53px);overflow-y:auto;min-width:0"><iframe id="cms-frame" src="showcase/cms.html" title="CMS components" style="width:100%;border:0;background:var(--canvas-bg);display:block"></iframe></div>
 </section>
 
 <!-- CSS Library — the technical/dev reference, indexed by CSS file. Native left
@@ -2588,18 +2588,20 @@
 
 <style>
   /* CSS Library stage — one slice shown at a time, filling the panel. */
-  #tab-complib .cl-stage { flex: 1; height: calc(100vh - 53px); min-width: 0; }
-  #tab-complib .cl-frame { display: none; width: 100%; height: calc(100vh - 53px); border: 0; background: var(--neutral); }
+  #tab-complib .cl-stage { flex: 1; height: calc(100vh - 53px); overflow-y: auto; min-width: 0; }
+  #tab-complib .cl-frame { display: none; width: 100%; border: 0; background: var(--neutral); }
   #tab-complib .cl-frame.active { display: block; }
   #sidebar-complib .cl-file { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
 </style>
 
 <script src="js/showcase.js?v=4"></script>
 <script>
-  // CSS Library: sidebar switches the active slice (lazy-loads on first show).
+  // CSS Library: switch slice (lazy-load) + fit frame to content so the stage scrolls.
   (function () {
     var links = document.querySelectorAll('#sidebar-complib .sidebar-link[data-cl]');
     var frames = document.querySelectorAll('#tab-complib .cl-frame');
+    function fit(f) { try { f.style.height = f.contentWindow.document.body.scrollHeight + 'px'; } catch (e) {} }
+    frames.forEach(function (f) { f.addEventListener('load', function () { fit(f); }); });
     links.forEach(function (a) {
       a.addEventListener('click', function () {
         var key = a.dataset.cl;
@@ -2607,20 +2609,26 @@
         frames.forEach(function (f) {
           var on = f.dataset.clPane === key;
           f.classList.toggle('active', on);
-          if (on && !f.src && f.dataset.src) f.src = f.dataset.src;  // lazy load
+          if (on) { if (!f.src && f.dataset.src) f.src = f.dataset.src; else fit(f); }
         });
       });
     });
   })();
 </script>
 <script>
-  // CMS tab: sidebar scrolls the shared cms.html frame to a section.
+  // CMS tab: fit the shared frame to content (so the stage scrolls) + sidebar scrolls to a section.
   (function () {
     var f = document.getElementById("cms-frame");
+    var stage = document.querySelector("#tab-cms .cms-stage");
+    function fit() { try { f.style.height = f.contentWindow.document.body.scrollHeight + 'px'; } catch (e) {} }
+    f.addEventListener("load", fit);
     document.querySelectorAll("#sidebar-cms .sidebar-link[data-cms]").forEach(function (a) {
       a.addEventListener("click", function () {
         document.querySelectorAll("#sidebar-cms .sidebar-link").forEach(function (l) { l.classList.toggle("active", l === a); });
-        try { f.contentWindow.location.hash = "#" + a.dataset.cms; } catch (e) {}
+        try {
+          var sec = f.contentWindow.document.getElementById(a.dataset.cms);
+          if (sec) stage.scrollTo({ top: sec.offsetTop, behavior: "smooth" });
+        } catch (e) {}
       });
     });
   })();

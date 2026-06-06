@@ -2951,14 +2951,48 @@
   </div>
 </section>
 
-<!-- Component Library — the technical/dev reference, organized by CSS file
-     (Root / Pages / Blocks / CMS). Self-contained sub-app, iframed so its own
-     sub-tab chrome stays isolated. Renders from the same canonical slices as
-     the docs above + the live site, so one CSS edit propagates everywhere. -->
-<section class="workspace" id="tab-complib" data-tab="complib">
-  <iframe src="component-library.html" title="Component Library — by CSS file" style="flex:1; height:100%; border:0; display:block;"></iframe>
+<!-- CSS Library — the technical/dev reference, indexed by CSS file. Native
+     sidebar convention (like every other tab); each section renders its slice in
+     an isolated frame loading the real CSS, so one edit propagates everywhere. -->
+<section class="workspace" id="tab-complib" data-tab="complib">  <nav class="sidebar" id="sidebar-complib">
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">By CSS file</span>
+      <a data-scroll-panel="complib" data-scroll-section="cl-root" class="sidebar-link active">Root</a>
+      <a data-scroll-panel="complib" data-scroll-section="cl-pages" class="sidebar-link">Pages</a>
+      <a data-scroll-panel="complib" data-scroll-section="cl-blocks" class="sidebar-link">Blocks</a>
+      <a data-scroll-panel="complib" data-scroll-section="cl-cms" class="sidebar-link">CMS</a>
+    </div>
+  </nav>
+  <div class="canvas">
+    <div class="section" id="cl-root">
+      <div class="section-header"><div class="section-num">R</div><div class="section-title">Root · tokens.css</div><div class="section-desc">Shared primitives — colours, type, spacing, radii, shadows, fonts. Every other slice reads from these.</div></div>
+      <iframe class="cl-frame" data-frame src="showcase/root.html" title="Root slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:300px"></iframe>
+    </div>
+    <div class="section" id="cl-pages">
+      <div class="section-header"><div class="section-num">P</div><div class="section-title">Pages · pages.css</div><div class="section-desc">Marketing-page primitives — nav, hero, buttons, form, callout, footer (via system-public.css).</div></div>
+      <iframe class="cl-frame" data-frame src="showcase/pages.html" title="Pages slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:300px"></iframe>
+    </div>
+    <div class="section" id="cl-blocks">
+      <div class="section-header"><div class="section-num">B</div><div class="section-title">Blocks · blocks.css</div><div class="section-desc">Article / index / card templates.</div></div>
+      <iframe class="cl-frame" data-frame src="showcase/blocks.html" title="Blocks slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--neutral);min-height:120px"></iframe>
+    </div>
+    <div class="section" id="cl-cms">
+      <div class="section-header"><div class="section-num">C</div><div class="section-title">CMS · system-cms.css</div><div class="section-desc">Admin editor toolkit. Mirrors the in-CMS viewer at /cms/design-system from one shared source.</div></div>
+      <iframe class="cl-frame" data-frame src="showcase/cms.html" title="CMS slice" style="display:block;width:100%;border:1px solid var(--ink-12);border-radius:4px;background:var(--canvas-bg);min-height:120px"></iframe>
+    </div>
+  </div>
 </section>
 
 <script src="js/showcase.js?v=4"></script>
+<script>
+  // Auto-size the same-origin CSS-Library slice frames to their content.
+  (function () {
+    function fit(f) { try { var h = f.contentWindow.document.body.scrollHeight; if (h > 40) f.style.height = (h + 8) + 'px'; } catch (e) {} }
+    function fitAll() { document.querySelectorAll('iframe[data-frame]').forEach(fit); }
+    document.querySelectorAll('iframe[data-frame]').forEach(function (f) { f.addEventListener('load', function () { fit(f); }); });
+    document.querySelectorAll('.topbar-tabsbar-tab').forEach(function (t) { t.addEventListener('click', function () { setTimeout(fitAll, 90); }); });
+    window.addEventListener('load', fitAll);
+  })();
+</script>
 </body>
 </html>

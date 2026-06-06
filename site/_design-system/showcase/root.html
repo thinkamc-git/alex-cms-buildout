@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Component Library — by CSS file</title>
+<title>Root · tokens.css</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <!-- ============================================================
@@ -82,17 +82,6 @@
 </head>
 <body>
 
-<div class="dsx-top">
-  <span class="dsx-brand">Component Library<em>by CSS file</em></span>
-  <nav class="dsx-tabs">
-    <button class="dsx-tab active" data-tab="root">Root<span class="dsx-slice">tokens.css</span></button>
-    <button class="dsx-tab" data-tab="pages">Pages<span class="dsx-slice">pages.css</span></button>
-    <button class="dsx-tab" data-tab="blocks">Blocks<span class="dsx-slice">blocks.css</span></button>
-    <button class="dsx-tab" data-tab="cms">CMS<span class="dsx-slice">system-cms.css</span></button>
-  </nav>
-</div>
-
-<!-- ═══════════════ ROOT ═══════════════ -->
 <section class="dsx-panel active" data-panel="root">
   <h1 class="dsx-lede">Root — shared primitives</h1>
   <p class="dsx-sub">The single source of truth: <code>tokens.css</code>. Every other slice (Pages, Blocks, CMS) reads from these — colours, type scale, spacing, radii, shadows, rules, fonts. No raw values live outside this file.</p>
@@ -147,51 +136,7 @@
 </section>
 
 <!-- ═══════════════ PAGES (22.6b-2) ═══════════════ -->
-<section class="dsx-panel" data-panel="pages">
-  <h1 class="dsx-lede">Pages — marketing primitives</h1>
-  <p class="dsx-sub">Marketing-page components from <code>public/pages.css</code> (via <code>system-public.css</code>): nav, footer, buttons, hero, form, callout. Rendered in an isolated frame so the marketing body/chrome doesn't bleed onto the showcase.</p>
-  <iframe class="dsx-frame" data-frame src="showcase/pages.html" title="Pages slice — live components"></iframe>
-</section>
-
-<!-- ═══════════════ BLOCKS (22.6b-3) ═══════════════ -->
-<section class="dsx-panel" data-panel="blocks">
-  <h1 class="dsx-lede">Blocks — article &amp; index templates</h1>
-  <p class="dsx-sub">Article/index/card components from <code>public/blocks.css</code>: post cards, article prose, event cards, series, author line.</p>
-  <div class="dsx-soon">Built in 22.6b-3.</div>
-</section>
-
-<!-- ═══════════════ CMS (22.6b-4) ═══════════════ -->
-<section class="dsx-panel" data-panel="cms">
-  <h1 class="dsx-lede">CMS — admin components</h1>
-  <p class="dsx-sub">Admin editor toolkit from <code>system-cms.css</code>: tables, forms, buttons, status/stage pills, cards. Mirrors the canonical in-CMS viewer at <code>/cms/design-system</code>.</p>
-  <div class="dsx-soon">Built in 22.6b-4.</div>
-</section>
-
 <script>
-  // Auto-size same-origin demo iframes to their content (no inner scrollbar).
-  function fitFrame(f) {
-    try {
-      var h = f.contentWindow.document.body.scrollHeight;
-      if (h > 40) f.style.height = (h + 8) + 'px';
-    } catch (e) { /* not yet loaded */ }
-  }
-  document.querySelectorAll('iframe[data-frame]').forEach(function (f) {
-    f.addEventListener('load', function () { fitFrame(f); });
-  });
-
-  // Tab switching. Re-fit frames in the panel being shown (display:none frames
-  // can report a stale height until they're visible).
-  document.querySelectorAll('.dsx-tab').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      var name = tab.dataset.tab;
-      document.querySelectorAll('.dsx-tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
-      document.querySelectorAll('.dsx-panel').forEach(function (p) { p.classList.toggle('active', p.dataset.panel === name); });
-      var panel = document.querySelector('.dsx-panel[data-panel="' + name + '"]');
-      if (panel) panel.querySelectorAll('iframe[data-frame]').forEach(function (f) { setTimeout(function () { fitFrame(f); }, 50); });
-    });
-  });
-
-  // ── Root tab data → DOM (kept in JS so the token lists stay terse) ──
   var POOL = [
     ['rust','#765150'],['terracotta','#7d4631'],['clay','#765e44'],['amber','#81642a'],
     ['ochre','#786e4a'],['olive','#6e7448'],['moss','#607549'],['forest','#49634b'],

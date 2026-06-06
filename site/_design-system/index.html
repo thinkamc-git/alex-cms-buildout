@@ -954,140 +954,59 @@
   <div class="section-header">
     <div class="section-num">03</div>
     <div class="section-title">Event Cards</div>
-    <div class="section-desc">Talks, workshops, and masterclasses. Dark header carrying the event type plus countdown or past pill. Location/remote zone with ghost city text. Format pills below the title.</div>
+    <div class="section-desc">Talks, workshops, and masterclasses. A dark top (header + location) carries the event type and, when upcoming, a countdown pill. Past events keep full colour and are signalled by a diagonal hatch over the dark top, a clock, and “Past Event”. Format pills sit below the title.</div>
   </div>
   <div class="cards-grid">
   <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label">In 6 Days</span>
-    </div>
-    <div class="loc-zone">
-      <div class="loc-ghost">Toronto</div>
-      <div style="position:relative">
-        <div class="loc-city">Toronto, ON</div>
-        <div class="loc-venue">Centre for Social Innovation</div>
-      </div>
+    <div class="ev-top">
+      <div class="card-header"><span class="ev-type">Talk</span><span class="ev-countdown-label">In 6 Days</span></div>
+      <div class="loc-zone"><div class="loc-ghost">Toronto</div><div style="position:relative"><div class="loc-city">Toronto, ON</div><div class="loc-venue">Centre for Social Innovation</div></div></div>
     </div>
     <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 12, 2026</span>
-        <span class="ev-time">Wed · 7:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom: var(--space-12)">Design Leadership in the Age of AI</h2>
-      <p class="ev-desc">A live conversation on leading teams through disruption — making better decisions and staying human.</p>
+      <div class="ev-date-row"><span class="ev-date">May 12, 2026</span><span class="ev-time">Wed · 7:00 PM ET</span></div>
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Design Leadership in the Age of AI</h2>
+      <p class="ev-desc">Upcoming: full colour, countdown pill in the header.</p>
       <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-free">Free</span></div>
-        <span class="arrow">→</span>
-      </div>
+      <div class="ev-footer"><div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-free">Free</span></div><span class="arrow">→</span></div>
     </div>
   </div>
 
-  <div class="card card--event" data-type="event" data-category="workshop">
-    <div class="card-header">
-      <span class="ev-type">Workshop</span>
-      <span class="ev-countdown-label">Next Week</span>
-    </div>
-    <div class="loc-zone">
-      <div class="loc-ghost">Toronto</div>
-      <div style="position:relative">
-        <div class="loc-city">Toronto, ON</div>
-        <div class="loc-venue">Gladstone House · 16 seats</div>
-      </div>
+  <div class="card card--event past" data-type="event" data-category="talk">
+    <div class="ev-top">
+      <div class="card-header"><span class="ev-type-past">Talk</span><span class="ev-past-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></svg>Past Event</span></div>
+      <div class="loc-zone"><div class="loc-ghost">Toronto</div><div style="position:relative"><div class="loc-city">Toronto, ON</div><div class="loc-venue">Gladstone House</div></div></div>
     </div>
     <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 28, 2026</span>
-        <span class="ev-time">Wed · 10:00 AM – 1:00 PM</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Designing for Decisions</h2>
-      <p class="ev-desc">A half-day session for designers ready to operate at the level of strategy. Built around real problems.</p>
+      <div class="ev-date-row"><span class="ev-date-past">Mar 3, 2026</span></div>
+      <h2 class="ev-title-past" style="margin-bottom:var(--space-12)">Designing for Decisions</h2>
+      <p class="ev-desc">Past: keeps full colour (no desaturation). The diagonal hatch across the dark top, a clock, and “Past Event” signal it has happened.</p>
       <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-paid">$249</span></div>
-        <span class="arrow">→</span>
-      </div>
+      <div class="ev-footer"><div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-paid">$249</span></div><span class="arrow">→</span></div>
     </div>
   </div>
 
   <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label tomorrow">Tomorrow</span>
-    </div>
-    <div class="remote-zone">
-      <div class="remote-ghost">Remote</div>
-      <div style="position:relative">
-        <div class="remote-label">Remote Talk</div>
-        <div class="remote-sub">Join from anywhere</div>
-      </div>
+    <div class="ev-top">
+      <div class="card-header"><span class="ev-type">Talk</span><span class="ev-countdown-label tomorrow">Tomorrow</span></div>
+      <div class="remote-zone"><div class="remote-ghost">Remote</div><div style="position:relative"><div class="remote-label">Remote Talk</div><div class="remote-sub">Join from anywhere</div></div></div>
     </div>
     <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 7, 2026</span>
-        <span class="ev-time">Thu · 12:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The State of Design Leadership in 2026</h2>
-      <p class="ev-desc">What does design leadership look like when AI, hiring uncertainty, and organizational pressure are reshaping the role from every direction?</p>
+      <div class="ev-date-row"><span class="ev-date">May 7, 2026</span><span class="ev-time">Thu · 12:00 PM ET</span></div>
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The State of Design Leadership</h2>
+      <p class="ev-desc">Remote variant — ghost “Remote” wordmark in the dark top.</p>
       <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-free">Free</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label today">Today!</span>
-    </div>
-    <div class="remote-zone">
-      <div class="remote-ghost">Remote</div>
-      <div style="position:relative">
-        <div class="remote-label">Remote</div>
-        <div class="remote-sub">12 seats · Join from anywhere</div>
-      </div>
-    </div>
-    <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 6, 2026</span>
-        <span class="ev-time">Thu · 9:00 AM – 5:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Reclaiming Creative Agency as a Senior Designer</h2>
-      <p class="ev-desc">On burnout, self-trust, and the conditions that restore creative momentum when the work has stopped feeling like yours.</p>
-      <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-paid">$149</span></div>
-        <span class="arrow">→</span>
-      </div>
+      <div class="ev-footer"><div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-free">Free</span></div><span class="arrow">→</span></div>
     </div>
   </div>
 
   <div class="card card--event" data-type="event" data-category="masterclass">
-    <div class="card-header">
-      <span class="ev-type">Masterclass</span>
-      <span class="ev-countdown-label">In 2 Months</span>
-    </div>
+    <div class="card-header"><span class="ev-type">Masterclass</span><span class="ev-countdown-label">In 2 Months</span></div>
     <div class="mc-body">
       <h2 class="ev-title" style="margin-bottom:var(--space-12)">The Coaching Designer</h2>
-      <p class="ev-desc">A two-day intensive on building a coaching practice as a working designer — for those ready to lead through questions.</p>
-      <div class="mc-logistics">
-        <div class="mc-logistic"><span class="mc-logistic-icon">◷</span><span>Oct 2 – 3, 2026 · 9 AM – 5 PM ET</span></div>
-        <div class="mc-logistic"><span class="mc-logistic-icon">○</span><span>Virtual · 2 Days</span></div>
-      </div>
+      <p class="ev-desc">Masterclass variant — logistics list + dedicated CTA zone.</p>
+      <div class="mc-logistics"><div class="mc-logistic"><span class="mc-logistic-icon">◷</span><span>Oct 2 – 3, 2026 · 9 AM – 5 PM ET</span></div><div class="mc-logistic"><span class="mc-logistic-icon">○</span><span>Virtual · 2 Days</span></div></div>
     </div>
-    <div class="mc-cta-zone">
-      <div class="mc-cta-left">
-        <span class="mc-cta-label">Register Now</span>
-        <span class="mc-cta-sub">12 Seats · Online</span>
-      </div>
-      <div class="mc-cta-right">
-        <span class="mc-price">$349</span>
-        <span class="mc-arrow">→</span>
-      </div>
-    </div>
+    <div class="mc-cta-zone"><div class="mc-cta-left"><span class="mc-cta-label">Register Now</span><span class="mc-cta-sub">12 Seats · Online</span></div><div class="mc-cta-right"><span class="mc-price">$349</span><span class="mc-arrow">→</span></div></div>
   </div>
 </div>
 </div>

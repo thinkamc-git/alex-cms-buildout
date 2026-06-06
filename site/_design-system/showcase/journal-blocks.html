@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal Key Statement</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Journal Key Statement — rendered live from the real blocks.css. On a journal
+     entry this block replaces the title: one declarative sentence in Instrument
+     Serif italic with a left rule in the category colour (--c-current). -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
+<link rel="stylesheet" href="/_ds/css/public/pages.css">
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
+<style>
+  body { margin: 0; background: var(--neutral); }
+  .demo-entry { max-width: 760px; margin: 0 auto; padding: var(--space-48) var(--space-32); }
+  .demo-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-16); }
+  .demo-body p { font-family: var(--font); font-size: var(--text-md); font-weight: 500; line-height: 1.75; color: var(--secondary); max-width: 640px; margin: 0; }
+</style>
+</head>
+<body>
+<article class="demo-entry" data-category="teal" style="--c-current:var(--c-teal)">
+  <div class="demo-eyebrow">Journal · Introspection · Entry 014</div>
+  <p class="article-key-statement" data-block="key-statement">The strongest statement in the room is usually the quietest one.</p>
+  <div class="demo-body"><p>On a journal entry the key statement replaces the title — a single declarative sentence set in Instrument Serif italic against a left rule in the category colour. The rule colour comes from the entry's category via <code style="font-family:var(--font-mono)">--c-current</code>.</p></div>
+</article>
+</body>
+</html>

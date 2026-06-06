@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editorial Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Editorial Index — the real index layout rendered live from the public
+     stylesheets: index-page header, an editorial hero, a curated section with a
+     big header + view-all, and a feed section with per-section filter pills
+     (OR-logic). data-category doubles as the pill filter key, matching prod. -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
+<link rel="stylesheet" href="/_ds/css/public/pages.css">
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
+<style> body { margin: 0; background: var(--neutral); } a, button { cursor: default; } </style>
+</head>
+<body>
+<div class="index-page index-page--editorial">
+
+  <header class="index-page-header">
+    <div class="index-page-header-row">
+      <div class="index-page-header-left">
+        <div class="index-eyebrow">Writing</div>
+        <h1 class="index-title">Thoughts on design &amp; leadership</h1>
+        <p class="index-subtitle">Essays, journals, and experiments from a working practice.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero section — promoted lead (within + series card) -->
+  <section class="index-section index-section--hero">
+    <div class="editorial-hero editorial-hero--within editorial-hero--bg-surface">
+      <div class="editorial-hero-text">
+        <div class="editorial-hero-eyebrow" style="--c-current:var(--c-forest)">— FEATURED — LEADING DESIGN</div>
+        <h1 class="editorial-hero-title">UX 2.0 Is a Thinking Problem</h1>
+        <p class="editorial-hero-summary">Everyone is asking which AI tools designers should learn. Nobody is asking whether the role itself needs to change.</p>
+        <div class="editorial-hero-foot"><span class="editorial-hero-meta">APR 14, 2026 · 9 MIN READ</span><a href="#" class="editorial-hero-cta">Read &rarr;</a></div>
+      </div>
+      <aside class="editorial-hero-side">
+        <div class="editorial-hero-card">
+          <div class="editorial-hero-card-label">Series</div>
+          <div class="editorial-hero-card-title">UX 2.0 <span class="editorial-hero-card-part">&mdash; Part 3 of 3</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Curated section — big header + view-all -->
+  <section class="index-section index-section--curated">
+    <header class="index-section-header is-big">
+      <h2 class="index-section-title-big">Leading Design</h2>
+      <a class="index-section-view-all" href="#">View all &rarr;</a>
+    </header>
+    <div class="cards-grid">
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The Designer Who Runs the Room</h2><p class="excerpt">Authority in a design team is quieter than it looks — and it is mostly built before the meeting starts.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Leadership</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Feb 12, 2026</span><span>17 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">Why Most Design Teams Address Symptoms</h2><p class="excerpt">The real problem is rarely the one on the ticket. Leading design is learning to look one level up.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Systems</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Jan 22, 2026</span><span>12 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The Quiet Authority Problem</h2><p class="excerpt">Loud teams aren't strong teams. The strongest direction is usually the calmest one in the room.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Craft</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 8, 2026</span><span>14 min read</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curated section — carousel display format (is-carousel) -->
+  <section class="index-section index-section--curated">
+    <header class="index-section-header is-big">
+      <h2 class="index-section-title-big">The UX 2.0 Series</h2>
+      <a class="index-section-view-all" href="#">View all &rarr;</a>
+    </header>
+    <div class="cards-grid is-carousel">
+      <div class="card card--article" data-type="article" data-category="terracotta">
+        <div class="card-header"><span class="cat">UX Industry</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">A Discipline Reset</h2><p class="excerpt">UX 1.0 was built around scarcity. AI dissolved it entirely.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Part 1</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 4, 2026</span><span>14 min</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="terracotta">
+        <div class="card-header"><span class="cat">UX Industry</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">What a Post-AI Workflow Looks Like</h2><p class="excerpt">Change how you think before you change how you work.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Part 2</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 28, 2026</span><span>11 min</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">UX 2.0 Is a Thinking Problem</h2><p class="excerpt">The role itself needs to change, not just the toolset.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Part 3</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Apr 14, 2026</span><span>9 min</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="denim">
+        <div class="card-header"><span class="cat">For Designers</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The New Generalist</h2><p class="excerpt">Range is becoming the senior skill again.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Coda</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>May 5, 2026</span><span>11 min</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The Coaching Designer</h2><p class="excerpt">Develop people the way you develop products.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Bonus</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Jun 1, 2026</span><span>8 min</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feed section — group header + visitor filter pills (OR-logic) -->
+  <section class="index-section index-section--feed">
+    <div class="group-header"><span class="group-header-eyebrow">Latest</span><a class="group-header-link" href="#">View all &rarr;</a></div>
+    <div class="index-section-pills" data-pill-mode="categories">
+      <button type="button" class="fp on" data-cat="all">All</button>
+      <button type="button" class="fp" data-cat="terracotta">UX Industry</button>
+      <button type="button" class="fp" data-cat="forest">Leading Design</button>
+      <button type="button" class="fp" data-cat="denim">For Designers</button>
+    </div>
+    <div class="cards-grid">
+      <div class="card card--article" data-type="article" data-category="terracotta">
+        <div class="card-header"><span class="cat">UX Industry</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">A Discipline Reset</h2><p class="excerpt">UX 1.0 was built around scarcity. AI dissolved the scarcity entirely.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Reframe</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 4, 2026</span><span>14 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="denim">
+        <div class="card-header"><span class="cat">For Designers</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">Burnout Lives Below Workload</h2><p class="excerpt">The fix is rarely fewer tasks. It is usually a clearer sense of what the work is for.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Practice</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Apr 2, 2026</span><span>9 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The New Generalist</h2><p class="excerpt">Specialists are quietly losing ground. Range is becoming the senior skill again.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Roles</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>May 5, 2026</span><span>11 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="terracotta">
+        <div class="card-header"><span class="cat">UX Industry</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">What a Post-AI Workflow Looks Like</h2><p class="excerpt">The designers thriving now changed how they think before how they work.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Workflow</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 28, 2026</span><span>11 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="denim">
+        <div class="card-header"><span class="cat">For Designers</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">Notes Toward a Practice</h2><p class="excerpt">A working set of principles for designing with restraint.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Craft</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>May 30, 2026</span><span>7 min read</span></div>
+      </div>
+      <div class="card card--article" data-type="article" data-category="forest">
+        <div class="card-header"><span class="cat">Leading Design</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">The Coaching Designer</h2><p class="excerpt">The strongest leaders develop people the way they develop products.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Coaching</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Jun 1, 2026</span><span>8 min read</span></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Per-section visitor pills — OR-semantics, scoped to each .index-section.
+  // Verbatim behaviour from templates/index-editorial.php.
+  (function () {
+    'use strict';
+    document.querySelectorAll('.index-section .index-section-pills').forEach(function (ctrl) {
+      var section = ctrl.closest('.index-section');
+      if (!section) return;
+      var attr  = ctrl.getAttribute('data-pill-mode') === 'types' ? 'type' : 'category';
+      var pills = Array.prototype.slice.call(ctrl.querySelectorAll('.fp'));
+      var cards = Array.prototype.slice.call(section.querySelectorAll('.cards-grid > .card'));
+      function activeKeys() {
+        return pills.filter(function (p) { return p.classList.contains('on') && p.getAttribute('data-cat') !== 'all'; })
+                    .map(function (p) { return p.getAttribute('data-cat'); });
+      }
+      function apply() {
+        var keys = activeKeys();
+        var allOn = pills.some(function (p) { return p.getAttribute('data-cat') === 'all' && p.classList.contains('on'); });
+        cards.forEach(function (c) {
+          var v = c.getAttribute('data-' + attr) || '';
+          var show = allOn || (keys.length > 0 && keys.indexOf(v) !== -1);
+          c.classList.toggle('is-filtered-out', !show);
+        });
+      }
+      pills.forEach(function (p) {
+        p.addEventListener('click', function () {
+          var key = p.getAttribute('data-cat');
+          if (key === 'all') {
+            pills.forEach(function (q) { q.classList.toggle('on', q === p); });
+          } else {
+            var allPill = pills.find(function (q) { return q.getAttribute('data-cat') === 'all'; });
+            if (allPill) allPill.classList.remove('on');
+            p.classList.toggle('on');
+            if (activeKeys().length === 0 && allPill) allPill.classList.add('on');
+          }
+          apply();
+        });
+      });
+      apply();
+    });
+  })();
+</script>
+</body>
+</html>

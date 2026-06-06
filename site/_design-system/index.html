@@ -1119,6 +1119,19 @@
     <div class="meta-strip"><span>Apr 20, 2026</span><span>12 min read</span></div>
   </div>
 </div>
+
+  <div class="comp-section">
+    <span class="section-label">Series Watermark — /series/[slug]/ cards</span>
+    <p class="comp-rule">On a series index, each card carries a faint Instrument Serif part-number behind its content (from <code style="font-family:var(--font-mono);font-size:var(--text-meta)">_series_number</code>). The card adds <code style="font-family:var(--font-mono);font-size:var(--text-meta)">.card--has-series-number</code>; the numeral sits at 12% of the category colour, pointer-events none, behind the content.</p>
+    <div class="cards-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="card card--article card--has-series-number" data-type="article" data-category="ux-industry">
+        <span class="card-series-number" aria-hidden="true">02</span>
+        <div class="card-header"><span class="cat">UX Industry</span><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+        <div class="card-body"><h2 class="title" style="margin-bottom: var(--space-12)">What a Post-AI Workflow Looks Like</h2><p class="excerpt">Second in the UX 2.0 series — the part number sits behind the card as a quiet index.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">UX 2.0</span></div><span class="arrow">→</span></div></div>
+        <div class="meta-strip"><span>Mar 28, 2026</span><span>11 min read</span></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="section" id="card-events">
   <div class="section-header">
@@ -1479,6 +1492,7 @@
       <a data-scroll-panel="patterns" data-scroll-section="pc-stats" class="sidebar-link">Stat Row</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-services" class="sidebar-link">Service / Feature List</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-quote" class="sidebar-link">Pull Quote</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-keystatement" class="sidebar-link">Journal Key Statement</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-bio" class="sidebar-link">Bio / Profile</a>
       <a data-scroll-panel="patterns" data-scroll-section="pc-testimonials" class="sidebar-link">Testimonials</a>
     </div>
@@ -1760,7 +1774,24 @@
 
   </div>
 
-  <div class="section" id="pc-bio"><div class="section-header"><div class="section-num">07</div><div class="section-title">Bio / Profile Block</div><div class="section-desc">Portrait placeholder + metadata on the left, full bio + CTAs on the right. Portrait scales with the column — always circle, always border-faint.</div></div>
+  <div class="section" id="pc-keystatement">
+    <div class="section-header"><div class="section-num">07</div><div class="section-title">Journal Key Statement</div><div class="section-desc">On a journal entry this block <strong>replaces the title</strong>: one declarative sentence in Instrument Serif italic against a left rule in the category colour (<code style="font-family:var(--font-mono);font-size:var(--text-meta)">--c-current</code>). Rendered live from the real <code style="font-family:var(--font-mono);font-size:var(--text-meta)">blocks.css</code>.</div></div>
+    <div class="comp-section">
+      <span class="section-label">Live — replaces the entry title</span>
+      <iframe class="live-frame" src="showcase/journal-blocks.html" title="Journal key statement"></iframe>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:780px">
+        <span class="spec-key">.article-key-statement</span><span class="spec-val">Instrument Serif italic · 38px (28/22 at breakpoints)</span>
+        <span class="spec-key">left rule</span><span class="spec-val">4px solid var(--c-current) · falls back to var(--ink-30)</span>
+        <span class="spec-key">colour source</span><span class="spec-val">entry category → --c-current on the parent &lt;article&gt;</span>
+        <span class="spec-key">source</span><span class="spec-val">block-key-statement.php · blocks.css:1036-1070</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="pc-bio"><div class="section-header"><div class="section-num">08</div><div class="section-title">Bio / Profile Block</div><div class="section-desc">Portrait placeholder + metadata on the left, full bio + CTAs on the right. Portrait scales with the column — always circle, always border-faint.</div></div>
   <!-- Block 7 -->
       <span class="section-label">Bio / Profile Block</span>
     <div class="preview-frame" style="padding: 56px var(--space-64)">
@@ -2297,73 +2328,11 @@
     <div class="section-header">
       <div class="section-num">03</div>
       <div class="section-title">Editorial Index</div>
-      <div class="section-desc">A content index that opens with a featured article showcase rather than a hero statement, then surfaces ongoing work in three category showcases (For Designers, Leading Design, Experiments). Use when the page's job is to lead with the most recent or most important piece, then orient visitors across the rest of the catalogue.</div>
+      <div class="section-desc">The editorial index renders a resolved stack of sections: a promoted <strong>hero</strong> (the variants above), then <strong>curated</strong> sections (big header + view-all) and <strong>feed</strong> sections (group header + visitor <strong>filter pills</strong> with OR-logic). Cards filter live by category — <code style="font-family:var(--font-mono);font-size:var(--text-meta)">data-category</code> is the pill key. Rendered live from the real <code style="font-family:var(--font-mono);font-size:var(--text-meta)">blocks.css</code>; click the pills to filter the feed.</div>
     </div>
-    <div class="preview-frame">
-      <div class="layout-nav">
-        <span class="layout-nav-logo">alex m. chong</span>
-        <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Writing</a></div>
-      </div>
-      <!-- Featured article showcase -->
-      <div style="padding: var(--space-48); border-bottom: var(--rule)">
-        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-current,var(--c-terracotta));margin-bottom: var(--space-12)">— Featured · UX Industry</div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
-          <div>
-            <h2 style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size: var(--text-display);line-height:1.05;letter-spacing:-0.015em;color:var(--primary);margin-bottom: var(--space-20)">A Discipline Reset</h2>
-            <p style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.55;margin-bottom: var(--space-24);max-width:560px">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
-            <div class="row-between" style="max-width:560px">
-              <div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min read</div>
-              <button class="btn-dark">Read →</button>
-            </div>
-          </div>
-          <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24);min-height:240px;display:flex;align-items:flex-end">
-            <div>
-              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">Series</div>
-              <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary)">UX 2.0 — Part 1 of 3</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Three category showcases × 3 cards each -->
-      <div style="padding: var(--space-48)">
-        <div style="margin-bottom: var(--space-48)">
-          <div class="group-header" style="--c-current: var(--c-denim)">
-            <span class="group-header-eyebrow">For Designers — 3 of 12</span>
-            <a href="#" class="group-header-link">View all →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-20)">
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-denim);margin-bottom: var(--space-8)">For Designers</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">Burnout Lives Below Workload</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Apr 2, 2026 · 9 min</div></div>
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-denim);margin-bottom: var(--space-8)">For Designers</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">Signal vs Noise: A Filter for Post-AI Design Decisions</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Apr 20, 2026 · 12 min</div></div>
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-denim);margin-bottom: var(--space-8)">For Designers</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">The New Generalist: Why Specialists Are Quietly Losing Ground</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">May 5, 2026 · 11 min</div></div>
-          </div>
-        </div>
-        <div style="margin-bottom: var(--space-48)">
-          <div class="group-header" style="--c-current: var(--c-forest)">
-            <span class="group-header-eyebrow">Leading Design — 3 of 8</span>
-            <a href="#" class="group-header-link">View all →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-20)">
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-forest);margin-bottom: var(--space-8)">Leading Design</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">The Designer Who Runs the Room</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Feb 12, 2026 · 17 min</div></div>
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-forest);margin-bottom: var(--space-8)">Leading Design</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">Why Most Design Teams Address Symptoms</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Jan 22, 2026 · 12 min</div></div>
-            <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-20)"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-forest);margin-bottom: var(--space-8)">Leading Design</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary);line-height:1.2;margin-bottom: var(--space-12)">The Quiet Authority Problem in Design Teams</div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 8, 2026 · 14 min</div></div>
-          </div>
-        </div>
-        <div>
-          <div class="group-header" style="--c-current: var(--c-experiment-prototype)">
-            <span class="group-header-eyebrow">Experiments — 3 of 5</span>
-            <a href="#" class="group-header-link">View all →</a>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-20)">
-            <div style="background:var(--c-experiment-prototype);border-radius:4px;padding: var(--space-20);min-height:140px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--white-45);margin-bottom: var(--space-8)">Prototype · Live</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--white);line-height:1.2">Decision Filter — UX Choices in 5 Steps</div></div>
-            <div style="background:var(--c-experiment-concept);border-radius:4px;padding: var(--space-20);min-height:140px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--white-45);margin-bottom: var(--space-8)">Concept</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--white);line-height:1.2">A Coaching System Built on Field Notes</div></div>
-            <div style="background:var(--c-experiment-prototype);border-radius:4px;padding: var(--space-20);min-height:140px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--white-45);margin-bottom: var(--space-8)">Prototype · In Progress</div><div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--white);line-height:1.2">Browser-Based Critique Tool</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="layout-footer">
-        <span class="layout-footer-left">© 2026 alex m. chong</span>
-        <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
-      </div>
+    <div class="comp-section">
+      <span class="section-label">Live — header · hero · curated section · feed section with filter pills</span>
+      <iframe class="live-frame" src="showcase/editorial-index.html" title="Editorial index"></iframe>
     </div>
   </div>
 
@@ -3145,6 +3114,8 @@
   .icon-constellation-tag { position: absolute; left: var(--space-12); bottom: var(--space-12); font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); }
   /* Live, real-CSS examples embedded as isolated iframes (Patterns heroes). */
   .live-frame { width: 100%; border: 1px solid var(--ink-12); border-radius: 4px; background: var(--canvas-bg); display: block; }
+  /* Watermark demo: ensure the card is the positioned ancestor in the showcase. */
+  .card--has-series-number { position: relative; }
   .welcome-glance { margin: var(--space-24) 0 0; padding-top: var(--space-20); border-top: var(--rule-faint); max-width: 80ch; }
   .welcome-glance-label { display: block; font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-12); }
   .welcome-glance .wg { font-size: var(--text-md); line-height: 1.55; color: var(--secondary); margin: 0 0 var(--space-8); }

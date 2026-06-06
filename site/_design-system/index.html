@@ -2562,7 +2562,7 @@
       <a class="sidebar-link" data-cms="cms-cards">Cards</a>
     </div>
   </nav>
-  <div class="cms-stage" style="flex:1;height:calc(100vh - 53px);min-width:0"><iframe id="cms-frame" src="showcase/cms.html" title="CMS components" style="width:100%;height:100%;border:0;background:var(--canvas-bg);display:block"></iframe></div>
+  <div class="cms-stage" style="flex:1;height:calc(100vh - 53px);min-width:0"><iframe id="cms-frame" src="showcase/cms.html" title="CMS components" style="width:100%;height:calc(100vh - 53px);border:0;background:var(--canvas-bg);display:block"></iframe></div>
 </section>
 
 <!-- CSS Library — the technical/dev reference, indexed by CSS file. Native left
@@ -2589,7 +2589,7 @@
 <style>
   /* CSS Library stage — one slice shown at a time, filling the panel. */
   #tab-complib .cl-stage { flex: 1; height: calc(100vh - 53px); min-width: 0; }
-  #tab-complib .cl-frame { display: none; width: 100%; height: 100%; border: 0; background: var(--neutral); }
+  #tab-complib .cl-frame { display: none; width: 100%; height: calc(100vh - 53px); border: 0; background: var(--neutral); }
   #tab-complib .cl-frame.active { display: block; }
   #sidebar-complib .cl-file { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
 </style>

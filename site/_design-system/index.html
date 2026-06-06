@@ -19,43 +19,27 @@
 <div class="topbar">
   <span class="topbar-brandtitle">alex m. chong <em>design system</em></span>
   <nav class="topbar-tabsbar">
-    <a class="topbar-tabsbar-tab active" href="#components" data-tab="components">Components</a>
-    <a class="topbar-tabsbar-tab" href="#sections" data-tab="sections">Sections</a>
-    <a class="topbar-tabsbar-tab" href="#templates" data-tab="templates">Templates</a>
+    <a class="topbar-tabsbar-tab active" href="#foundations" data-tab="foundations">Foundations</a>
+    <a class="topbar-tabsbar-tab" href="#components" data-tab="components">Components</a>
+    <a class="topbar-tabsbar-tab" href="#patterns" data-tab="patterns">Patterns</a>
+    <a class="topbar-tabsbar-tab" href="#pages" data-tab="pages">Pages</a>
     <a class="topbar-tabsbar-tab" href="#cms" data-tab="cms">CMS</a>
     <a class="topbar-tabsbar-tab" href="#complib" data-tab="complib">CSS Library</a>
   </nav>
 </div>
 
-<section class="workspace active" id="tab-components" data-tab="components">  <nav class="sidebar" id="sidebar-components">
+<section class="workspace active" id="tab-foundations" data-tab="foundations">
+  <nav class="sidebar" id="sidebar-foundations">
     <div class="sidebar-group">
       <span class="sidebar-group-label">Foundations</span>
-      <a data-scroll-panel="components" data-scroll-section="comp-colors" class="sidebar-link active">Colors</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Elements</span>
-      <a data-scroll-panel="components" data-scroll-section="comp-anatomy" class="sidebar-link">Sections &amp; Dividers</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-buttons" class="sidebar-link">Buttons &amp; CTAs</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-nav" class="sidebar-link">Navigation</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-filter" class="sidebar-link">Filter Controls</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-pills" class="sidebar-link">Pills &amp; Badges</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Cards</span>
-      <a data-scroll-panel="components" data-scroll-section="card-anatomy" class="sidebar-link">Card Anatomy</a>
-      <a data-scroll-panel="components" data-scroll-section="card-articles" class="sidebar-link">Articles</a>
-      <a data-scroll-panel="components" data-scroll-section="card-events" class="sidebar-link">Events</a>
-      <a data-scroll-panel="components" data-scroll-section="card-experiments" class="sidebar-link">Experiments</a>
-      <a data-scroll-panel="components" data-scroll-section="card-journal" class="sidebar-link">Journal</a>
-      <a data-scroll-panel="components" data-scroll-section="card-nav" class="sidebar-link">Nav &amp; Filtering</a>
-      <a data-scroll-panel="components" data-scroll-section="card-meta" class="sidebar-link">Meta Strip</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-colors" class="sidebar-link active">Colour</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-anatomy" class="sidebar-link">Rules & Dividers</a>
     </div>
   </nav>
   <div class="canvas">
-
-  <div class="section" id="comp-colors">
+<div class="section" id="comp-colors">
     <div class="section-header">
       <div class="section-num">01</div>
       <div class="section-title">Color System</div>
@@ -381,7 +365,40 @@
   </div>
 
   <!-- ══ 05 BUTTONS & CTAs ══ -->
-  <div class="section" id="comp-buttons">
+    </div>
+</section>
+
+<section class="workspace" id="tab-components" data-tab="components">
+  <nav class="sidebar" id="sidebar-components">
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Actions</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-buttons" class="sidebar-link active">Buttons & CTAs</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Selection & Filters</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-filter" class="sidebar-link">Filter Controls</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Status & Feedback</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-pills" class="sidebar-link">Pills & Badges</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Navigation</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-nav" class="sidebar-link">Navigation</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Cards</span>
+      <a data-scroll-panel="components" data-scroll-section="card-anatomy" class="sidebar-link">Card Anatomy</a>
+      <a data-scroll-panel="components" data-scroll-section="card-articles" class="sidebar-link">Articles</a>
+      <a data-scroll-panel="components" data-scroll-section="card-events" class="sidebar-link">Events</a>
+      <a data-scroll-panel="components" data-scroll-section="card-experiments" class="sidebar-link">Experiments</a>
+      <a data-scroll-panel="components" data-scroll-section="card-journal" class="sidebar-link">Journal</a>
+      <a data-scroll-panel="components" data-scroll-section="card-nav" class="sidebar-link">Nav & Filtering</a>
+      <a data-scroll-panel="components" data-scroll-section="card-meta" class="sidebar-link">Meta Strip</a>
+    </div>
+  </nav>
+  <div class="canvas">
+<div class="section" id="comp-buttons">
     <div class="section-header">
       <div class="section-num">05</div>
       <div class="section-title">Buttons & CTAs</div>
@@ -466,55 +483,6 @@
   </div>
 
   <!-- ══ 06 NAVIGATION ══ -->
-  <div class="section" id="comp-nav">
-    <div class="section-header">
-      <div class="section-num">06</div>
-      <div class="section-title">Navigation</div>
-      <div class="section-desc">A centered pill-button bar. All nav links share the same component — there is no separate "active" styling beyond what hover provides. The handwritten logotype sits outside the type system entirely.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Anatomy</span>
-      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: var(--space-20) var(--space-48);display:flex;align-items:center;justify-content:space-between">
-        <span style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);color:var(--primary)">alex m. chong</span>
-        <div class="npbar" style="margin: 0">
-          <a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a>
-          <a href="#">Coaching</a><a href="#">About</a><a href="#">Writing</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Nav Pill Specs</span>
-      <div class="spec-grid" style="max-width:480px">
-        <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
-        <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
-        <span class="spec-key">border-radius</span><span class="spec-val">var(--space-4)</span>
-        <span class="spec-key">padding</span><span class="spec-val">var(--space-8) 18px</span>
-        <span class="spec-key">margin</span><span class="spec-val">var(--space-4) between pills</span>
-        <span class="spec-key">font</span><span class="spec-val">Barlow 13px 600</span>
-        <span class="spec-key">letter-spacing</span><span class="spec-val">0.02em — mixed case</span>
-        <span class="spec-key">hover</span><span class="spec-val">bg var(--primary), color surface</span>
-        <span class="spec-key">wrapping</span><span class="spec-val">flex-wrap — breaks to 2 rows on narrow</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">States</span>
-      <div class="states-row">
-        <div class="state-item">
-          <span class="state-label">Default</span>
-          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--surface);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--primary);text-decoration:none">Coaching</a>
-        </div>
-        <div class="state-item">
-          <span class="state-label">Hover</span>
-          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--primary);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--surface);text-decoration:none">Coaching</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 05 FILTER PILLS ══ -->
   <div class="section" id="comp-filter">
     <div class="section-header">
       <div class="section-num">07</div>
@@ -631,7 +599,56 @@
   
 
 
-<div class="section" id="card-anatomy">
+<div class="section" id="comp-nav">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">Navigation</div>
+      <div class="section-desc">A centered pill-button bar. All nav links share the same component — there is no separate "active" styling beyond what hover provides. The handwritten logotype sits outside the type system entirely.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Anatomy</span>
+      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: var(--space-20) var(--space-48);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);color:var(--primary)">alex m. chong</span>
+        <div class="npbar" style="margin: 0">
+          <a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a>
+          <a href="#">Coaching</a><a href="#">About</a><a href="#">Writing</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Nav Pill Specs</span>
+      <div class="spec-grid" style="max-width:480px">
+        <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
+        <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
+        <span class="spec-key">border-radius</span><span class="spec-val">var(--space-4)</span>
+        <span class="spec-key">padding</span><span class="spec-val">var(--space-8) 18px</span>
+        <span class="spec-key">margin</span><span class="spec-val">var(--space-4) between pills</span>
+        <span class="spec-key">font</span><span class="spec-val">Barlow 13px 600</span>
+        <span class="spec-key">letter-spacing</span><span class="spec-val">0.02em — mixed case</span>
+        <span class="spec-key">hover</span><span class="spec-val">bg var(--primary), color surface</span>
+        <span class="spec-key">wrapping</span><span class="spec-val">flex-wrap — breaks to 2 rows on narrow</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">States</span>
+      <div class="states-row">
+        <div class="state-item">
+          <span class="state-label">Default</span>
+          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--surface);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--primary);text-decoration:none">Coaching</a>
+        </div>
+        <div class="state-item">
+          <span class="state-label">Hover</span>
+          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--primary);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--surface);text-decoration:none">Coaching</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 05 FILTER PILLS ══ -->
+  <div class="section" id="card-anatomy">
   <div class="section-header">
     <div class="section-num">01</div>
     <div class="section-title">Card Anatomy</div>
@@ -1396,31 +1413,110 @@
     </div>
   </div>
 </div>
-  </div>
+    </div>
 </section>
 
-<section class="workspace" id="tab-sections" data-tab="sections">  <nav class="sidebar" id="sidebar-sections">
+<section class="workspace" id="tab-patterns" data-tab="patterns">
+  <nav class="sidebar" id="sidebar-patterns">
     <div class="sidebar-group">
-      <span class="sidebar-group-label">Sections</span>
-      <a data-scroll-panel="sections" data-scroll-section="pc-divider" class="sidebar-link active">Variations</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-twocol" class="sidebar-link">Two-Column</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-statement" class="sidebar-link">Full-Width Statement</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-stats" class="sidebar-link">Stat Row</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-services" class="sidebar-link">Service List</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-quote" class="sidebar-link">Pull Quote</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-bio" class="sidebar-link">Bio Block</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-testimonials" class="sidebar-link">Testimonials</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-topbar" class="sidebar-link">Top Bar</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-hero-writing" class="sidebar-link">Hero Writing</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-feature" class="sidebar-link">Featured Article</a>
-      <a data-scroll-panel="sections" data-scroll-section="pc-footer" class="sidebar-link">Footer</a>
+      <span class="sidebar-group-label">Heroes & Statements</span>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-hero-writing" class="sidebar-link active">Hero Writing</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-feature" class="sidebar-link">Featured Article</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-statement" class="sidebar-link">Full-Width Statement</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Content Blocks</span>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-divider" class="sidebar-link">Section Dividers</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-twocol" class="sidebar-link">Two-Column</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-stats" class="sidebar-link">Stat Row</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-services" class="sidebar-link">Service / Feature List</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-quote" class="sidebar-link">Pull Quote</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-bio" class="sidebar-link">Bio / Profile</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-testimonials" class="sidebar-link">Testimonials</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Page Chrome</span>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-topbar" class="sidebar-link">Top Bar</a>
+      <a data-scroll-panel="patterns" data-scroll-section="pc-footer" class="sidebar-link">Footer</a>
     </div>
   </nav>
   <div class="canvas">
+<div class="section" id="pc-hero-writing">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Hero Writing</div>
+      <div class="section-desc">The opening statement on a landing or content page. A display-weight Barlow paragraph with the muted-word technique threaded through it, optionally closing on an Instrument Serif italic word for emphasis. The voice of the system, fully committed.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Display statement with muted-word technique</span>
+      <div class="preview-frame" style="padding: var(--space-64)">
+        <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h3);font-weight:400;color:var(--primary);margin-bottom: var(--space-24)">Design Leadership &amp; Practice</div>
+        <div style="font-size: var(--text-display);font-weight:500;letter-spacing:-0.025em;line-height:1.18;max-width:900px;margin-bottom: var(--space-32)">
+          I am a <span class="m">strategist</span>. An educator. A designer
+          of <span class="m">everyday interactions</span>. A strong believer
+          in ethics and education. A leader of design <span class="m">culture</span>
+          and craftsman of design <span class="ac">communities</span>. I will
+          <span class="ac">train</span> the next generation of minds through
+          <span class="m">deliberated</span> technological <em style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">interactions</em>.
+        </div>
+        <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">
+          I coach and train design teams &amp; individuals to produce their strongest, most creatively invigorated work — at the intersection of leadership, strategy, and the discipline of design.
+        </div>
+      </div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Notes on the voice</span>
+      <p class="comp-rule">Hero Writing carries the system's only allowance for sustained Instrument Serif italic — typically the eyebrow line above and one or two words inside the display block. Every other typographic choice serves the muted-word rhythm. Don't add accent colour outside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.ac</code>; don't drop below 22px on any italic.</p>
+    </div>
+  </div>
 
+  <!-- ══ Featured Article ══ -->
+  <div class="section" id="pc-feature">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div class="section-title">Featured Article</div>
+      <div class="section-desc">A magazine-style hero block that gives one specific piece headline treatment. Used at the top of an Editorial Index, sometimes inline as an "Editor's Pick" at the top of a content listing. Carries category, title, excerpt, meta, and a CTA — all the moves of a card, scaled to page-feature weight.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Lead feature with sidebar tag</span>
+      <div class="preview-frame" style="padding: var(--space-48)">
+        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-terracotta);margin-bottom: var(--space-12)">— Featured · UX Industry</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
+          <div>
+            <h2 style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size: var(--text-h0);line-height:1.05;letter-spacing:-0.015em;color:var(--primary);margin-bottom: var(--space-20)">A Discipline Reset</h2>
+            <p style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.55;margin-bottom: var(--space-24);max-width:540px">UX 1.0 was a discipline built around scarcity. AI dissolved that scarcity entirely.</p>
+            <div class="row-between" style="max-width:540px">
+              <div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min read</div>
+              <button class="btn-dark">Read →</button>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24);min-height:200px;display:flex;align-items:flex-end">
+            <div>
+              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">Series</div>
+              <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary)">UX 2.0 — Part 1 of 3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- ══ Footer ══ -->
+  <div class="section" id="pc-statement"><div class="section-header"><div class="section-num">03</div><div class="section-title">Full-Width Statement</div><div class="section-desc">Large display statement with muted-word technique, subhead, and CTA cluster. Used at the top of landing variations.</div></div>
+  <!-- Block 2 -->
+      <span class="section-label">Full-Width Statement</span>
+    <div class="preview-frame" style="padding:var(--space-64)">
+      <div style="font-size:52px;font-weight:500;letter-spacing:-0.025em;line-height:1.2;max-width:1100px;margin-bottom: 0">
+        Hi — I'm Alex, and I care deeply about <span class="m">leading</span> the <span class="m">discipline</span> of design and shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">future</em> <span class="ac">for organizations</span>.
+      </div>
+      <div style="margin-top: 36px;font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">I coach and train design teams & individuals to produce their strongest, most creatively invigorated work.</div>
+      <div class="hero-ctas" style="margin-top: 36px">
+        <button class="cta-primary">Design Principles →</button>
+        <button class="cta-ghost">Design Services</button>
+      </div>
+    </div>
 
-  <!-- ══ Section Dividers — placed first because dividers separate everything else ══ -->
+  </div>
   <div class="section" id="pc-divider">
     <div class="section-header">
       <div class="section-num">01</div>
@@ -1507,21 +1603,6 @@
           <div class="section-intro">A way of thinking differently about what design can do — well beyond fixing your process.</div>
           <div class="section-body">A strong design leader and educator who inspires teams to produce their strongest work — specializing in the messy, ambiguous problems that sit outside typical frameworks.</div>
         </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="section" id="pc-statement"><div class="section-header"><div class="section-num">03</div><div class="section-title">Full-Width Statement</div><div class="section-desc">Large display statement with muted-word technique, subhead, and CTA cluster. Used at the top of landing variations.</div></div>
-  <!-- Block 2 -->
-      <span class="section-label">Full-Width Statement</span>
-    <div class="preview-frame" style="padding:var(--space-64)">
-      <div style="font-size:52px;font-weight:500;letter-spacing:-0.025em;line-height:1.2;max-width:1100px;margin-bottom: 0">
-        Hi — I'm Alex, and I care deeply about <span class="m">leading</span> the <span class="m">discipline</span> of design and shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">future</em> <span class="ac">for organizations</span>.
-      </div>
-      <div style="margin-top: 36px;font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">I coach and train design teams & individuals to produce their strongest, most creatively invigorated work.</div>
-      <div class="hero-ctas" style="margin-top: 36px">
-        <button class="cta-primary">Design Principles →</button>
-        <button class="cta-ghost">Design Services</button>
       </div>
     </div>
 
@@ -1737,67 +1818,6 @@
   </div>
 
   <!-- ══ Hero Writing ══ -->
-  <div class="section" id="pc-hero-writing">
-    <div class="section-header">
-      <div class="section-num">10</div>
-      <div class="section-title">Hero Writing</div>
-      <div class="section-desc">The opening statement on a landing or content page. A display-weight Barlow paragraph with the muted-word technique threaded through it, optionally closing on an Instrument Serif italic word for emphasis. The voice of the system, fully committed.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Display statement with muted-word technique</span>
-      <div class="preview-frame" style="padding: var(--space-64)">
-        <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h3);font-weight:400;color:var(--primary);margin-bottom: var(--space-24)">Design Leadership &amp; Practice</div>
-        <div style="font-size: var(--text-display);font-weight:500;letter-spacing:-0.025em;line-height:1.18;max-width:900px;margin-bottom: var(--space-32)">
-          I am a <span class="m">strategist</span>. An educator. A designer
-          of <span class="m">everyday interactions</span>. A strong believer
-          in ethics and education. A leader of design <span class="m">culture</span>
-          and craftsman of design <span class="ac">communities</span>. I will
-          <span class="ac">train</span> the next generation of minds through
-          <span class="m">deliberated</span> technological <em style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">interactions</em>.
-        </div>
-        <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">
-          I coach and train design teams &amp; individuals to produce their strongest, most creatively invigorated work — at the intersection of leadership, strategy, and the discipline of design.
-        </div>
-      </div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Notes on the voice</span>
-      <p class="comp-rule">Hero Writing carries the system's only allowance for sustained Instrument Serif italic — typically the eyebrow line above and one or two words inside the display block. Every other typographic choice serves the muted-word rhythm. Don't add accent colour outside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.ac</code>; don't drop below 22px on any italic.</p>
-    </div>
-  </div>
-
-  <!-- ══ Featured Article ══ -->
-  <div class="section" id="pc-feature">
-    <div class="section-header">
-      <div class="section-num">11</div>
-      <div class="section-title">Featured Article</div>
-      <div class="section-desc">A magazine-style hero block that gives one specific piece headline treatment. Used at the top of an Editorial Index, sometimes inline as an "Editor's Pick" at the top of a content listing. Carries category, title, excerpt, meta, and a CTA — all the moves of a card, scaled to page-feature weight.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Lead feature with sidebar tag</span>
-      <div class="preview-frame" style="padding: var(--space-48)">
-        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-terracotta);margin-bottom: var(--space-12)">— Featured · UX Industry</div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
-          <div>
-            <h2 style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size: var(--text-h0);line-height:1.05;letter-spacing:-0.015em;color:var(--primary);margin-bottom: var(--space-20)">A Discipline Reset</h2>
-            <p style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.55;margin-bottom: var(--space-24);max-width:540px">UX 1.0 was a discipline built around scarcity. AI dissolved that scarcity entirely.</p>
-            <div class="row-between" style="max-width:540px">
-              <div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min read</div>
-              <button class="btn-dark">Read →</button>
-            </div>
-          </div>
-          <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24);min-height:200px;display:flex;align-items:flex-end">
-            <div>
-              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">Series</div>
-              <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary)">UX 2.0 — Part 1 of 3</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Footer ══ -->
   <div class="section" id="pc-footer">
     <div class="section-header">
       <div class="section-num">12</div>
@@ -1829,20 +1849,24 @@
   
 
     
-  </div>
+    </div>
 </section>
 
-<section class="workspace" id="tab-templates" data-tab="templates">  <nav class="sidebar" id="sidebar-templates">
+<section class="workspace" id="tab-pages" data-tab="pages">
+  <nav class="sidebar" id="sidebar-pages">
     <div class="sidebar-group">
-      <span class="sidebar-group-label">Templates</span>
-      <a data-scroll-panel="templates" data-scroll-section="lay-landing" class="sidebar-link active">Simple Landing</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-editorial" class="sidebar-link">Editorial Landing</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-editorial-index" class="sidebar-link">Editorial Index</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-index" class="sidebar-link">Full Page Index</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-article" class="sidebar-link">Article</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-services" class="sidebar-link">Services Page</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-about" class="sidebar-link">About Page</a>
-      <a data-scroll-panel="templates" data-scroll-section="lay-resume" class="sidebar-link">Resume</a>
+      <span class="sidebar-group-label">Marketing</span>
+      <a data-scroll-panel="pages" data-scroll-section="lay-landing" class="sidebar-link active">Simple Landing</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-editorial" class="sidebar-link">Editorial Landing</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-services" class="sidebar-link">Services Page</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-about" class="sidebar-link">About Page</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-resume" class="sidebar-link">Resume</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Content</span>
+      <a data-scroll-panel="pages" data-scroll-section="lay-editorial-index" class="sidebar-link">Editorial Index</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-index" class="sidebar-link">Full Page Index</a>
+      <a data-scroll-panel="pages" data-scroll-section="lay-article" class="sidebar-link">Article</a>
     </div>
   </nav>
   <div class="canvas">
@@ -1996,7 +2020,192 @@
         <span class="layout-footer-left">&copy; 2026 alex m. chong</span>
         <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
       </div>
-    </div><div class="section" id="lay-editorial-index">
+    </div><div class="section" id="lay-services">
+      <div class="section-header">
+        <div class="section-num">06</div>
+        <div class="section-title">Services Page</div>
+        <div class="section-desc">Full-page services listing. Large index numbers as visual anchors, rule-separated rows, scoped engagement CTA per service. Use when offerings deserve their own page rather than a card grid.</div>
+      </div>
+              <span class="section-label">Services Page</span>
+        <div class="preview-frame">
+          <div class="layout-nav">
+            <span class="layout-nav-logo">alex m. chong</span>
+            <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Coaching</a><a href="#">Writing</a></div>
+          </div>
+          <div style="padding: 72px var(--space-64) var(--space-96)">
+
+            <!-- Page header -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap: var(--space-64);align-items:end;padding-bottom: var(--space-48);border-bottom:1px solid var(--primary);margin-bottom: 0">
+              <div>
+                <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-16)">What I Do</div>
+                <div style="font-size:42px;font-weight:500;letter-spacing:-0.02em;line-height:1.1">Design leadership <span class="m">at the level</span><br>your company <span class="m">actually needs.</span></div>
+              </div>
+              <div style="padding-left: var(--space-32);border-left:1px solid var(--ink-18)">
+                <p style="font-size: var(--text-sm);font-weight:500;line-height:1.75;color:var(--secondary)">I work with early-stage and scaling startups as a fractional design partner — bringing the strategic altitude and craft-level precision of a seasoned design director, without the full-time overhead.</p>
+              </div>
+            </div>
+
+            <!-- Service rows -->
+            <div style="display:grid;grid-template-columns:64px 1fr auto;align-items:start;gap: 0">
+
+              <!-- Service 1 -->
+              <div style="padding:40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
+                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">01</div>
+                <div style="padding:0 var(--space-48) 0 var(--space-32)">
+                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Fractional Design Leadership</div>
+                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Embedded design direction for early-stage and scaling startups. Strategic presence without the full-time overhead — from team-building and process to product vision and stakeholder alignment.</div>
+                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Ongoing</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">2–4 days/week</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Remote or Toronto</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Service 2 -->
+              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
+                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">02</div>
+                <div style="padding:0 var(--space-48) 0 var(--space-32)">
+                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Product &amp; UX Strategy</div>
+                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Shaping what gets built and why. From opportunity framing through to validated direction and a roadmap your team can actually execute. Delivered as a sprint engagement or ongoing advisory.</div>
+                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Sprint or Advisory</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">2–6 weeks</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Service 3 -->
+              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
+                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">03</div>
+                <div style="padding:0 var(--space-48) 0 var(--space-32)">
+                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">1:1 Design Coaching</div>
+                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Structured coaching for mid-to-senior designers navigating career inflection points, leadership transitions, and creative health. Built around your actual situation.</div>
+                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Bi-weekly sessions</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">3-month minimum</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Remote</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Service 4 -->
+              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
+                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">04</div>
+                <div style="padding:0 var(--space-48) 0 var(--space-32)">
+                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Workshops &amp; Talks</div>
+                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Live sessions on design leadership, post-AI workflows, and building a practice worth having. Delivered for in-house teams, conferences, and accelerator cohorts.</div>
+                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Half or full day</span>
+                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">In-person or Remote</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer note -->
+            <div style="padding-top: 40px;display:flex;align-items:center;justify-content:space-between">
+              <p style="font-size: var(--text-base);font-weight:500;color:var(--muted);max-width:480px">Unsure what you need? <span style="color:var(--primary)">Most lasting conversations start there.</span></p>
+              <button class="btn-dark">Get in touch →</button>
+            </div>
+
+          </div>
+          <div class="layout-footer">
+            <span class="layout-footer-left">&copy; 2026 alex m. chong</span>
+            <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
+          </div>
+        </div>
+    </div>
+
+  <!-- ══ Editorial Index ══ --><div class="section" id="lay-about">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">About Page</div>
+      <div class="section-desc">A self-contained narrative page. Lowercase Instrument Serif italic name as the primary mark, three-paragraph bio in the editorial voice, sidebar metadata column, and a strip of milestones below. Use when introducing the practitioner — the page should feel like a personal letter set into the system's chrome.</div>
+    </div>
+    <div class="preview-frame">
+      <div class="layout-nav">
+        <span class="layout-nav-logo">alex m. chong</span>
+        <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">About</a></div>
+      </div>
+      <div style="padding: 72px var(--space-48)">
+        <div style="border-bottom:var(--rule);padding-bottom: 40px;margin-bottom: var(--space-48)">
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-16)">About</div>
+          <div style="font-family:var(--font-serif);font-style:italic;font-size:52px;font-weight:400;letter-spacing:-0.025em;line-height:1.1;margin-bottom: var(--space-16)">alex m. chong</div>
+          <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary)">Director of UX · Design Coach · Educator</div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-64)">
+          <div>
+            <p style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h4);font-weight:400;line-height:1.5;color:var(--secondary);margin-bottom: 28px">A way of thinking differently about what design can do — well beyond fixing your process.</p>
+            <p style="font-size: var(--text-md);font-weight:500;color:var(--secondary);line-height:1.75;margin-bottom: var(--space-20)">Twelve years shipping consumer and enterprise software from concept to implementation. Worked across agencies, startups, accelerators, and product companies.</p>
+            <p style="font-size: var(--text-md);font-weight:500;color:var(--secondary);line-height:1.75;margin-bottom: var(--space-32)">Now focused on the intersection of design leadership, practice development, and what happens to the discipline when AI removes all the easy excuses.</p>
+            <div style="display:flex;gap: 10px"><button class="btn-dark">View Coaching →</button><button class="btn-light">View Services →</button></div>
+          </div>
+          <div>
+            <div style="background:var(--neutral);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
+              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: 14px">Details</div>
+              <div style="display:flex;flex-direction:column;gap: var(--space-12)">
+                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Location</div><div style="font-size: var(--text-base);font-weight:600">Toronto, Ontario</div></div>
+                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Education</div><div style="font-size: var(--text-base);font-weight:600">MID · BAS</div></div>
+                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Years Active</div><div style="font-size: var(--text-base);font-weight:600">12+</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-footer">
+        <span class="layout-footer-left">© 2026 alex m. chong</span>
+        <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Resume ══ --><div class="section" id="lay-resume">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">Resume</div>
+      <div class="section-desc">A document-style CV laid out as a constrained two-column grid. Left column is the role/employer/dates ledger, right column is the metadata and download/contact actions. Treats the resume as a typeset document, not a UI form.</div>
+    </div>
+    <div class="preview-frame">
+      <div class="layout-nav">
+        <span class="layout-nav-logo">alex m. chong</span>
+        <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Resume</a></div>
+      </div>
+      <div style="padding: 72px var(--space-48); max-width:1200px;margin:0 auto">
+        <div style="border-bottom:var(--rule);padding-bottom: var(--space-32);margin-bottom: var(--space-48);display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
+          <div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-12)">Resume — March 2026</div>
+            <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h1);font-weight:400;letter-spacing:-0.02em;line-height:1.1">alex m. chong</div>
+            <div style="font-size: var(--text-md);color:var(--secondary);margin-top: var(--space-8)">Director of UX · Design Coach · Toronto, ON</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap: var(--space-8)">
+            <button class="btn-dark">Download PDF →</button>
+            <button class="btn-light">Email me →</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:160px 1fr;gap: var(--space-12) var(--space-32);margin-bottom: var(--space-48)">
+          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2024 — Now</span>
+          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Director of UX</div><div style="font-size: var(--text-meta);color:var(--secondary)">Independent · Practice & Coaching</div></div>
+          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2020 — 2024</span>
+          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Head of Design</div><div style="font-size: var(--text-meta);color:var(--secondary)">An enterprise SaaS company · Toronto</div></div>
+          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2016 — 2020</span>
+          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Senior Product Designer</div><div style="font-size: var(--text-meta);color:var(--secondary)">A consumer fintech startup · Toronto</div></div>
+          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0">2014 — 2016</span>
+          <div style="padding: var(--space-12) 0"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">UX Designer</div><div style="font-size: var(--text-meta);color:var(--secondary)">An interactive agency · Toronto</div></div>
+        </div>
+      </div>
+      <div class="layout-footer">
+        <span class="layout-footer-left">© 2026 alex m. chong</span>
+        <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
+      </div>
+    </div>
+  </div>
+
+  
+  
+  <div class="section" id="lay-editorial-index">
     <div class="section-header">
       <div class="section-num">03</div>
       <div class="section-title">Editorial Index</div>
@@ -2329,203 +2538,27 @@
         <span class="layout-footer-left">&copy; 2026 alex m. chong</span>
         <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a></div>
       </div>
-    </div><div class="section" id="lay-services">
-      <div class="section-header">
-        <div class="section-num">06</div>
-        <div class="section-title">Services Page</div>
-        <div class="section-desc">Full-page services listing. Large index numbers as visual anchors, rule-separated rows, scoped engagement CTA per service. Use when offerings deserve their own page rather than a card grid.</div>
-      </div>
-              <span class="section-label">Services Page</span>
-        <div class="preview-frame">
-          <div class="layout-nav">
-            <span class="layout-nav-logo">alex m. chong</span>
-            <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Coaching</a><a href="#">Writing</a></div>
-          </div>
-          <div style="padding: 72px var(--space-64) var(--space-96)">
-
-            <!-- Page header -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap: var(--space-64);align-items:end;padding-bottom: var(--space-48);border-bottom:1px solid var(--primary);margin-bottom: 0">
-              <div>
-                <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-16)">What I Do</div>
-                <div style="font-size:42px;font-weight:500;letter-spacing:-0.02em;line-height:1.1">Design leadership <span class="m">at the level</span><br>your company <span class="m">actually needs.</span></div>
-              </div>
-              <div style="padding-left: var(--space-32);border-left:1px solid var(--ink-18)">
-                <p style="font-size: var(--text-sm);font-weight:500;line-height:1.75;color:var(--secondary)">I work with early-stage and scaling startups as a fractional design partner — bringing the strategic altitude and craft-level precision of a seasoned design director, without the full-time overhead.</p>
-              </div>
-            </div>
-
-            <!-- Service rows -->
-            <div style="display:grid;grid-template-columns:64px 1fr auto;align-items:start;gap: 0">
-
-              <!-- Service 1 -->
-              <div style="padding:40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
-                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">01</div>
-                <div style="padding:0 var(--space-48) 0 var(--space-32)">
-                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Fractional Design Leadership</div>
-                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Embedded design direction for early-stage and scaling startups. Strategic presence without the full-time overhead — from team-building and process to product vision and stakeholder alignment.</div>
-                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Ongoing</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">2–4 days/week</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Remote or Toronto</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Service 2 -->
-              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
-                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">02</div>
-                <div style="padding:0 var(--space-48) 0 var(--space-32)">
-                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Product &amp; UX Strategy</div>
-                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Shaping what gets built and why. From opportunity framing through to validated direction and a roadmap your team can actually execute. Delivered as a sprint engagement or ongoing advisory.</div>
-                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Sprint or Advisory</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">2–6 weeks</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Service 3 -->
-              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
-                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">03</div>
-                <div style="padding:0 var(--space-48) 0 var(--space-32)">
-                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">1:1 Design Coaching</div>
-                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Structured coaching for mid-to-senior designers navigating career inflection points, leadership transitions, and creative health. Built around your actual situation.</div>
-                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Bi-weekly sessions</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">3-month minimum</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Remote</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Service 4 -->
-              <div style="padding: 40px 0;border-bottom:1px solid var(--ink-18);grid-column:1/-1;display:grid;grid-template-columns:64px 1fr;gap: 0;align-items:start">
-                <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h0);font-weight:400;color:var(--ink-12);line-height:1;padding-top: var(--space-4)">04</div>
-                <div style="padding:0 var(--space-48) 0 var(--space-32)">
-                  <div style="font-size: var(--text-h5);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-12)">Workshops &amp; Talks</div>
-                  <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">Live sessions on design leadership, post-AI workflows, and building a practice worth having. Delivered for in-house teams, conferences, and accelerator cohorts.</div>
-                  <div style="display:flex;gap: var(--space-8);margin-top: var(--space-20);flex-wrap:wrap">
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">Half or full day</span>
-                    <span style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;border:1px solid var(--ink-18);color:var(--secondary)">In-person or Remote</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Footer note -->
-            <div style="padding-top: 40px;display:flex;align-items:center;justify-content:space-between">
-              <p style="font-size: var(--text-base);font-weight:500;color:var(--muted);max-width:480px">Unsure what you need? <span style="color:var(--primary)">Most lasting conversations start there.</span></p>
-              <button class="btn-dark">Get in touch →</button>
-            </div>
-
-          </div>
-          <div class="layout-footer">
-            <span class="layout-footer-left">&copy; 2026 alex m. chong</span>
-            <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
-          </div>
-        </div>
-    </div>
-
-  <!-- ══ Editorial Index ══ --><div class="section" id="lay-about">
-    <div class="section-header">
-      <div class="section-num">07</div>
-      <div class="section-title">About Page</div>
-      <div class="section-desc">A self-contained narrative page. Lowercase Instrument Serif italic name as the primary mark, three-paragraph bio in the editorial voice, sidebar metadata column, and a strip of milestones below. Use when introducing the practitioner — the page should feel like a personal letter set into the system's chrome.</div>
-    </div>
-    <div class="preview-frame">
-      <div class="layout-nav">
-        <span class="layout-nav-logo">alex m. chong</span>
-        <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">About</a></div>
-      </div>
-      <div style="padding: 72px var(--space-48)">
-        <div style="border-bottom:var(--rule);padding-bottom: 40px;margin-bottom: var(--space-48)">
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-16)">About</div>
-          <div style="font-family:var(--font-serif);font-style:italic;font-size:52px;font-weight:400;letter-spacing:-0.025em;line-height:1.1;margin-bottom: var(--space-16)">alex m. chong</div>
-          <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary)">Director of UX · Design Coach · Educator</div>
-        </div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-64)">
-          <div>
-            <p style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h4);font-weight:400;line-height:1.5;color:var(--secondary);margin-bottom: 28px">A way of thinking differently about what design can do — well beyond fixing your process.</p>
-            <p style="font-size: var(--text-md);font-weight:500;color:var(--secondary);line-height:1.75;margin-bottom: var(--space-20)">Twelve years shipping consumer and enterprise software from concept to implementation. Worked across agencies, startups, accelerators, and product companies.</p>
-            <p style="font-size: var(--text-md);font-weight:500;color:var(--secondary);line-height:1.75;margin-bottom: var(--space-32)">Now focused on the intersection of design leadership, practice development, and what happens to the discipline when AI removes all the easy excuses.</p>
-            <div style="display:flex;gap: 10px"><button class="btn-dark">View Coaching →</button><button class="btn-light">View Services →</button></div>
-          </div>
-          <div>
-            <div style="background:var(--neutral);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
-              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: 14px">Details</div>
-              <div style="display:flex;flex-direction:column;gap: var(--space-12)">
-                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Location</div><div style="font-size: var(--text-base);font-weight:600">Toronto, Ontario</div></div>
-                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Education</div><div style="font-size: var(--text-base);font-weight:600">MID · BAS</div></div>
-                <div><div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: 3px">Years Active</div><div style="font-size: var(--text-base);font-weight:600">12+</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="layout-footer">
-        <span class="layout-footer-left">© 2026 alex m. chong</span>
-        <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Resume ══ --><div class="section" id="lay-resume">
-    <div class="section-header">
-      <div class="section-num">08</div>
-      <div class="section-title">Resume</div>
-      <div class="section-desc">A document-style CV laid out as a constrained two-column grid. Left column is the role/employer/dates ledger, right column is the metadata and download/contact actions. Treats the resume as a typeset document, not a UI form.</div>
-    </div>
-    <div class="preview-frame">
-      <div class="layout-nav">
-        <span class="layout-nav-logo">alex m. chong</span>
-        <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Resume</a></div>
-      </div>
-      <div style="padding: 72px var(--space-48); max-width:1200px;margin:0 auto">
-        <div style="border-bottom:var(--rule);padding-bottom: var(--space-32);margin-bottom: var(--space-48);display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
-          <div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-12)">Resume — March 2026</div>
-            <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h1);font-weight:400;letter-spacing:-0.02em;line-height:1.1">alex m. chong</div>
-            <div style="font-size: var(--text-md);color:var(--secondary);margin-top: var(--space-8)">Director of UX · Design Coach · Toronto, ON</div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap: var(--space-8)">
-            <button class="btn-dark">Download PDF →</button>
-            <button class="btn-light">Email me →</button>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:160px 1fr;gap: var(--space-12) var(--space-32);margin-bottom: var(--space-48)">
-          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2024 — Now</span>
-          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Director of UX</div><div style="font-size: var(--text-meta);color:var(--secondary)">Independent · Practice & Coaching</div></div>
-          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2020 — 2024</span>
-          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Head of Design</div><div style="font-size: var(--text-meta);color:var(--secondary)">An enterprise SaaS company · Toronto</div></div>
-          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0;border-bottom: var(--rule-faint)">2016 — 2020</span>
-          <div style="padding: var(--space-12) 0;border-bottom: var(--rule-faint)"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">Senior Product Designer</div><div style="font-size: var(--text-meta);color:var(--secondary)">A consumer fintech startup · Toronto</div></div>
-          <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding: var(--space-12) 0">2014 — 2016</span>
-          <div style="padding: var(--space-12) 0"><div style="font-size: var(--text-h5);font-weight:600;color:var(--primary)">UX Designer</div><div style="font-size: var(--text-meta);color:var(--secondary)">An interactive agency · Toronto</div></div>
-        </div>
-      </div>
-      <div class="layout-footer">
-        <span class="layout-footer-left">© 2026 alex m. chong</span>
-        <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
-      </div>
-    </div>
-  </div>
-
-  
-  
-  </div>
+    </div>  </div>
 </section>
 
 <section class="workspace" id="tab-cms" data-tab="cms">  <nav class="sidebar" id="sidebar-cms">
     <div class="sidebar-group">
-      <span class="sidebar-group-label">CMS components</span>
+      <span class="sidebar-group-label">Actions</span>
       <a class="sidebar-link active" data-cms="cms-buttons">Buttons</a>
-      <a class="sidebar-link" data-cms="cms-tables">Tables</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Inputs</span>
       <a class="sidebar-link" data-cms="cms-forms">Form Fields</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Status &amp; Feedback</span>
       <a class="sidebar-link" data-cms="cms-pills">Status &amp; Stage Pills</a>
       <a class="sidebar-link" data-cms="cms-badges">Type &amp; Badges</a>
       <a class="sidebar-link" data-cms="cms-tags">Tags &amp; Labels</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Containment</span>
+      <a class="sidebar-link" data-cms="cms-tables">Tables</a>
       <a class="sidebar-link" data-cms="cms-cards">Cards</a>
     </div>
   </nav>

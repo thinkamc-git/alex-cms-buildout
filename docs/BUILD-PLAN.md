@@ -2105,6 +2105,10 @@ Worked example using real selectors and real files. The recipe is a single ~150-
 
 **Goal:** Remove redundant old CSS, rebuild showcase as four tabs, ship v2.1 to prod.
 
+> **⚠️ SUPERSEDED 2026-06-05 by [docs/DS-IA.md](DS-IA.md)** — the research-grounded IA
+> (6 tabs: Foundations · Components · Patterns · Pages · CMS · CSS Library, sub-navs by
+> function). The block below is the earlier iteration, kept for history.
+>
 > **Showcase IA — LOCKED 2026-06-05 (supersedes "four tabs Root/Pages/Blocks/CMS").**
 > The §32 "4-tab by-CSS-file" framing was a dev-ref model; the showcase is design-
 > system *documentation*, organized by design concept. Agreed structure — **5 top

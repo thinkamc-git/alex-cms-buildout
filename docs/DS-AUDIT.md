@@ -1641,3 +1641,21 @@ Coverage: `768 / 480 / 900 / 600` breakpoints. Figures use `min(1080px, calc(100
 - **Phase 23.2 (Mobile):** §10 punch list (Pages needs a 480+600 tier; Blocks mostly verify-only).
 
 ---
+
+## Phase 22.6b reconciliation — closing note (2026-06-06)
+
+The showcase had drifted behind the live site. A fresh **site-vs-showcase audit** (gap list in `docs/DS-IA.md` §7) drove this reconciliation. Done + on staging (not prod):
+
+- **Foundations ▸ Welcome** overview rewritten (purpose/philosophy, see DS-IA §0) with a live mini-homepage preview; **Foundations ▸ Icons** section added (real card/editorial SVGs).
+- **Patterns ▸ Article Hero** and **Patterns ▸ Editorial Index Heroes** added, rendered live from `public/blocks.css` (isolated iframes).
+- **Pages ▸ Editorial Index** replaced (static replica → live iframe of the real index: header, hero, curated, feed + working filter pills).
+- **P2:** carousel mode, card series watermark, journal key-statement — all added.
+- **CMS tab** reworked to in-context documentation (`cms.html`); terse class catalogue split to `cms-classes.html` for the CSS Library slice.
+- **In-CMS viewer** (`/cms/design-system`) rebuilt = CSS Library 4 slices + a "Full Design System ↗" launch.
+- **Governance:** `docs/BUILD-DISCIPLINE.md` (project-wide reuse-first / prototype≠done / exceptions need permission) + CLAUDE.md rule.
+
+**Pending (Alex's decisions):**
+- **Applied tab (C)** — refresh Coaching/Analytics/Mobile to isolated-iframe real-CSS, wire the real CMS Panel, and the new concepts **Command Center** + **Together**. These introduce **new ("future") components** (analytics card + progress bars, intention/cadence/ritual cards, energy/paired-presence, etc.) which, per BUILD-DISCIPLINE, need assessment + explicit sign-off before building. Specs in DS-IA §6 C.
+- **Gated prod ship** — `/_ds/` stays staging-only (Alex's reference) until the above is decided and 22.6b is signed off.
+
+---

@@ -114,6 +114,14 @@ $TYPE_SCALE = [
   .ds-type-tok { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); width: 130px; flex-shrink: 0; }
   .ds-type-px  { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); width: 36px; flex-shrink: 0; text-align: right; }
   .ds-type-sample { font-family: var(--font); font-weight: 500; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* CSS Library tabs + slice frames (Phase 22.6b). */
+  .ds-tabs { display: flex; gap: var(--space-8); align-items: center; padding: var(--space-12) var(--space-16); border-bottom: var(--rule); background: var(--surface); }
+  .ds-tab { font-family: var(--font); font-size: var(--text-base); font-weight: 600; padding: 7px 16px; border: var(--rule-faint); border-radius: var(--r-tag); background: var(--surface); color: var(--secondary); cursor: pointer; }
+  .ds-tab.is-active { background: var(--primary); color: var(--surface); border-color: var(--primary); }
+  .ds-tab-launch { margin-left: auto; text-decoration: none; color: var(--primary); display: inline-flex; align-items: center; }
+  .ds-tab-launch:hover { background: var(--primary); color: var(--surface); border-color: var(--primary); }
+  .ds-frame { display: none; width: 100%; height: calc(100vh - 178px); border: 0; background: var(--neutral); }
+  .ds-frame.is-active { display: block; }
 </style>
 </head>
 <body>
@@ -134,17 +142,49 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-design-system">
       <?php
       $title    = 'CMS Design System';
-      $subtitle = 'The admin (CMS) design system — the same shared catalogue shown in the public design system\'s CMS tab, rendered here inside the CMS. Edit the CSS in _design-system/css/ (system-cms.css) to change anything here, in the showcase, and on the live admin at once.';
+      $subtitle = 'The CSS Library — the design system by source file (Root · Pages · Blocks · CMS), rendered from the real stylesheets so it never drifts. Open the full design system for the complete reference.';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
-            <div class="content-area" style="padding:0">
-        <!-- Single shared CMS catalogue (also shown in /_ds/ CMS tab + CSS Library). -->
-        <iframe src="/_ds/showcase/cms.html" title="CMS components" style="width:100%;height:100%;border:0;display:block"></iframe>
+      <div class="content-area" style="padding:0">
+        <!-- CSS Library: the 4 by-file slices + a launch into the full /_ds/ DS.
+             Same slice sources the public CSS Library tab uses. -->
+        <div class="ds-tabs">
+          <button class="ds-tab is-active" data-slice="root">Root</button>
+          <button class="ds-tab" data-slice="pages">Pages</button>
+          <button class="ds-tab" data-slice="blocks">Blocks</button>
+          <button class="ds-tab" data-slice="cms">CMS</button>
+          <a class="ds-tab ds-tab-launch" href="/_ds/" target="_blank" rel="noopener">Full Design System ↗</a>
+        </div>
+        <div class="ds-frames">
+          <iframe class="ds-frame is-active" data-pane="root"   src="/_ds/showcase/root.html"        title="Root slice"></iframe>
+          <iframe class="ds-frame"           data-pane="pages"  data-src="/_ds/showcase/pages.html"  title="Pages slice"></iframe>
+          <iframe class="ds-frame"           data-pane="blocks" data-src="/_ds/showcase/blocks.html" title="Blocks slice"></iframe>
+          <iframe class="ds-frame"           data-pane="cms"    data-src="/_ds/showcase/cms-classes.html" title="CMS slice"></iframe>
+        </div>
       </div>
     </div>
   </main>
 </div>
+
+<script>
+  // CSS Library: switch slice (lazy-load the others on first open).
+  (function () {
+    var tabs   = document.querySelectorAll('.ds-tab[data-slice]');
+    var frames = document.querySelectorAll('.ds-frame');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        var key = t.getAttribute('data-slice');
+        tabs.forEach(function (x) { x.classList.toggle('is-active', x === t); });
+        frames.forEach(function (f) {
+          var on = f.getAttribute('data-pane') === key;
+          f.classList.toggle('is-active', on);
+          if (on && !f.getAttribute('src') && f.dataset.src) { f.setAttribute('src', f.dataset.src); }
+        });
+      });
+    });
+  })();
+</script>
 
 </body>
 </html>

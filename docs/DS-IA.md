@@ -228,3 +228,5 @@ Shared-across-views future components: `Accomplishment / progress bar` (Analytic
 - `.event-card` (when/where/format white card) distinct from event *cards*.
 
 **Undocumented selector families** (in `blocks.css`, absent from showcase + CSS Library): `.index-page(--editorial/--series)`, `.index-section(--hero/--curated/--feed)`, `.index-section-header.is-big`, `.index-section-pills`, `.editorial-hero*` (~20), `.cards-grid(.is-carousel)`, `.article-hero*`, `.article-key-statement`.
+
+**STATUS (2026-06-06, on staging):** ✅ A Welcome+preview · ✅ Icons · ✅ Article Hero · ✅ Editorial Index Heroes · ✅ Editorial Index refresh (+filter pills) · ✅ P2 (carousel, series watermark, key-statement) · ✅ B CMS tab rich doc (+ cms-classes split) · ✅ D in-CMS viewer (CSS Library 4 slices + launch). ⏳ **C Applied** (new concepts/future-components → needs Alex's sign-off, see §6 C) · ⏳ **F gated prod ship** (staging-only until C decided). Closing note in `docs/DS-AUDIT.md`.

@@ -4,15 +4,80 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blocks · blocks.css</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Blocks slice, linked directly (like articles) so pages.css chrome doesn't bleed. -->
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Blocks slice — the article / index rendering. Linked directly (like real
+     article pages) so pages.css marketing chrome doesn't bleed. The post-card
+     family lives under Components → Cards; full pages under Pages → Content.
+     This slice focuses on the article body + header blocks blocks.css owns. -->
 <link rel="stylesheet" href="/_ds/css/tokens.css">
 <link rel="stylesheet" href="/_ds/css/public/blocks.css">
 <style>
-  body { margin: 0; padding: var(--space-32); font-family: var(--font-mono); font-size: 13px; color: var(--muted); background: var(--neutral); }
+  body { margin: 0; background: var(--neutral); }
+  .bx { max-width: 720px; margin: 0 auto; padding: var(--space-40) var(--space-24) var(--space-96); }
+  .bx-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin: var(--space-32) 0 var(--space-12); padding-top: var(--space-16); border-top: var(--rule-faint); }
+  .bx-label:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .bx-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); line-height: 1.6; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16); margin-bottom: var(--space-24); }
 </style>
 </head>
 <body>
-  Blocks slice (article / index / card templates) — live components arrive in a later chunk (22.6b-E).
+<div class="bx">
+
+  <div class="bx-note">
+    <strong>blocks.css</strong> renders the article &amp; index templates. The post-card family
+    (article / journal / event / experiment) is shown under <strong>Components → Cards</strong>;
+    full page layouts under <strong>Pages → Content</strong>. Below: the header + body blocks.
+  </div>
+
+  <p class="bx-label">.article-category · .article-key-statement · .article-byline-row · .article-meta</p>
+  <header class="article-header">
+    <div class="article-category" style="color:var(--c-forest)">Leading Design</div>
+    <h1 class="article-key-statement">A discipline reset — what design leadership asks of us now.</h1>
+    <div class="article-byline-row">
+      <div class="article-author">
+        <div class="article-author-avatar">AC</div>
+        <div class="article-author-info">
+          <div class="article-author-name">Alex M. Chong</div>
+          <div class="article-author-tagline">Design leadership &amp; craft</div>
+        </div>
+      </div>
+      <div class="article-meta">
+        <span class="article-meta-date">Jun 4, 2026</span>
+        <span class="article-meta-sep">·</span>
+        <span class="article-read-time">6 min read</span>
+      </div>
+    </div>
+  </header>
+
+  <p class="bx-label">.article-prose (body typography)</p>
+  <div class="article-prose">
+    <p>The opening paragraph sets the register — measured, editorial, unhurried. Body copy runs in Barlow at a comfortable reading measure, with generous line height.</p>
+    <h2>A second-level heading</h2>
+    <p>Paragraphs after a heading keep their natural rhythm. Inline treatments include <strong>bold emphasis</strong>, <em>italics</em>, a <a href="#">hyperlink</a>, and <code>inline code</code>.</p>
+    <blockquote>A pull quote in Instrument Serif italic, set inside a left-rule callout — the editorial voice of the system.</blockquote>
+    <h3>A third-level heading</h3>
+    <ul>
+      <li>First item in an unordered list.</li>
+      <li>Second item, a little longer, to show wrapping and spacing.</li>
+      <li>Third item.</li>
+    </ul>
+    <p>A closing paragraph to show spacing between blocks.</p>
+  </div>
+
+  <p class="bx-label">.article-special-tag · .article-series-pill</p>
+  <div style="display:flex;gap:var(--space-12);align-items:center;flex-wrap:wrap">
+    <span class="article-special-tag">Featured</span>
+    <span class="article-series-pill">Series · Part 2 of 5</span>
+  </div>
+
+  <p class="bx-label">.article-author-bio</p>
+  <div class="article-author-bio">
+    <div class="article-author-bio-avatar">AC</div>
+    <div class="article-author-bio-extended">
+      <div class="article-author-name">Alex M. Chong</div>
+      <p>A short author bio in the document register — who wrote this and why it's worth your time, rendered from the shared Author Info.</p>
+    </div>
+  </div>
+
+</div>
 </body>
 </html>

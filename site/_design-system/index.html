@@ -19,25 +19,42 @@
 <div class="topbar">
   <span class="topbar-brandtitle">alex m. chong <em>design system</em></span>
   <nav class="topbar-tabsbar">
-    <a class="topbar-tabsbar-tab active" href="#foundations" data-tab="foundations">Foundations</a>
+    <a class="topbar-tabsbar-tab active" href="#components" data-tab="components">Components</a>
     <a class="topbar-tabsbar-tab" href="#layouts" data-tab="layouts">Page Layouts</a>
     <a class="topbar-tabsbar-tab" href="#section" data-tab="section">Page Components</a>
-    <a class="topbar-tabsbar-tab" href="#cards" data-tab="cards">Content Cards</a>
-    <a class="topbar-tabsbar-tab" href="#components" data-tab="components">Components</a>
     <a class="topbar-tabsbar-tab" href="#cms" data-tab="cms">Applied Aesthetics</a>
-    <a class="topbar-tabsbar-tab" href="#complib" data-tab="complib">Component Library</a>
+    <a class="topbar-tabsbar-tab" href="#complib" data-tab="complib">CSS Library</a>
   </nav>
 </div>
 
-<section class="workspace active" id="tab-foundations" data-tab="foundations">  <nav class="sidebar" id="sidebar-foundations">
+<section class="workspace active" id="tab-components" data-tab="components">  <nav class="sidebar" id="sidebar-components">
     <div class="sidebar-group">
       <span class="sidebar-group-label">Foundations</span>
-      <a data-scroll-panel="foundations" data-scroll-section="comp-colors" class="sidebar-link active">Colors</a>
-      <a data-scroll-panel="foundations" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
-      <a data-scroll-panel="foundations" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-colors" class="sidebar-link active">Colors</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Elements</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-anatomy" class="sidebar-link">Sections &amp; Dividers</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-buttons" class="sidebar-link">Buttons &amp; CTAs</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-nav" class="sidebar-link">Navigation</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-filter" class="sidebar-link">Filter Controls</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-pills" class="sidebar-link">Pills &amp; Badges</a>
+    </div>
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Cards</span>
+      <a data-scroll-panel="components" data-scroll-section="card-anatomy" class="sidebar-link">Card Anatomy</a>
+      <a data-scroll-panel="components" data-scroll-section="card-articles" class="sidebar-link">Articles</a>
+      <a data-scroll-panel="components" data-scroll-section="card-events" class="sidebar-link">Events</a>
+      <a data-scroll-panel="components" data-scroll-section="card-experiments" class="sidebar-link">Experiments</a>
+      <a data-scroll-panel="components" data-scroll-section="card-journal" class="sidebar-link">Journal</a>
+      <a data-scroll-panel="components" data-scroll-section="card-nav" class="sidebar-link">Nav &amp; Filtering</a>
+      <a data-scroll-panel="components" data-scroll-section="card-meta" class="sidebar-link">Meta Strip</a>
     </div>
   </nav>
   <div class="canvas">
+
   <div class="section" id="comp-colors">
     <div class="section-header">
       <div class="section-num">01</div>
@@ -270,6 +287,1115 @@
     </div>
   </div>
 
+  
+
+  <!-- ══ 04 SECTIONS, HEADERS & DIVIDERS ══ -->
+  <div class="section" id="comp-anatomy">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div class="section-title">Sections, Headers & Dividers</div>
+      <div class="section-desc">The structural vocabulary of every documented page. Use this anatomy whenever you're laying out content inside a canvas — it's how the rest of the system stays consistent.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Anatomy</span>
+      <p class="comp-rule">A canvas is a stack of <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section</code> blocks. Each section opens with a <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-header</code> (number + title + description), then any combination of <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-label</code> eyebrows and <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.preview-frame</code> showcases.</p>
+      <div class="preview-frame" style="padding:var(--space-32);background:var(--surface)">
+        <div class="section-header">
+          <div class="section-num">XX</div>
+          <div class="section-title">Section Title</div>
+          <div class="section-desc">A short paragraph naming what this section documents and why a reader would care.</div>
+        </div>
+        <span class="section-label">Section label — eyebrow above a sub-block</span>
+        <div class="preview-frame" style="padding:var(--space-24);min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.preview-frame · rendered preview lives here</div>
+        <span class="section-label">Another section-label introduces a second example</span>
+        <div class="preview-frame" style="padding:var(--space-24);min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.preview-frame · second example</div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">When to use each</span>
+      <div class="spec-grid" style="max-width:780px">
+        <span class="spec-key">.section</span><span class="spec-val">Wraps every documented item in a canvas. Provides 80px bottom margin and a scroll-anchor for the sidebar.</span>
+        <span class="spec-key">.section-header</span><span class="spec-val">Opens every section. Number + title + description. Underlined with <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--rule)</code> (full primary). Don't omit the description — it's where the section earns its place.</span>
+        <span class="spec-key">.section-num</span><span class="spec-val">Two-digit ordinal in mono. Sequential within the canvas. JetBrains Mono 11px muted.</span>
+        <span class="spec-key">.section-title</span><span class="spec-val">Barlow 22px / 600. The h-level for a documentation block.</span>
+        <span class="spec-key">.section-desc</span><span class="spec-val">Body-sm secondary. Caps at ~600px width to keep the eye-line short.</span>
+        <span class="spec-key">.section-label</span><span class="spec-val">Small Barlow Condensed eyebrow above a preview or sub-block. Auto-spaces 80px above siblings (except first child of a section). Use for "Variants", "States", "Anatomy", etc.</span>
+        <span class="spec-key">.preview-frame</span><span class="spec-val">Dot-grid bordered container for the actual rendered example. Inherits surface tone, leaves padding to the inline style of the instance.</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Rule hierarchy — three weights, one axis</span>
+      <p class="comp-rule">Three line-weight tokens, all derived from the primary ink. Choose one axis — line-weight (thin vs thick) <em>or</em> line-darkness (full vs faint). Thick at low opacity reads muddy in both directions.</p>
+      <div style="display:flex;flex-direction:column;gap:var(--space-16);max-width:560px;background:var(--surface);padding:var(--space-24);border:var(--rule-faint);border-radius:4px">
+        <div>
+          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule) · 1px primary</div>
+          <div style="height:1px;background:var(--primary)"></div>
+          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Structural — section-header underline, sidebar separator, table header. The strongest mark.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule-30) · 1px primary at 30%</div>
+          <div style="height:1px;background:var(--ink-30)"></div>
+          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Boundary — topbar bottom edge, layout-nav, layout-footer. Visible but stepped back.</div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule-faint) · 1px primary at 18%</div>
+          <div style="height:1px;background:var(--ink-18)"></div>
+          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Separator — card borders, table row dividers, type-row separators, preview-frame edges.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Section labels — small vs full-width</span>
+      <p class="comp-rule">Two ways to mark a sub-block of content. <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-label</code> is the small inline eyebrow used everywhere in this documentation. <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-strip</code> (defined elsewhere) is a heavier full-width strip with a bottom rule, reserved for major group dividers within a flat layout.</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Group header — content grouping with optional view-all</span>
+      <p class="comp-rule">Used at the top of a content row (a strip of cards, a list of articles inside an Editorial Index). The eyebrow names the group and shows a count; the "View all" link sits flush right. The eyebrow tints with the group's category colour — set <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> on <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.group-header</code> and the eyebrow inherits it.</p>
+      <div class="preview-frame" style="padding:var(--space-32) var(--space-48);background:var(--surface)">
+        <div class="group-header" style="--c-current: var(--c-denim)">
+          <span class="group-header-eyebrow">For Designers — 3 of 12</span>
+          <a href="#" class="group-header-link">View all →</a>
+        </div>
+        <div style="height:120px;background:var(--canvas-bg);border:var(--rule-faint);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta);margin-bottom: var(--space-32)">.cards-grid · content row</div>
+        <div class="group-header" style="--c-current: var(--c-forest)">
+          <span class="group-header-eyebrow">Leading Design — 3 of 8</span>
+          <a href="#" class="group-header-link">View all →</a>
+        </div>
+        <div style="height:120px;background:var(--canvas-bg);border:var(--rule-faint);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.cards-grid · content row</div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Group header — anatomy</span>
+      <div class="spec-grid" style="max-width:780px">
+        <span class="spec-key">.group-header</span><span class="spec-val">flex space-between · margin-bottom: var(--space-20). Set <code style="font-family:var(--font-mono);font-size: var(--text-meta)">--c-current</code> here to tint the eyebrow.</span>
+        <span class="spec-key">.group-header-eyebrow</span><span class="spec-val">Barlow Condensed 11px / 700 / uppercase / 0.20em letter-spacing. Inherits <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--c-current)</code>.</span>
+        <span class="spec-key">.group-header-link</span><span class="spec-val">Same family/size/weight as the eyebrow but tighter letter-spacing (0.14em) and primary colour. Hover fades opacity to 0.5.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 05 BUTTONS & CTAs ══ -->
+  <div class="section" id="comp-buttons">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div class="section-title">Buttons & CTAs</div>
+      <div class="section-desc">Three tiers of call-to-action, each stepping back from the previous. The type is always the thing — buttons exist to clarify action, not to compete with content.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Three Tiers</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap: var(--space-20)">
+        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
+          <div style="margin-bottom:var(--space-16)"><button class="btn-dark">Design Principles →</button></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Primary</div>
+          <div class="spec-grid">
+            <span class="spec-key">background</span><span class="spec-val">var(--primary)</span>
+            <span class="spec-key">color</span><span class="spec-val">var(--surface)</span>
+            <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
+            <span class="spec-key">radius</span><span class="spec-val">var(--space-4)</span>
+            <span class="spec-key">padding</span><span class="spec-val">11px var(--space-24)</span>
+            <span class="spec-key">font</span><span class="spec-val">Barlow 14px 600</span>
+            <span class="spec-key">hover</span><span class="spec-val">bg var(--primary-hover)</span>
+          </div>
+          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Use for the single most important action on a section. One primary button per content zone maximum.</p>
+        </div>
+        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
+          <div style="margin-bottom:var(--space-16)"><button class="btn-light">Design Services →</button></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Secondary</div>
+          <div class="spec-grid">
+            <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
+            <span class="spec-key">color</span><span class="spec-val">var(--primary)</span>
+            <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
+            <span class="spec-key">radius</span><span class="spec-val">var(--space-4)</span>
+            <span class="spec-key">padding</span><span class="spec-val">11px var(--space-24)</span>
+            <span class="spec-key">font</span><span class="spec-val">Barlow 14px 600</span>
+            <span class="spec-key">hover</span><span class="spec-val">bg primary, color surface</span>
+          </div>
+          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Supporting action alongside a primary. Use when two actions share equal or near-equal weight.</p>
+        </div>
+        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
+          <div style="margin-bottom:var(--space-16);display:flex;flex-direction:column;gap: 10px;align-items:flex-start">
+            <button class="btn-ul">View Writing →</button>
+            <button class="cta-ghost" style="cursor:pointer">About</button>
+          </div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Tertiary</div>
+          <div class="spec-grid">
+            <span class="spec-key">border-bottom</span><span class="spec-val">1.5px solid var(--primary)</span>
+            <span class="spec-key">background</span><span class="spec-val">transparent</span>
+            <span class="spec-key">font</span><span class="spec-val">Barlow 14–15px 600</span>
+            <span class="spec-key">hover</span><span class="spec-val">opacity 0.45</span>
+          </div>
+          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Low-emphasis links and nav. No box. The bold weight retains authority without the visual weight of a bordered button.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">CTA Hierarchy in Context</span>
+      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: 36px 40px">
+        <div style="font-size: var(--text-h3);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-8)">Design Leadership</div>
+        <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.65;margin-bottom: var(--space-24)">Fractional design leadership for early-stage and scaling startups navigating complex product decisions.</div>
+        <div class="btn-row">
+          <button class="btn-dark">View Services →</button>
+          <button class="btn-light">Get in Touch →</button>
+          <button class="btn-ul">Read my approach →</button>
+        </div>
+      </div>
+      <p style="font-size: var(--text-meta);font-weight:500;color:var(--muted);margin-top: var(--space-12);line-height:1.6">One primary · One secondary · One tertiary. The eye reads them in order. Never two primary buttons in the same zone.</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Usage</span>
+      <div class="usage-row">
+        <div class="usage-card do">
+          <span class="usage-label">✓ Do</span>
+          <p class="usage-text">Use one primary per content zone · Let the hierarchy guide reading order · Use underline link for low-stakes navigation · Arrow suffix (→) on forward navigation</p>
+        </div>
+        <div class="usage-card dont">
+          <span class="usage-label">✗ Don't</span>
+          <p class="usage-text">Two primary buttons side by side · Using accent colour (var(--accent)) as button fill · Pill radius on buttons — system uses 4px · All-caps button text</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 06 NAVIGATION ══ -->
+  <div class="section" id="comp-nav">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div class="section-title">Navigation</div>
+      <div class="section-desc">A centered pill-button bar. All nav links share the same component — there is no separate "active" styling beyond what hover provides. The handwritten logotype sits outside the type system entirely.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Anatomy</span>
+      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: var(--space-20) var(--space-48);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);color:var(--primary)">alex m. chong</span>
+        <div class="npbar" style="margin: 0">
+          <a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a>
+          <a href="#">Coaching</a><a href="#">About</a><a href="#">Writing</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Nav Pill Specs</span>
+      <div class="spec-grid" style="max-width:480px">
+        <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
+        <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
+        <span class="spec-key">border-radius</span><span class="spec-val">var(--space-4)</span>
+        <span class="spec-key">padding</span><span class="spec-val">var(--space-8) 18px</span>
+        <span class="spec-key">margin</span><span class="spec-val">var(--space-4) between pills</span>
+        <span class="spec-key">font</span><span class="spec-val">Barlow 13px 600</span>
+        <span class="spec-key">letter-spacing</span><span class="spec-val">0.02em — mixed case</span>
+        <span class="spec-key">hover</span><span class="spec-val">bg var(--primary), color surface</span>
+        <span class="spec-key">wrapping</span><span class="spec-val">flex-wrap — breaks to 2 rows on narrow</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">States</span>
+      <div class="states-row">
+        <div class="state-item">
+          <span class="state-label">Default</span>
+          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--surface);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--primary);text-decoration:none">Coaching</a>
+        </div>
+        <div class="state-item">
+          <span class="state-label">Hover</span>
+          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--primary);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--surface);text-decoration:none">Coaching</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 05 FILTER PILLS ══ -->
+  <div class="section" id="comp-filter">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div class="section-title">Filter Controls</div>
+      <div class="section-desc">OR multi-select content filters. Category identity is expressed through colour — hover reveals the category colour, active fills it. Barlow Condensed only — these are the designated space for the condensed variant.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">All Three States — Live</span>
+      <div style="display:flex;gap: var(--space-8);flex-wrap:wrap;margin-bottom: 10px">
+        <button class="fp" data-cat="all">All</button>
+        <button class="fp on" data-cat="ux-industry">UX Industry</button>
+        <button class="fp" data-cat="leading-design">Leading Design</button>
+        <button class="fp on" data-cat="for-designers">For Designers</button>
+        <button class="fp" data-cat="talk">Talk</button>
+        <button class="fp on" data-cat="workshop">Workshop</button>
+        <button class="fp" data-cat="masterclass">Masterclass</button>
+      </div>
+      <p style="font-size: var(--text-meta);font-weight:500;color:var(--muted);line-height:1.6">Click to toggle. Hover any inactive pill to preview its category colour.</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:480px">
+        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 12px 700 uppercase</span>
+        <span class="spec-key">letter-spacing</span><span class="spec-val">0.14em</span>
+        <span class="spec-key">border-radius</span><span class="spec-val">3px</span>
+        <span class="spec-key">padding</span><span class="spec-val">6px 14px</span>
+        <span class="spec-key">default border</span><span class="spec-val">1px solid var(--primary)</span>
+        <span class="spec-key">default bg</span><span class="spec-val">surface</span>
+        <span class="spec-key">hover</span><span class="spec-val">border + text → category colour</span>
+        <span class="spec-key">active</span><span class="spec-val">category colour fill, white text</span>
+        <span class="spec-key">logic</span><span class="spec-val">OR — multiple selections allowed</span>
+        <span class="spec-key">all deselected</span><span class="spec-val">All re-activates automatically</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Usage</span>
+      <div class="usage-row">
+        <div class="usage-card do">
+          <span class="usage-label">✓ Do</span>
+          <p class="usage-text">Use for content type and category filtering · Allow multiple selections simultaneously · Always include an All option · Show active count or result count nearby when possible</p>
+        </div>
+        <div class="usage-card dont">
+          <span class="usage-label">✗ Don't</span>
+          <p class="usage-text">Use Barlow Condensed outside of pills · Use for AND logic without making that explicit · Use more than 8 pills in a row — wrap is fine but consider grouping</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card system documentation lives on the dedicated Content Cards tab — this Components tab covers tokens and primitives. -->
+
+  <!-- ══ 08 PILLS & BADGES ══ -->
+  <div class="section" id="comp-pills">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">Pills & Badges</div>
+      <div class="section-desc">Four distinct pill types serving different purposes. All use Barlow Condensed. The shapes are similar — the distinction lives in color, fill, and context of use.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Series Pill + Progress</span>
+      <div style="display:flex;align-items:center;gap: 10px;flex-wrap:wrap;margin-bottom: var(--space-16)">
+        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-terracotta) 35%, transparent);color:var(--c-terracotta)">UX 2.0 Series</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Part 2 of 3</span>
+        <div style="display:flex;gap: 3px;align-items:center">
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--c-terracotta)"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:var(--c-terracotta)"></div>
+          <div style="width:5px;height:5px;border-radius:50%;background:color-mix(in srgb, var(--c-terracotta) 20%, transparent)"></div>
+        </div>
+      </div>
+      <div class="spec-grid" style="max-width:420px">
+        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 12–13px 600 uppercase</span>
+        <span class="spec-key">border</span><span class="spec-val">category colour at 35% opacity</span>
+        <span class="spec-key">color</span><span class="spec-val">category colour</span>
+        <span class="spec-key">bg</span><span class="spec-val">transparent</span>
+        <span class="spec-key">radius</span><span class="spec-val">4px</span>
+        <span class="spec-key">use</span><span class="spec-val">Multi-part article series only</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Principle / Framework Badge</span>
+      <div style="display:flex;gap: 10px;flex-wrap:wrap;margin-bottom: var(--space-16)">
+        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-terracotta) 40%, transparent);color:var(--c-terracotta);display:inline-flex;align-self:flex-start">Principle</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-forest) 40%, transparent);color:var(--c-forest);display:inline-flex;align-self:flex-start">Framework</span>
+      </div>
+      <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);line-height:1.6">Sits below the article title. Signals that the article is a foundational position or structured model — not a news piece or opinion.</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Event Format Tags</span>
+      <div style="display:flex;gap: var(--space-8);flex-wrap:wrap;align-items:center;margin-bottom: var(--space-16)">
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-free-text);background:var(--c-free-bg);border:1px solid color-mix(in srgb, var(--c-forest) 24%, transparent);line-height:1.4;display:inline-flex;align-items:center">Free</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--primary);background:var(--ink-08);border:1px solid var(--ink-18);line-height:1.4;display:inline-flex;align-items:center">$249</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-inperson-text);background:var(--c-inperson-bg);border:1px solid color-mix(in srgb, var(--c-clay) 20%, transparent);line-height:1.4;display:inline-flex;align-items:center">In-Person</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-remote-text);background:var(--c-remote-bg);border:1px solid var(--ink-12);line-height:1.4;display:inline-flex;align-items:center">Remote</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--white);border-radius:3px;padding: 3px 10px;background:var(--c-countdown-bg);line-height:1.4;display:inline-flex;align-items:center">In 6 Days</span>
+        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--c-exp-text-bright);border-radius:3px;padding: 3px 10px;background:var(--c-past-bg);border:1px solid var(--white-15);line-height:1.4;display:inline-flex;align-items:center">Past</span>
+      </div>
+      <div class="spec-grid" style="max-width:460px">
+        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 13px 700 uppercase</span>
+        <span class="spec-key">radius</span><span class="spec-val">3px</span>
+        <span class="spec-key">padding</span><span class="spec-val">3px 10px</span>
+        <span class="spec-key">display</span><span class="spec-val">inline-flex align-items:center</span>
+        <span class="spec-key">line-height</span><span class="spec-val">1.4 — ensures vertical alignment</span>
+        <span class="spec-key">use</span><span class="spec-val">Event cards only, ev-footer zone</span>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+<div class="section" id="card-anatomy">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Card Anatomy</div>
+    <div class="section-desc">All card types share the same shell — flat, bordered, near-square, no shadow. Depth comes from border contrast on hover. What changes between types is the header tone, the body content, and the footer. Use this as the mental model before reaching for a specific card type.</div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">The shell — every card</span>
+    <div class="spec-grid" style="max-width:780px">
+      <span class="spec-key">background</span><span class="spec-val">var(--surface) — light cards · var(--c-experiment-prototype/concept) — dark cards</span>
+      <span class="spec-key">border</span><span class="spec-val">1px solid var(--ink-18) · darkens to var(--primary) on hover</span>
+      <span class="spec-key">border-radius</span><span class="spec-val">var(--r-card) = 4px (near-square)</span>
+      <span class="spec-key">box-shadow</span><span class="spec-val">none — depth is border-only</span>
+      <span class="spec-key">overflow</span><span class="spec-val">hidden — nothing peeks past the corners</span>
+      <span class="spec-key">layout</span><span class="spec-val">flex column · header → body → meta-strip</span>
+      <span class="spec-key">padding</span><span class="spec-val">scoped via --pad (24px on cards)</span>
+    </div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">Three zones — header, body, meta-strip</span>
+    <p class="comp-rule">Every card resolves to the same three-zone structure. The header announces type and identity (category label, dark zones for events, gradient for masterclass). The body carries the headline + supporting content. The meta-strip closes with utilitarian metadata and a forward arrow.</p>
+    <div class="spec-grid" style="max-width:780px">
+      <span class="spec-key">.card-header</span><span class="spec-val">Type / category labels and bookmark icon. Dark on event &amp; experiment cards.</span>
+      <span class="spec-key">.card-body</span><span class="spec-val">Title + excerpt + tags or framework badge. The reading content of the card.</span>
+      <span class="spec-key">.meta-strip</span><span class="spec-val">Metadata row at the bottom — date, read time, action arrow. See section 05 for the full anatomy.</span>
+    </div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">How category colour works</span>
+    <p class="comp-rule">Each card sets a single CSS custom property — <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> — based on its <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">data-category</code>. Every coloured element inside the card (category label, series pill border, framework badge, journal rule, sdot indicator) reads from that single token. Adding a new category is one line of CSS — pick a colour from the pool, point <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> at it.</p>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">States</span>
+    <div class="spec-grid" style="max-width:780px">
+      <span class="spec-key">default</span><span class="spec-val">faint border, surface bg</span>
+      <span class="spec-key">:hover</span><span class="spec-val">border darkens to primary — only depth signal</span>
+      <span class="spec-key">.past</span><span class="spec-val">applied to past events. Dark zones overlay at <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--ink-72)</code>, content remains legible.</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="card-articles">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Article Cards</div>
+    <div class="section-desc">Editorial entries for the writing track. Category label, italic title, optional series pill, excerpt, tag row, and meta strip with date and read time.</div>
+  </div>
+  <div class="cards-grid">
+  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
+    <div class="card-header">
+      <span class="cat">UX Industry</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">A Discipline Reset</h2>
+      <div class="series-row">
+        <span class="series-pill">UX 2.0 Series</span>
+        <span class="series-pos">Part 1 of 3</span>
+        <div class="series-dots">
+          <div class="sdot on"></div><div class="sdot"></div><div class="sdot"></div>
+        </div>
+      </div>
+      <p class="excerpt">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Discipline History</span><span class="tag">Reframe</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Mar 4, 2026</span><span>14 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
+    <div class="card-header">
+      <span class="cat">UX Industry</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">What a Post-AI Workflow Actually Looks Like</h2>
+      <div class="series-row">
+        <span class="series-pill">UX 2.0 Series</span>
+        <span class="series-pos">Part 2 of 3</span>
+        <div class="series-dots">
+          <div class="sdot"></div><div class="sdot on"></div><div class="sdot"></div>
+        </div>
+      </div>
+      <p class="excerpt">The designers thriving right now changed how they think before they changed how they work.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">AI Workflow</span><span class="tag">Actionable</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Mar 28, 2026</span><span>11 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
+    <div class="card-header">
+      <span class="cat">UX Industry</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">UX 2.0 Is a Thinking Problem</h2>
+      <div class="series-row">
+        <span class="series-pill">UX 2.0 Series</span>
+        <span class="series-pos">Part 3 of 3</span>
+        <div class="series-dots">
+          <div class="sdot"></div><div class="sdot"></div><div class="sdot on"></div>
+        </div>
+      </div>
+      <p class="excerpt">Everyone is talking about which AI tools designers should learn. Nobody is asking whether the role itself needs to change. Those are very different conversations.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Role Evolution</span><span class="tag">Uncomfortable</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Apr 14, 2026</span><span>9 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="leading-design" data-special-tag="principle" data-tags="">
+    <div class="card-header">
+      <span class="cat">Leading Design</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">The Designer Who Runs the Room</h2>
+      <span class="fw-badge">Principle</span>
+      <p class="excerpt">Design leadership is about building the conditions where stronger decisions get made — with or without you in them.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Design Influence</span><span class="tag">Foundational</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Feb 12, 2026</span><span>12 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="leading-design" data-tags="for-designers">
+    <div class="card-header">
+      <span class="cat">Leading Design</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: 18px">Why Most Design Teams Address Symptoms</h2>
+      <p class="excerpt">The symptoms are always visible — slow output, constant rework, misaligned stakeholders. The cause sits a layer below.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Team Health</span><span class="tag">Diagnosis</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Jan 22, 2026</span><span>13 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="principle" data-tags="leading-design">
+    <div class="card-header">
+      <span class="cat">For Designers</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">Burnout Lives Below Workload</h2>
+      <span class="fw-badge">Principle</span>
+      <p class="excerpt">Most designers hit the wall when they've lost the thread connecting their work to something they actually care about.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Burnout</span><span class="tag">Honest</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Apr 3, 2026</span><span>8 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="principle" data-tags="">
+    <div class="card-header">
+      <span class="cat">For Designers</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">Your Career Belongs to You</h2>
+      <span class="fw-badge">Principle</span>
+      <p class="excerpt">Most designers wait for something their job is structurally unable to provide. Growth that belongs to you has to be built by you — manager, team, and next role each play their own game.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Career Ownership</span><span class="tag">Reframe</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Mar 18, 2026</span><span>7 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="for-designers" data-tags="">
+    <div class="card-header">
+      <span class="cat">For Designers</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: 18px">The Practice Outside the Practice</h2>
+      <p class="excerpt">Every designer I know who stayed creatively alive for decades had something they made that no one was paying them for. The pattern repeats.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Creative Health</span><span class="tag">Slow Burn</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Feb 27, 2026</span><span>6 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="for-designers" data-tags="ux-industry">
+    <div class="card-header">
+      <span class="cat">For Designers</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: 18px">Prompting Is Specifying</h2>
+      <p class="excerpt">The designers getting the most out of AI articulate intent better — which was always the job.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">AI Prompting</span><span class="tag">Reframe</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Apr 10, 2026</span><span>6 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="ux-industry" data-special-tag="principle" data-tags="">
+    <div class="card-header">
+      <span class="cat">UX Industry</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">The Medium Shapes the Designer</h2>
+      <span class="fw-badge">Principle</span>
+      <p class="excerpt">Every tool you default to is quietly training you to think in its constraints. The designers who stay sharp are the ones who keep changing their medium on purpose.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Tools & Thinking</span><span class="tag">Slow Burn</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Feb 5, 2026</span><span>5 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="leading-design" data-special-tag="framework" data-tags="">
+    <div class="card-header">
+      <span class="cat">Leading Design</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">The Three Layers of Design Influence</h2>
+      <span class="fw-badge">Framework</span>
+      <p class="excerpt">Most design leaders get stuck at Layer 1 — execution quality. Layer 2 is process ownership. Layer 3 is decision framing. Each requires a fundamentally different kind of presence.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Design Influence</span><span class="tag">Structured Model</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Jan 14, 2026</span><span>10 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="framework" data-tags="">
+    <div class="card-header">
+      <span class="cat">For Designers</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">The Creative Recovery Loop</h2>
+      <span class="fw-badge">Framework</span>
+      <p class="excerpt">A four-stage model for restoring creative momentum after burnout or stagnation: Reduce, Restore, Reorient, Re-engage. Most designers skip straight to the last step and wonder why nothing sticks.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Creative Health</span><span class="tag">Process Model</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Mar 2, 2026</span><span>8 min read</span></div>
+  </div>
+
+  <div class="card card--article" data-type="article" data-category="ux-industry" data-special-tag="framework" data-tags="">
+    <div class="card-header">
+      <span class="cat">UX Industry</span>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <h2 class="title" style="margin-bottom: var(--space-12)">Signal vs Noise: A Filter for Post-AI Design Decisions</h2>
+      <span class="fw-badge">Framework</span>
+      <p class="excerpt">When every tool claims to accelerate your work, you need a filter more than a workflow. This model maps which decisions require human judgment — and shows how that line keeps moving.</p>
+      <div class="push-divider"></div>
+      <div class="row-between">
+        <div class="tag-row"><span class="tag">Decision-Making</span><span class="tag">Mental Model</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="meta-strip"><span>Apr 20, 2026</span><span>12 min read</span></div>
+  </div>
+</div>
+</div>
+<div class="section" id="card-events">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Event Cards</div>
+    <div class="section-desc">Talks, workshops, and masterclasses. Dark header carrying the event type plus countdown or past pill. Location/remote zone with ghost city text. Format pills below the title.</div>
+  </div>
+  <div class="cards-grid">
+  <div class="card card--event" data-type="event" data-category="talk">
+    <div class="card-header">
+      <span class="ev-type">Talk</span>
+      <span class="ev-countdown-label">In 6 Days</span>
+    </div>
+    <div class="loc-zone">
+      <div class="loc-ghost">Toronto</div>
+      <div style="position:relative">
+        <div class="loc-city">Toronto, ON</div>
+        <div class="loc-venue">Centre for Social Innovation</div>
+      </div>
+    </div>
+    <div class="ev-body">
+      <div class="ev-date-row">
+        <span class="ev-date">May 12, 2026</span>
+        <span class="ev-time">Wed · 7:00 PM ET</span>
+      </div>
+      <h2 class="ev-title" style="margin-bottom: var(--space-12)">Design Leadership in the Age of AI</h2>
+      <p class="ev-desc">A live conversation on leading teams through disruption — making better decisions and staying human.</p>
+      <div class="push-divider"></div>
+      <div class="ev-footer">
+        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-free">Free</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--event" data-type="event" data-category="workshop">
+    <div class="card-header">
+      <span class="ev-type">Workshop</span>
+      <span class="ev-countdown-label">Next Week</span>
+    </div>
+    <div class="loc-zone">
+      <div class="loc-ghost">Toronto</div>
+      <div style="position:relative">
+        <div class="loc-city">Toronto, ON</div>
+        <div class="loc-venue">Gladstone House · 16 seats</div>
+      </div>
+    </div>
+    <div class="ev-body">
+      <div class="ev-date-row">
+        <span class="ev-date">May 28, 2026</span>
+        <span class="ev-time">Wed · 10:00 AM – 1:00 PM</span>
+      </div>
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Designing for Decisions</h2>
+      <p class="ev-desc">A half-day session for designers ready to operate at the level of strategy. Built around real problems.</p>
+      <div class="push-divider"></div>
+      <div class="ev-footer">
+        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-paid">$249</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--event" data-type="event" data-category="talk">
+    <div class="card-header">
+      <span class="ev-type">Talk</span>
+      <span class="ev-countdown-label tomorrow">Tomorrow</span>
+    </div>
+    <div class="remote-zone">
+      <div class="remote-ghost">Remote</div>
+      <div style="position:relative">
+        <div class="remote-label">Remote Talk</div>
+        <div class="remote-sub">Join from anywhere</div>
+      </div>
+    </div>
+    <div class="ev-body">
+      <div class="ev-date-row">
+        <span class="ev-date">May 7, 2026</span>
+        <span class="ev-time">Thu · 12:00 PM ET</span>
+      </div>
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The State of Design Leadership in 2026</h2>
+      <p class="ev-desc">What does design leadership look like when AI, hiring uncertainty, and organizational pressure are reshaping the role from every direction?</p>
+      <div class="push-divider"></div>
+      <div class="ev-footer">
+        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-free">Free</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--event" data-type="event" data-category="talk">
+    <div class="card-header">
+      <span class="ev-type">Talk</span>
+      <span class="ev-countdown-label today">Today!</span>
+    </div>
+    <div class="remote-zone">
+      <div class="remote-ghost">Remote</div>
+      <div style="position:relative">
+        <div class="remote-label">Remote</div>
+        <div class="remote-sub">12 seats · Join from anywhere</div>
+      </div>
+    </div>
+    <div class="ev-body">
+      <div class="ev-date-row">
+        <span class="ev-date">May 6, 2026</span>
+        <span class="ev-time">Thu · 9:00 AM – 5:00 PM ET</span>
+      </div>
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Reclaiming Creative Agency as a Senior Designer</h2>
+      <p class="ev-desc">On burnout, self-trust, and the conditions that restore creative momentum when the work has stopped feeling like yours.</p>
+      <div class="push-divider"></div>
+      <div class="ev-footer">
+        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-paid">$149</span></div>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--event" data-type="event" data-category="masterclass">
+    <div class="card-header">
+      <span class="ev-type">Masterclass</span>
+      <span class="ev-countdown-label">In 2 Months</span>
+    </div>
+    <div class="mc-body">
+      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The Coaching Designer</h2>
+      <p class="ev-desc">A two-day intensive on building a coaching practice as a working designer — for those ready to lead through questions.</p>
+      <div class="mc-logistics">
+        <div class="mc-logistic"><span class="mc-logistic-icon">◷</span><span>Oct 2 – 3, 2026 · 9 AM – 5 PM ET</span></div>
+        <div class="mc-logistic"><span class="mc-logistic-icon">○</span><span>Virtual · 2 Days</span></div>
+      </div>
+    </div>
+    <div class="mc-cta-zone">
+      <div class="mc-cta-left">
+        <span class="mc-cta-label">Register Now</span>
+        <span class="mc-cta-sub">12 Seats · Online</span>
+      </div>
+      <div class="mc-cta-right">
+        <span class="mc-price">$349</span>
+        <span class="mc-arrow">→</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section" id="card-experiments">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">Experiment Cards</div>
+    <div class="section-desc">Working drafts and prototypes. Deep tonal background with SVG decoration, status dot, and a Launch / Read CTA bar. Distinct from articles to signal "in progress."</div>
+  </div>
+  <div class="cards-grid">
+  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
+    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
+      <circle cx="190" cy="140" r="100" fill="none" stroke="rgba(107,48,128,0.1)" stroke-width="1"/>
+      <circle cx="190" cy="140" r="64" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/>
+      <circle cx="190" cy="140" r="30" fill="none" stroke="rgba(107,48,128,0.22)" stroke-width="1"/>
+      <circle cx="190" cy="140" r="8" fill="rgba(107,48,128,0.65)"/>
+      <circle cx="248" cy="84" r="5" fill="rgba(180,120,220,0.7)"/>
+      <circle cx="132" cy="188" r="4" fill="rgba(180,120,220,0.52)"/>
+      <circle cx="268" cy="168" r="4" fill="rgba(180,120,220,0.44)"/>
+      <circle cx="296" cy="124" r="5" fill="rgba(180,120,220,0.58)"/>
+      <line x1="190" y1="140" x2="248" y2="84" stroke="rgba(180,120,220,0.13)" stroke-width="1"/>
+      <line x1="190" y1="140" x2="132" y2="188" stroke="rgba(180,120,220,0.1)" stroke-width="1"/>
+      <line x1="190" y1="140" x2="268" y2="168" stroke="rgba(180,120,220,0.09)" stroke-width="1"/>
+      <line x1="190" y1="140" x2="296" y2="124" stroke="rgba(180,120,220,0.1)" stroke-width="1"/>
+    </svg>
+    <div class="scrim-proto"></div>
+    <div class="exp-content">
+      <div class="card-header" style="position:relative;z-index:2">
+        <span class="od-type">Prototype</span>
+        <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-forest);flex-shrink:0"></span>Live</div>
+      </div>
+      <div style="flex:1;min-height:80px"></div>
+      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
+        <h2 class="od-title" style="margin-bottom: 10px">UX Audit Generator</h2>
+        <p class="od-excerpt" style="margin-bottom:14px">Feed it a product description — it hypothesizes the most likely UX debt before you open a single screen.</p>
+        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">AI Tool</span><span class="od-tag">Interaction Design</span></div>
+        <span class="od-meta">May 2026</span>
+      </div>
+      <div class="cta-launch" style="position:relative;z-index:2"><span class="label">Launch</span><span class="arrow">→</span></div>
+    </div>
+  </div>
+
+  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
+    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
+      <circle cx="146" cy="100" r="5" fill="color-mix(in srgb, var(--c-forest) 58%, transparent)"/>
+      <circle cx="228" cy="78" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
+      <circle cx="290" cy="134" r="6" fill="color-mix(in srgb, var(--c-forest) 72%, transparent)"/>
+      <circle cx="84" cy="160" r="4" fill="color-mix(in srgb, var(--c-forest) 44%, transparent)"/>
+      <circle cx="206" cy="152" r="8" fill="color-mix(in srgb, var(--c-forest) 82%, transparent)"/>
+      <line x1="146" y1="100" x2="228" y2="78" stroke="color-mix(in srgb, var(--c-forest) 24%, transparent)" stroke-width="1"/>
+      <line x1="228" y1="78" x2="290" y2="134" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
+      <line x1="206" y1="152" x2="290" y2="134" stroke="color-mix(in srgb, var(--c-forest) 27%, transparent)" stroke-width="1"/>
+      <line x1="84" y1="160" x2="206" y2="152" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
+    </svg>
+    <div class="scrim-concept"></div>
+    <div class="exp-content">
+      <div class="card-header" style="position:relative;z-index:2">
+        <span class="od-type">Concept</span>
+        
+      </div>
+      <div style="flex:1;min-height:80px"></div>
+      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
+        <h2 class="od-title" style="margin-bottom: 10px">Thinking Mode Selector</h2>
+        <p class="od-excerpt" style="margin-bottom:14px">An interactive model that maps your current cognitive state to the AI interaction mode that matches — so you're directing it from intent.</p>
+        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Interaction Model</span><span class="od-tag">AI Collaboration</span></div>
+        <span class="od-meta">Apr 2026</span>
+      </div>
+      <div class="cta-read" style="position:relative;z-index:2"><span class="label">Read</span><span class="arrow">→</span></div>
+    </div>
+  </div>
+
+  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
+    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
+      <circle cx="80" cy="80" r="5" fill="rgba(180,120,220,0.58)"/>
+      <circle cx="190" cy="58" r="4" fill="rgba(180,120,220,0.44)"/>
+      <circle cx="306" cy="96" r="6" fill="rgba(180,120,220,0.68)"/>
+      <circle cx="256" cy="184" r="4" fill="rgba(180,120,220,0.48)"/>
+      <circle cx="138" cy="214" r="7" fill="rgba(180,120,220,0.78)"/>
+      <line x1="80" y1="80" x2="190" y2="58" stroke="rgba(180,120,220,0.11)" stroke-width="1"/>
+      <line x1="190" y1="58" x2="306" y2="96" stroke="rgba(180,120,220,0.09)" stroke-width="1"/>
+      <line x1="306" y1="96" x2="256" y2="184" stroke="rgba(180,120,220,0.12)" stroke-width="1"/>
+      <line x1="256" y1="184" x2="138" y2="214" stroke="rgba(180,120,220,0.14)" stroke-width="1"/>
+    </svg>
+    <div class="scrim-proto"></div>
+    <div class="exp-content">
+      <div class="card-header" style="position:relative;z-index:2">
+        <span class="od-type">Prototype</span>
+        <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-amber);flex-shrink:0"></span>In Progress</div>
+      </div>
+      <div style="flex:1;min-height:80px"></div>
+      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
+        <h2 class="od-title" style="margin-bottom: 10px">Scope Estimator</h2>
+        <p class="od-excerpt" style="margin-bottom:14px">Forces tradeoff conversations before the first sprint. Enter constraints — it outputs a range, a confidence level, and a warning.</p>
+        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Decision Tool</span><span class="od-tag">AI Tool</span></div>
+        <span class="od-meta">Apr 2026</span>
+      </div>
+      <div class="cta-launch" style="position:relative;z-index:2;background:rgba(0,0,0,0.3)"><span class="label" style="color:var(--white-45)">Preview</span><span class="arrow" style="color:var(--white-45)">→</span></div>
+    </div>
+  </div>
+
+  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
+    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
+      <circle cx="118" cy="94" r="6" fill="color-mix(in srgb, var(--c-forest) 68%, transparent)"/>
+      <circle cx="274" cy="74" r="7" fill="color-mix(in srgb, var(--c-forest) 78%, transparent)"/>
+      <circle cx="196" cy="122" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
+      <circle cx="334" cy="152" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
+      <circle cx="158" cy="192" r="5" fill="color-mix(in srgb, var(--c-forest) 58%, transparent)"/>
+      <line x1="118" y1="94" x2="196" y2="122" stroke="color-mix(in srgb, var(--c-forest) 17%, transparent)" stroke-width="1"/>
+      <line x1="196" y1="122" x2="274" y2="74" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
+      <line x1="274" y1="74" x2="334" y2="152" stroke="color-mix(in srgb, var(--c-forest) 15%, transparent)" stroke-width="1"/>
+      <line x1="158" y1="192" x2="196" y2="122" stroke="color-mix(in srgb, var(--c-forest) 13%, transparent)" stroke-width="1"/>
+    </svg>
+    <div class="scrim-concept"></div>
+    <div class="exp-content">
+      <div class="card-header" style="position:relative;z-index:2">
+        <span class="od-type">Concept</span>
+        
+      </div>
+      <div style="flex:1;min-height:80px"></div>
+      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
+        <h2 class="od-title" style="margin-bottom: 10px">Constraint Builder</h2>
+        <p class="od-excerpt" style="margin-bottom:14px">An interactive design space where you add constraints one by one and watch the solution space shift. A working model of why limitation produces better design.</p>
+        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Interaction Design</span><span class="od-tag">Speculative</span></div>
+        <span class="od-meta">Mar 2026</span>
+      </div>
+      <div class="cta-read" style="position:relative;z-index:2"><span class="label">Read</span><span class="arrow">→</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section" id="card-journal">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">Journal Cards</div>
+    <div class="section-desc">Short reflective entries. Italic Instrument Serif quote with a left-rule in the journal category colour, a thin excerpt, and a date in the meta strip.</div>
+  </div>
+  <div class="cards-grid">
+  <div class="card card--journal" data-type="journal" data-category="contemplation">
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap: 7px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-teal);flex-shrink:0">
+          <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 2 A5 5 0 0 1 12 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M7 12 A5 5 0 0 1 2 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="cat">Contemplation<span class="j-num"> 001</span></span>
+      </div>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <p class="j-ruled">I keep returning to the idea that constraints reveal what creativity actually is.</p>
+      <p class="excerpt" style="margin-bottom: var(--space-16)">The blank page is paralysis with a better story.</p>
+      <div class="j-footer-push"></div>
+      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
+      <div class="row-between">
+        <span class="j-date">Apr 29, 2026</span>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--journal" data-type="journal" data-category="insight">
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap: 7px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-ochre);flex-shrink:0">
+          <circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.4"/>
+          <line x1="7" y1="1.1" x2="7" y2="2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="7" y1="11.1" x2="7" y2="12.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="1.1" y1="7" x2="2.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="11.1" y1="7" x2="12.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="cat">Insight<span class="j-num"> 001</span></span>
+      </div>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <p class="j-ruled">Seniority in design is being the person who changes what the room is trying to do.</p>
+      <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">That's a completely different skill — and almost no one teaches it. We spend years getting better at execution and almost no time learning how to shift the frame before execution starts...</p>
+      <div class="j-footer-push"></div>
+      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
+      <div class="row-between">
+        <span class="j-date">Apr 17, 2026</span>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card--journal" data-type="journal" data-category="introspection">
+    <div class="card-header">
+      <div style="display:flex;align-items:center;gap: 7px">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-violet);flex-shrink:0">
+          <path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="cat">Introspection<span class="j-num"> 001</span></span>
+      </div>
+      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
+    </div>
+    <div class="card-body">
+      <p class="j-ruled">The designers struggling most with AI were already struggling to articulate why their decisions mattered.</p>
+      <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">The tool surfaced a gap that had been sitting quietly for years. That gap is a design thinking problem...</p>
+      <div class="j-footer-push"></div>
+      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
+      <div class="row-between">
+        <span class="j-date">May 4, 2026</span>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="section" id="card-nav">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Card Navigation &amp; Filtering</div>
+    <div class="section-desc">Cards live behind a controller — type pills choose the card family, category pills filter within it. The logic is OR multi-select: enabling more pills shows more results, never narrows them. "All" is a master toggle that clears every category at once. With nothing selected, "All" auto-re-engages so the user is never looking at an empty set.</div>
+  </div>
+
+  <div class="preview-frame" style="padding: 0 0 28px;background:var(--surface);border-color:var(--rule-faint)">
+    <div class="controller">
+      <div class="controller-row">
+        <span class="ctrl-label">Type</span>
+        <div class="pill-group">
+          <button class="fp on" data-cat="all">All</button>
+          <button class="fp" data-cat="article">Articles</button>
+          <button class="fp" data-cat="event">Events</button>
+          <button class="fp" data-cat="experiment">Experiments</button>
+          <button class="fp" data-cat="journal">Journal</button>
+        </div>
+        <span class="count-badge">25 cards</span>
+      </div>
+      <div class="controller-row">
+        <span class="ctrl-label">Topic</span>
+        <div class="pill-group">
+          <button class="fp on" data-cat="all">All</button>
+          <button class="fp" data-cat="ux-industry">UX Industry</button>
+          <button class="fp" data-cat="leading-design">Leading Design</button>
+          <button class="fp" data-cat="for-designers">For Designers</button>
+          <button class="fp" data-cat="talk">Talk</button>
+          <button class="fp" data-cat="workshop">Workshop</button>
+          <button class="fp" data-cat="masterclass">Masterclass</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">Behaviour</span>
+    <div class="spec-grid" style="max-width:720px">
+      <span class="spec-key">Default state</span><span class="spec-val">"All" engaged on every row · everything visible</span>
+      <span class="spec-key">Click "All"</span><span class="spec-val">deselects every other pill in that row · "All" stays on</span>
+      <span class="spec-key">Click a category</span><span class="spec-val">that pill toggles · "All" deselects the moment a category is on</span>
+      <span class="spec-key">Multiple categories</span><span class="spec-val">OR-logic — show cards matching ANY active pill</span>
+      <span class="spec-key">Deselect last category</span><span class="spec-val">"All" auto-re-engages · the user never sees an empty set</span>
+      <span class="spec-key">Visual hover</span><span class="spec-val">border + text shift to category colour (preview the brand)</span>
+      <span class="spec-key">Visual active</span><span class="spec-val">filled category colour, white text — pill becomes the brand for that filter</span>
+    </div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">Pill states</span>
+    <div style="display:flex;gap: 14px;flex-wrap:wrap;align-items:center">
+      <button class="fp" data-cat="ux-industry">Default</button>
+      <button class="fp on" data-cat="ux-industry">Active (UX Industry)</button>
+      <button class="fp on" data-cat="leading-design">Active (Leading)</button>
+      <button class="fp on" data-cat="for-designers">Active (Designers)</button>
+      <button class="fp on" data-cat="talk">Active (Talk)</button>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="card-meta">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">Card Meta Strip</div>
+    <div class="section-desc">The unified bottom zone of every card. Same structure across article, journal, and experiment types — information left, arrow right. The only thing that changes is the surface tone and what the metadata says.</div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">Three variants</span>
+    <div style="display:flex;flex-direction:column;gap: var(--space-8);max-width:420px">
+      <div>
+        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Article</div>
+        <div style="background:var(--surface);border:var(--rule-faint);border-radius:0 0 4px 4px;overflow:hidden">
+          <div class="row-between" style="padding: 11px var(--space-20);border-top:var(--rule-faint)">
+            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min</span>
+            <span style="font-size: var(--text-sm);color:var(--secondary)">→</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Journal</div>
+        <div style="background:var(--surface);border:var(--rule-faint);border-radius:0 0 4px 4px;overflow:hidden">
+          <div class="row-between" style="padding: 11px var(--space-20);border-top:var(--rule-faint)">
+            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">May 4, 2026</span>
+            <span style="font-size: var(--text-sm);color:var(--secondary)">→</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Experiment</div>
+        <div style="background:var(--c-experiment-prototype);border-radius:0 0 4px 4px;overflow:hidden">
+          <div class="row-between" style="padding: 11px var(--space-20);border-top:1px solid var(--white-06)">
+            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--white-45)">May 2026 · Launch</span>
+            <span style="font-size: var(--text-sm);font-weight:300;color:var(--white-45)">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="comp-section">
+    <span class="section-label">Specs</span>
+    <div class="spec-grid" style="max-width:600px">
+      <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 13px / 600 / uppercase</span>
+      <span class="spec-key">letter-spacing</span><span class="spec-val">0.12em</span>
+      <span class="spec-key">color</span><span class="spec-val">var(--muted) on light · var(--white-45) on dark</span>
+      <span class="spec-key">padding</span><span class="spec-val">11px var(--space-20)</span>
+      <span class="spec-key">border-top</span><span class="spec-val">var(--rule-faint) on light · 1px solid var(--white-06) on dark</span>
+      <span class="spec-key">layout</span><span class="spec-val">flex space-between (.row-between utility)</span>
+      <span class="spec-key">arrow</span><span class="spec-val">15px / weight 400 · var(--secondary) on light · var(--white-45) on dark</span>
+    </div>
+  </div>
+</div>
   </div>
 </section>
 
@@ -1388,1151 +2514,6 @@
         <span class="spec-key">layout</span><span class="spec-val">flex space-between · vertical centre</span>
         <span class="spec-key">copyright</span><span class="spec-val">Barlow Condensed 11px / 700 / uppercase / 0.14em / primary</span>
         <span class="spec-key">links</span><span class="spec-val">same as copyright — hover: opacity-only</span>
-      </div>
-    </div>
-  </div>
-
-  </div></section>
-
-<section class="workspace" id="tab-cards" data-tab="cards">
-  <nav class="sidebar" id="sidebar-cards">
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Overview</span>
-      <a data-scroll-panel="cards" data-scroll-section="card-anatomy"      class="sidebar-link active">Anatomy</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Card Types</span>
-      <a data-scroll-panel="cards" data-scroll-section="card-articles"     class="sidebar-link">Articles</a>
-      <a data-scroll-panel="cards" data-scroll-section="card-events"       class="sidebar-link">Events</a>
-      <a data-scroll-panel="cards" data-scroll-section="card-experiments"  class="sidebar-link">Experiments</a>
-      <a data-scroll-panel="cards" data-scroll-section="card-journal"      class="sidebar-link">Journal</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Behaviour</span>
-      <a data-scroll-panel="cards" data-scroll-section="card-nav"          class="sidebar-link">Nav &amp; Filtering</a>
-      <a data-scroll-panel="cards" data-scroll-section="card-meta"         class="sidebar-link">Meta Strip</a>
-    </div>
-  </nav>
-<div class="canvas">
-
-<div class="section" id="card-anatomy">
-  <div class="section-header">
-    <div class="section-num">01</div>
-    <div class="section-title">Card Anatomy</div>
-    <div class="section-desc">All card types share the same shell — flat, bordered, near-square, no shadow. Depth comes from border contrast on hover. What changes between types is the header tone, the body content, and the footer. Use this as the mental model before reaching for a specific card type.</div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">The shell — every card</span>
-    <div class="spec-grid" style="max-width:780px">
-      <span class="spec-key">background</span><span class="spec-val">var(--surface) — light cards · var(--c-experiment-prototype/concept) — dark cards</span>
-      <span class="spec-key">border</span><span class="spec-val">1px solid var(--ink-18) · darkens to var(--primary) on hover</span>
-      <span class="spec-key">border-radius</span><span class="spec-val">var(--r-card) = 4px (near-square)</span>
-      <span class="spec-key">box-shadow</span><span class="spec-val">none — depth is border-only</span>
-      <span class="spec-key">overflow</span><span class="spec-val">hidden — nothing peeks past the corners</span>
-      <span class="spec-key">layout</span><span class="spec-val">flex column · header → body → meta-strip</span>
-      <span class="spec-key">padding</span><span class="spec-val">scoped via --pad (24px on cards)</span>
-    </div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">Three zones — header, body, meta-strip</span>
-    <p class="comp-rule">Every card resolves to the same three-zone structure. The header announces type and identity (category label, dark zones for events, gradient for masterclass). The body carries the headline + supporting content. The meta-strip closes with utilitarian metadata and a forward arrow.</p>
-    <div class="spec-grid" style="max-width:780px">
-      <span class="spec-key">.card-header</span><span class="spec-val">Type / category labels and bookmark icon. Dark on event &amp; experiment cards.</span>
-      <span class="spec-key">.card-body</span><span class="spec-val">Title + excerpt + tags or framework badge. The reading content of the card.</span>
-      <span class="spec-key">.meta-strip</span><span class="spec-val">Metadata row at the bottom — date, read time, action arrow. See section 05 for the full anatomy.</span>
-    </div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">How category colour works</span>
-    <p class="comp-rule">Each card sets a single CSS custom property — <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> — based on its <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">data-category</code>. Every coloured element inside the card (category label, series pill border, framework badge, journal rule, sdot indicator) reads from that single token. Adding a new category is one line of CSS — pick a colour from the pool, point <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> at it.</p>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">States</span>
-    <div class="spec-grid" style="max-width:780px">
-      <span class="spec-key">default</span><span class="spec-val">faint border, surface bg</span>
-      <span class="spec-key">:hover</span><span class="spec-val">border darkens to primary — only depth signal</span>
-      <span class="spec-key">.past</span><span class="spec-val">applied to past events. Dark zones overlay at <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--ink-72)</code>, content remains legible.</span>
-    </div>
-  </div>
-</div>
-
-<div class="section" id="card-articles">
-  <div class="section-header">
-    <div class="section-num">02</div>
-    <div class="section-title">Article Cards</div>
-    <div class="section-desc">Editorial entries for the writing track. Category label, italic title, optional series pill, excerpt, tag row, and meta strip with date and read time.</div>
-  </div>
-  <div class="cards-grid">
-  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
-    <div class="card-header">
-      <span class="cat">UX Industry</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">A Discipline Reset</h2>
-      <div class="series-row">
-        <span class="series-pill">UX 2.0 Series</span>
-        <span class="series-pos">Part 1 of 3</span>
-        <div class="series-dots">
-          <div class="sdot on"></div><div class="sdot"></div><div class="sdot"></div>
-        </div>
-      </div>
-      <p class="excerpt">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Discipline History</span><span class="tag">Reframe</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Mar 4, 2026</span><span>14 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
-    <div class="card-header">
-      <span class="cat">UX Industry</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">What a Post-AI Workflow Actually Looks Like</h2>
-      <div class="series-row">
-        <span class="series-pill">UX 2.0 Series</span>
-        <span class="series-pos">Part 2 of 3</span>
-        <div class="series-dots">
-          <div class="sdot"></div><div class="sdot on"></div><div class="sdot"></div>
-        </div>
-      </div>
-      <p class="excerpt">The designers thriving right now changed how they think before they changed how they work.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">AI Workflow</span><span class="tag">Actionable</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Mar 28, 2026</span><span>11 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="ux-industry" data-tags="" data-series="ux-2-0">
-    <div class="card-header">
-      <span class="cat">UX Industry</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">UX 2.0 Is a Thinking Problem</h2>
-      <div class="series-row">
-        <span class="series-pill">UX 2.0 Series</span>
-        <span class="series-pos">Part 3 of 3</span>
-        <div class="series-dots">
-          <div class="sdot"></div><div class="sdot"></div><div class="sdot on"></div>
-        </div>
-      </div>
-      <p class="excerpt">Everyone is talking about which AI tools designers should learn. Nobody is asking whether the role itself needs to change. Those are very different conversations.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Role Evolution</span><span class="tag">Uncomfortable</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Apr 14, 2026</span><span>9 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="leading-design" data-special-tag="principle" data-tags="">
-    <div class="card-header">
-      <span class="cat">Leading Design</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">The Designer Who Runs the Room</h2>
-      <span class="fw-badge">Principle</span>
-      <p class="excerpt">Design leadership is about building the conditions where stronger decisions get made — with or without you in them.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Design Influence</span><span class="tag">Foundational</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Feb 12, 2026</span><span>12 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="leading-design" data-tags="for-designers">
-    <div class="card-header">
-      <span class="cat">Leading Design</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: 18px">Why Most Design Teams Address Symptoms</h2>
-      <p class="excerpt">The symptoms are always visible — slow output, constant rework, misaligned stakeholders. The cause sits a layer below.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Team Health</span><span class="tag">Diagnosis</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Jan 22, 2026</span><span>13 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="principle" data-tags="leading-design">
-    <div class="card-header">
-      <span class="cat">For Designers</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">Burnout Lives Below Workload</h2>
-      <span class="fw-badge">Principle</span>
-      <p class="excerpt">Most designers hit the wall when they've lost the thread connecting their work to something they actually care about.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Burnout</span><span class="tag">Honest</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Apr 3, 2026</span><span>8 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="principle" data-tags="">
-    <div class="card-header">
-      <span class="cat">For Designers</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">Your Career Belongs to You</h2>
-      <span class="fw-badge">Principle</span>
-      <p class="excerpt">Most designers wait for something their job is structurally unable to provide. Growth that belongs to you has to be built by you — manager, team, and next role each play their own game.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Career Ownership</span><span class="tag">Reframe</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Mar 18, 2026</span><span>7 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="for-designers" data-tags="">
-    <div class="card-header">
-      <span class="cat">For Designers</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: 18px">The Practice Outside the Practice</h2>
-      <p class="excerpt">Every designer I know who stayed creatively alive for decades had something they made that no one was paying them for. The pattern repeats.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Creative Health</span><span class="tag">Slow Burn</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Feb 27, 2026</span><span>6 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="for-designers" data-tags="ux-industry">
-    <div class="card-header">
-      <span class="cat">For Designers</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: 18px">Prompting Is Specifying</h2>
-      <p class="excerpt">The designers getting the most out of AI articulate intent better — which was always the job.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">AI Prompting</span><span class="tag">Reframe</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Apr 10, 2026</span><span>6 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="ux-industry" data-special-tag="principle" data-tags="">
-    <div class="card-header">
-      <span class="cat">UX Industry</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">The Medium Shapes the Designer</h2>
-      <span class="fw-badge">Principle</span>
-      <p class="excerpt">Every tool you default to is quietly training you to think in its constraints. The designers who stay sharp are the ones who keep changing their medium on purpose.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Tools & Thinking</span><span class="tag">Slow Burn</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Feb 5, 2026</span><span>5 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="leading-design" data-special-tag="framework" data-tags="">
-    <div class="card-header">
-      <span class="cat">Leading Design</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">The Three Layers of Design Influence</h2>
-      <span class="fw-badge">Framework</span>
-      <p class="excerpt">Most design leaders get stuck at Layer 1 — execution quality. Layer 2 is process ownership. Layer 3 is decision framing. Each requires a fundamentally different kind of presence.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Design Influence</span><span class="tag">Structured Model</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Jan 14, 2026</span><span>10 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="for-designers" data-special-tag="framework" data-tags="">
-    <div class="card-header">
-      <span class="cat">For Designers</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">The Creative Recovery Loop</h2>
-      <span class="fw-badge">Framework</span>
-      <p class="excerpt">A four-stage model for restoring creative momentum after burnout or stagnation: Reduce, Restore, Reorient, Re-engage. Most designers skip straight to the last step and wonder why nothing sticks.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Creative Health</span><span class="tag">Process Model</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Mar 2, 2026</span><span>8 min read</span></div>
-  </div>
-
-  <div class="card card--article" data-type="article" data-category="ux-industry" data-special-tag="framework" data-tags="">
-    <div class="card-header">
-      <span class="cat">UX Industry</span>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <h2 class="title" style="margin-bottom: var(--space-12)">Signal vs Noise: A Filter for Post-AI Design Decisions</h2>
-      <span class="fw-badge">Framework</span>
-      <p class="excerpt">When every tool claims to accelerate your work, you need a filter more than a workflow. This model maps which decisions require human judgment — and shows how that line keeps moving.</p>
-      <div class="push-divider"></div>
-      <div class="row-between">
-        <div class="tag-row"><span class="tag">Decision-Making</span><span class="tag">Mental Model</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-    <div class="meta-strip"><span>Apr 20, 2026</span><span>12 min read</span></div>
-  </div>
-</div>
-</div>
-<div class="section" id="card-events">
-  <div class="section-header">
-    <div class="section-num">03</div>
-    <div class="section-title">Event Cards</div>
-    <div class="section-desc">Talks, workshops, and masterclasses. Dark header carrying the event type plus countdown or past pill. Location/remote zone with ghost city text. Format pills below the title.</div>
-  </div>
-  <div class="cards-grid">
-  <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label">In 6 Days</span>
-    </div>
-    <div class="loc-zone">
-      <div class="loc-ghost">Toronto</div>
-      <div style="position:relative">
-        <div class="loc-city">Toronto, ON</div>
-        <div class="loc-venue">Centre for Social Innovation</div>
-      </div>
-    </div>
-    <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 12, 2026</span>
-        <span class="ev-time">Wed · 7:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom: var(--space-12)">Design Leadership in the Age of AI</h2>
-      <p class="ev-desc">A live conversation on leading teams through disruption — making better decisions and staying human.</p>
-      <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-free">Free</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--event" data-type="event" data-category="workshop">
-    <div class="card-header">
-      <span class="ev-type">Workshop</span>
-      <span class="ev-countdown-label">Next Week</span>
-    </div>
-    <div class="loc-zone">
-      <div class="loc-ghost">Toronto</div>
-      <div style="position:relative">
-        <div class="loc-city">Toronto, ON</div>
-        <div class="loc-venue">Gladstone House · 16 seats</div>
-      </div>
-    </div>
-    <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 28, 2026</span>
-        <span class="ev-time">Wed · 10:00 AM – 1:00 PM</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Designing for Decisions</h2>
-      <p class="ev-desc">A half-day session for designers ready to operate at the level of strategy. Built around real problems.</p>
-      <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-paid">$249</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label tomorrow">Tomorrow</span>
-    </div>
-    <div class="remote-zone">
-      <div class="remote-ghost">Remote</div>
-      <div style="position:relative">
-        <div class="remote-label">Remote Talk</div>
-        <div class="remote-sub">Join from anywhere</div>
-      </div>
-    </div>
-    <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 7, 2026</span>
-        <span class="ev-time">Thu · 12:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The State of Design Leadership in 2026</h2>
-      <p class="ev-desc">What does design leadership look like when AI, hiring uncertainty, and organizational pressure are reshaping the role from every direction?</p>
-      <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-free">Free</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--event" data-type="event" data-category="talk">
-    <div class="card-header">
-      <span class="ev-type">Talk</span>
-      <span class="ev-countdown-label today">Today!</span>
-    </div>
-    <div class="remote-zone">
-      <div class="remote-ghost">Remote</div>
-      <div style="position:relative">
-        <div class="remote-label">Remote</div>
-        <div class="remote-sub">12 seats · Join from anywhere</div>
-      </div>
-    </div>
-    <div class="ev-body">
-      <div class="ev-date-row">
-        <span class="ev-date">May 6, 2026</span>
-        <span class="ev-time">Thu · 9:00 AM – 5:00 PM ET</span>
-      </div>
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">Reclaiming Creative Agency as a Senior Designer</h2>
-      <p class="ev-desc">On burnout, self-trust, and the conditions that restore creative momentum when the work has stopped feeling like yours.</p>
-      <div class="push-divider"></div>
-      <div class="ev-footer">
-        <div class="fmt-row"><span class="fmt fmt-remote">Remote</span><span class="fmt fmt-paid">$149</span></div>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--event" data-type="event" data-category="masterclass">
-    <div class="card-header">
-      <span class="ev-type">Masterclass</span>
-      <span class="ev-countdown-label">In 2 Months</span>
-    </div>
-    <div class="mc-body">
-      <h2 class="ev-title" style="margin-bottom:var(--space-12)">The Coaching Designer</h2>
-      <p class="ev-desc">A two-day intensive on building a coaching practice as a working designer — for those ready to lead through questions.</p>
-      <div class="mc-logistics">
-        <div class="mc-logistic"><span class="mc-logistic-icon">◷</span><span>Oct 2 – 3, 2026 · 9 AM – 5 PM ET</span></div>
-        <div class="mc-logistic"><span class="mc-logistic-icon">○</span><span>Virtual · 2 Days</span></div>
-      </div>
-    </div>
-    <div class="mc-cta-zone">
-      <div class="mc-cta-left">
-        <span class="mc-cta-label">Register Now</span>
-        <span class="mc-cta-sub">12 Seats · Online</span>
-      </div>
-      <div class="mc-cta-right">
-        <span class="mc-price">$349</span>
-        <span class="mc-arrow">→</span>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-<div class="section" id="card-experiments">
-  <div class="section-header">
-    <div class="section-num">04</div>
-    <div class="section-title">Experiment Cards</div>
-    <div class="section-desc">Working drafts and prototypes. Deep tonal background with SVG decoration, status dot, and a Launch / Read CTA bar. Distinct from articles to signal "in progress."</div>
-  </div>
-  <div class="cards-grid">
-  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
-    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
-      <circle cx="190" cy="140" r="100" fill="none" stroke="rgba(107,48,128,0.1)" stroke-width="1"/>
-      <circle cx="190" cy="140" r="64" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/>
-      <circle cx="190" cy="140" r="30" fill="none" stroke="rgba(107,48,128,0.22)" stroke-width="1"/>
-      <circle cx="190" cy="140" r="8" fill="rgba(107,48,128,0.65)"/>
-      <circle cx="248" cy="84" r="5" fill="rgba(180,120,220,0.7)"/>
-      <circle cx="132" cy="188" r="4" fill="rgba(180,120,220,0.52)"/>
-      <circle cx="268" cy="168" r="4" fill="rgba(180,120,220,0.44)"/>
-      <circle cx="296" cy="124" r="5" fill="rgba(180,120,220,0.58)"/>
-      <line x1="190" y1="140" x2="248" y2="84" stroke="rgba(180,120,220,0.13)" stroke-width="1"/>
-      <line x1="190" y1="140" x2="132" y2="188" stroke="rgba(180,120,220,0.1)" stroke-width="1"/>
-      <line x1="190" y1="140" x2="268" y2="168" stroke="rgba(180,120,220,0.09)" stroke-width="1"/>
-      <line x1="190" y1="140" x2="296" y2="124" stroke="rgba(180,120,220,0.1)" stroke-width="1"/>
-    </svg>
-    <div class="scrim-proto"></div>
-    <div class="exp-content">
-      <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Prototype</span>
-        <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-forest);flex-shrink:0"></span>Live</div>
-      </div>
-      <div style="flex:1;min-height:80px"></div>
-      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
-        <h2 class="od-title" style="margin-bottom: 10px">UX Audit Generator</h2>
-        <p class="od-excerpt" style="margin-bottom:14px">Feed it a product description — it hypothesizes the most likely UX debt before you open a single screen.</p>
-        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">AI Tool</span><span class="od-tag">Interaction Design</span></div>
-        <span class="od-meta">May 2026</span>
-      </div>
-      <div class="cta-launch" style="position:relative;z-index:2"><span class="label">Launch</span><span class="arrow">→</span></div>
-    </div>
-  </div>
-
-  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
-    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
-      <circle cx="146" cy="100" r="5" fill="color-mix(in srgb, var(--c-forest) 58%, transparent)"/>
-      <circle cx="228" cy="78" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
-      <circle cx="290" cy="134" r="6" fill="color-mix(in srgb, var(--c-forest) 72%, transparent)"/>
-      <circle cx="84" cy="160" r="4" fill="color-mix(in srgb, var(--c-forest) 44%, transparent)"/>
-      <circle cx="206" cy="152" r="8" fill="color-mix(in srgb, var(--c-forest) 82%, transparent)"/>
-      <line x1="146" y1="100" x2="228" y2="78" stroke="color-mix(in srgb, var(--c-forest) 24%, transparent)" stroke-width="1"/>
-      <line x1="228" y1="78" x2="290" y2="134" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
-      <line x1="206" y1="152" x2="290" y2="134" stroke="color-mix(in srgb, var(--c-forest) 27%, transparent)" stroke-width="1"/>
-      <line x1="84" y1="160" x2="206" y2="152" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
-    </svg>
-    <div class="scrim-concept"></div>
-    <div class="exp-content">
-      <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Concept</span>
-        
-      </div>
-      <div style="flex:1;min-height:80px"></div>
-      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
-        <h2 class="od-title" style="margin-bottom: 10px">Thinking Mode Selector</h2>
-        <p class="od-excerpt" style="margin-bottom:14px">An interactive model that maps your current cognitive state to the AI interaction mode that matches — so you're directing it from intent.</p>
-        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Interaction Model</span><span class="od-tag">AI Collaboration</span></div>
-        <span class="od-meta">Apr 2026</span>
-      </div>
-      <div class="cta-read" style="position:relative;z-index:2"><span class="label">Read</span><span class="arrow">→</span></div>
-    </div>
-  </div>
-
-  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
-    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
-      <circle cx="80" cy="80" r="5" fill="rgba(180,120,220,0.58)"/>
-      <circle cx="190" cy="58" r="4" fill="rgba(180,120,220,0.44)"/>
-      <circle cx="306" cy="96" r="6" fill="rgba(180,120,220,0.68)"/>
-      <circle cx="256" cy="184" r="4" fill="rgba(180,120,220,0.48)"/>
-      <circle cx="138" cy="214" r="7" fill="rgba(180,120,220,0.78)"/>
-      <line x1="80" y1="80" x2="190" y2="58" stroke="rgba(180,120,220,0.11)" stroke-width="1"/>
-      <line x1="190" y1="58" x2="306" y2="96" stroke="rgba(180,120,220,0.09)" stroke-width="1"/>
-      <line x1="306" y1="96" x2="256" y2="184" stroke="rgba(180,120,220,0.12)" stroke-width="1"/>
-      <line x1="256" y1="184" x2="138" y2="214" stroke="rgba(180,120,220,0.14)" stroke-width="1"/>
-    </svg>
-    <div class="scrim-proto"></div>
-    <div class="exp-content">
-      <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Prototype</span>
-        <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-amber);flex-shrink:0"></span>In Progress</div>
-      </div>
-      <div style="flex:1;min-height:80px"></div>
-      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
-        <h2 class="od-title" style="margin-bottom: 10px">Scope Estimator</h2>
-        <p class="od-excerpt" style="margin-bottom:14px">Forces tradeoff conversations before the first sprint. Enter constraints — it outputs a range, a confidence level, and a warning.</p>
-        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Decision Tool</span><span class="od-tag">AI Tool</span></div>
-        <span class="od-meta">Apr 2026</span>
-      </div>
-      <div class="cta-launch" style="position:relative;z-index:2;background:rgba(0,0,0,0.3)"><span class="label" style="color:var(--white-45)">Preview</span><span class="arrow" style="color:var(--white-45)">→</span></div>
-    </div>
-  </div>
-
-  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
-    <svg style="position:absolute;inset: 0;z-index:0" viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg" width="380" height="320" preserveAspectRatio="xMidYMid slice">
-      <circle cx="118" cy="94" r="6" fill="color-mix(in srgb, var(--c-forest) 68%, transparent)"/>
-      <circle cx="274" cy="74" r="7" fill="color-mix(in srgb, var(--c-forest) 78%, transparent)"/>
-      <circle cx="196" cy="122" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
-      <circle cx="334" cy="152" r="4" fill="color-mix(in srgb, var(--c-forest) 48%, transparent)"/>
-      <circle cx="158" cy="192" r="5" fill="color-mix(in srgb, var(--c-forest) 58%, transparent)"/>
-      <line x1="118" y1="94" x2="196" y2="122" stroke="color-mix(in srgb, var(--c-forest) 17%, transparent)" stroke-width="1"/>
-      <line x1="196" y1="122" x2="274" y2="74" stroke="color-mix(in srgb, var(--c-forest) 19%, transparent)" stroke-width="1"/>
-      <line x1="274" y1="74" x2="334" y2="152" stroke="color-mix(in srgb, var(--c-forest) 15%, transparent)" stroke-width="1"/>
-      <line x1="158" y1="192" x2="196" y2="122" stroke="color-mix(in srgb, var(--c-forest) 13%, transparent)" stroke-width="1"/>
-    </svg>
-    <div class="scrim-concept"></div>
-    <div class="exp-content">
-      <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Concept</span>
-        
-      </div>
-      <div style="flex:1;min-height:80px"></div>
-      <div style="padding: 0 var(--pad) var(--space-16);position:relative;z-index:2">
-        <h2 class="od-title" style="margin-bottom: 10px">Constraint Builder</h2>
-        <p class="od-excerpt" style="margin-bottom:14px">An interactive design space where you add constraints one by one and watch the solution space shift. A working model of why limitation produces better design.</p>
-        <div class="tag-row" style="margin-bottom:var(--space-12)"><span class="od-tag">Interaction Design</span><span class="od-tag">Speculative</span></div>
-        <span class="od-meta">Mar 2026</span>
-      </div>
-      <div class="cta-read" style="position:relative;z-index:2"><span class="label">Read</span><span class="arrow">→</span></div>
-    </div>
-  </div>
-</div>
-</div>
-<div class="section" id="card-journal">
-  <div class="section-header">
-    <div class="section-num">05</div>
-    <div class="section-title">Journal Cards</div>
-    <div class="section-desc">Short reflective entries. Italic Instrument Serif quote with a left-rule in the journal category colour, a thin excerpt, and a date in the meta strip.</div>
-  </div>
-  <div class="cards-grid">
-  <div class="card card--journal" data-type="journal" data-category="contemplation">
-    <div class="card-header">
-      <div style="display:flex;align-items:center;gap: 7px">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-teal);flex-shrink:0">
-          <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M7 2 A5 5 0 0 1 12 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          <path d="M7 12 A5 5 0 0 1 2 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        <span class="cat">Contemplation<span class="j-num"> 001</span></span>
-      </div>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <p class="j-ruled">I keep returning to the idea that constraints reveal what creativity actually is.</p>
-      <p class="excerpt" style="margin-bottom: var(--space-16)">The blank page is paralysis with a better story.</p>
-      <div class="j-footer-push"></div>
-      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
-      <div class="row-between">
-        <span class="j-date">Apr 29, 2026</span>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--journal" data-type="journal" data-category="insight">
-    <div class="card-header">
-      <div style="display:flex;align-items:center;gap: 7px">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-ochre);flex-shrink:0">
-          <circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.4"/>
-          <line x1="7" y1="1.1" x2="7" y2="2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          <line x1="7" y1="11.1" x2="7" y2="12.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          <line x1="1.1" y1="7" x2="2.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          <line x1="11.1" y1="7" x2="12.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        <span class="cat">Insight<span class="j-num"> 001</span></span>
-      </div>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <p class="j-ruled">Seniority in design is being the person who changes what the room is trying to do.</p>
-      <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">That's a completely different skill — and almost no one teaches it. We spend years getting better at execution and almost no time learning how to shift the frame before execution starts...</p>
-      <div class="j-footer-push"></div>
-      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
-      <div class="row-between">
-        <span class="j-date">Apr 17, 2026</span>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card card--journal" data-type="journal" data-category="introspection">
-    <div class="card-header">
-      <div style="display:flex;align-items:center;gap: 7px">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-violet);flex-shrink:0">
-          <path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-          <path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-        </svg>
-        <span class="cat">Introspection<span class="j-num"> 001</span></span>
-      </div>
-      <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
-    </div>
-    <div class="card-body">
-      <p class="j-ruled">The designers struggling most with AI were already struggling to articulate why their decisions mattered.</p>
-      <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">The tool surfaced a gap that had been sitting quietly for years. That gap is a design thinking problem...</p>
-      <div class="j-footer-push"></div>
-      <div style="height:1px;background:var(--rule);margin-bottom: 18px"></div>
-      <div class="row-between">
-        <span class="j-date">May 4, 2026</span>
-        <span class="arrow">→</span>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<div class="section" id="card-nav">
-  <div class="section-header">
-    <div class="section-num">06</div>
-    <div class="section-title">Card Navigation &amp; Filtering</div>
-    <div class="section-desc">Cards live behind a controller — type pills choose the card family, category pills filter within it. The logic is OR multi-select: enabling more pills shows more results, never narrows them. "All" is a master toggle that clears every category at once. With nothing selected, "All" auto-re-engages so the user is never looking at an empty set.</div>
-  </div>
-
-  <div class="preview-frame" style="padding: 0 0 28px;background:var(--surface);border-color:var(--rule-faint)">
-    <div class="controller">
-      <div class="controller-row">
-        <span class="ctrl-label">Type</span>
-        <div class="pill-group">
-          <button class="fp on" data-cat="all">All</button>
-          <button class="fp" data-cat="article">Articles</button>
-          <button class="fp" data-cat="event">Events</button>
-          <button class="fp" data-cat="experiment">Experiments</button>
-          <button class="fp" data-cat="journal">Journal</button>
-        </div>
-        <span class="count-badge">25 cards</span>
-      </div>
-      <div class="controller-row">
-        <span class="ctrl-label">Topic</span>
-        <div class="pill-group">
-          <button class="fp on" data-cat="all">All</button>
-          <button class="fp" data-cat="ux-industry">UX Industry</button>
-          <button class="fp" data-cat="leading-design">Leading Design</button>
-          <button class="fp" data-cat="for-designers">For Designers</button>
-          <button class="fp" data-cat="talk">Talk</button>
-          <button class="fp" data-cat="workshop">Workshop</button>
-          <button class="fp" data-cat="masterclass">Masterclass</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">Behaviour</span>
-    <div class="spec-grid" style="max-width:720px">
-      <span class="spec-key">Default state</span><span class="spec-val">"All" engaged on every row · everything visible</span>
-      <span class="spec-key">Click "All"</span><span class="spec-val">deselects every other pill in that row · "All" stays on</span>
-      <span class="spec-key">Click a category</span><span class="spec-val">that pill toggles · "All" deselects the moment a category is on</span>
-      <span class="spec-key">Multiple categories</span><span class="spec-val">OR-logic — show cards matching ANY active pill</span>
-      <span class="spec-key">Deselect last category</span><span class="spec-val">"All" auto-re-engages · the user never sees an empty set</span>
-      <span class="spec-key">Visual hover</span><span class="spec-val">border + text shift to category colour (preview the brand)</span>
-      <span class="spec-key">Visual active</span><span class="spec-val">filled category colour, white text — pill becomes the brand for that filter</span>
-    </div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">Pill states</span>
-    <div style="display:flex;gap: 14px;flex-wrap:wrap;align-items:center">
-      <button class="fp" data-cat="ux-industry">Default</button>
-      <button class="fp on" data-cat="ux-industry">Active (UX Industry)</button>
-      <button class="fp on" data-cat="leading-design">Active (Leading)</button>
-      <button class="fp on" data-cat="for-designers">Active (Designers)</button>
-      <button class="fp on" data-cat="talk">Active (Talk)</button>
-    </div>
-  </div>
-</div>
-
-<div class="section" id="card-meta">
-  <div class="section-header">
-    <div class="section-num">07</div>
-    <div class="section-title">Card Meta Strip</div>
-    <div class="section-desc">The unified bottom zone of every card. Same structure across article, journal, and experiment types — information left, arrow right. The only thing that changes is the surface tone and what the metadata says.</div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">Three variants</span>
-    <div style="display:flex;flex-direction:column;gap: var(--space-8);max-width:420px">
-      <div>
-        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Article</div>
-        <div style="background:var(--surface);border:var(--rule-faint);border-radius:0 0 4px 4px;overflow:hidden">
-          <div class="row-between" style="padding: 11px var(--space-20);border-top:var(--rule-faint)">
-            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min</span>
-            <span style="font-size: var(--text-sm);color:var(--secondary)">→</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Journal</div>
-        <div style="background:var(--surface);border:var(--rule-faint);border-radius:0 0 4px 4px;overflow:hidden">
-          <div class="row-between" style="padding: 11px var(--space-20);border-top:var(--rule-faint)">
-            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">May 4, 2026</span>
-            <span style="font-size: var(--text-sm);color:var(--secondary)">→</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Experiment</div>
-        <div style="background:var(--c-experiment-prototype);border-radius:0 0 4px 4px;overflow:hidden">
-          <div class="row-between" style="padding: 11px var(--space-20);border-top:1px solid var(--white-06)">
-            <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--white-45)">May 2026 · Launch</span>
-            <span style="font-size: var(--text-sm);font-weight:300;color:var(--white-45)">→</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="comp-section">
-    <span class="section-label">Specs</span>
-    <div class="spec-grid" style="max-width:600px">
-      <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 13px / 600 / uppercase</span>
-      <span class="spec-key">letter-spacing</span><span class="spec-val">0.12em</span>
-      <span class="spec-key">color</span><span class="spec-val">var(--muted) on light · var(--white-45) on dark</span>
-      <span class="spec-key">padding</span><span class="spec-val">11px var(--space-20)</span>
-      <span class="spec-key">border-top</span><span class="spec-val">var(--rule-faint) on light · 1px solid var(--white-06) on dark</span>
-      <span class="spec-key">layout</span><span class="spec-val">flex space-between (.row-between utility)</span>
-      <span class="spec-key">arrow</span><span class="spec-val">15px / weight 400 · var(--secondary) on light · var(--white-45) on dark</span>
-    </div>
-  </div>
-</div>
-
-</div>
-</section>
-
-<section class="workspace" id="tab-components" data-tab="components">  <nav class="sidebar" id="sidebar-components">
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Structure</span>
-      <a data-scroll-panel="components" data-scroll-section="comp-anatomy" class="sidebar-link active">Sections &amp; Dividers</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Interactive</span>
-      <a data-scroll-panel="components" data-scroll-section="comp-buttons" class="sidebar-link">Buttons & CTAs</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-nav" class="sidebar-link">Navigation</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-filter" class="sidebar-link">Filter Controls</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-pills" class="sidebar-link">Pills & Badges</a>
-    </div>
-  </nav>
-  <div class="canvas">
-  <!-- ══ 04 SECTIONS, HEADERS & DIVIDERS ══ -->
-  <div class="section" id="comp-anatomy">
-    <div class="section-header">
-      <div class="section-num">04</div>
-      <div class="section-title">Sections, Headers & Dividers</div>
-      <div class="section-desc">The structural vocabulary of every documented page. Use this anatomy whenever you're laying out content inside a canvas — it's how the rest of the system stays consistent.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Anatomy</span>
-      <p class="comp-rule">A canvas is a stack of <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section</code> blocks. Each section opens with a <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-header</code> (number + title + description), then any combination of <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-label</code> eyebrows and <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.preview-frame</code> showcases.</p>
-      <div class="preview-frame" style="padding:var(--space-32);background:var(--surface)">
-        <div class="section-header">
-          <div class="section-num">XX</div>
-          <div class="section-title">Section Title</div>
-          <div class="section-desc">A short paragraph naming what this section documents and why a reader would care.</div>
-        </div>
-        <span class="section-label">Section label — eyebrow above a sub-block</span>
-        <div class="preview-frame" style="padding:var(--space-24);min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.preview-frame · rendered preview lives here</div>
-        <span class="section-label">Another section-label introduces a second example</span>
-        <div class="preview-frame" style="padding:var(--space-24);min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.preview-frame · second example</div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">When to use each</span>
-      <div class="spec-grid" style="max-width:780px">
-        <span class="spec-key">.section</span><span class="spec-val">Wraps every documented item in a canvas. Provides 80px bottom margin and a scroll-anchor for the sidebar.</span>
-        <span class="spec-key">.section-header</span><span class="spec-val">Opens every section. Number + title + description. Underlined with <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--rule)</code> (full primary). Don't omit the description — it's where the section earns its place.</span>
-        <span class="spec-key">.section-num</span><span class="spec-val">Two-digit ordinal in mono. Sequential within the canvas. JetBrains Mono 11px muted.</span>
-        <span class="spec-key">.section-title</span><span class="spec-val">Barlow 22px / 600. The h-level for a documentation block.</span>
-        <span class="spec-key">.section-desc</span><span class="spec-val">Body-sm secondary. Caps at ~600px width to keep the eye-line short.</span>
-        <span class="spec-key">.section-label</span><span class="spec-val">Small Barlow Condensed eyebrow above a preview or sub-block. Auto-spaces 80px above siblings (except first child of a section). Use for "Variants", "States", "Anatomy", etc.</span>
-        <span class="spec-key">.preview-frame</span><span class="spec-val">Dot-grid bordered container for the actual rendered example. Inherits surface tone, leaves padding to the inline style of the instance.</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Rule hierarchy — three weights, one axis</span>
-      <p class="comp-rule">Three line-weight tokens, all derived from the primary ink. Choose one axis — line-weight (thin vs thick) <em>or</em> line-darkness (full vs faint). Thick at low opacity reads muddy in both directions.</p>
-      <div style="display:flex;flex-direction:column;gap:var(--space-16);max-width:560px;background:var(--surface);padding:var(--space-24);border:var(--rule-faint);border-radius:4px">
-        <div>
-          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule) · 1px primary</div>
-          <div style="height:1px;background:var(--primary)"></div>
-          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Structural — section-header underline, sidebar separator, table header. The strongest mark.</div>
-        </div>
-        <div>
-          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule-30) · 1px primary at 30%</div>
-          <div style="height:1px;background:var(--ink-30)"></div>
-          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Boundary — topbar bottom edge, layout-nav, layout-footer. Visible but stepped back.</div>
-        </div>
-        <div>
-          <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--secondary);margin-bottom:var(--space-4)">var(--rule-faint) · 1px primary at 18%</div>
-          <div style="height:1px;background:var(--ink-18)"></div>
-          <div style="font-size: var(--text-meta);color:var(--muted);margin-top:var(--space-4)">Separator — card borders, table row dividers, type-row separators, preview-frame edges.</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Section labels — small vs full-width</span>
-      <p class="comp-rule">Two ways to mark a sub-block of content. <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-label</code> is the small inline eyebrow used everywhere in this documentation. <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.section-strip</code> (defined elsewhere) is a heavier full-width strip with a bottom rule, reserved for major group dividers within a flat layout.</p>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Group header — content grouping with optional view-all</span>
-      <p class="comp-rule">Used at the top of a content row (a strip of cards, a list of articles inside an Editorial Index). The eyebrow names the group and shows a count; the "View all" link sits flush right. The eyebrow tints with the group's category colour — set <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--c-current</code> on <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.group-header</code> and the eyebrow inherits it.</p>
-      <div class="preview-frame" style="padding:var(--space-32) var(--space-48);background:var(--surface)">
-        <div class="group-header" style="--c-current: var(--c-denim)">
-          <span class="group-header-eyebrow">For Designers — 3 of 12</span>
-          <a href="#" class="group-header-link">View all →</a>
-        </div>
-        <div style="height:120px;background:var(--canvas-bg);border:var(--rule-faint);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta);margin-bottom: var(--space-32)">.cards-grid · content row</div>
-        <div class="group-header" style="--c-current: var(--c-forest)">
-          <span class="group-header-eyebrow">Leading Design — 3 of 8</span>
-          <a href="#" class="group-header-link">View all →</a>
-        </div>
-        <div style="height:120px;background:var(--canvas-bg);border:var(--rule-faint);border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-family:var(--font-mono);font-size: var(--text-meta)">.cards-grid · content row</div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Group header — anatomy</span>
-      <div class="spec-grid" style="max-width:780px">
-        <span class="spec-key">.group-header</span><span class="spec-val">flex space-between · margin-bottom: var(--space-20). Set <code style="font-family:var(--font-mono);font-size: var(--text-meta)">--c-current</code> here to tint the eyebrow.</span>
-        <span class="spec-key">.group-header-eyebrow</span><span class="spec-val">Barlow Condensed 11px / 700 / uppercase / 0.20em letter-spacing. Inherits <code style="font-family:var(--font-mono);font-size: var(--text-meta)">var(--c-current)</code>.</span>
-        <span class="spec-key">.group-header-link</span><span class="spec-val">Same family/size/weight as the eyebrow but tighter letter-spacing (0.14em) and primary colour. Hover fades opacity to 0.5.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 05 BUTTONS & CTAs ══ -->
-  <div class="section" id="comp-buttons">
-    <div class="section-header">
-      <div class="section-num">05</div>
-      <div class="section-title">Buttons & CTAs</div>
-      <div class="section-desc">Three tiers of call-to-action, each stepping back from the previous. The type is always the thing — buttons exist to clarify action, not to compete with content.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Three Tiers</span>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap: var(--space-20)">
-        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
-          <div style="margin-bottom:var(--space-16)"><button class="btn-dark">Design Principles →</button></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Primary</div>
-          <div class="spec-grid">
-            <span class="spec-key">background</span><span class="spec-val">var(--primary)</span>
-            <span class="spec-key">color</span><span class="spec-val">var(--surface)</span>
-            <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
-            <span class="spec-key">radius</span><span class="spec-val">var(--space-4)</span>
-            <span class="spec-key">padding</span><span class="spec-val">11px var(--space-24)</span>
-            <span class="spec-key">font</span><span class="spec-val">Barlow 14px 600</span>
-            <span class="spec-key">hover</span><span class="spec-val">bg var(--primary-hover)</span>
-          </div>
-          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Use for the single most important action on a section. One primary button per content zone maximum.</p>
-        </div>
-        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
-          <div style="margin-bottom:var(--space-16)"><button class="btn-light">Design Services →</button></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Secondary</div>
-          <div class="spec-grid">
-            <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
-            <span class="spec-key">color</span><span class="spec-val">var(--primary)</span>
-            <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
-            <span class="spec-key">radius</span><span class="spec-val">var(--space-4)</span>
-            <span class="spec-key">padding</span><span class="spec-val">11px var(--space-24)</span>
-            <span class="spec-key">font</span><span class="spec-val">Barlow 14px 600</span>
-            <span class="spec-key">hover</span><span class="spec-val">bg primary, color surface</span>
-          </div>
-          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Supporting action alongside a primary. Use when two actions share equal or near-equal weight.</p>
-        </div>
-        <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24)">
-          <div style="margin-bottom:var(--space-16);display:flex;flex-direction:column;gap: 10px;align-items:flex-start">
-            <button class="btn-ul">View Writing →</button>
-            <button class="cta-ghost" style="cursor:pointer">About</button>
-          </div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);margin-bottom: 10px">Tertiary</div>
-          <div class="spec-grid">
-            <span class="spec-key">border-bottom</span><span class="spec-val">1.5px solid var(--primary)</span>
-            <span class="spec-key">background</span><span class="spec-val">transparent</span>
-            <span class="spec-key">font</span><span class="spec-val">Barlow 14–15px 600</span>
-            <span class="spec-key">hover</span><span class="spec-val">opacity 0.45</span>
-          </div>
-          <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);margin-top: 14px;line-height:1.6">Low-emphasis links and nav. No box. The bold weight retains authority without the visual weight of a bordered button.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">CTA Hierarchy in Context</span>
-      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: 36px 40px">
-        <div style="font-size: var(--text-h3);font-weight:600;letter-spacing:-0.01em;margin-bottom: var(--space-8)">Design Leadership</div>
-        <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.65;margin-bottom: var(--space-24)">Fractional design leadership for early-stage and scaling startups navigating complex product decisions.</div>
-        <div class="btn-row">
-          <button class="btn-dark">View Services →</button>
-          <button class="btn-light">Get in Touch →</button>
-          <button class="btn-ul">Read my approach →</button>
-        </div>
-      </div>
-      <p style="font-size: var(--text-meta);font-weight:500;color:var(--muted);margin-top: var(--space-12);line-height:1.6">One primary · One secondary · One tertiary. The eye reads them in order. Never two primary buttons in the same zone.</p>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Usage</span>
-      <div class="usage-row">
-        <div class="usage-card do">
-          <span class="usage-label">✓ Do</span>
-          <p class="usage-text">Use one primary per content zone · Let the hierarchy guide reading order · Use underline link for low-stakes navigation · Arrow suffix (→) on forward navigation</p>
-        </div>
-        <div class="usage-card dont">
-          <span class="usage-label">✗ Don't</span>
-          <p class="usage-text">Two primary buttons side by side · Using accent colour (var(--accent)) as button fill · Pill radius on buttons — system uses 4px · All-caps button text</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 06 NAVIGATION ══ -->
-  <div class="section" id="comp-nav">
-    <div class="section-header">
-      <div class="section-num">06</div>
-      <div class="section-title">Navigation</div>
-      <div class="section-desc">A centered pill-button bar. All nav links share the same component — there is no separate "active" styling beyond what hover provides. The handwritten logotype sits outside the type system entirely.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Anatomy</span>
-      <div style="background:var(--neutral);border:var(--rule-30);border-radius:4px;padding: var(--space-20) var(--space-48);display:flex;align-items:center;justify-content:space-between">
-        <span style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);color:var(--primary)">alex m. chong</span>
-        <div class="npbar" style="margin: 0">
-          <a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a>
-          <a href="#">Coaching</a><a href="#">About</a><a href="#">Writing</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Nav Pill Specs</span>
-      <div class="spec-grid" style="max-width:480px">
-        <span class="spec-key">background</span><span class="spec-val">var(--surface)</span>
-        <span class="spec-key">border</span><span class="spec-val">1px solid var(--primary)</span>
-        <span class="spec-key">border-radius</span><span class="spec-val">var(--space-4)</span>
-        <span class="spec-key">padding</span><span class="spec-val">var(--space-8) 18px</span>
-        <span class="spec-key">margin</span><span class="spec-val">var(--space-4) between pills</span>
-        <span class="spec-key">font</span><span class="spec-val">Barlow 13px 600</span>
-        <span class="spec-key">letter-spacing</span><span class="spec-val">0.02em — mixed case</span>
-        <span class="spec-key">hover</span><span class="spec-val">bg var(--primary), color surface</span>
-        <span class="spec-key">wrapping</span><span class="spec-val">flex-wrap — breaks to 2 rows on narrow</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">States</span>
-      <div class="states-row">
-        <div class="state-item">
-          <span class="state-label">Default</span>
-          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--surface);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--primary);text-decoration:none">Coaching</a>
-        </div>
-        <div class="state-item">
-          <span class="state-label">Hover</span>
-          <a href="#" style="display:inline-block;margin: var(--space-4);padding: var(--space-8) 18px;border-radius:4px;background:var(--primary);border:1px solid var(--primary);font-family:var(--font);font-size: var(--text-meta);font-weight:600;letter-spacing:0.02em;color:var(--surface);text-decoration:none">Coaching</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 05 FILTER PILLS ══ -->
-  <div class="section" id="comp-filter">
-    <div class="section-header">
-      <div class="section-num">07</div>
-      <div class="section-title">Filter Controls</div>
-      <div class="section-desc">OR multi-select content filters. Category identity is expressed through colour — hover reveals the category colour, active fills it. Barlow Condensed only — these are the designated space for the condensed variant.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">All Three States — Live</span>
-      <div style="display:flex;gap: var(--space-8);flex-wrap:wrap;margin-bottom: 10px">
-        <button class="fp" data-cat="all">All</button>
-        <button class="fp on" data-cat="ux-industry">UX Industry</button>
-        <button class="fp" data-cat="leading-design">Leading Design</button>
-        <button class="fp on" data-cat="for-designers">For Designers</button>
-        <button class="fp" data-cat="talk">Talk</button>
-        <button class="fp on" data-cat="workshop">Workshop</button>
-        <button class="fp" data-cat="masterclass">Masterclass</button>
-      </div>
-      <p style="font-size: var(--text-meta);font-weight:500;color:var(--muted);line-height:1.6">Click to toggle. Hover any inactive pill to preview its category colour.</p>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Specs</span>
-      <div class="spec-grid" style="max-width:480px">
-        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 12px 700 uppercase</span>
-        <span class="spec-key">letter-spacing</span><span class="spec-val">0.14em</span>
-        <span class="spec-key">border-radius</span><span class="spec-val">3px</span>
-        <span class="spec-key">padding</span><span class="spec-val">6px 14px</span>
-        <span class="spec-key">default border</span><span class="spec-val">1px solid var(--primary)</span>
-        <span class="spec-key">default bg</span><span class="spec-val">surface</span>
-        <span class="spec-key">hover</span><span class="spec-val">border + text → category colour</span>
-        <span class="spec-key">active</span><span class="spec-val">category colour fill, white text</span>
-        <span class="spec-key">logic</span><span class="spec-val">OR — multiple selections allowed</span>
-        <span class="spec-key">all deselected</span><span class="spec-val">All re-activates automatically</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Usage</span>
-      <div class="usage-row">
-        <div class="usage-card do">
-          <span class="usage-label">✓ Do</span>
-          <p class="usage-text">Use for content type and category filtering · Allow multiple selections simultaneously · Always include an All option · Show active count or result count nearby when possible</p>
-        </div>
-        <div class="usage-card dont">
-          <span class="usage-label">✗ Don't</span>
-          <p class="usage-text">Use Barlow Condensed outside of pills · Use for AND logic without making that explicit · Use more than 8 pills in a row — wrap is fine but consider grouping</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card system documentation lives on the dedicated Content Cards tab — this Components tab covers tokens and primitives. -->
-
-  <!-- ══ 08 PILLS & BADGES ══ -->
-  <div class="section" id="comp-pills">
-    <div class="section-header">
-      <div class="section-num">08</div>
-      <div class="section-title">Pills & Badges</div>
-      <div class="section-desc">Four distinct pill types serving different purposes. All use Barlow Condensed. The shapes are similar — the distinction lives in color, fill, and context of use.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Series Pill + Progress</span>
-      <div style="display:flex;align-items:center;gap: 10px;flex-wrap:wrap;margin-bottom: var(--space-16)">
-        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-terracotta) 35%, transparent);color:var(--c-terracotta)">UX 2.0 Series</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">Part 2 of 3</span>
-        <div style="display:flex;gap: 3px;align-items:center">
-          <div style="width:5px;height:5px;border-radius:50%;background:var(--c-terracotta)"></div>
-          <div style="width:5px;height:5px;border-radius:50%;background:var(--c-terracotta)"></div>
-          <div style="width:5px;height:5px;border-radius:50%;background:color-mix(in srgb, var(--c-terracotta) 20%, transparent)"></div>
-        </div>
-      </div>
-      <div class="spec-grid" style="max-width:420px">
-        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 12–13px 600 uppercase</span>
-        <span class="spec-key">border</span><span class="spec-val">category colour at 35% opacity</span>
-        <span class="spec-key">color</span><span class="spec-val">category colour</span>
-        <span class="spec-key">bg</span><span class="spec-val">transparent</span>
-        <span class="spec-key">radius</span><span class="spec-val">4px</span>
-        <span class="spec-key">use</span><span class="spec-val">Multi-part article series only</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Principle / Framework Badge</span>
-      <div style="display:flex;gap: 10px;flex-wrap:wrap;margin-bottom: var(--space-16)">
-        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-terracotta) 40%, transparent);color:var(--c-terracotta);display:inline-flex;align-self:flex-start">Principle</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:600;letter-spacing:0.13em;text-transform:uppercase;padding: 3px 10px;border-radius:4px;border:1px solid color-mix(in srgb, var(--c-forest) 40%, transparent);color:var(--c-forest);display:inline-flex;align-self:flex-start">Framework</span>
-      </div>
-      <p style="font-size: var(--text-meta);font-weight:500;color:var(--secondary);line-height:1.6">Sits below the article title. Signals that the article is a foundational position or structured model — not a news piece or opinion.</p>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Event Format Tags</span>
-      <div style="display:flex;gap: var(--space-8);flex-wrap:wrap;align-items:center;margin-bottom: var(--space-16)">
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-free-text);background:var(--c-free-bg);border:1px solid color-mix(in srgb, var(--c-forest) 24%, transparent);line-height:1.4;display:inline-flex;align-items:center">Free</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--primary);background:var(--ink-08);border:1px solid var(--ink-18);line-height:1.4;display:inline-flex;align-items:center">$249</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-inperson-text);background:var(--c-inperson-bg);border:1px solid color-mix(in srgb, var(--c-clay) 20%, transparent);line-height:1.4;display:inline-flex;align-items:center">In-Person</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding: 3px 10px;border-radius:3px;color:var(--c-remote-text);background:var(--c-remote-bg);border:1px solid var(--ink-12);line-height:1.4;display:inline-flex;align-items:center">Remote</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--white);border-radius:3px;padding: 3px 10px;background:var(--c-countdown-bg);line-height:1.4;display:inline-flex;align-items:center">In 6 Days</span>
-        <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--c-exp-text-bright);border-radius:3px;padding: 3px 10px;background:var(--c-past-bg);border:1px solid var(--white-15);line-height:1.4;display:inline-flex;align-items:center">Past</span>
-      </div>
-      <div class="spec-grid" style="max-width:460px">
-        <span class="spec-key">font</span><span class="spec-val">Barlow Condensed 13px 700 uppercase</span>
-        <span class="spec-key">radius</span><span class="spec-val">3px</span>
-        <span class="spec-key">padding</span><span class="spec-val">3px 10px</span>
-        <span class="spec-key">display</span><span class="spec-val">inline-flex align-items:center</span>
-        <span class="spec-key">line-height</span><span class="spec-val">1.4 — ensures vertical alignment</span>
-        <span class="spec-key">use</span><span class="spec-val">Event cards only, ev-footer zone</span>
       </div>
     </div>
   </div>

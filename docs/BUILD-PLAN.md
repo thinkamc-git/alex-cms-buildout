@@ -2105,6 +2105,20 @@ Worked example using real selectors and real files. The recipe is a single ~150-
 
 **Goal:** Remove redundant old CSS, rebuild showcase as four tabs, ship v2.1 to prod.
 
+> **Showcase IA — LOCKED 2026-06-05 (supersedes "four tabs Root/Pages/Blocks/CMS").**
+> The §32 "4-tab by-CSS-file" framing was a dev-ref model; the showcase is design-
+> system *documentation*, organized by design concept. Agreed structure — **5 top
+> tabs** (≤6 cap), each with a left sub-nav, restoring the old rich written content:
+> 1. **Foundations** — Colour · Typography · Spacing · Radii & Shadows · Rules · Texture
+> 2. **Components** — *Elements:* Buttons & CTAs · Pills & Badges · Filter Controls · Navigation · Form Fields · Dividers & Headers. *Cards:* Anatomy · Article · Journal · Event · Experiment · Meta & Filtering. (Content Cards folded in — cards are components — so neither tab reads thin; Foundations stays separate as the primitives reference.)
+> 3. **Layouts** — *Sections* (Hero, Two-Column, Statement, Stat Row, Service List, Pull Quote, Bio, Testimonials, Top Bar, Footer) + *Templates* (Landing, Editorial, Index, Article, Services, About, Resume)
+> 4. **CMS** — the admin mini-DS (Buttons · Tables · Forms · Status/Stage Pills · Cards (Kanban/Library) · **Assembled Layout**). Houses ONLY unique CMS elements; mirrors the in-CMS `/cms/design-system` viewer from a single shared source so they never drift. Absorbs the durable part of the old "Applied Aesthetics" (the assembled CMS layout); the rest (dashboards/mobile mockups) is regenerated later or dropped.
+> 5. **CSS Library** — the lone *technical* lens, indexed by CSS file (Root/Pages/Blocks/CMS), each rendered in an isolated frame loading its real slice. Renamed from "Component Library" to avoid colliding with tab 2.
+>
+> **Single source of truth:** every example (rich docs + CSS Library + the in-CMS viewer) loads the actual canonical slices, so one CSS edit propagates to docs, library, and the live site.
+>
+> **Build order (chunks):** A ✅ restore + shell · B ✅ Foundations · C CMS tab (+ shared source, repoint in-CMS viewer) · D refresh Components/Cards/Layouts + convert CSS Library to the native sidebar convention · E finish CSS Library Blocks/CMS slices · F (last) regenerate Applied/assembled examples.
+
 **Scope:**
 - Delete old CSS files (3 files)
 - Strip inline styles from each `cms/views/*.php` in sequence with per-view verification

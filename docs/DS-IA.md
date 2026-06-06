@@ -106,3 +106,66 @@ in the showcase, e.g.:
 - the **header/footer "dot"** (the `--dot-grid` / dot-surface treatment, separator dots)
 - a **list of icons** used across components (nav icons, action icons, the inline SVGs)
 - any other selectors/treatments present in the slices but missing from the tabs.
+
+---
+
+## 6. LOCKED PLAN — Phase 22.6b remaining (2026-06-06)
+
+> Captured before a context compact. This section is the source of truth for
+> resuming. Nothing here is prod-shipped: **staging (`/_ds/`) is Alex's working
+> reference; do NOT prod-ship 22.6b until the whole plan is done.**
+
+### Current state (done, on staging)
+- **7 tabs:** Foundations · Components · Patterns · Pages · CMS · Applied · CSS Library
+  (over the 6 soft-cap; accepted for now — may merge later).
+- Sub-navs grouped by function; scroll fixed (stage `overflow-y:auto` + JS-fit iframes).
+- Content refreshed: **event cards** (past-event hatch/clock) + **experiment constellations** match prod.
+- **CMS** uses a single shared source `showcase/cms.html` (CMS tab + CSS Library CMS slice + in-CMS viewer); **CMS Panel model built** at `showcase/cms-panel.html` (real CMS, isolated).
+- Showcase load motion (cascade reveal) added.
+
+### Remaining work (the plan)
+- **A · Foundations → Welcome section** (opens the tab): the philosophy/intent intro. Details + draft below.
+- **B · CMS tab → rich documentation.** Rework to read like the **Components** tab — components shown *in context with writing/usage*, NOT class-name boxes. (Stays an isolated iframe; `style-cms.css` collides with showcase chrome.) The terse box-catalog belongs in **CSS Library → CMS slice**, not the CMS tab.
+- **C · Applied → light concept showcases.** Inspiration only — capture the *essence*, not a functional UI (depth = today's CMS Panel / Coaching). Each concept = one section, its own isolated `showcase/*.html` (DS CSS + page-scoped future CSS, never in production slices). **New components are documented inside their own concept's section** (not a separate global catalog). Parity first: reuse real components; only genuinely-new things get called out as new (e.g. Analytics' card + progress bars). Split a concept in two if it gets heavy.
+  - Set: refresh **CMS Panel (✓ built), Coaching, Analytics, Mobile** + add **Command Center (View A)** + **Together (View B)** (specs below).
+- **D · In-CMS viewer** (`/cms/design-system`) = the **CSS Library** (4 by-file slices: Root/Pages/Blocks/CMS) **+ a 5th tab that launches the full `/_ds/` DS**. Nothing else. (Currently it iframes cms.html — needs rebuilding to this.)
+- **E · Existence audit** — document what EXISTS but isn't shown: header/footer **dot / dot-surface** (`--dot-grid`), an **icon list** (nav + action inline SVGs), other undocumented selectors.
+- **F · Close 22.6** — annotate DS-AUDIT, check §3 box, then the **gated prod ship** (backup + deploy), only once A–E are done.
+
+### A · Welcome section — extracted insight + draft
+Insight pulled from Alex (2026-06-06):
+- **Feeling (all four):** timeless & archival · bold & opinionated · calm & deliberate · crafted & tactile → synthesis = **"quietly bold."**
+- **The foil (what to move away from):** coldness / soulless minimalism · trend-chasing / disposable · decorative noise. **NOT** anti-SaaS-sameness (he did not pick that).
+- **Print DNA to carry:** paper texture & ink · editorial measure & rhythm · rules/lines as structure. (Less about rigid grid.)
+- **Personal:** the **writer / coach / designer tension** is the soul of it.
+
+**WRITING TONE RULES (Alex, 2026-06-06):**
+- **No "good" moral dichotomies** (don't frame as good-vs-bad).
+- **Voice: artist statement** — confident, clear, evocative; state what the work *is* and trust it (not a defensive justification).
+- **No comparative negation** — avoid "X over Y", "rather than", "instead of", "avoids/not". State what it **IS**, declaratively.
+
+**Draft copy (revised to the tone rules — for review):**
+
+> ## How this is built
+> This is a design system made the way books are made — with structure, restraint, and a point of view. Its roots are in the Bauhaus and in the printed design manuals of the 1980s and early '90s: work built for ink and paper, brought whole to the screen.
+>
+> It is quietly bold. The type is confident, the contrast is real, and everything is given room to breathe. It is meant to feel made, and meant to last.
+>
+> The page behaves like paper. A faint texture and ink-dark type give the screen a surface; hairline rules do the organizing; line length, spacing, and rhythm are measured so the work reads like a printed page.
+>
+> Three sensibilities hold it together: the writer, who lets language lead; the coach, who keeps it calm and intentional; the designer, who keeps it disciplined. The system lives where they meet.
+
+**Open question:** voice — keep the confident **system voice** (above) or shift to **first-person (Alex)**? (Undecided.)
+
+### C · New Applied views — specs
+**View A — Command Center** (personal life-rhythm surface). Essence: "what am I oriented toward, and how am I moving" — calm, accomplishment-first.
+- Zones: Season banner (current season + its 6 intentions) · Cadence spine (Season›Month›Week) · This Month · This Week (active) · Rituals (open/close week·month·season) · Reflected progress (accomplishment, narrative).
+- Parity: serif statements, cards, tags/pills, section headers + dividers, buttons, meta.
+- New components (kept in this section): `Intention Card` · `Cadence Nav` · `Ritual Prompt` · `Accomplishment Meter`.
+
+**View B — Together** (private shared dashboard for two). Essence: staying aligned as an act of love.
+- Zones: Paired presence (both people + each other's energy) · Shared week · Shared projects & plans · Touchpoints.
+- Parity: circular author avatar, cards, week layout, pills/tags, section headers.
+- New components: `Energy Indicator` · `Paired Presence` · `Shared Project Card`.
+
+Shared-across-views future components: `Accomplishment / progress bar` (Analytics + Command Center), `Energy Indicator` (Together + Command Center).

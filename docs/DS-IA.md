@@ -66,3 +66,34 @@ real system does and it's the most-referenced page.
 
 **Open naming choices:** Patterns vs "Page Blocks"; whether "Content Cards" sit
 under Components/Containment (recommended) or get their own tab.
+
+---
+
+## 4. Applied tab + "Future Components" (added 2026-06-06)
+
+**Applied is a sandbox** — the design system used in contexts *beyond the website*
+(CMS admin, coaching dashboard, analytics, mobile app). These explorations surface
+**new components that are not in the production DS**. That's allowed, but governed:
+
+- **Each Applied example is a self-contained iframe page** (`_design-system/showcase/*.html`)
+  that loads the canonical DS CSS **plus any new/"future" component styles scoped to
+  that page only**. New-component CSS NEVER goes into the production slices
+  (`tokens/pages/blocks/cms.css`) until it's been promoted.
+- **"Future Components"** is a section *inside* Applied that catalogues the new
+  components these explorations introduce — candidates for later promotion into the
+  real DS (at which point they get real slice CSS + a Components entry).
+- Examples: **CMS Panel** = the real CMS admin assembled from existing components
+  (`showcase/cms-panel.html`, isolated because `style-cms.css` owns `.topbar`/`.sidebar`).
+  Coaching Dashboard / Analytics / Mobile = explorations that may introduce future
+  components.
+
+**This protects production CSS:** exploratory styling is quarantined in Applied's
+iframe pages; nothing leaks to the live site.
+
+## 5. Existence audit — TODO (flagged 2026-06-06)
+
+After Applied, audit for things that EXIST in the CSS/markup but aren't documented
+in the showcase, e.g.:
+- the **header/footer "dot"** (the `--dot-grid` / dot-surface treatment, separator dots)
+- a **list of icons** used across components (nav icons, action icons, the inline SVGs)
+- any other selectors/treatments present in the slices but missing from the tabs.

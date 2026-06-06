@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · CMS Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied → CMS Panel: the actual CMS admin assembled from the design system,
+     rendered in isolation (style-cms.css owns .topbar/.sidebar, which collide
+     with the showcase chrome — hence the iframe). Mirrors the real /cms shell. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style> body { margin: 0; } a { cursor: default; } </style>
+</head>
+<body>
+
+<header class="topbar dot-surface" role="banner">
+  <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em></div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-breadcrumb"><span class="crumb-active">Articles</span></div>
+  <div class="topbar-right"><button class="btn-sec">Log out</button></div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-section">
+      <span class="nav-label">Writer's Desk</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="6" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 10.5h3M6.5 12.5h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Ideation</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="2.5" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="3" width="2.5" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="2.5" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>Draft Writing</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Library</span>
+      <a class="nav-item is-active" href="#" aria-current="page"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Articles</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Journals</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg>Live Sessions</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Experiments</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Site</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Pages</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Navigation</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="view active">
+      <div class="view-header">
+        <div class="view-header-left">
+          <div class="view-title">Articles</div>
+          <div class="view-subtitle">Everything in the article library — drafts in progress and published pieces.</div>
+        </div>
+        <div class="view-header-actions"><button class="btn-pri">+ New Article</button></div>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-label">Stage</span>
+        <div class="filter-group">
+          <a class="filter-pill all-btn active" href="#">All</a>
+          <a class="filter-pill" href="#">Draft</a>
+          <a class="filter-pill" href="#">Published</a>
+        </div>
+        <span class="filter-sep"></span>
+        <span class="filter-label">Category</span>
+        <div class="filter-group">
+          <a class="filter-pill" href="#" style="--pill-cat:var(--c-terracotta)">UX Industry</a>
+          <a class="filter-pill" href="#" style="--pill-cat:var(--c-forest)">Leading Design</a>
+        </div>
+      </div>
+      <div class="content-area">
+        <div class="content-block">
+          <div class="table-card">
+            <table class="cms-table">
+              <thead><tr><th>Title</th><th>Category</th><th>Stage</th><th>Updated</th><th></th></tr></thead>
+              <tbody>
+                <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td><span class="pill pill-published" style="display:none"></span><span class="pill pill-live">Live</span></td><td class="td-mono">Jun 4</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td class="td-title"><div class="t">The Tools Don't Matter</div><div class="slug">/articles/tools-dont-matter</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span></td><td><span class="pill pill-draft">Draft</span></td><td class="td-mono">Jun 2</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td class="td-title"><div class="t">Notes Toward a Practice</div><div class="slug">/articles/notes-toward-a-practice</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span></td><td><span class="pill pill-outline">Outline</span></td><td class="td-mono">May 30</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td class="td-title"><div class="t">What Senior Really Means</div><div class="slug">/articles/what-senior-means</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td><span class="pill pill-concept">Concept</span></td><td class="td-mono">May 27</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

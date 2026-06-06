@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS · system-cms.css</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- ============================================================
+     CMS slice — the SINGLE SHARED SOURCE for the admin component
+     catalogue. Iframed by three consumers so they never drift:
+       · /_ds/  → CMS tab
+       · /_ds/  → CSS Library → CMS slice
+       · /cms/design-system → the in-CMS viewer (inside CMS chrome)
+     Loads the admin barrel + style-cms overrides — the same CSS the
+     live admin uses, so one edit propagates everywhere.
+     Scope: ONLY components unique to the CMS (admin). Shared tokens
+     live in the Components → Foundations tab, not here.
+     ============================================================ -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  /* Page-local catalogue scaffold (not part of the DS). */
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .cms-cat { padding: var(--space-32) var(--space-32) var(--space-24); border-bottom: var(--rule-faint); scroll-margin-top: var(--space-16); }
+  .cms-cat:last-child { border-bottom: 0; }
+  .cms-cat-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--secondary); margin: 0 0 var(--space-20); padding-bottom: var(--space-12); border-bottom: var(--rule-faint); }
+  .cms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-16); }
+  .cms-grid.is-wide { grid-template-columns: 1fr; }
+  .cms-item { border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
+  .cms-render { padding: var(--space-20) var(--space-16); display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; min-height: 60px; }
+  .cms-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border-top: var(--rule-faint); margin-top: auto; }
+  .cms-class { font-family: var(--font-mono); font-size: 11px; color: var(--secondary); background: var(--ink-08); padding: 2px 6px; border-radius: 2px; white-space: normal; word-break: break-word; min-width: 0; }
+  .cms-note { padding: 0 var(--space-12) var(--space-8); font-size: 11px; color: var(--muted); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ═══ BUTTONS ═══ -->
+<section class="cms-cat" id="cms-buttons">
+  <h2 class="cms-cat-h">Buttons</h2>
+  <div class="cms-grid">
+    <div class="cms-item"><div class="cms-render"><button class="btn-pri">Publish</button></div><div class="cms-meta"><code class="cms-class">.btn-pri</code></div></div>
+    <div class="cms-item"><div class="cms-render"><button class="btn-sec">Edit</button></div><div class="cms-meta"><code class="cms-class">.btn-sec</code></div></div>
+    <div class="cms-item"><div class="cms-render"><button class="btn-danger">Delete</button></div><div class="cms-meta"><code class="cms-class">.btn-danger</code></div></div>
+    <div class="cms-item"><div class="cms-render"><button class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete"><svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="cms-meta"><code class="cms-class">.btn-icon · .btn-icon-danger</code></div></div>
+    <div class="cms-item"><div class="cms-render"><button class="btn-pri btn-tiny">Save</button> <button class="btn-sec btn-tiny">Cancel</button></div><div class="cms-meta"><code class="cms-class">.btn-tiny</code></div><div class="cms-note">Size modifier — composable with any button.</div></div>
+    <div class="cms-item"><div class="cms-render" style="display:block"><button class="btn-add-dashed">+ Add row</button></div><div class="cms-meta"><code class="cms-class">.btn-add-dashed</code></div></div>
+  </div>
+</section>
+
+<!-- ═══ TABLES ═══ -->
+<section class="cms-cat" id="cms-tables">
+  <h2 class="cms-cat-h">Tables</h2>
+  <div class="table-card">
+    <table class="cms-table">
+      <thead><tr><th style="width:52%">Title</th><th>Stage</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+        <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="pill pill-draft">Draft</span></td><td class="td-mono">2026-06-04</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+        <tr class="row-clickable"><td class="td-title"><div class="t">Notes on Craft</div><div class="slug live">/journals/notes-on-craft</div></td><td><span class="pill pill-live">Live</span></td><td class="td-mono">2026-05-28</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="cms-note" style="padding-left:0"><code class="cms-class">.table-card &gt; .cms-table</code> · rows <code class="cms-class">.row-clickable</code> · cells <code class="cms-class">.td-title .td-mono .cell-actions</code></p>
+</section>
+
+<!-- ═══ FORM FIELDS ═══ -->
+<section class="cms-cat" id="cms-forms">
+  <h2 class="cms-cat-h">Form fields</h2>
+  <div class="cms-grid is-wide">
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Title <span class="field-req">*</span></label><input class="field-input" value="A Discipline Reset"></div></div><div class="cms-meta"><code class="cms-class">.field-input · .field-label · .field-req</code></div></div>
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Stage</label><select class="field-select"><option>Draft</option><option>Published</option></select></div></div><div class="cms-meta"><code class="cms-class">.field-select</code></div></div>
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Slug</label><div class="slug-field"><span class="slug-prefix">/articles/</span><input class="slug-input" value="a-discipline-reset"></div></div></div><div class="cms-meta"><code class="cms-class">.slug-field · .slug-prefix · .slug-input</code></div></div>
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-note-box">Slugs are permanent once published — changing one issues a 301 redirect.</div></div><div class="cms-meta"><code class="cms-class">.field-note-box</code></div></div>
+  </div>
+</section>
+
+<!-- ═══ STATUS & STAGE PILLS ═══ -->
+<section class="cms-cat" id="cms-pills">
+  <h2 class="cms-cat-h">Status &amp; stage pills</h2>
+  <div class="cms-grid">
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-idea">Idea</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-idea</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-concept">Concept</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-concept</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-outline">Outline</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-outline</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-draft">Draft</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-draft</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-live">Live</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-live</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-scheduled">Scheduled</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-scheduled</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="pill pill-hidden">Hidden</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-hidden</code></div></div>
+  </div>
+</section>
+
+<!-- ═══ TYPE & STATUS BADGES ═══ -->
+<section class="cms-cat" id="cms-badges">
+  <h2 class="cms-cat-h">Type &amp; status badges</h2>
+  <div class="cms-grid">
+    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-article">Article</span></div><div class="cms-meta"><code class="cms-class">.type-badge .tb-article</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-journal">Journal</span></div><div class="cms-meta"><code class="cms-class">.tb-journal</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-live-session">Live Session</span></div><div class="cms-meta"><code class="cms-class">.tb-live-session</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-experiment">Experiment</span></div><div class="cms-meta"><code class="cms-class">.tb-experiment</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="st st-pub">Published</span></div><div class="cms-meta"><code class="cms-class">.st .st-pub</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="st st-dft">Draft</span></div><div class="cms-meta"><code class="cms-class">.st .st-dft</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="st st-sch">Scheduled</span></div><div class="cms-meta"><code class="cms-class">.st .st-sch</code></div></div>
+  </div>
+</section>
+
+<!-- ═══ TAGS & LABELS ═══ -->
+<section class="cms-cat" id="cms-tags">
+  <h2 class="cms-cat-h">Tags &amp; labels</h2>
+  <div class="cms-grid">
+    <div class="cms-item"><div class="cms-render"><span class="tag">Series</span></div><div class="cms-meta"><code class="cms-class">.tag</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="tag special">Featured</span></div><div class="cms-meta"><code class="cms-class">.tag.special</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="val-pill">value-slug</span></div><div class="cms-meta"><code class="cms-class">.val-pill</code></div></div>
+    <div class="cms-item"><div class="cms-render"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></div><div class="cms-meta"><code class="cms-class">.cat-label · .cat-label-dot</code></div></div>
+  </div>
+</section>
+
+<!-- ═══ CARDS ═══ -->
+<section class="cms-cat" id="cms-cards">
+  <h2 class="cms-cat-h">Cards</h2>
+  <div class="cms-grid">
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="kcard" style="cursor:default"><div class="kcard-head"><div class="kcard-title">A Discipline Reset</div><span class="type-badge tb-article">Art</span></div><div class="kcard-summary">A short summary line that wraps to two lines then truncates when it runs long enough to need it.</div><div class="kcard-foot"><span class="pill pill-draft">Draft</span><span class="kcard-date">Jun 4</span></div></div></div><div class="cms-meta"><code class="cms-class">.kcard</code></div><div class="cms-note">Draft-Writing / ideation board card.</div></div>
+    <div class="cms-item"><div class="cms-render" style="display:block"><div class="pub-card" style="cursor:default"><div class="pub-card-status"><span class="st st-pub">Pub</span></div><div class="pub-card-hd"><span class="pub-card-cat" style="color:var(--c-forest)">Leading Design</span></div><div class="pub-card-bd"><div class="pub-card-title">A Discipline Reset</div></div></div></div><div class="cms-meta"><code class="cms-class">.pub-card</code></div><div class="cms-note">Published-library grid card.</div></div>
+  </div>
+</section>
+
+</body>
+</html>

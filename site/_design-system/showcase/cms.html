@@ -3,122 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CMS · system-cms.css</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>CMS — Components in context</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- ============================================================
-     CMS slice — the SINGLE SHARED SOURCE for the admin component
-     catalogue. Iframed by three consumers so they never drift:
-       · /_ds/  → CMS tab
-       · /_ds/  → CSS Library → CMS slice
-       · /cms/design-system → the in-CMS viewer (inside CMS chrome)
-     Loads the admin barrel + style-cms overrides — the same CSS the
-     live admin uses, so one edit propagates everywhere.
-     Scope: ONLY components unique to the CMS (admin). Shared tokens
-     live in the Components → Foundations tab, not here.
+     CMS tab — the admin design system documented IN CONTEXT, the way
+     the public Components tab reads: each component shown doing its job,
+     with a short usage note, not a grid of class-name boxes.
+     The terse class catalogue lives in CSS Library → CMS slice
+     (cms-classes.html). Both load the real admin CSS, so neither drifts.
      ============================================================ -->
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  /* Page-local catalogue scaffold (not part of the DS). */
+  /* Documentation scaffold — not part of the DS. */
   body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
-  .cms-cat { padding: var(--space-32) var(--space-32) var(--space-24); border-bottom: var(--rule-faint); scroll-margin-top: var(--space-16); }
-  .cms-cat:last-child { border-bottom: 0; }
-  .cms-cat-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--secondary); margin: 0 0 var(--space-20); padding-bottom: var(--space-12); border-bottom: var(--rule-faint); }
-  .cms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-16); }
-  .cms-grid.is-wide { grid-template-columns: 1fr; }
-  .cms-item { border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
-  .cms-render { padding: var(--space-20) var(--space-16); display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; min-height: 60px; }
-  .cms-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-8); padding: var(--space-8) var(--space-12); border-top: var(--rule-faint); margin-top: auto; }
-  .cms-class { font-family: var(--font-mono); font-size: 11px; color: var(--secondary); background: var(--ink-08); padding: 2px 6px; border-radius: 2px; white-space: normal; word-break: break-word; min-width: 0; }
-  .cms-note { padding: 0 var(--space-12) var(--space-8); font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .doc-sec { padding: var(--space-40) var(--space-40) var(--space-32); border-bottom: var(--rule-faint); scroll-margin-top: var(--space-16); }
+  .doc-sec:last-child { border-bottom: 0; }
+  .doc-head { margin-bottom: var(--space-24); max-width: 760px; }
+  .doc-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .doc-h { font-size: var(--text-h4); font-weight: 600; letter-spacing: -0.01em; color: var(--primary); margin: 6px 0 var(--space-12); }
+  .doc-desc { font-size: var(--text-sm); line-height: 1.7; color: var(--secondary); margin: 0; }
+  .doc-sub { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: var(--space-32) 0 var(--space-12); }
+  .doc-sub:first-of-type { margin-top: var(--space-8); }
+  .doc-demo { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-24); }
+  .doc-demo.is-plain { background: var(--canvas-bg); }
+  .doc-row { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; }
+  .doc-note { font-size: 12px; line-height: 1.6; color: var(--muted); margin: var(--space-12) 0 0; }
+  .doc-note code { font-family: var(--font-mono); font-size: 11px; background: var(--ink-08); padding: 1px 5px; border-radius: 2px; }
+  .doc-form { max-width: 460px; }
+  /* Assembled shell demo sizing. */
+  .shell-demo { border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; }
+  .shell-demo .topbar { position: static; }
+  .shell-demo .layout { min-height: 320px; }
+  a, button { cursor: default; }
 </style>
 </head>
 <body>
 
-<!-- ═══ BUTTONS ═══ -->
-<section class="cms-cat" id="cms-buttons">
-  <h2 class="cms-cat-h">Buttons</h2>
-  <div class="cms-grid">
-    <div class="cms-item"><div class="cms-render"><button class="btn-pri">Publish</button></div><div class="cms-meta"><code class="cms-class">.btn-pri</code></div></div>
-    <div class="cms-item"><div class="cms-render"><button class="btn-sec">Edit</button></div><div class="cms-meta"><code class="cms-class">.btn-sec</code></div></div>
-    <div class="cms-item"><div class="cms-render"><button class="btn-danger">Delete</button></div><div class="cms-meta"><code class="cms-class">.btn-danger</code></div></div>
-    <div class="cms-item"><div class="cms-render"><button class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete"><svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div><div class="cms-meta"><code class="cms-class">.btn-icon · .btn-icon-danger</code></div></div>
-    <div class="cms-item"><div class="cms-render"><button class="btn-pri btn-tiny">Save</button> <button class="btn-sec btn-tiny">Cancel</button></div><div class="cms-meta"><code class="cms-class">.btn-tiny</code></div><div class="cms-note">Size modifier — composable with any button.</div></div>
-    <div class="cms-item"><div class="cms-render" style="display:block"><button class="btn-add-dashed">+ Add row</button></div><div class="cms-meta"><code class="cms-class">.btn-add-dashed</code></div></div>
+<!-- ═══════════════════ SHELL ═══════════════════ -->
+<section class="doc-sec" id="cms-shell">
+  <div class="doc-head">
+    <div class="doc-eyebrow">CMS</div>
+    <h2 class="doc-h">Shell</h2>
+    <p class="doc-desc">Every admin screen is built from the same chrome: a dot-grid <strong>topbar</strong> carrying the wordmark and breadcrumb, a grouped <strong>sidebar</strong> for navigation, and a <strong>main</strong> column that opens each view with a <strong>view header</strong> and an optional <strong>filter bar</strong>. The shell is identical across content types — only the main column changes.</p>
+  </div>
+
+  <div class="shell-demo">
+    <header class="topbar dot-surface" role="banner">
+      <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em></div>
+      <div class="topbar-divider"></div>
+      <div class="topbar-breadcrumb"><span class="crumb-active">Articles</span></div>
+      <div class="topbar-right"><button class="btn-sec">Log out</button></div>
+    </header>
+    <div class="layout">
+      <nav class="sidebar">
+        <div class="nav-section">
+          <span class="nav-label">Writer's Desk</span>
+          <a class="nav-item" href="#">Ideation</a>
+          <a class="nav-item" href="#">Draft Writing</a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">Library</span>
+          <a class="nav-item is-active" href="#" aria-current="page">Articles</a>
+          <a class="nav-item" href="#">Journals</a>
+          <a class="nav-item" href="#">Live Sessions</a>
+          <a class="nav-item" href="#">Experiments</a>
+        </div>
+        <div class="nav-section">
+          <span class="nav-label">Site</span>
+          <a class="nav-item" href="#">Pages</a>
+          <a class="nav-item" href="#">Navigation</a>
+        </div>
+      </nav>
+      <main class="main">
+        <div class="view active">
+          <div class="view-header">
+            <div class="view-header-left">
+              <div class="view-title">Articles</div>
+              <div class="view-subtitle">Everything in the article library — drafts in progress and published pieces.</div>
+            </div>
+            <div class="view-header-actions"><button class="btn-pri">+ New Article</button></div>
+          </div>
+          <div class="filter-bar">
+            <span class="filter-label">Stage</span>
+            <div class="filter-group">
+              <a class="filter-pill all-btn active" href="#">All</a>
+              <a class="filter-pill" href="#">Draft</a>
+              <a class="filter-pill" href="#">Published</a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <p class="doc-note"><code>.topbar.dot-surface</code> · <code>.sidebar &gt; .nav-section &gt; .nav-label / .nav-item.is-active</code> · <code>.main &gt; .view &gt; .view-header</code> · <code>.filter-bar</code></p>
+</section>
+
+<!-- ═══════════════════ ACTIONS ═══════════════════ -->
+<section class="doc-sec" id="cms-actions">
+  <div class="doc-head">
+    <div class="doc-eyebrow">CMS</div>
+    <h2 class="doc-h">Actions</h2>
+    <p class="doc-desc">Buttons carry every admin action. The <strong>primary</strong> button is reserved for the one main action on a screen (new, publish, save); <strong>secondary</strong> handles everything alongside it; <strong>danger</strong> is destructive only. The <strong>tiny</strong> size is for table rows and tight toolbars, and the <strong>dashed add</strong> button opens repeatable fields.</p>
+  </div>
+
+  <div class="doc-sub">Primary action in a view header</div>
+  <div class="doc-demo">
+    <div class="view-header" style="border:0;padding:0">
+      <div class="view-header-left">
+        <div class="view-title">Articles</div>
+        <div class="view-subtitle">The primary button sits at the top-right of the view.</div>
+      </div>
+      <div class="view-header-actions"><button class="btn-pri">+ New Article</button></div>
+    </div>
+  </div>
+
+  <div class="doc-sub">The button set</div>
+  <div class="doc-demo">
+    <div class="doc-row">
+      <button class="btn-pri">Publish</button>
+      <button class="btn-sec">Edit</button>
+      <button class="btn-danger">Delete</button>
+      <button class="btn-icon btn-icon-danger" title="Delete" aria-label="Delete"><svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="btn-pri btn-tiny">Save</button>
+      <button class="btn-sec btn-tiny">Cancel</button>
+      <button class="btn-add-dashed">+ Add row</button>
+    </div>
+    <p class="doc-note"><code>.btn-pri</code> · <code>.btn-sec</code> · <code>.btn-danger</code> · <code>.btn-icon.btn-icon-danger</code> · <code>.btn-tiny</code> (size modifier) · <code>.btn-add-dashed</code></p>
   </div>
 </section>
 
-<!-- ═══ TABLES ═══ -->
-<section class="cms-cat" id="cms-tables">
-  <h2 class="cms-cat-h">Tables</h2>
-  <div class="table-card">
-    <table class="cms-table">
-      <thead><tr><th style="width:52%">Title</th><th>Stage</th><th>Updated</th><th></th></tr></thead>
-      <tbody>
-        <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="pill pill-draft">Draft</span></td><td class="td-mono">2026-06-04</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
-        <tr class="row-clickable"><td class="td-title"><div class="t">Notes on Craft</div><div class="slug live">/journals/notes-on-craft</div></td><td><span class="pill pill-live">Live</span></td><td class="td-mono">2026-05-28</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
-      </tbody>
-    </table>
+<!-- ═══════════════════ INPUTS ═══════════════════ -->
+<section class="doc-sec" id="cms-inputs">
+  <div class="doc-head">
+    <div class="doc-eyebrow">CMS</div>
+    <h2 class="doc-h">Inputs</h2>
+    <p class="doc-desc">Editor forms use one field language: a label (with an optional required mark), the control, and an optional note. The <strong>slug field</strong> shows its permanent path prefix inline. <strong>Filter pills</strong> sit above a library to narrow it — single-select within a group, tinted to the category colour.</p>
   </div>
-  <p class="cms-note" style="padding-left:0"><code class="cms-class">.table-card &gt; .cms-table</code> · rows <code class="cms-class">.row-clickable</code> · cells <code class="cms-class">.td-title .td-mono .cell-actions</code></p>
-</section>
 
-<!-- ═══ FORM FIELDS ═══ -->
-<section class="cms-cat" id="cms-forms">
-  <h2 class="cms-cat-h">Form fields</h2>
-  <div class="cms-grid is-wide">
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Title <span class="field-req">*</span></label><input class="field-input" value="A Discipline Reset"></div></div><div class="cms-meta"><code class="cms-class">.field-input · .field-label · .field-req</code></div></div>
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Stage</label><select class="field-select"><option>Draft</option><option>Published</option></select></div></div><div class="cms-meta"><code class="cms-class">.field-select</code></div></div>
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-group" style="margin:0"><label class="field-label">Slug</label><div class="slug-field"><span class="slug-prefix">/articles/</span><input class="slug-input" value="a-discipline-reset"></div></div></div><div class="cms-meta"><code class="cms-class">.slug-field · .slug-prefix · .slug-input</code></div></div>
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="field-note-box">Slugs are permanent once published — changing one issues a 301 redirect.</div></div><div class="cms-meta"><code class="cms-class">.field-note-box</code></div></div>
+  <div class="doc-sub">Form fields</div>
+  <div class="doc-demo">
+    <div class="doc-form">
+      <div class="field-group">
+        <label class="field-label">Title <span class="field-req">*</span></label>
+        <input class="field-input" value="A Discipline Reset">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Slug</label>
+        <div class="slug-field"><span class="slug-prefix">/articles/</span><input class="slug-input" value="a-discipline-reset"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Stage</label>
+        <select class="field-select"><option>Draft</option><option>Published</option></select>
+      </div>
+      <div class="field-note-box">Slugs are permanent once published — changing one issues a 301 redirect.</div>
+    </div>
+    <p class="doc-note"><code>.field-group &gt; .field-label / .field-req</code> · <code>.field-input</code> · <code>.field-select</code> · <code>.slug-field &gt; .slug-prefix / .slug-input</code> · <code>.field-note-box</code></p>
   </div>
-</section>
 
-<!-- ═══ STATUS & STAGE PILLS ═══ -->
-<section class="cms-cat" id="cms-pills">
-  <h2 class="cms-cat-h">Status &amp; stage pills</h2>
-  <div class="cms-grid">
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-idea">Idea</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-idea</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-concept">Concept</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-concept</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-outline">Outline</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-outline</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-draft">Draft</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-draft</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-live">Live</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-live</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-scheduled">Scheduled</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-scheduled</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="pill pill-hidden">Hidden</span></div><div class="cms-meta"><code class="cms-class">.pill .pill-hidden</code></div></div>
-  </div>
-</section>
-
-<!-- ═══ TYPE & STATUS BADGES ═══ -->
-<section class="cms-cat" id="cms-badges">
-  <h2 class="cms-cat-h">Type &amp; status badges</h2>
-  <div class="cms-grid">
-    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-article">Article</span></div><div class="cms-meta"><code class="cms-class">.type-badge .tb-article</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-journal">Journal</span></div><div class="cms-meta"><code class="cms-class">.tb-journal</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-live-session">Live Session</span></div><div class="cms-meta"><code class="cms-class">.tb-live-session</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="type-badge tb-experiment">Experiment</span></div><div class="cms-meta"><code class="cms-class">.tb-experiment</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="st st-pub">Published</span></div><div class="cms-meta"><code class="cms-class">.st .st-pub</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="st st-dft">Draft</span></div><div class="cms-meta"><code class="cms-class">.st .st-dft</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="st st-sch">Scheduled</span></div><div class="cms-meta"><code class="cms-class">.st .st-sch</code></div></div>
+  <div class="doc-sub">Filter pills — above a library</div>
+  <div class="doc-demo is-plain">
+    <div class="filter-bar" style="background:transparent;border:0;padding:0">
+      <span class="filter-label">Category</span>
+      <div class="filter-group">
+        <a class="filter-pill all-btn active" href="#">All</a>
+        <a class="filter-pill" href="#" style="--pill-cat:var(--c-terracotta)">UX Industry</a>
+        <a class="filter-pill" href="#" style="--pill-cat:var(--c-forest)">Leading Design</a>
+      </div>
+    </div>
+    <p class="doc-note"><code>.filter-bar &gt; .filter-label / .filter-group &gt; .filter-pill</code> · active state tints to <code>--pill-cat</code></p>
   </div>
 </section>
 
-<!-- ═══ TAGS & LABELS ═══ -->
-<section class="cms-cat" id="cms-tags">
-  <h2 class="cms-cat-h">Tags &amp; labels</h2>
-  <div class="cms-grid">
-    <div class="cms-item"><div class="cms-render"><span class="tag">Series</span></div><div class="cms-meta"><code class="cms-class">.tag</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="tag special">Featured</span></div><div class="cms-meta"><code class="cms-class">.tag.special</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="val-pill">value-slug</span></div><div class="cms-meta"><code class="cms-class">.val-pill</code></div></div>
-    <div class="cms-item"><div class="cms-render"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></div><div class="cms-meta"><code class="cms-class">.cat-label · .cat-label-dot</code></div></div>
+<!-- ═══════════════════ STATUS & FEEDBACK ═══════════════════ -->
+<section class="doc-sec" id="cms-feedback">
+  <div class="doc-head">
+    <div class="doc-eyebrow">CMS</div>
+    <h2 class="doc-h">Status &amp; Feedback</h2>
+    <p class="doc-desc">The system tells the author where a piece is and what just happened. <strong>Stage pills</strong> track the pipeline from idea to live; <strong>type and status badges</strong> label rows; <strong>banners</strong> confirm a save, surface errors, and mark a piece as live or scheduled.</p>
+  </div>
+
+  <div class="doc-sub">Pipeline stage pills</div>
+  <div class="doc-demo">
+    <div class="doc-row">
+      <span class="pill pill-idea">Idea</span>
+      <span class="pill pill-concept">Concept</span>
+      <span class="pill pill-outline">Outline</span>
+      <span class="pill pill-draft">Draft</span>
+      <span class="pill pill-live">Live</span>
+      <span class="pill pill-scheduled">Scheduled</span>
+      <span class="pill pill-hidden">Hidden</span>
+    </div>
+    <p class="doc-note">The pipeline order: <code>.pill-idea → .pill-concept → .pill-outline → .pill-draft → .pill-live</code>. <code>.pill-scheduled</code> / <code>.pill-hidden</code> are publish states.</p>
+  </div>
+
+  <div class="doc-sub">Type &amp; status badges</div>
+  <div class="doc-demo">
+    <div class="doc-row">
+      <span class="type-badge tb-article">Article</span>
+      <span class="type-badge tb-journal">Journal</span>
+      <span class="type-badge tb-live-session">Live Session</span>
+      <span class="type-badge tb-experiment">Experiment</span>
+      <span class="st st-pub">Published</span>
+      <span class="st st-dft">Draft</span>
+      <span class="st st-sch">Scheduled</span>
+    </div>
+    <p class="doc-note"><code>.type-badge.tb-*</code> labels the content type in tables · <code>.st.st-*</code> is the compact status chip</p>
+  </div>
+
+  <div class="doc-sub">Banners — confirmation, errors, publish state</div>
+  <div class="doc-demo is-plain">
+    <div class="flash-success" role="status">Saved.</div>
+    <div class="form-errors" role="alert" style="margin-top:var(--space-16)">
+      <strong>Please fix the following:</strong>
+      <ul><li>Title is required.</li><li>Slug is already in use.</li></ul>
+    </div>
+    <div class="live-banner" style="margin-top:var(--space-16)">
+      <span class="cms-live-dot" aria-hidden="true"></span>
+      <span class="live-banner-text">Published on <strong>Mar 4, 2026 · 9:00 AM</strong></span>
+      <a class="live-banner-link" href="#">View live ↗</a>
+    </div>
+    <div class="schedule-banner" style="margin-top:var(--space-16)">
+      <span class="schedule-banner-icon">⏱</span>
+      <span class="schedule-banner-text">Scheduled for publish on <strong>Jun 12, 2026 · 8:00 AM</strong> · <span class="schedule-countdown">in 6 days</span></span>
+    </div>
+    <p class="doc-note"><code>.flash-success</code> · <code>.form-errors</code> · <code>.live-banner</code> (green, with <code>.cms-live-dot</code>) · <code>.schedule-banner</code> (amber)</p>
+  </div>
+
+  <div class="doc-sub">Tags &amp; labels</div>
+  <div class="doc-demo">
+    <div class="doc-row">
+      <span class="tag">Series</span>
+      <span class="tag special">Featured</span>
+      <span class="val-pill">value-slug</span>
+      <span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span>
+    </div>
+    <p class="doc-note"><code>.tag</code> / <code>.tag.special</code> · <code>.val-pill</code> · <code>.cat-label &gt; .cat-label-dot</code></p>
   </div>
 </section>
 
-<!-- ═══ CARDS ═══ -->
-<section class="cms-cat" id="cms-cards">
-  <h2 class="cms-cat-h">Cards</h2>
-  <div class="cms-grid">
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="kcard" style="cursor:default"><div class="kcard-head"><div class="kcard-title">A Discipline Reset</div><span class="type-badge tb-article">Art</span></div><div class="kcard-summary">A short summary line that wraps to two lines then truncates when it runs long enough to need it.</div><div class="kcard-foot"><span class="pill pill-draft">Draft</span><span class="kcard-date">Jun 4</span></div></div></div><div class="cms-meta"><code class="cms-class">.kcard</code></div><div class="cms-note">Draft-Writing / ideation board card.</div></div>
-    <div class="cms-item"><div class="cms-render" style="display:block"><div class="pub-card" style="cursor:default"><div class="pub-card-status"><span class="st st-pub">Pub</span></div><div class="pub-card-hd"><span class="pub-card-cat" style="color:var(--c-forest)">Leading Design</span></div><div class="pub-card-bd"><div class="pub-card-title">A Discipline Reset</div></div></div></div><div class="cms-meta"><code class="cms-class">.pub-card</code></div><div class="cms-note">Published-library grid card.</div></div>
+<!-- ═══════════════════ CONTAINMENT ═══════════════════ -->
+<section class="doc-sec" id="cms-containment">
+  <div class="doc-head">
+    <div class="doc-eyebrow">CMS</div>
+    <h2 class="doc-h">Containment</h2>
+    <p class="doc-desc">Two ways to hold content. <strong>Tables</strong> are the library's default — clickable rows with title, status, date, and row actions. <strong>Cards</strong> are for boards and grids: the ideation/draft <em>kanban</em> card and the published-library card. The <strong>publish box</strong> is the editor's sidebar panel.</p>
+  </div>
+
+  <div class="doc-sub">Library table</div>
+  <div class="doc-demo is-plain">
+    <div class="table-card">
+      <table class="cms-table">
+        <thead><tr><th style="width:52%">Title</th><th>Stage</th><th>Updated</th><th></th></tr></thead>
+        <tbody>
+          <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="pill pill-draft">Draft</span></td><td class="td-mono">2026-06-04</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">Notes on Craft</div><div class="slug live">/journals/notes-on-craft</div></td><td><span class="pill pill-live">Live</span></td><td class="td-mono">2026-05-28</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="doc-note"><code>.table-card &gt; .cms-table</code> · rows <code>.row-clickable</code> · cells <code>.td-title / .td-mono / .cell-actions</code></p>
+  </div>
+
+  <div class="doc-sub">Board cards</div>
+  <div class="doc-demo">
+    <div class="doc-row" style="align-items:stretch">
+      <div class="kcard" style="width:260px">
+        <div class="kcard-head"><div class="kcard-title">A Discipline Reset</div><span class="type-badge tb-article">Art</span></div>
+        <div class="kcard-summary">A short summary line that wraps to two lines then truncates when it runs long enough to need it.</div>
+        <div class="kcard-foot"><span class="pill pill-draft">Draft</span><span class="kcard-date">Jun 4</span></div>
+      </div>
+      <div class="pub-card" style="width:260px">
+        <div class="pub-card-status"><span class="st st-pub">Pub</span></div>
+        <div class="pub-card-hd"><span class="pub-card-cat" style="color:var(--c-forest)">Leading Design</span></div>
+        <div class="pub-card-bd"><div class="pub-card-title">A Discipline Reset</div></div>
+      </div>
+    </div>
+    <p class="doc-note"><code>.kcard</code> — ideation / draft-writing board · <code>.pub-card</code> — published-library grid</p>
+  </div>
+
+  <div class="doc-sub">Publish box — editor sidebar panel</div>
+  <div class="doc-demo">
+    <div class="cms-publish-box is-live" style="max-width:320px">
+      <div class="cms-publish-header">
+        <span class="cms-live-indicator"><span class="cms-live-dot" aria-hidden="true"></span> Live</span>
+        <a class="live-banner-link" href="#">View live ↗</a>
+      </div>
+    </div>
+    <p class="doc-note"><code>.cms-publish-box.is-live</code> — the Publish panel that opens an editor's right rail</p>
   </div>
 </section>
 

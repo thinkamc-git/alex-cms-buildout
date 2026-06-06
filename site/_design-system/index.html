@@ -2600,23 +2600,24 @@
 
 <section class="workspace" id="tab-cms" data-tab="cms">  <nav class="sidebar" id="sidebar-cms">
     <div class="sidebar-group">
+      <span class="sidebar-group-label">Shell</span>
+      <a class="sidebar-link active" data-cms="cms-shell">Topbar · Sidebar · Header</a>
+    </div>
+    <div class="sidebar-group">
       <span class="sidebar-group-label">Actions</span>
-      <a class="sidebar-link active" data-cms="cms-buttons">Buttons</a>
+      <a class="sidebar-link" data-cms="cms-actions">Buttons</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Inputs</span>
-      <a class="sidebar-link" data-cms="cms-forms">Form Fields</a>
+      <a class="sidebar-link" data-cms="cms-inputs">Form Fields · Filter Pills</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Status &amp; Feedback</span>
-      <a class="sidebar-link" data-cms="cms-pills">Status &amp; Stage Pills</a>
-      <a class="sidebar-link" data-cms="cms-badges">Type &amp; Badges</a>
-      <a class="sidebar-link" data-cms="cms-tags">Tags &amp; Labels</a>
+      <a class="sidebar-link" data-cms="cms-feedback">Pills · Badges · Banners</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Containment</span>
-      <a class="sidebar-link" data-cms="cms-tables">Tables</a>
-      <a class="sidebar-link" data-cms="cms-cards">Cards</a>
+      <a class="sidebar-link" data-cms="cms-containment">Tables · Cards · Publish box</a>
     </div>
   </nav>
   <div class="cms-stage" style="flex:1;height:calc(100vh - 53px);overflow-y:auto;min-width:0"><iframe id="cms-frame" src="showcase/cms.html" title="CMS components" style="width:100%;border:0;background:var(--canvas-bg);display:block"></iframe></div>
@@ -3070,7 +3071,7 @@
     <iframe class="cl-frame active" data-cl-pane="root"   src="showcase/root.html"        title="Root slice"></iframe>
     <iframe class="cl-frame"        data-cl-pane="pages"  data-src="showcase/pages.html"  title="Pages slice"></iframe>
     <iframe class="cl-frame"        data-cl-pane="blocks" data-src="showcase/blocks.html" title="Blocks slice"></iframe>
-    <iframe class="cl-frame"        data-cl-pane="cms"    data-src="showcase/cms.html"    title="CMS slice"></iframe>
+    <iframe class="cl-frame"        data-cl-pane="cms"    data-src="showcase/cms-classes.html"    title="CMS slice"></iframe>
   </div>
 </section>
 

@@ -20,8 +20,7 @@
   <span class="topbar-brandtitle">alex m. chong <em>design system</em></span>
   <nav class="topbar-tabsbar">
     <a class="topbar-tabsbar-tab active" href="#components" data-tab="components">Components</a>
-    <a class="topbar-tabsbar-tab" href="#layouts" data-tab="layouts">Page Layouts</a>
-    <a class="topbar-tabsbar-tab" href="#section" data-tab="section">Page Components</a>
+    <a class="topbar-tabsbar-tab" href="#layouts" data-tab="layouts">Layouts</a>
     <a class="topbar-tabsbar-tab" href="#cms" data-tab="cms">Applied Aesthetics</a>
     <a class="topbar-tabsbar-tab" href="#complib" data-tab="complib">CSS Library</a>
   </nav>
@@ -1401,24 +1400,443 @@
 
 <section class="workspace" id="tab-layouts" data-tab="layouts">  <nav class="sidebar" id="sidebar-layouts">
     <div class="sidebar-group">
-      <span class="sidebar-group-label">Landing</span>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-landing"          class="sidebar-link active">Simple Landing</a>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-editorial"        class="sidebar-link">Editorial Landing</a>
+      <span class="sidebar-group-label">Sections</span>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-divider" class="sidebar-link active">Variations</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-twocol" class="sidebar-link">Two-Column</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-statement" class="sidebar-link">Full-Width Statement</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-stats" class="sidebar-link">Stat Row</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-services" class="sidebar-link">Service List</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-quote" class="sidebar-link">Pull Quote</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-bio" class="sidebar-link">Bio Block</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-testimonials" class="sidebar-link">Testimonials</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-topbar" class="sidebar-link">Top Bar</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-hero-writing" class="sidebar-link">Hero Writing</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-feature" class="sidebar-link">Featured Article</a>
+      <a data-scroll-panel="layouts" data-scroll-section="pc-footer" class="sidebar-link">Footer</a>
     </div>
     <div class="sidebar-group">
-      <span class="sidebar-group-label">Content Layouts</span>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-editorial-index"  class="sidebar-link">Editorial Index</a>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-index"            class="sidebar-link">Full Page Index</a>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-article"          class="sidebar-link">Article</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Page Layouts</span>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-services"         class="sidebar-link">Services Page</a>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-about"            class="sidebar-link">About Page</a>
-      <a data-scroll-panel="layouts" data-scroll-section="lay-resume"           class="sidebar-link">Resume</a>
+      <span class="sidebar-group-label">Templates</span>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-landing" class="sidebar-link">Simple Landing</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-editorial" class="sidebar-link">Editorial Landing</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-editorial-index" class="sidebar-link">Editorial Index</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-index" class="sidebar-link">Full Page Index</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-article" class="sidebar-link">Article</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-services" class="sidebar-link">Services Page</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-about" class="sidebar-link">About Page</a>
+      <a data-scroll-panel="layouts" data-scroll-section="lay-resume" class="sidebar-link">Resume</a>
     </div>
   </nav>
-  <div class="canvas" id="content-layouts">
+  <div class="canvas">
+
+
+  <!-- ══ Section Dividers — placed first because dividers separate everything else ══ -->
+  <div class="section" id="pc-divider">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">Section Dividers</div>
+      <div class="section-desc">Rules as structure. Dividers carry the visual rhythm between blocks — most pages need at most two of these, used consistently. Choose the variation that matches the section's job: "we're moving on," "this is a new chapter," or "this is the start of a counted list."</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Plain rule — three weights</span>
+      <p class="comp-rule">The simplest divider. Use the rule weight that matches the boundary's importance: <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule</code> for structural breaks, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-30</code> for soft section boundaries (page chrome edges, layout-nav bottom), <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-faint</code> for content separators (table rows, type-row dividers).</p>
+      <div class="preview-frame" style="padding:var(--space-48) var(--space-64);background:var(--surface)">
+        <div style="display:flex;flex-direction:column;gap: var(--space-32);max-width:600px">
+          <div>
+            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule · structural</div>
+            <div style="height:1px;background:var(--primary)"></div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule-30 · soft boundary</div>
+            <div style="height:1px;background:var(--ink-30)"></div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule-faint · content separator</div>
+            <div style="height:1px;background:var(--ink-18)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Centred label between two rules</span>
+      <p class="comp-rule">For "we're moving on to a new section." The centred label gets the eyebrow treatment (Barlow Condensed 11px 700 uppercase, primary). Most common between editorial blocks. Don't use it more than 2–3× per page — it's a heavy mark.</p>
+      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
+        <div class="row-center" style="gap: var(--space-24)">
+          <div style="flex:1;height:1px;background:var(--primary)"></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">Writing</div>
+          <div style="flex:1;height:1px;background:var(--primary)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Numbered label, flush-left</span>
+      <p class="comp-rule">For counted sequences (services, principles, chapters). Index number on the left as a strict typographic anchor, the rule extends through the middle, the section name closes on the right. Reads like a contents listing in a book.</p>
+      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
+        <div class="row-center" style="gap: var(--space-24)">
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">04 —</div>
+          <div style="flex:1;height:1px;background:var(--primary)"></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">Design Principles</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Section strip — full-width labelled</span>
+      <p class="comp-rule">A wider, heavier divider for major group breaks inside a flat content layout (e.g. between Articles / Events / Experiments on the cards page). Eyebrow on the left, full-width bottom rule. Used sparingly — typically once per "section" of a long scroll.</p>
+      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
+        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);padding-bottom: var(--space-12);border-bottom: var(--rule)">Articles</div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">When to use which</span>
+      <div class="spec-grid" style="max-width:780px">
+        <span class="spec-key">Plain rule</span><span class="spec-val">A boundary inside a section — between paragraphs, table rows, sidebar groups. Choose weight by importance.</span>
+        <span class="spec-key">Centred label</span><span class="spec-val">A break between major editorial blocks. Reads as "new chapter."</span>
+        <span class="spec-key">Numbered label</span><span class="spec-val">Counted sequences — services, principles, ordered chapters. Use when order matters.</span>
+        <span class="spec-key">Section strip</span><span class="spec-val">Top-of-group divider in a flat scrolling layout — content cards, events listing.</span>
+        <span class="spec-key">.section-header</span><span class="spec-val">Not a divider — the heading row at the top of a documentation block. Includes a primary rule under it.</span>
+      </div>
+    </div>
+  </div>
+
+    <div class="section" id="pc-twocol"><div class="section-header"><div class="section-num">02</div><div class="section-title">Two-Column Editorial</div><div class="section-desc">Primary layout for service/about sections. Left column carries the heading and CTA, right column carries the editorial voice.</div></div>
+  <!-- Block 1: Two-col editorial -->
+      <span class="section-label">Two-Column Editorial</span>
+    <div class="preview-frame" style="padding: 56px var(--space-64)">
+      <div class="two-col">
+        <div>
+          <div class="section-heading">Design <span class="m">Leadership</span>,<br>Product <span class="m">Strategy</span> &<br>Innovation <span class="m">Partner</span></div>
+          <div class="section-body" style="margin-top:var(--space-24)">Alex is a product design leader, strategist & coach who specializes in complex problems outside typical processes. Twelve years shipping consumer-ready and enterprise-grade software from concept to implementation.</div>
+          <div style="margin-top:var(--space-32)"><button class="cta-primary">View Services →</button></div>
+        </div>
+        <div>
+          <div class="section-intro">A way of thinking differently about what design can do — well beyond fixing your process.</div>
+          <div class="section-body">A strong design leader and educator who inspires teams to produce their strongest work — specializing in the messy, ambiguous problems that sit outside typical frameworks.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section" id="pc-statement"><div class="section-header"><div class="section-num">03</div><div class="section-title">Full-Width Statement</div><div class="section-desc">Large display statement with muted-word technique, subhead, and CTA cluster. Used at the top of landing variations.</div></div>
+  <!-- Block 2 -->
+      <span class="section-label">Full-Width Statement</span>
+    <div class="preview-frame" style="padding:var(--space-64)">
+      <div style="font-size:52px;font-weight:500;letter-spacing:-0.025em;line-height:1.2;max-width:1100px;margin-bottom: 0">
+        Hi — I'm Alex, and I care deeply about <span class="m">leading</span> the <span class="m">discipline</span> of design and shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">future</em> <span class="ac">for organizations</span>.
+      </div>
+      <div style="margin-top: 36px;font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">I coach and train design teams & individuals to produce their strongest, most creatively invigorated work.</div>
+      <div class="hero-ctas" style="margin-top: 36px">
+        <button class="cta-primary">Design Principles →</button>
+        <button class="cta-ghost">Design Services</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="section" id="pc-stats"><div class="section-header"><div class="section-num">04</div><div class="section-title">Stat Row</div><div class="section-desc">Four-cell ruled grid. Numbers in display weight, Instrument Serif italic on the suffix. Rules do all the structural work.</div></div>
+  <!-- Block 3 -->
+      <span class="section-label">Stat Row</span>
+    <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap: 0;border:var(--rule)">
+        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
+          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">12<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Years Shipping</div>
+        </div>
+        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
+          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">40<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Designers Coached</div>
+        </div>
+        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
+          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">6</div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Industries</div>
+        </div>
+        <div style="padding: 28px var(--space-32)">
+          <div style="font-size:var(--space-48);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">3</div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Countries</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section" id="pc-services"><div class="section-header"><div class="section-num">05</div><div class="section-title">Service / Feature List</div><div class="section-desc">Two-column ruled list. Top rule is full primary, secondary rows use rule-30. Padding carries the spacing — no additional decoration.</div></div>
+  <!-- Block 4 -->
+      <span class="section-label">Service / Feature List</span>
+    <div class="preview-frame" style="padding: 56px var(--space-64)">
+      <div style="font-size: var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:var(--font-cond);color:var(--primary);margin-bottom: var(--space-32)">What I Offer</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap: 0">
+        <div style="padding:28px 0;border-top:var(--rule);border-right:var(--rule-30);padding-right: 40px">
+          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Fractional Design Leadership</div>
+          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Embedded design direction for early-stage and scaling startups. Strategic presence without the full-time overhead.</div>
+        </div>
+        <div style="padding: 28px 0;border-top:var(--rule);padding-left: 40px">
+          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Product Strategy</div>
+          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Shaping what gets built and why. From opportunity framing through to validated direction and roadmap.</div>
+        </div>
+        <div style="padding: 28px 0;border-top:var(--rule-30);border-right:var(--rule-30);padding-right: 40px">
+          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">1:1 Design Coaching</div>
+          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Structured coaching for mid-to-senior designers navigating career inflection points, leadership, and creative health.</div>
+        </div>
+        <div style="padding: 28px 0;border-top:var(--rule-30);padding-left: 40px">
+          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Workshops & Talks</div>
+          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Live sessions on design leadership, post-AI workflows, and building a practice worth having.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="section" id="pc-quote"><div class="section-header"><div class="section-num">06</div><div class="section-title">Pull Quote</div><div class="section-desc">Instrument Serif italic inside a left-rule callout. The 3px rule is the heaviest element on the page — use sparingly.</div></div>
+  <!-- Block 5 -->
+      <span class="section-label">Pull Quote / Callout</span>
+    <div class="preview-frame" style="padding: var(--space-64)">
+      <div style="max-width:760px">
+        <div style="border-left:3px solid var(--primary);padding-left: var(--space-32)">
+          <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);font-weight:400;line-height:1.45;color:var(--primary);margin-bottom: var(--space-16)">"The gap between strategist and executor sits openly in the room — and that gap is exactly where strong design leadership lives."</div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--primary)">alex m. chong — UX 2.0: The Discipline Is Being Corrected</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section" id="pc-bio"><div class="section-header"><div class="section-num">07</div><div class="section-title">Bio / Profile Block</div><div class="section-desc">Portrait placeholder + metadata on the left, full bio + CTAs on the right. Portrait scales with the column — always circle, always border-faint.</div></div>
+  <!-- Block 7 -->
+      <span class="section-label">Bio / Profile Block</span>
+    <div class="preview-frame" style="padding: 56px var(--space-64)">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap: var(--space-64);align-items:start">
+        <div>
+          <div style="width:100%;aspect-ratio:1;background:var(--neutral);border:var(--rule-faint);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Portrait</div>
+          <div style="margin-top: var(--space-16);display:flex;flex-direction:column;gap: 6px">
+            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);text-align:center">Based in Toronto, ON</div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);text-align:center">Open to conversations</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-20)">About</div>
+          <div style="font-size:var(--space-32);font-weight:600;letter-spacing:-0.015em;line-height:1.2;margin-bottom: var(--space-24)">Director of UX. Design coach. Educator.</div>
+          <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.7;margin-bottom: var(--space-20)">Twelve years shipping consumer and enterprise software from concept to implementation. Worked across agencies, startups, accelerators, and product companies. Now focused on the intersection of design leadership, practice development, and what happens to the discipline when AI removes all the easy excuses.</div>
+          <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.7;margin-bottom: var(--space-32)">Masters of Interaction Design · Bachelor of Architectural Studies · Based in Toronto, previously Taipei.</div>
+          <div style="display:flex;gap: 10px">
+            <button class="btn-dark">View Coaching →</button>
+            <button class="btn-light">View Services →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section" id="pc-testimonials">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div class="section-title">Testimonials</div>
+      <div class="section-desc">Social proof in the document register. No stars, no avatars, no coloured cards. The quote is the thing — Instrument Serif italic carries the voice, attribution sits below in Barlow Condensed.</div>
+    </div>
+    <span class="section-label">Single — Full Width</span>
+    <div class="preview-frame" style="padding: 56px var(--space-64);margin-bottom: var(--space-24)">
+      <div style="max-width:720px">
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: var(--space-20)">"Alex thinks about how design creates the conditions for stronger decisions. Working with him changed how our entire team frames problems."</div>
+        <div style="display:flex;align-items:center;gap: var(--space-16)">
+          <div style="width:1px;height:32px;background:var(--primary)"></div>
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+          <div>
+            <div style="font-size: var(--text-base);font-weight:600">Jordan Lee</div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">VP Product · Series B SaaS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <span class="section-label">Three-Column Grid</span>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-16);margin-bottom: var(--space-24)">
+      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;He has an unusual ability to make the abstract feel inevitable. The team trusted his direction because he always showed his reasoning.&rdquo;</div>
+        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
+        <div style="display:flex;align-items:center;gap: var(--space-12)">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+          <div>
+            <div style="font-size: var(--text-meta);font-weight:600">Priya Nair</div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Founding Designer · Fintech</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;The coaching sessions changed how I think about my own career — what I do next, and what kind of designer I want to be.&rdquo;</div>
+        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
+        <div style="display:flex;align-items:center;gap: var(--space-12)">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+          <div>
+            <div style="font-size: var(--text-meta);font-weight:600">Marcus Chen</div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Senior UX Designer · Enterprise</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;Our product direction became dramatically clearer. Alex brought both the strategic altitude and the craft-level precision we didn&rsquo;t know we needed.&rdquo;</div>
+        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
+        <div style="display:flex;align-items:center;gap: var(--space-12)">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+          <div>
+            <div style="font-size: var(--text-meta);font-weight:600">Sam Okafor</div>
+            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">CEO · Early-Stage Startup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="section-label">Inline — With Attribution Rule</span>
+    <div class="preview-frame" style="padding:40px var(--space-64)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap: var(--space-48)">
+        <div>
+          <div style="border-left:2px solid var(--primary);padding-left: var(--space-20)">
+            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body-lg);font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: 14px">&ldquo;Exactly the design partner we needed, at exactly the moment we needed them.&rdquo;</div>
+            <div style="display:flex;align-items:center;gap: var(--space-12)">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+              <div>
+                <div style="font-size: var(--text-meta);font-weight:600">Rachel Torres</div>
+                <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">CPO · Health Tech</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="border-left:2px solid var(--primary);padding-left: var(--space-20)">
+            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body-lg);font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: 14px">&ldquo;He asks the kind of questions that surface what you should be solving instead.&rdquo;</div>
+            <div style="display:flex;align-items:center;gap: var(--space-12)">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
+              <div>
+                <div style="font-size: var(--text-meta);font-weight:600">David Kim</div>
+                <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Design Lead · Scale-up</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Top Bar ══ -->
+  <div class="section" id="pc-topbar">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div class="section-title">Top Bar</div>
+      <div class="section-desc">The site's primary navigation row. Lowercase Instrument Serif italic logotype on the left, rectangular nav pills on the right. Sits flush above page content with a <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-30</code> bottom edge — boundary, not weight.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Default — solid neutral background</span>
+      <div class="preview-frame" style="padding: 0">
+        <div class="layout-nav">
+          <span class="layout-nav-logo">alex m. chong</span>
+          <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Coaching</a><a href="#">Writing</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:720px">
+        <span class="spec-key">height</span><span class="spec-val">52px</span>
+        <span class="spec-key">padding</span><span class="spec-val">0 var(--space-48)</span>
+        <span class="spec-key">background</span><span class="spec-val">var(--neutral)</span>
+        <span class="spec-key">border-bottom</span><span class="spec-val">1px solid var(--ink-30)</span>
+        <span class="spec-key">layout</span><span class="spec-val">flex space-between · vertical centre</span>
+        <span class="spec-key">logo</span><span class="spec-val">Instrument Serif italic 20px · primary</span>
+        <span class="spec-key">nav pill</span><span class="spec-val">Barlow 12px / 600 · padded 6px 14px · 1px primary border · 4px radius</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Hero Writing ══ -->
+  <div class="section" id="pc-hero-writing">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Hero Writing</div>
+      <div class="section-desc">The opening statement on a landing or content page. A display-weight Barlow paragraph with the muted-word technique threaded through it, optionally closing on an Instrument Serif italic word for emphasis. The voice of the system, fully committed.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Display statement with muted-word technique</span>
+      <div class="preview-frame" style="padding: var(--space-64)">
+        <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h3);font-weight:400;color:var(--primary);margin-bottom: var(--space-24)">Design Leadership &amp; Practice</div>
+        <div style="font-size: var(--text-display);font-weight:500;letter-spacing:-0.025em;line-height:1.18;max-width:900px;margin-bottom: var(--space-32)">
+          I am a <span class="m">strategist</span>. An educator. A designer
+          of <span class="m">everyday interactions</span>. A strong believer
+          in ethics and education. A leader of design <span class="m">culture</span>
+          and craftsman of design <span class="ac">communities</span>. I will
+          <span class="ac">train</span> the next generation of minds through
+          <span class="m">deliberated</span> technological <em style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">interactions</em>.
+        </div>
+        <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">
+          I coach and train design teams &amp; individuals to produce their strongest, most creatively invigorated work — at the intersection of leadership, strategy, and the discipline of design.
+        </div>
+      </div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Notes on the voice</span>
+      <p class="comp-rule">Hero Writing carries the system's only allowance for sustained Instrument Serif italic — typically the eyebrow line above and one or two words inside the display block. Every other typographic choice serves the muted-word rhythm. Don't add accent colour outside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.ac</code>; don't drop below 22px on any italic.</p>
+    </div>
+  </div>
+
+  <!-- ══ Featured Article ══ -->
+  <div class="section" id="pc-feature">
+    <div class="section-header">
+      <div class="section-num">11</div>
+      <div class="section-title">Featured Article</div>
+      <div class="section-desc">A magazine-style hero block that gives one specific piece headline treatment. Used at the top of an Editorial Index, sometimes inline as an "Editor's Pick" at the top of a content listing. Carries category, title, excerpt, meta, and a CTA — all the moves of a card, scaled to page-feature weight.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Lead feature with sidebar tag</span>
+      <div class="preview-frame" style="padding: var(--space-48)">
+        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-terracotta);margin-bottom: var(--space-12)">— Featured · UX Industry</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
+          <div>
+            <h2 style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size: var(--text-h0);line-height:1.05;letter-spacing:-0.015em;color:var(--primary);margin-bottom: var(--space-20)">A Discipline Reset</h2>
+            <p style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.55;margin-bottom: var(--space-24);max-width:540px">UX 1.0 was a discipline built around scarcity. AI dissolved that scarcity entirely.</p>
+            <div class="row-between" style="max-width:540px">
+              <div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min read</div>
+              <button class="btn-dark">Read →</button>
+            </div>
+          </div>
+          <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24);min-height:200px;display:flex;align-items:flex-end">
+            <div>
+              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">Series</div>
+              <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary)">UX 2.0 — Part 1 of 3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Footer ══ -->
+  <div class="section" id="pc-footer">
+    <div class="section-header">
+      <div class="section-num">12</div>
+      <div class="section-title">Footer</div>
+      <div class="section-desc">A document footer — single rule above, copyright on the left, navigation links on the right. Same Barlow Condensed eyebrow treatment as nav pills above. No social icons, no big columns of links — kept as a closing edge rather than a wayfinding tool.</div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Default footer</span>
+      <div class="preview-frame" style="padding: 0;background:var(--neutral);border:none">
+        <div class="layout-footer">
+          <span class="layout-footer-left">© 2026 alex m. chong</span>
+          <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:720px">
+        <span class="spec-key">padding</span><span class="spec-val">28px var(--space-48)</span>
+        <span class="spec-key">background</span><span class="spec-val">var(--neutral) — same surface as topbar</span>
+        <span class="spec-key">border-top</span><span class="spec-val">1px solid var(--ink-30)</span>
+        <span class="spec-key">layout</span><span class="spec-val">flex space-between · vertical centre</span>
+        <span class="spec-key">copyright</span><span class="spec-val">Barlow Condensed 11px / 700 / uppercase / 0.14em / primary</span>
+        <span class="spec-key">links</span><span class="spec-val">same as copyright — hover: opacity-only</span>
+      </div>
+    </div>
+  </div>
+
+  
+
     <div class="section" id="lay-landing">
       <div class="section-header">
         <div class="section-num">01</div>
@@ -2085,440 +2503,9 @@
     </div>
   </div>
 
-  </div></section>
-
-<section class="workspace" id="tab-section" data-tab="section">  <nav class="sidebar" id="sidebar-section">
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Section Dividers</span>
-      <a data-scroll-panel="section" data-scroll-section="pc-divider"      class="sidebar-link active">Variations</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Blocks</span>
-      <a data-scroll-panel="section" data-scroll-section="pc-twocol"       class="sidebar-link">Two-Column</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-statement"    class="sidebar-link">Full-Width Statement</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-stats"        class="sidebar-link">Stat Row</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-services"     class="sidebar-link">Service List</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-quote"        class="sidebar-link">Pull Quote</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-bio"          class="sidebar-link">Bio Block</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-testimonials" class="sidebar-link">Testimonials</a>
-    </div>
-    <div class="sidebar-group">
-      <span class="sidebar-group-label">Header / Footer</span>
-      <a data-scroll-panel="section" data-scroll-section="pc-topbar"       class="sidebar-link">Top Bar</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-hero-writing" class="sidebar-link">Hero Writing</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-feature"      class="sidebar-link">Featured Article</a>
-      <a data-scroll-panel="section" data-scroll-section="pc-footer"       class="sidebar-link">Footer</a>
-    </div>
-  </nav>
-  <div class="canvas">
-
-  <!-- ══ Section Dividers — placed first because dividers separate everything else ══ -->
-  <div class="section" id="pc-divider">
-    <div class="section-header">
-      <div class="section-num">01</div>
-      <div class="section-title">Section Dividers</div>
-      <div class="section-desc">Rules as structure. Dividers carry the visual rhythm between blocks — most pages need at most two of these, used consistently. Choose the variation that matches the section's job: "we're moving on," "this is a new chapter," or "this is the start of a counted list."</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Plain rule — three weights</span>
-      <p class="comp-rule">The simplest divider. Use the rule weight that matches the boundary's importance: <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule</code> for structural breaks, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-30</code> for soft section boundaries (page chrome edges, layout-nav bottom), <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-faint</code> for content separators (table rows, type-row dividers).</p>
-      <div class="preview-frame" style="padding:var(--space-48) var(--space-64);background:var(--surface)">
-        <div style="display:flex;flex-direction:column;gap: var(--space-32);max-width:600px">
-          <div>
-            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule · structural</div>
-            <div style="height:1px;background:var(--primary)"></div>
-          </div>
-          <div>
-            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule-30 · soft boundary</div>
-            <div style="height:1px;background:var(--ink-30)"></div>
-          </div>
-          <div>
-            <div style="font-family:var(--font-mono);font-size: var(--text-meta);color:var(--muted);margin-bottom: var(--space-8)">--rule-faint · content separator</div>
-            <div style="height:1px;background:var(--ink-18)"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Centred label between two rules</span>
-      <p class="comp-rule">For "we're moving on to a new section." The centred label gets the eyebrow treatment (Barlow Condensed 11px 700 uppercase, primary). Most common between editorial blocks. Don't use it more than 2–3× per page — it's a heavy mark.</p>
-      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
-        <div class="row-center" style="gap: var(--space-24)">
-          <div style="flex:1;height:1px;background:var(--primary)"></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">Writing</div>
-          <div style="flex:1;height:1px;background:var(--primary)"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Numbered label, flush-left</span>
-      <p class="comp-rule">For counted sequences (services, principles, chapters). Index number on the left as a strict typographic anchor, the rule extends through the middle, the section name closes on the right. Reads like a contents listing in a book.</p>
-      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
-        <div class="row-center" style="gap: var(--space-24)">
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">04 —</div>
-          <div style="flex:1;height:1px;background:var(--primary)"></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--primary);flex-shrink:0">Design Principles</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Section strip — full-width labelled</span>
-      <p class="comp-rule">A wider, heavier divider for major group breaks inside a flat content layout (e.g. between Articles / Events / Experiments on the cards page). Eyebrow on the left, full-width bottom rule. Used sparingly — typically once per "section" of a long scroll.</p>
-      <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
-        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--primary);padding-bottom: var(--space-12);border-bottom: var(--rule)">Articles</div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">When to use which</span>
-      <div class="spec-grid" style="max-width:780px">
-        <span class="spec-key">Plain rule</span><span class="spec-val">A boundary inside a section — between paragraphs, table rows, sidebar groups. Choose weight by importance.</span>
-        <span class="spec-key">Centred label</span><span class="spec-val">A break between major editorial blocks. Reads as "new chapter."</span>
-        <span class="spec-key">Numbered label</span><span class="spec-val">Counted sequences — services, principles, ordered chapters. Use when order matters.</span>
-        <span class="spec-key">Section strip</span><span class="spec-val">Top-of-group divider in a flat scrolling layout — content cards, events listing.</span>
-        <span class="spec-key">.section-header</span><span class="spec-val">Not a divider — the heading row at the top of a documentation block. Includes a primary rule under it.</span>
-      </div>
-    </div>
+  
   </div>
-
-    <div class="section" id="pc-twocol"><div class="section-header"><div class="section-num">02</div><div class="section-title">Two-Column Editorial</div><div class="section-desc">Primary layout for service/about sections. Left column carries the heading and CTA, right column carries the editorial voice.</div></div>
-  <!-- Block 1: Two-col editorial -->
-      <span class="section-label">Two-Column Editorial</span>
-    <div class="preview-frame" style="padding: 56px var(--space-64)">
-      <div class="two-col">
-        <div>
-          <div class="section-heading">Design <span class="m">Leadership</span>,<br>Product <span class="m">Strategy</span> &<br>Innovation <span class="m">Partner</span></div>
-          <div class="section-body" style="margin-top:var(--space-24)">Alex is a product design leader, strategist & coach who specializes in complex problems outside typical processes. Twelve years shipping consumer-ready and enterprise-grade software from concept to implementation.</div>
-          <div style="margin-top:var(--space-32)"><button class="cta-primary">View Services →</button></div>
-        </div>
-        <div>
-          <div class="section-intro">A way of thinking differently about what design can do — well beyond fixing your process.</div>
-          <div class="section-body">A strong design leader and educator who inspires teams to produce their strongest work — specializing in the messy, ambiguous problems that sit outside typical frameworks.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="section" id="pc-statement"><div class="section-header"><div class="section-num">03</div><div class="section-title">Full-Width Statement</div><div class="section-desc">Large display statement with muted-word technique, subhead, and CTA cluster. Used at the top of landing variations.</div></div>
-  <!-- Block 2 -->
-      <span class="section-label">Full-Width Statement</span>
-    <div class="preview-frame" style="padding:var(--space-64)">
-      <div style="font-size:52px;font-weight:500;letter-spacing:-0.025em;line-height:1.2;max-width:1100px;margin-bottom: 0">
-        Hi — I'm Alex, and I care deeply about <span class="m">leading</span> the <span class="m">discipline</span> of design and shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">future</em> <span class="ac">for organizations</span>.
-      </div>
-      <div style="margin-top: 36px;font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">I coach and train design teams & individuals to produce their strongest, most creatively invigorated work.</div>
-      <div class="hero-ctas" style="margin-top: 36px">
-        <button class="cta-primary">Design Principles →</button>
-        <button class="cta-ghost">Design Services</button>
-      </div>
-    </div>
-
-  </div>
-  <div class="section" id="pc-stats"><div class="section-header"><div class="section-num">04</div><div class="section-title">Stat Row</div><div class="section-desc">Four-cell ruled grid. Numbers in display weight, Instrument Serif italic on the suffix. Rules do all the structural work.</div></div>
-  <!-- Block 3 -->
-      <span class="section-label">Stat Row</span>
-    <div class="preview-frame" style="padding:var(--space-48) var(--space-64)">
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap: 0;border:var(--rule)">
-        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
-          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">12<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Years Shipping</div>
-        </div>
-        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
-          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">40<span style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:0.7em">+</span></div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Designers Coached</div>
-        </div>
-        <div style="padding: 28px var(--space-32);border-right:var(--rule)">
-          <div style="font-size: var(--text-h0);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">6</div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Industries</div>
-        </div>
-        <div style="padding: 28px var(--space-32)">
-          <div style="font-size:var(--space-48);font-weight:600;letter-spacing:-0.03em;line-height:1;margin-bottom: 6px">3</div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary)">Countries</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="section" id="pc-services"><div class="section-header"><div class="section-num">05</div><div class="section-title">Service / Feature List</div><div class="section-desc">Two-column ruled list. Top rule is full primary, secondary rows use rule-30. Padding carries the spacing — no additional decoration.</div></div>
-  <!-- Block 4 -->
-      <span class="section-label">Service / Feature List</span>
-    <div class="preview-frame" style="padding: 56px var(--space-64)">
-      <div style="font-size: var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;font-family:var(--font-cond);color:var(--primary);margin-bottom: var(--space-32)">What I Offer</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap: 0">
-        <div style="padding:28px 0;border-top:var(--rule);border-right:var(--rule-30);padding-right: 40px">
-          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Fractional Design Leadership</div>
-          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Embedded design direction for early-stage and scaling startups. Strategic presence without the full-time overhead.</div>
-        </div>
-        <div style="padding: 28px 0;border-top:var(--rule);padding-left: 40px">
-          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Product Strategy</div>
-          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Shaping what gets built and why. From opportunity framing through to validated direction and roadmap.</div>
-        </div>
-        <div style="padding: 28px 0;border-top:var(--rule-30);border-right:var(--rule-30);padding-right: 40px">
-          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">1:1 Design Coaching</div>
-          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Structured coaching for mid-to-senior designers navigating career inflection points, leadership, and creative health.</div>
-        </div>
-        <div style="padding: 28px 0;border-top:var(--rule-30);padding-left: 40px">
-          <div style="font-size:var(--space-20);font-weight:600;letter-spacing:-0.01em;margin-bottom: 10px">Workshops & Talks</div>
-          <div style="font-size: var(--text-sm);font-weight:500;color:var(--secondary);line-height:1.65">Live sessions on design leadership, post-AI workflows, and building a practice worth having.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-  <div class="section" id="pc-quote"><div class="section-header"><div class="section-num">06</div><div class="section-title">Pull Quote</div><div class="section-desc">Instrument Serif italic inside a left-rule callout. The 3px rule is the heaviest element on the page — use sparingly.</div></div>
-  <!-- Block 5 -->
-      <span class="section-label">Pull Quote / Callout</span>
-    <div class="preview-frame" style="padding: var(--space-64)">
-      <div style="max-width:760px">
-        <div style="border-left:3px solid var(--primary);padding-left: var(--space-32)">
-          <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h3);font-weight:400;line-height:1.45;color:var(--primary);margin-bottom: var(--space-16)">"The gap between strategist and executor sits openly in the room — and that gap is exactly where strong design leadership lives."</div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--primary)">alex m. chong — UX 2.0: The Discipline Is Being Corrected</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="section" id="pc-bio"><div class="section-header"><div class="section-num">07</div><div class="section-title">Bio / Profile Block</div><div class="section-desc">Portrait placeholder + metadata on the left, full bio + CTAs on the right. Portrait scales with the column — always circle, always border-faint.</div></div>
-  <!-- Block 7 -->
-      <span class="section-label">Bio / Profile Block</span>
-    <div class="preview-frame" style="padding: 56px var(--space-64)">
-      <div style="display:grid;grid-template-columns:1fr 2fr;gap: var(--space-64);align-items:start">
-        <div>
-          <div style="width:100%;aspect-ratio:1;background:var(--neutral);border:var(--rule-faint);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Portrait</div>
-          <div style="margin-top: var(--space-16);display:flex;flex-direction:column;gap: 6px">
-            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);text-align:center">Based in Toronto, ON</div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--primary);text-align:center">Open to conversations</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-family:var(--font-cond);font-size: var(--text-pill);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--primary);margin-bottom: var(--space-20)">About</div>
-          <div style="font-size:var(--space-32);font-weight:600;letter-spacing:-0.015em;line-height:1.2;margin-bottom: var(--space-24)">Director of UX. Design coach. Educator.</div>
-          <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.7;margin-bottom: var(--space-20)">Twelve years shipping consumer and enterprise software from concept to implementation. Worked across agencies, startups, accelerators, and product companies. Now focused on the intersection of design leadership, practice development, and what happens to the discipline when AI removes all the easy excuses.</div>
-          <div style="font-size:var(--space-16);font-weight:500;color:var(--secondary);line-height:1.7;margin-bottom: var(--space-32)">Masters of Interaction Design · Bachelor of Architectural Studies · Based in Toronto, previously Taipei.</div>
-          <div style="display:flex;gap: 10px">
-            <button class="btn-dark">View Coaching →</button>
-            <button class="btn-light">View Services →</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="section" id="pc-testimonials">
-    <div class="section-header">
-      <div class="section-num">08</div>
-      <div class="section-title">Testimonials</div>
-      <div class="section-desc">Social proof in the document register. No stars, no avatars, no coloured cards. The quote is the thing — Instrument Serif italic carries the voice, attribution sits below in Barlow Condensed.</div>
-    </div>
-    <span class="section-label">Single — Full Width</span>
-    <div class="preview-frame" style="padding: 56px var(--space-64);margin-bottom: var(--space-24)">
-      <div style="max-width:720px">
-        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: var(--space-20)">"Alex thinks about how design creates the conditions for stronger decisions. Working with him changed how our entire team frames problems."</div>
-        <div style="display:flex;align-items:center;gap: var(--space-16)">
-          <div style="width:1px;height:32px;background:var(--primary)"></div>
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-          <div>
-            <div style="font-size: var(--text-base);font-weight:600">Jordan Lee</div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">VP Product · Series B SaaS</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <span class="section-label">Three-Column Grid</span>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap: var(--space-16);margin-bottom: var(--space-24)">
-      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
-        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;He has an unusual ability to make the abstract feel inevitable. The team trusted his direction because he always showed his reasoning.&rdquo;</div>
-        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
-        <div style="display:flex;align-items:center;gap: var(--space-12)">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-          <div>
-            <div style="font-size: var(--text-meta);font-weight:600">Priya Nair</div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Founding Designer · Fintech</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
-        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;The coaching sessions changed how I think about my own career — what I do next, and what kind of designer I want to be.&rdquo;</div>
-        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
-        <div style="display:flex;align-items:center;gap: var(--space-12)">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-          <div>
-            <div style="font-size: var(--text-meta);font-weight:600">Marcus Chen</div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Senior UX Designer · Enterprise</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: 28px">
-        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body);font-weight:400;line-height:1.55;color:var(--primary);margin-bottom: var(--space-20)">&ldquo;Our product direction became dramatically clearer. Alex brought both the strategic altitude and the craft-level precision we didn&rsquo;t know we needed.&rdquo;</div>
-        <div style="height:1px;background:var(--ink-18);margin-bottom: var(--space-16)"></div>
-        <div style="display:flex;align-items:center;gap: var(--space-12)">
-          <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-          <div>
-            <div style="font-size: var(--text-meta);font-weight:600">Sam Okafor</div>
-            <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">CEO · Early-Stage Startup</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <span class="section-label">Inline — With Attribution Rule</span>
-    <div class="preview-frame" style="padding:40px var(--space-64)">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap: var(--space-48)">
-        <div>
-          <div style="border-left:2px solid var(--primary);padding-left: var(--space-20)">
-            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body-lg);font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: 14px">&ldquo;Exactly the design partner we needed, at exactly the moment we needed them.&rdquo;</div>
-            <div style="display:flex;align-items:center;gap: var(--space-12)">
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-              <div>
-                <div style="font-size: var(--text-meta);font-weight:600">Rachel Torres</div>
-                <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">CPO · Health Tech</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div style="border-left:2px solid var(--primary);padding-left: var(--space-20)">
-            <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-body-lg);font-weight:400;line-height:1.5;color:var(--primary);margin-bottom: 14px">&ldquo;He asks the kind of questions that surface what you should be solving instead.&rdquo;</div>
-            <div style="display:flex;align-items:center;gap: var(--space-12)">
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);flex-shrink:0"></div>
-              <div>
-                <div style="font-size: var(--text-meta);font-weight:600">David Kim</div>
-                <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-top: 2px">Design Lead · Scale-up</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Top Bar ══ -->
-  <div class="section" id="pc-topbar">
-    <div class="section-header">
-      <div class="section-num">09</div>
-      <div class="section-title">Top Bar</div>
-      <div class="section-desc">The site's primary navigation row. Lowercase Instrument Serif italic logotype on the left, rectangular nav pills on the right. Sits flush above page content with a <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">--rule-30</code> bottom edge — boundary, not weight.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Default — solid neutral background</span>
-      <div class="preview-frame" style="padding: 0">
-        <div class="layout-nav">
-          <span class="layout-nav-logo">alex m. chong</span>
-          <div class="layout-nav-links"><a href="#">Talks</a><a href="#">Principles</a><a href="#">Services</a><a href="#">Coaching</a><a href="#">Writing</a></div>
-        </div>
-      </div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Specs</span>
-      <div class="spec-grid" style="max-width:720px">
-        <span class="spec-key">height</span><span class="spec-val">52px</span>
-        <span class="spec-key">padding</span><span class="spec-val">0 var(--space-48)</span>
-        <span class="spec-key">background</span><span class="spec-val">var(--neutral)</span>
-        <span class="spec-key">border-bottom</span><span class="spec-val">1px solid var(--ink-30)</span>
-        <span class="spec-key">layout</span><span class="spec-val">flex space-between · vertical centre</span>
-        <span class="spec-key">logo</span><span class="spec-val">Instrument Serif italic 20px · primary</span>
-        <span class="spec-key">nav pill</span><span class="spec-val">Barlow 12px / 600 · padded 6px 14px · 1px primary border · 4px radius</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Hero Writing ══ -->
-  <div class="section" id="pc-hero-writing">
-    <div class="section-header">
-      <div class="section-num">10</div>
-      <div class="section-title">Hero Writing</div>
-      <div class="section-desc">The opening statement on a landing or content page. A display-weight Barlow paragraph with the muted-word technique threaded through it, optionally closing on an Instrument Serif italic word for emphasis. The voice of the system, fully committed.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Display statement with muted-word technique</span>
-      <div class="preview-frame" style="padding: var(--space-64)">
-        <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h3);font-weight:400;color:var(--primary);margin-bottom: var(--space-24)">Design Leadership &amp; Practice</div>
-        <div style="font-size: var(--text-display);font-weight:500;letter-spacing:-0.025em;line-height:1.18;max-width:900px;margin-bottom: var(--space-32)">
-          I am a <span class="m">strategist</span>. An educator. A designer
-          of <span class="m">everyday interactions</span>. A strong believer
-          in ethics and education. A leader of design <span class="m">culture</span>
-          and craftsman of design <span class="ac">communities</span>. I will
-          <span class="ac">train</span> the next generation of minds through
-          <span class="m">deliberated</span> technological <em style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:1.08em;display:inline-block;line-height:1.2">interactions</em>.
-        </div>
-        <div style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.7;max-width:560px">
-          I coach and train design teams &amp; individuals to produce their strongest, most creatively invigorated work — at the intersection of leadership, strategy, and the discipline of design.
-        </div>
-      </div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Notes on the voice</span>
-      <p class="comp-rule">Hero Writing carries the system's only allowance for sustained Instrument Serif italic — typically the eyebrow line above and one or two words inside the display block. Every other typographic choice serves the muted-word rhythm. Don't add accent colour outside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.ac</code>; don't drop below 22px on any italic.</p>
-    </div>
-  </div>
-
-  <!-- ══ Featured Article ══ -->
-  <div class="section" id="pc-feature">
-    <div class="section-header">
-      <div class="section-num">11</div>
-      <div class="section-title">Featured Article</div>
-      <div class="section-desc">A magazine-style hero block that gives one specific piece headline treatment. Used at the top of an Editorial Index, sometimes inline as an "Editor's Pick" at the top of a content listing. Carries category, title, excerpt, meta, and a CTA — all the moves of a card, scaled to page-feature weight.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Lead feature with sidebar tag</span>
-      <div class="preview-frame" style="padding: var(--space-48)">
-        <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--c-terracotta);margin-bottom: var(--space-12)">— Featured · UX Industry</div>
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap: var(--space-48);align-items:end">
-          <div>
-            <h2 style="font-family:var(--font-serif);font-style:italic;font-weight:400;font-size: var(--text-h0);line-height:1.05;letter-spacing:-0.015em;color:var(--primary);margin-bottom: var(--space-20)">A Discipline Reset</h2>
-            <p style="font-size: var(--text-body-lg);font-weight:500;color:var(--secondary);line-height:1.55;margin-bottom: var(--space-24);max-width:540px">UX 1.0 was a discipline built around scarcity. AI dissolved that scarcity entirely.</p>
-            <div class="row-between" style="max-width:540px">
-              <div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Mar 4, 2026 · 14 min read</div>
-              <button class="btn-dark">Read →</button>
-            </div>
-          </div>
-          <div style="background:var(--surface);border:var(--rule-faint);border-radius:4px;padding: var(--space-24);min-height:200px;display:flex;align-items:flex-end">
-            <div>
-              <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">Series</div>
-              <div style="font-family:var(--font-serif);font-style:italic;font-size: var(--text-h5);color:var(--primary)">UX 2.0 — Part 1 of 3</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ Footer ══ -->
-  <div class="section" id="pc-footer">
-    <div class="section-header">
-      <div class="section-num">12</div>
-      <div class="section-title">Footer</div>
-      <div class="section-desc">A document footer — single rule above, copyright on the left, navigation links on the right. Same Barlow Condensed eyebrow treatment as nav pills above. No social icons, no big columns of links — kept as a closing edge rather than a wayfinding tool.</div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Default footer</span>
-      <div class="preview-frame" style="padding: 0;background:var(--neutral);border:none">
-        <div class="layout-footer">
-          <span class="layout-footer-left">© 2026 alex m. chong</span>
-          <div class="layout-footer-right"><a href="#">Writing</a><a href="#">Coaching</a><a href="#">Services</a><a href="#">Contact</a></div>
-        </div>
-      </div>
-    </div>
-    <div class="comp-section">
-      <span class="section-label">Specs</span>
-      <div class="spec-grid" style="max-width:720px">
-        <span class="spec-key">padding</span><span class="spec-val">28px var(--space-48)</span>
-        <span class="spec-key">background</span><span class="spec-val">var(--neutral) — same surface as topbar</span>
-        <span class="spec-key">border-top</span><span class="spec-val">1px solid var(--ink-30)</span>
-        <span class="spec-key">layout</span><span class="spec-val">flex space-between · vertical centre</span>
-        <span class="spec-key">copyright</span><span class="spec-val">Barlow Condensed 11px / 700 / uppercase / 0.14em / primary</span>
-        <span class="spec-key">links</span><span class="spec-val">same as copyright — hover: opacity-only</span>
-      </div>
-    </div>
-  </div>
-
-  </div></section>
+</section>
 
 <section class="workspace" id="tab-cms" data-tab="cms">
   <nav class="sidebar" id="sidebar-cms">

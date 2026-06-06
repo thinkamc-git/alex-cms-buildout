@@ -19,7 +19,8 @@
 <div class="topbar">
   <span class="topbar-brandtitle">alex m. chong <em>design system</em></span>
   <nav class="topbar-tabsbar">
-    <a class="topbar-tabsbar-tab active" href="#layouts" data-tab="layouts">Page Layouts</a>
+    <a class="topbar-tabsbar-tab active" href="#foundations" data-tab="foundations">Foundations</a>
+    <a class="topbar-tabsbar-tab" href="#layouts" data-tab="layouts">Page Layouts</a>
     <a class="topbar-tabsbar-tab" href="#section" data-tab="section">Page Components</a>
     <a class="topbar-tabsbar-tab" href="#cards" data-tab="cards">Content Cards</a>
     <a class="topbar-tabsbar-tab" href="#components" data-tab="components">Components</a>
@@ -28,7 +29,251 @@
   </nav>
 </div>
 
-<section class="workspace active" id="tab-layouts" data-tab="layouts">  <nav class="sidebar" id="sidebar-layouts">
+<section class="workspace active" id="tab-foundations" data-tab="foundations">  <nav class="sidebar" id="sidebar-foundations">
+    <div class="sidebar-group">
+      <span class="sidebar-group-label">Foundations</span>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-colors" class="sidebar-link active">Colors</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
+    </div>
+  </nav>
+  <div class="canvas">
+  <div class="section" id="comp-colors">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">Color System</div>
+      <div class="section-desc">A warm neutral foundation with one chromatic accent. Every colour is exposed as a CSS custom property — always reference by token name. Category colours are semantic — they carry content identity, kept out of chrome.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Base Palette</span>
+      <div class="color-grid">
+        <div class="chip"><div class="swatch" style="background:var(--primary)"></div><div class="cname">Primary</div><div class="ctoken">--primary</div><div class="chex">#191715</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--secondary)"></div><div class="cname">Secondary</div><div class="ctoken">--secondary</div><div class="chex">#494846</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--muted)"></div><div class="cname">Muted</div><div class="ctoken">--muted</div><div class="chex">#818080</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--neutral)"></div><div class="cname">Neutral</div><div class="ctoken">--neutral</div><div class="chex">#E8E8E8</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--canvas-bg)"></div><div class="cname">Canvas BG</div><div class="ctoken">--canvas-bg</div><div class="chex">#F3F2F1</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--surface)"></div><div class="cname">Surface</div><div class="ctoken">--surface</div><div class="chex">#F8F8F8</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--accent)"></div><div class="cname">Accent</div><div class="ctoken">--accent</div><div class="chex">#6B7F6E</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--white)"></div><div class="cname">White</div><div class="ctoken">--white</div><div class="chex">#FFFFFF</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Mid-Grey Ramp — between secondary and muted</span>
+      <div class="color-grid">
+        <div class="chip"><div class="swatch" style="background:var(--ink-mid)"></div><div class="cname">Ink Mid</div><div class="ctoken">--ink-mid</div><div class="chex">#646361</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--ink-faint)"></div><div class="cname">Ink Faint</div><div class="ctoken">--ink-faint</div><div class="chex">#716F6E</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--primary-hover)"></div><div class="cname">Primary Hover</div><div class="ctoken">--primary-hover</div><div class="chex">#333333</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Primary Tints — primary colour at fixed alphas</span>
+      <p class="comp-rule">For light surfaces — borders, dividers, subtle hovers, dark overlays. Reach for these instead of inventing fresh rgba alphas. Five steps cover every realistic use.</p>
+      <div class="color-grid" style="background:var(--surface);padding: 18px;border:var(--rule-faint);border-radius:4px">
+        <div class="chip"><div class="swatch" style="background:var(--ink-08)"></div><div class="cname">Hover · zebra</div><div class="ctoken">--ink-08</div><div class="chex">primary 8%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--ink-12)"></div><div class="cname">Faint divider</div><div class="ctoken">--ink-12</div><div class="chex">primary 12%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--ink-18)"></div><div class="cname">Card border</div><div class="ctoken">--ink-18</div><div class="chex">primary 18%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--ink-30)"></div><div class="cname">Section divider</div><div class="ctoken">--ink-30</div><div class="chex">primary 30%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--ink-72)"></div><div class="cname">Past-card overlay</div><div class="ctoken">--ink-72</div><div class="chex">primary 72%</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">White Tints — for dark surfaces</span>
+      <p class="comp-rule">Used inside event headers, masterclass gradients, and experiment cards where text and detail sit on a near-black ground.</p>
+      <div class="color-grid" style="background:var(--primary);padding: 18px;border-radius:4px">
+        <div class="chip"><div class="swatch" style="background:var(--white-06);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Ghost detail</div><div class="ctoken" style="color:var(--white-85)">--white-06</div><div class="chex" style="color:var(--white-45)">white 6%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--white-15);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Subtle border</div><div class="ctoken" style="color:var(--white-85)">--white-15</div><div class="chex" style="color:var(--white-45)">white 15%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--white-45);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Muted text</div><div class="ctoken" style="color:var(--white-85)">--white-45</div><div class="chex" style="color:var(--white-45)">white 45%</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--white-85);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Primary text</div><div class="ctoken" style="color:var(--white-85)">--white-85</div><div class="chex" style="color:var(--white-45)">white 85%</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Category Pool — 18 hues at one saturation/darkness level</span>
+      <p class="comp-rule">A pool of 18 chromatic colours, all at the same restrained intensity, named by the colour itself (not by the category that happens to use it). Categories pick from this pool; the design system has no opinion about which category gets which hue. Add a new category by adding a new <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.card[data-category="…"] { --c-current: var(--c-…); }</code> mapping at the bottom of the cards block.</p>
+      <div class="color-grid">
+        <div class="chip"><div class="swatch" style="background:var(--c-rust)"></div><div class="cname">Rust</div><div class="ctoken">--c-rust</div><div class="chex">#765150</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-terracotta)"></div><div class="cname">Terracotta</div><div class="ctoken">--c-terracotta</div><div class="chex">#7D4631</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-clay)"></div><div class="cname">Clay</div><div class="ctoken">--c-clay</div><div class="chex">#765E44</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-amber)"></div><div class="cname">Amber</div><div class="ctoken">--c-amber</div><div class="chex">#81642A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-ochre)"></div><div class="cname">Ochre</div><div class="ctoken">--c-ochre</div><div class="chex">#786E4A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-olive)"></div><div class="cname">Olive</div><div class="ctoken">--c-olive</div><div class="chex">#6E7448</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-moss)"></div><div class="cname">Moss</div><div class="ctoken">--c-moss</div><div class="chex">#607549</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-forest)"></div><div class="cname">Forest</div><div class="ctoken">--c-forest</div><div class="chex">#49634B</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-sage)"></div><div class="cname">Sage</div><div class="ctoken">--c-sage</div><div class="chex">#4D705A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-teal)"></div><div class="cname">Teal</div><div class="ctoken">--c-teal</div><div class="chex">#4A716E</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-ocean)"></div><div class="cname">Ocean</div><div class="ctoken">--c-ocean</div><div class="chex">#4A6677</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-denim)"></div><div class="cname">Denim</div><div class="ctoken">--c-denim</div><div class="chex">#46556A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-indigo)"></div><div class="cname">Indigo</div><div class="ctoken">--c-indigo</div><div class="chex">#4D567A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-purple)"></div><div class="cname">Purple</div><div class="ctoken">--c-purple</div><div class="chex">#5D5376</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-violet)"></div><div class="cname">Violet</div><div class="ctoken">--c-violet</div><div class="chex">#6C4D7A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-plum)"></div><div class="cname">Plum</div><div class="ctoken">--c-plum</div><div class="chex">#785071</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-mauve)"></div><div class="cname">Mauve</div><div class="ctoken">--c-mauve</div><div class="chex">#6F4B61</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-rose)"></div><div class="cname">Rose</div><div class="ctoken">--c-rose</div><div class="chex">#7A5160</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Category Tints — use color-mix() at the call site</span>
+      <p class="comp-rule">Series pills, framework badges, and journal rules use a tinted version of their category colour. Don't define new tokens for every category × alpha combination — use <code style="font-family:var(--font-mono);font-size: var(--text-pill);background:var(--ink-08);padding: 1px 6px;border-radius:2px">color-mix(in srgb, var(--c-terracotta) 35%, transparent)</code> at the call site. Standard alphas: <strong>20%</strong> (ghost dot), <strong>35%</strong> (border), <strong>40%</strong> (badge border).</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Experiment Card Backgrounds — deep tonal solids</span>
+      <p class="comp-rule">Two near-black tones used only as the full-bleed background of experiment cards. Separate from the category pool — these create the surface for content rather than carrying its identity.</p>
+      <div class="color-grid">
+        <div class="chip"><div class="swatch" style="background:var(--c-experiment-prototype)"></div><div class="cname">Prototype</div><div class="ctoken">--c-experiment-prototype</div><div class="chex">#1C1028</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-experiment-concept)"></div><div class="cname">Concept</div><div class="ctoken">--c-experiment-concept</div><div class="chex">#0A1F1A</div></div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Color Roles — where each token is used</span>
+      <div class="spec-grid" style="max-width:640px">
+        <span class="spec-key">Page background</span><span class="spec-val">var(--neutral)</span>
+        <span class="spec-key">Canvas surface</span><span class="spec-val">var(--canvas-bg)</span>
+        <span class="spec-key">Card surface</span><span class="spec-val">var(--surface)</span>
+        <span class="spec-key">All headings</span><span class="spec-val">var(--primary)</span>
+        <span class="spec-key">Body copy</span><span class="spec-val">var(--secondary)</span>
+        <span class="spec-key">Metadata / de-emphasis</span><span class="spec-val">var(--muted)</span>
+        <span class="spec-key">Inline highlights</span><span class="spec-val">var(--accent) — text only</span>
+        <span class="spec-key">Text on dark</span><span class="spec-val">var(--white)</span>
+        <span class="spec-key">Button hover (dark)</span><span class="spec-val">var(--primary-hover)</span>
+        <span class="spec-key">Structural borders</span><span class="spec-val">var(--rule) — 1px primary</span>
+        <span class="spec-key">Section dividers</span><span class="spec-val">var(--rule-30) — 30% primary</span>
+        <span class="spec-key">Card / row borders</span><span class="spec-val">var(--rule-faint) — 18% primary</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 02 TYPOGRAPHY ══ -->
+  <div class="section" id="comp-type">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">Typography</div>
+      <div class="section-desc">Two families, strictly bounded roles. Barlow carries all structural type. Instrument Serif italic appears only where the human voice breaks through — used as voice, not decoration.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Type Scale — token + px (always reference the token)</span>
+      <div class="spec-grid" style="max-width:720px">
+        <span class="spec-key">var(--text-display)</span><span class="spec-val">54px · hero display</span>
+        <span class="spec-key">var(--text-h0)</span><span class="spec-val">48px · large display</span>
+        <span class="spec-key">var(--text-h1)</span><span class="spec-val">40px · h1</span>
+        <span class="spec-key">var(--text-h2)</span><span class="spec-val">32px · h2</span>
+        <span class="spec-key">var(--text-h3)</span><span class="spec-val">28px · serif section intro / event title</span>
+        <span class="spec-key">var(--text-h4)</span><span class="spec-val">24px · h3-equivalent</span>
+        <span class="spec-key">var(--text-h5)</span><span class="spec-val">22px · card title / pull quote</span>
+        <span class="spec-key">var(--text-body-lg)</span><span class="spec-val">20px · body-lg / lead</span>
+        <span class="spec-key">var(--text-body)</span><span class="spec-val">18px · body — moderate</span>
+        <span class="spec-key">var(--text-md)</span><span class="spec-val">16px · default body</span>
+        <span class="spec-key">var(--text-sm)</span><span class="spec-val">15px · body-sm</span>
+        <span class="spec-key">var(--text-base)</span><span class="spec-val">14px · button / nav / base UI</span>
+        <span class="spec-key">var(--text-meta)</span><span class="spec-val">13px · metadata / table cell</span>
+        <span class="spec-key">var(--text-pill)</span><span class="spec-val">12px · pill / micro body</span>
+        <span class="spec-key">var(--text-label)</span><span class="spec-val">11px · eyebrow / mono / uppercase label</span>
+        <span class="spec-key">var(--text-tiny)</span><span class="spec-val">10px · status badge</span>
+        <span class="spec-key">var(--text-micro)</span><span class="spec-val">9px · extreme micro</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Barlow — Structural Voice</span>
+      <div class="type-row"><div class="type-meta"><div class="type-role">display</div><div class="type-spec">54px / 500 / lh 66px / -0.02em<br>Weight 500 — power from scale not stroke</div></div><div style="font-size: var(--text-h0);font-weight:500;letter-spacing:-0.02em;line-height:1.22">Design Leadership</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">h1</div><div class="type-spec">40px / 600 / -0.015em / lh 1.15</div></div><div style="font-size: var(--text-h1);font-weight:600;letter-spacing:-0.015em;line-height:1.15">Upcoming Talks</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">h2</div><div class="type-spec">32px / 600 / -0.01em / lh 1.2</div></div><div style="font-size: var(--text-h2);font-weight:600;letter-spacing:-0.01em;line-height:1.2">Design Principles</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">h3</div><div class="type-spec">24px / 600 / lh 1.3</div></div><div style="font-size: var(--text-h4);font-weight:600;line-height:1.3">Product Strategy & UX</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">body-lg</div><div class="type-spec">20px / 500 / lh 1.7<br>Weight 500 minimum on this bg</div></div><div style="font-size: var(--text-body-lg);font-weight:500;line-height:1.7;color:var(--secondary)">I coach and train design teams & individuals to produce their strongest work.</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">body-md</div><div class="type-spec">16px / 500 / lh 1.65</div></div><div style="font-size: var(--text-md);font-weight:500;line-height:1.65;color:var(--secondary)">Alex is a product design leader and coach who specializes in complex problems outside typical processes.</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">body-sm</div><div class="type-spec">15px / 500 / lh 1.5</div></div><div style="font-size: var(--text-sm);font-weight:500;line-height:1.5;color:var(--secondary)">Based in Toronto · Director of UX · Open to conversations</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">meta / label</div><div class="type-spec">Barlow Condensed 12–13px / 700<br>uppercase · letter-spacing 0.12–0.18em<br>Pills and labels only</div></div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--secondary)">Leading Design · Apr 28, 2026 · 14 min</div></div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Muted Word — Interior Rhythm</span>
+      <p class="comp-rule">Same font, weight, and size as surrounding text. Only color changes. Creates depth and rhythm inside a statement without adding hierarchy. This is the primary expressive tool in display copy.</p>
+      <div class="preview-frame" style="padding: var(--space-32) var(--space-48);background:var(--surface)">
+        <div style="font-size:36px;font-weight:500;letter-spacing:-0.02em;line-height:1.3;margin-bottom: var(--space-16)">
+          Design <span class="m">culture</span> and <span class="m">craft</span>
+        </div>
+        <div style="font-size: var(--text-h3);font-weight:500;letter-spacing:-0.015em;line-height:1.35">
+          I am a <span class="m">strategist</span>. An educator. A designer of <span class="m">everyday interactions</span>.
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Instrument Serif Italic — Editorial Voice</span>
+      <p class="comp-rule" style="margin-bottom: var(--space-20)">Minimum 22px · Saturated colour only · Italic weight 400 only · Inline only via display:inline-block · Max 2 instances per page</p>
+      <div class="type-row"><div class="type-meta"><div class="type-role">hero inline</div><div class="type-spec">1.15× context size<br>inline-block prevents clipping</div></div><div style="font-size: var(--text-h1);font-weight:500;letter-spacing:-0.02em">shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.15em;display:inline-block;line-height:1.2">future</em></div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">section intro</div><div class="type-spec">24–28px / secondary color<br>First sentence of a major section</div></div><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;font-weight:400;line-height:1.45;color:var(--secondary);overflow:visible">A way of thinking differently about what design can do — well beyond fixing your process.</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">pull quote</div><div class="type-spec">22px / primary color<br>With left border rule</div></div><div style="border-left:2px solid var(--primary);padding-left: var(--space-16);font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h5);font-weight:400;line-height:1.5;overflow:visible">"The gap between strategist and executor sits openly in the room now."</div></div>
+      <div class="type-row"><div class="type-meta"><div class="type-role">journal title</div><div class="type-spec">21px / category rule color<br>Bumped above body text size</div></div><div style="border-left:2px solid var(--c-purple);padding-left: var(--space-16);font-family:'Instrument Serif',serif;font-style:italic;font-size:21px;font-weight:400;line-height:1.4;overflow:visible">The designers struggling most with AI were already struggling to articulate why their decisions mattered.</div></div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Usage — When to Use Each</span>
+      <div class="usage-row">
+        <div class="usage-card do">
+          <span class="usage-label">✓ Instrument Serif</span>
+          <p class="usage-text">Hero emphasis word · Section intro sentence · Pull quote in article · Journal entry title · About page statement · Logotype</p>
+        </div>
+        <div class="usage-card dont">
+          <span class="usage-label">✗ Never Instrument Serif</span>
+          <p class="usage-text">Body copy · Navigation · Buttons · Labels · Metadata · Captions · Anything below 22px · Anything in muted color</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 03 SPACING ══ -->
+  <div class="section" id="comp-spacing">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">Spacing</div>
+      <div class="section-desc">A 10-step scale tied to the 8px base. The token name embeds the px value — <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">var(--space-24)</code> = 24px. Use only inside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">padding</code>, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">margin</code>, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">gap</code>, and <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">inset</code> — keep border widths, blur radii, and font sizes on their own scales.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Scale</span>
+      <div class="spec-grid" style="max-width:720px">
+        <span class="spec-key">var(--space-4)</span><span class="spec-val">4px · hairline gap · pill inner padding</span>
+        <span class="spec-key">var(--space-8)</span><span class="spec-val">8px · base unit · default gap inside compact rows</span>
+        <span class="spec-key">var(--space-12)</span><span class="spec-val">12px · between label + control · tight stack</span>
+        <span class="spec-key">var(--space-16)</span><span class="spec-val">16px · md spacing · between paragraph + spec</span>
+        <span class="spec-key">var(--space-20)</span><span class="spec-val">20px · grid gap on cards · controller row</span>
+        <span class="spec-key">var(--space-24)</span><span class="spec-val">24px · lg · default card padding · header spacing</span>
+        <span class="spec-key">var(--space-32)</span><span class="spec-val">32px · between groups · sidebar group block</span>
+        <span class="spec-key">var(--space-48)</span><span class="spec-val">48px · page gutter · canvas outer padding · 2xl</span>
+        <span class="spec-key">var(--space-64)</span><span class="spec-val">64px · hero block bottom · 3xl</span>
+        <span class="spec-key">var(--space-96)</span><span class="spec-val">96px · major section spacing · 4xl</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Visual scale</span>
+      <div style="display:flex;flex-direction:column;gap:var(--space-12);max-width:520px;background:var(--surface);padding:var(--space-24);border:var(--rule-faint);border-radius:4px">
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-4</span><span style="height:8px;background:var(--primary);width:4px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-8</span><span style="height:8px;background:var(--primary);width:8px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-12</span><span style="height:8px;background:var(--primary);width:12px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-16</span><span style="height:8px;background:var(--primary);width:16px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-20</span><span style="height:8px;background:var(--primary);width:20px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-24</span><span style="height:8px;background:var(--primary);width:24px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-32</span><span style="height:8px;background:var(--primary);width:32px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-48</span><span style="height:8px;background:var(--primary);width:48px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-64</span><span style="height:8px;background:var(--primary);width:64px"></span></div>
+        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-96</span><span style="height:8px;background:var(--primary);width:96px"></span></div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</section>
+
+<section class="workspace" id="tab-layouts" data-tab="layouts">  <nav class="sidebar" id="sidebar-layouts">
     <div class="sidebar-group">
       <span class="sidebar-group-label">Landing</span>
       <a data-scroll-panel="layouts" data-scroll-section="lay-landing"          class="sidebar-link active">Simple Landing</a>
@@ -1941,11 +2186,8 @@
 
 <section class="workspace" id="tab-components" data-tab="components">  <nav class="sidebar" id="sidebar-components">
     <div class="sidebar-group">
-      <span class="sidebar-group-label">Foundations</span>
-      <a data-scroll-panel="components" data-scroll-section="comp-colors" class="sidebar-link active">Colors</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
-      <a data-scroll-panel="components" data-scroll-section="comp-anatomy" class="sidebar-link">Sections &amp; Dividers</a>
+      <span class="sidebar-group-label">Structure</span>
+      <a data-scroll-panel="components" data-scroll-section="comp-anatomy" class="sidebar-link active">Sections &amp; Dividers</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Interactive</span>
@@ -1956,239 +2198,6 @@
     </div>
   </nav>
   <div class="canvas">
-    <!-- ══ 01 COLORS ══ -->
-  <div class="section" id="comp-colors">
-    <div class="section-header">
-      <div class="section-num">01</div>
-      <div class="section-title">Color System</div>
-      <div class="section-desc">A warm neutral foundation with one chromatic accent. Every colour is exposed as a CSS custom property — always reference by token name. Category colours are semantic — they carry content identity, kept out of chrome.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Base Palette</span>
-      <div class="color-grid">
-        <div class="chip"><div class="swatch" style="background:var(--primary)"></div><div class="cname">Primary</div><div class="ctoken">--primary</div><div class="chex">#191715</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--secondary)"></div><div class="cname">Secondary</div><div class="ctoken">--secondary</div><div class="chex">#494846</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--muted)"></div><div class="cname">Muted</div><div class="ctoken">--muted</div><div class="chex">#818080</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--neutral)"></div><div class="cname">Neutral</div><div class="ctoken">--neutral</div><div class="chex">#E8E8E8</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--canvas-bg)"></div><div class="cname">Canvas BG</div><div class="ctoken">--canvas-bg</div><div class="chex">#F3F2F1</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--surface)"></div><div class="cname">Surface</div><div class="ctoken">--surface</div><div class="chex">#F8F8F8</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--accent)"></div><div class="cname">Accent</div><div class="ctoken">--accent</div><div class="chex">#6B7F6E</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--white)"></div><div class="cname">White</div><div class="ctoken">--white</div><div class="chex">#FFFFFF</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Mid-Grey Ramp — between secondary and muted</span>
-      <div class="color-grid">
-        <div class="chip"><div class="swatch" style="background:var(--ink-mid)"></div><div class="cname">Ink Mid</div><div class="ctoken">--ink-mid</div><div class="chex">#646361</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--ink-faint)"></div><div class="cname">Ink Faint</div><div class="ctoken">--ink-faint</div><div class="chex">#716F6E</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--primary-hover)"></div><div class="cname">Primary Hover</div><div class="ctoken">--primary-hover</div><div class="chex">#333333</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Primary Tints — primary colour at fixed alphas</span>
-      <p class="comp-rule">For light surfaces — borders, dividers, subtle hovers, dark overlays. Reach for these instead of inventing fresh rgba alphas. Five steps cover every realistic use.</p>
-      <div class="color-grid" style="background:var(--surface);padding: 18px;border:var(--rule-faint);border-radius:4px">
-        <div class="chip"><div class="swatch" style="background:var(--ink-08)"></div><div class="cname">Hover · zebra</div><div class="ctoken">--ink-08</div><div class="chex">primary 8%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--ink-12)"></div><div class="cname">Faint divider</div><div class="ctoken">--ink-12</div><div class="chex">primary 12%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--ink-18)"></div><div class="cname">Card border</div><div class="ctoken">--ink-18</div><div class="chex">primary 18%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--ink-30)"></div><div class="cname">Section divider</div><div class="ctoken">--ink-30</div><div class="chex">primary 30%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--ink-72)"></div><div class="cname">Past-card overlay</div><div class="ctoken">--ink-72</div><div class="chex">primary 72%</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">White Tints — for dark surfaces</span>
-      <p class="comp-rule">Used inside event headers, masterclass gradients, and experiment cards where text and detail sit on a near-black ground.</p>
-      <div class="color-grid" style="background:var(--primary);padding: 18px;border-radius:4px">
-        <div class="chip"><div class="swatch" style="background:var(--white-06);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Ghost detail</div><div class="ctoken" style="color:var(--white-85)">--white-06</div><div class="chex" style="color:var(--white-45)">white 6%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--white-15);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Subtle border</div><div class="ctoken" style="color:var(--white-85)">--white-15</div><div class="chex" style="color:var(--white-45)">white 15%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--white-45);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Muted text</div><div class="ctoken" style="color:var(--white-85)">--white-45</div><div class="chex" style="color:var(--white-45)">white 45%</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--white-85);border-color:var(--white-15)"></div><div class="cname" style="color:var(--white)">Primary text</div><div class="ctoken" style="color:var(--white-85)">--white-85</div><div class="chex" style="color:var(--white-45)">white 85%</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Category Pool — 18 hues at one saturation/darkness level</span>
-      <p class="comp-rule">A pool of 18 chromatic colours, all at the same restrained intensity, named by the colour itself (not by the category that happens to use it). Categories pick from this pool; the design system has no opinion about which category gets which hue. Add a new category by adding a new <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">.card[data-category="…"] { --c-current: var(--c-…); }</code> mapping at the bottom of the cards block.</p>
-      <div class="color-grid">
-        <div class="chip"><div class="swatch" style="background:var(--c-rust)"></div><div class="cname">Rust</div><div class="ctoken">--c-rust</div><div class="chex">#765150</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-terracotta)"></div><div class="cname">Terracotta</div><div class="ctoken">--c-terracotta</div><div class="chex">#7D4631</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-clay)"></div><div class="cname">Clay</div><div class="ctoken">--c-clay</div><div class="chex">#765E44</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-amber)"></div><div class="cname">Amber</div><div class="ctoken">--c-amber</div><div class="chex">#81642A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-ochre)"></div><div class="cname">Ochre</div><div class="ctoken">--c-ochre</div><div class="chex">#786E4A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-olive)"></div><div class="cname">Olive</div><div class="ctoken">--c-olive</div><div class="chex">#6E7448</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-moss)"></div><div class="cname">Moss</div><div class="ctoken">--c-moss</div><div class="chex">#607549</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-forest)"></div><div class="cname">Forest</div><div class="ctoken">--c-forest</div><div class="chex">#49634B</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-sage)"></div><div class="cname">Sage</div><div class="ctoken">--c-sage</div><div class="chex">#4D705A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-teal)"></div><div class="cname">Teal</div><div class="ctoken">--c-teal</div><div class="chex">#4A716E</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-ocean)"></div><div class="cname">Ocean</div><div class="ctoken">--c-ocean</div><div class="chex">#4A6677</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-denim)"></div><div class="cname">Denim</div><div class="ctoken">--c-denim</div><div class="chex">#46556A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-indigo)"></div><div class="cname">Indigo</div><div class="ctoken">--c-indigo</div><div class="chex">#4D567A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-purple)"></div><div class="cname">Purple</div><div class="ctoken">--c-purple</div><div class="chex">#5D5376</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-violet)"></div><div class="cname">Violet</div><div class="ctoken">--c-violet</div><div class="chex">#6C4D7A</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-plum)"></div><div class="cname">Plum</div><div class="ctoken">--c-plum</div><div class="chex">#785071</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-mauve)"></div><div class="cname">Mauve</div><div class="ctoken">--c-mauve</div><div class="chex">#6F4B61</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-rose)"></div><div class="cname">Rose</div><div class="ctoken">--c-rose</div><div class="chex">#7A5160</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Category Tints — use color-mix() at the call site</span>
-      <p class="comp-rule">Series pills, framework badges, and journal rules use a tinted version of their category colour. Don't define new tokens for every category × alpha combination — use <code style="font-family:var(--font-mono);font-size: var(--text-pill);background:var(--ink-08);padding: 1px 6px;border-radius:2px">color-mix(in srgb, var(--c-terracotta) 35%, transparent)</code> at the call site. Standard alphas: <strong>20%</strong> (ghost dot), <strong>35%</strong> (border), <strong>40%</strong> (badge border).</p>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Experiment Card Backgrounds — deep tonal solids</span>
-      <p class="comp-rule">Two near-black tones used only as the full-bleed background of experiment cards. Separate from the category pool — these create the surface for content rather than carrying its identity.</p>
-      <div class="color-grid">
-        <div class="chip"><div class="swatch" style="background:var(--c-experiment-prototype)"></div><div class="cname">Prototype</div><div class="ctoken">--c-experiment-prototype</div><div class="chex">#1C1028</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-experiment-concept)"></div><div class="cname">Concept</div><div class="ctoken">--c-experiment-concept</div><div class="chex">#0A1F1A</div></div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Color Roles — where each token is used</span>
-      <div class="spec-grid" style="max-width:640px">
-        <span class="spec-key">Page background</span><span class="spec-val">var(--neutral)</span>
-        <span class="spec-key">Canvas surface</span><span class="spec-val">var(--canvas-bg)</span>
-        <span class="spec-key">Card surface</span><span class="spec-val">var(--surface)</span>
-        <span class="spec-key">All headings</span><span class="spec-val">var(--primary)</span>
-        <span class="spec-key">Body copy</span><span class="spec-val">var(--secondary)</span>
-        <span class="spec-key">Metadata / de-emphasis</span><span class="spec-val">var(--muted)</span>
-        <span class="spec-key">Inline highlights</span><span class="spec-val">var(--accent) — text only</span>
-        <span class="spec-key">Text on dark</span><span class="spec-val">var(--white)</span>
-        <span class="spec-key">Button hover (dark)</span><span class="spec-val">var(--primary-hover)</span>
-        <span class="spec-key">Structural borders</span><span class="spec-val">var(--rule) — 1px primary</span>
-        <span class="spec-key">Section dividers</span><span class="spec-val">var(--rule-30) — 30% primary</span>
-        <span class="spec-key">Card / row borders</span><span class="spec-val">var(--rule-faint) — 18% primary</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 02 TYPOGRAPHY ══ -->
-  <div class="section" id="comp-type">
-    <div class="section-header">
-      <div class="section-num">02</div>
-      <div class="section-title">Typography</div>
-      <div class="section-desc">Two families, strictly bounded roles. Barlow carries all structural type. Instrument Serif italic appears only where the human voice breaks through — used as voice, not decoration.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Type Scale — token + px (always reference the token)</span>
-      <div class="spec-grid" style="max-width:720px">
-        <span class="spec-key">var(--text-display)</span><span class="spec-val">54px · hero display</span>
-        <span class="spec-key">var(--text-h0)</span><span class="spec-val">48px · large display</span>
-        <span class="spec-key">var(--text-h1)</span><span class="spec-val">40px · h1</span>
-        <span class="spec-key">var(--text-h2)</span><span class="spec-val">32px · h2</span>
-        <span class="spec-key">var(--text-h3)</span><span class="spec-val">28px · serif section intro / event title</span>
-        <span class="spec-key">var(--text-h4)</span><span class="spec-val">24px · h3-equivalent</span>
-        <span class="spec-key">var(--text-h5)</span><span class="spec-val">22px · card title / pull quote</span>
-        <span class="spec-key">var(--text-body-lg)</span><span class="spec-val">20px · body-lg / lead</span>
-        <span class="spec-key">var(--text-body)</span><span class="spec-val">18px · body — moderate</span>
-        <span class="spec-key">var(--text-md)</span><span class="spec-val">16px · default body</span>
-        <span class="spec-key">var(--text-sm)</span><span class="spec-val">15px · body-sm</span>
-        <span class="spec-key">var(--text-base)</span><span class="spec-val">14px · button / nav / base UI</span>
-        <span class="spec-key">var(--text-meta)</span><span class="spec-val">13px · metadata / table cell</span>
-        <span class="spec-key">var(--text-pill)</span><span class="spec-val">12px · pill / micro body</span>
-        <span class="spec-key">var(--text-label)</span><span class="spec-val">11px · eyebrow / mono / uppercase label</span>
-        <span class="spec-key">var(--text-tiny)</span><span class="spec-val">10px · status badge</span>
-        <span class="spec-key">var(--text-micro)</span><span class="spec-val">9px · extreme micro</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Barlow — Structural Voice</span>
-      <div class="type-row"><div class="type-meta"><div class="type-role">display</div><div class="type-spec">54px / 500 / lh 66px / -0.02em<br>Weight 500 — power from scale not stroke</div></div><div style="font-size: var(--text-h0);font-weight:500;letter-spacing:-0.02em;line-height:1.22">Design Leadership</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">h1</div><div class="type-spec">40px / 600 / -0.015em / lh 1.15</div></div><div style="font-size: var(--text-h1);font-weight:600;letter-spacing:-0.015em;line-height:1.15">Upcoming Talks</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">h2</div><div class="type-spec">32px / 600 / -0.01em / lh 1.2</div></div><div style="font-size: var(--text-h2);font-weight:600;letter-spacing:-0.01em;line-height:1.2">Design Principles</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">h3</div><div class="type-spec">24px / 600 / lh 1.3</div></div><div style="font-size: var(--text-h4);font-weight:600;line-height:1.3">Product Strategy & UX</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">body-lg</div><div class="type-spec">20px / 500 / lh 1.7<br>Weight 500 minimum on this bg</div></div><div style="font-size: var(--text-body-lg);font-weight:500;line-height:1.7;color:var(--secondary)">I coach and train design teams & individuals to produce their strongest work.</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">body-md</div><div class="type-spec">16px / 500 / lh 1.65</div></div><div style="font-size: var(--text-md);font-weight:500;line-height:1.65;color:var(--secondary)">Alex is a product design leader and coach who specializes in complex problems outside typical processes.</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">body-sm</div><div class="type-spec">15px / 500 / lh 1.5</div></div><div style="font-size: var(--text-sm);font-weight:500;line-height:1.5;color:var(--secondary)">Based in Toronto · Director of UX · Open to conversations</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">meta / label</div><div class="type-spec">Barlow Condensed 12–13px / 700<br>uppercase · letter-spacing 0.12–0.18em<br>Pills and labels only</div></div><div style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--secondary)">Leading Design · Apr 28, 2026 · 14 min</div></div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Muted Word — Interior Rhythm</span>
-      <p class="comp-rule">Same font, weight, and size as surrounding text. Only color changes. Creates depth and rhythm inside a statement without adding hierarchy. This is the primary expressive tool in display copy.</p>
-      <div class="preview-frame" style="padding: var(--space-32) var(--space-48);background:var(--surface)">
-        <div style="font-size:36px;font-weight:500;letter-spacing:-0.02em;line-height:1.3;margin-bottom: var(--space-16)">
-          Design <span class="m">culture</span> and <span class="m">craft</span>
-        </div>
-        <div style="font-size: var(--text-h3);font-weight:500;letter-spacing:-0.015em;line-height:1.35">
-          I am a <span class="m">strategist</span>. An educator. A designer of <span class="m">everyday interactions</span>.
-        </div>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Instrument Serif Italic — Editorial Voice</span>
-      <p class="comp-rule" style="margin-bottom: var(--space-20)">Minimum 22px · Saturated colour only · Italic weight 400 only · Inline only via display:inline-block · Max 2 instances per page</p>
-      <div class="type-row"><div class="type-meta"><div class="type-role">hero inline</div><div class="type-spec">1.15× context size<br>inline-block prevents clipping</div></div><div style="font-size: var(--text-h1);font-weight:500;letter-spacing:-0.02em">shaping its <em style="font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.15em;display:inline-block;line-height:1.2">future</em></div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">section intro</div><div class="type-spec">24–28px / secondary color<br>First sentence of a major section</div></div><div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:26px;font-weight:400;line-height:1.45;color:var(--secondary);overflow:visible">A way of thinking differently about what design can do — well beyond fixing your process.</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">pull quote</div><div class="type-spec">22px / primary color<br>With left border rule</div></div><div style="border-left:2px solid var(--primary);padding-left: var(--space-16);font-family:'Instrument Serif',serif;font-style:italic;font-size: var(--text-h5);font-weight:400;line-height:1.5;overflow:visible">"The gap between strategist and executor sits openly in the room now."</div></div>
-      <div class="type-row"><div class="type-meta"><div class="type-role">journal title</div><div class="type-spec">21px / category rule color<br>Bumped above body text size</div></div><div style="border-left:2px solid var(--c-purple);padding-left: var(--space-16);font-family:'Instrument Serif',serif;font-style:italic;font-size:21px;font-weight:400;line-height:1.4;overflow:visible">The designers struggling most with AI were already struggling to articulate why their decisions mattered.</div></div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Usage — When to Use Each</span>
-      <div class="usage-row">
-        <div class="usage-card do">
-          <span class="usage-label">✓ Instrument Serif</span>
-          <p class="usage-text">Hero emphasis word · Section intro sentence · Pull quote in article · Journal entry title · About page statement · Logotype</p>
-        </div>
-        <div class="usage-card dont">
-          <span class="usage-label">✗ Never Instrument Serif</span>
-          <p class="usage-text">Body copy · Navigation · Buttons · Labels · Metadata · Captions · Anything below 22px · Anything in muted color</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ 03 SPACING ══ -->
-  <div class="section" id="comp-spacing">
-    <div class="section-header">
-      <div class="section-num">03</div>
-      <div class="section-title">Spacing</div>
-      <div class="section-desc">A 10-step scale tied to the 8px base. The token name embeds the px value — <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">var(--space-24)</code> = 24px. Use only inside <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">padding</code>, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">margin</code>, <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">gap</code>, and <code style="font-family:var(--font-mono);font-size: var(--text-meta);background:var(--ink-08);padding:1px 6px;border-radius:2px">inset</code> — keep border widths, blur radii, and font sizes on their own scales.</div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Scale</span>
-      <div class="spec-grid" style="max-width:720px">
-        <span class="spec-key">var(--space-4)</span><span class="spec-val">4px · hairline gap · pill inner padding</span>
-        <span class="spec-key">var(--space-8)</span><span class="spec-val">8px · base unit · default gap inside compact rows</span>
-        <span class="spec-key">var(--space-12)</span><span class="spec-val">12px · between label + control · tight stack</span>
-        <span class="spec-key">var(--space-16)</span><span class="spec-val">16px · md spacing · between paragraph + spec</span>
-        <span class="spec-key">var(--space-20)</span><span class="spec-val">20px · grid gap on cards · controller row</span>
-        <span class="spec-key">var(--space-24)</span><span class="spec-val">24px · lg · default card padding · header spacing</span>
-        <span class="spec-key">var(--space-32)</span><span class="spec-val">32px · between groups · sidebar group block</span>
-        <span class="spec-key">var(--space-48)</span><span class="spec-val">48px · page gutter · canvas outer padding · 2xl</span>
-        <span class="spec-key">var(--space-64)</span><span class="spec-val">64px · hero block bottom · 3xl</span>
-        <span class="spec-key">var(--space-96)</span><span class="spec-val">96px · major section spacing · 4xl</span>
-      </div>
-    </div>
-
-    <div class="comp-section">
-      <span class="section-label">Visual scale</span>
-      <div style="display:flex;flex-direction:column;gap:var(--space-12);max-width:520px;background:var(--surface);padding:var(--space-24);border:var(--rule-faint);border-radius:4px">
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-4</span><span style="height:8px;background:var(--primary);width:4px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-8</span><span style="height:8px;background:var(--primary);width:8px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-12</span><span style="height:8px;background:var(--primary);width:12px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-16</span><span style="height:8px;background:var(--primary);width:16px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-20</span><span style="height:8px;background:var(--primary);width:20px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-24</span><span style="height:8px;background:var(--primary);width:24px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-32</span><span style="height:8px;background:var(--primary);width:32px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-48</span><span style="height:8px;background:var(--primary);width:48px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-64</span><span style="height:8px;background:var(--primary);width:64px"></span></div>
-        <div style="display:flex;align-items:center;gap:var(--space-16)"><span style="font-family:var(--font-mono);font-size: var(--text-label);color:var(--muted);width:90px;flex-shrink:0">--space-96</span><span style="height:8px;background:var(--primary);width:96px"></span></div>
-      </div>
-    </div>
-  </div>
-
   <!-- ══ 04 SECTIONS, HEADERS & DIVIDERS ══ -->
   <div class="section" id="comp-anatomy">
     <div class="section-header">

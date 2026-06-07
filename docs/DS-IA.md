@@ -99,6 +99,10 @@ under Components/Containment (recommended) or get their own tab.
 **This protects production CSS:** exploratory styling is quarantined in Applied's
 iframe pages; nothing leaks to the live site.
 
+> **Codified (2026-06-06):** the management rule for future components — page-scoped
+> `<style>` per concept, `fc-` prefix, tokens-only, documented per section, promote
+> via Stage 2 — now lives in `docs/BUILD-DISCIPLINE.md` §6.1. Build to that.
+
 ## 5. Existence audit — TODO (flagged 2026-06-06)
 
 After Applied, audit for things that EXIST in the CSS/markup but aren't documented

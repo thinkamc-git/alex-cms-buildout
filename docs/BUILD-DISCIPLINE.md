@@ -97,6 +97,35 @@ This mirrors the Applied-tab "future components" quarantine in `docs/DS-IA.md` �
 
 ---
 
+## 6.1 Future components (Applied tab)
+
+The Applied tab is a sandbox for using the design system in contexts beyond the
+website. These explorations may introduce **new components that are not in the
+production design system** — "future components." They are allowed, but governed
+so they sit *adjacent to* the system, never *in* it:
+
+- **They live in their concept's isolated iframe page, and nowhere else.** Each
+  Applied concept is its own `showcase/applied-*.html`, loading the real DS CSS
+  plus a **page-scoped `<style>` block** (or a co-located `concept.css` linked
+  only by that page) for its future components. This CSS **never** enters a
+  production slice (`tokens.css`, `public/pages.css`, `public/blocks.css`, the
+  CMS modules).
+- **Prefix every future component `fc-`** (e.g. `fc-progress`, `fc-intention-card`)
+  so the whole un-promoted surface is greppable for audit.
+- **Tokens only** — no raw values — so promotion is mechanical.
+- **Parity first.** Reuse real components wherever the concept needs something the
+  system already has; only genuinely-new things become `fc-` components.
+- **Document them** in a short "Future Components" note inside that concept's
+  section, so they are tracked, not hidden.
+- **Promotion = §3 Stage 2.** When a future component proves out (or two concepts
+  need it), graduate it: move the rule into the correct slice, drop the `fc-`
+  prefix, add it to the `/_ds/` showcase, and delete the page-scoped copy.
+- **Inline styles** are for trivial one-off nudges only — never for a component
+  (they can't express states/pseudo-elements/media and don't promote cleanly).
+
+A single shared "future components" stylesheet is **not** used — it becomes a
+second, ungoverned design system. Scope stays per-concept.
+
 ## 7. Monitoring — preventing drift
 
 - Styles: the `/_ds/` showcase renders **from the real CSS**, so divergence is

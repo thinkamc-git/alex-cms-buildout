@@ -2723,7 +2723,7 @@
   .icon-constellation { position: relative; aspect-ratio: 380 / 170; border-radius: 4px; overflow: hidden; }
   .icon-constellation-tag { position: absolute; left: var(--space-12); bottom: var(--space-12); font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-85); }
   /* Live, real-CSS examples embedded as isolated iframes (Patterns heroes). */
-  .live-frame { width: 100%; border: 1px solid var(--ink-12); border-radius: 4px; background: var(--canvas-bg); display: block; }
+  .live-frame { width: 100%; min-height: 600px; border: 1px solid var(--ink-12); border-radius: 4px; background: var(--canvas-bg); display: block; }
   /* Watermark demo: ensure the card is the positioned ancestor in the showcase. */
   .card--has-series-number { position: relative; }
   .welcome-glance { margin: var(--space-24) 0 0; padding-top: var(--space-20); border-top: var(--rule-faint); max-width: 80ch; }
@@ -2776,15 +2776,31 @@
   })();
 </script>
 <script>
-  // Live example iframes (Patterns heroes): fit each to its content height so the
-  // canvas scrolls naturally. Only fit when visible (offsetParent != null), and
-  // re-fit when a tab is activated, since hidden iframes have no layout width.
+  // Live example iframes: fit each to its content height so the canvas scrolls
+  // naturally. Robust to late layout + first-reveal timing via a ResizeObserver
+  // on the iframe body plus retries — fitting once on tab-click was unreliable
+  // for tall pages (they came out tiny).
   (function () {
     var frames = document.querySelectorAll('iframe.live-frame');
-    function fit(f) { try { if (f.offsetParent !== null) f.style.height = f.contentWindow.document.body.scrollHeight + 'px'; } catch (e) {} }
-    frames.forEach(function (f) { f.addEventListener('load', function () { fit(f); setTimeout(function () { fit(f); }, 300); }); });
-    document.querySelectorAll('.topbar-tabsbar-tab').forEach(function (t) {
-      t.addEventListener('click', function () { setTimeout(function () { frames.forEach(fit); }, 80); });
+    function fit(f) {
+      try {
+        if (f.offsetParent === null) return;            // hidden: skip, RO will catch the reveal
+        var h = f.contentWindow.document.body.scrollHeight;
+        if (h > 60) f.style.height = h + 'px';
+      } catch (e) {}
+    }
+    function wire(f) {
+      fit(f);
+      [150, 450, 1000].forEach(function (d) { setTimeout(function () { fit(f); }, d); });
+      try {
+        var ro = new ResizeObserver(function () { fit(f); });
+        ro.observe(f.contentWindow.document.body);
+      } catch (e) {}
+    }
+    frames.forEach(function (f) { f.addEventListener('load', function () { wire(f); }); });
+    // Re-fit visible frames whenever a tab or sidebar link is activated.
+    document.querySelectorAll('.topbar-tabsbar-tab, .sidebar-link').forEach(function (t) {
+      t.addEventListener('click', function () { [60, 300, 700].forEach(function (d) { setTimeout(function () { frames.forEach(fit); }, d); }); });
     });
   })();
 </script>

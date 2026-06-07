@@ -126,6 +126,16 @@ so they sit *adjacent to* the system, never *in* it:
 A single shared "future components" stylesheet is **not** used — it becomes a
 second, ungoverned design system. Scope stays per-concept.
 
+**Applied creative license (Applied tab only).** Parity-first is *relaxed inside
+Applied* — it's a sandbox, and forcing concepts to mostly reuse existing
+components makes them flat and same-y. Within Applied, a concept may be **~50%
+new `fc-` elements**: use the DS as a **general aesthetic foundation** (tokens,
+the four type roles, restraint, hairlines, near-square, one accent + content
+hues, no shadow-soup) rather than a component straitjacket. Invent where it makes
+the concept sing. The quarantine rules still hold (page-scoped, `fc-` prefixed,
+tokens-only, footnoted) and **promotion to production still requires full Stage-2
++ sign-off**. This license is Applied-only; production code stays parity-first.
+
 ## 7. Monitoring — preventing drift
 
 - Styles: the `/_ds/` showcase renders **from the real CSS**, so divergence is

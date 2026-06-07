@@ -5,80 +5,263 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Applied · Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Applied · Command Center (View A) — a personal life-rhythm surface. Calm,
-     accomplishment-first. Parity from the real CMS CSS (type, cards, pills,
-     buttons). New widgets are FUTURE COMPONENTS (fc-cadence, fc-intention,
-     fc-ritual, fc-meter): page-scoped, tokens-only. -->
-<link rel="stylesheet" href="/_ds/css/system-cms.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<!-- Applied · Command Center — two modes that switch:
+     · THIS WEEK (execution): the working week + light priority reminders.
+     · OVERVIEW (reflection): seasonal goals, weekly rollups, sense of progress.
+     No counts/%/streaks. Brand-language anchored; titles = Barlow 600. -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
+<link rel="stylesheet" href="/_ds/css/base.css">
+<link rel="stylesheet" href="/_ds/css/typography.css">
 <style>
-  /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-40) var(--space-40) var(--space-48); }
-  .cc-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
-  .cc-statement { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.2; color: var(--primary); margin: var(--space-12) 0 var(--space-24); max-width: 680px; }
-  .cc-sec-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-40) 0 var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
-  /* fc-cadence — Season › Month › Week spine */
-  .fc-cadence { display: flex; align-items: center; gap: var(--space-12); font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-  .fc-cadence span { color: var(--muted); }
-  .fc-cadence .on { color: var(--primary); }
-  .fc-cadence i { color: var(--ink-30); font-style: normal; }
-  /* fc-intention — intention card */
-  .fc-int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-12); }
-  .fc-intention { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); border-left: 3px solid var(--c-current, var(--accent)); padding: var(--space-16); }
-  .fc-intention-n { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
-  .fc-intention-t { font-size: var(--text-sm); font-weight: 600; color: var(--primary); margin-top: 4px; line-height: 1.35; }
-  /* fc-ritual — ritual prompt */
-  .fc-ritual { display: flex; align-items: center; gap: var(--space-16); background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16) var(--space-20); }
-  .fc-ritual-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-  .fc-ritual-t { flex: 1; font-size: var(--text-sm); color: var(--secondary); }
-  .fc-ritual-t strong { color: var(--primary); }
-  /* fc-meter — accomplishment, narrative-first */
-  .fc-meter { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20) var(--space-24); }
-  .fc-meter-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-12); }
-  .fc-meter-big { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h3); color: var(--primary); }
-  .fc-meter-sub { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
-  .fc-meter-track { height: 8px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
-  .fc-meter-fill { height: 100%; border-radius: 99px; background: var(--accent); }
-  a, button { cursor: default; }
+  body { margin: 0; color: var(--primary); font-family: var(--font);
+    background-color: var(--neutral);
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23e8e8e8%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221.5%22%20fill%3D%22%23b8b6b2%22%20opacity%3D%220.15%22/%3E%3C/svg%3E");
+    background-size: 4px 4px; }
+  .cc { max-width: 1280px; margin: 0 auto; padding: var(--space-24) var(--space-40) var(--space-80); }
+
+  .cc-id { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-16); border-bottom: var(--rule-30); }
+  .cc-id-l { font-size: var(--text-base); font-weight: 500; }
+  .cc-id-l em { font-style: normal; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .cc-switch { display: inline-flex; border: 1px solid var(--ink-30); border-radius: 4px; overflow: hidden; }
+  .cc-switch button { font-family: var(--font); font-size: var(--text-base); font-weight: 600; padding: 6px 16px; background: var(--surface); color: var(--muted); border: 0; border-right: 1px solid var(--ink-18); cursor: pointer; }
+  .cc-switch button:last-child { border-right: 0; }
+  .cc-switch button.on { background: var(--primary); color: var(--surface); }
+  .cc-id-d { font-family: var(--font-mono); font-size: var(--text-meta); letter-spacing: 0.08em; color: var(--muted); }
+
+  .eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* ════ THIS WEEK (execution) ════ */
+  .wk-mast { padding: var(--space-24) 0; border-bottom: var(--rule-30); }
+  .wk-mast-row { display: flex; align-items: baseline; gap: var(--space-16); }
+  .wk-mast h1 { font-size: var(--text-h4); font-weight: 500; letter-spacing: -0.01em; color: var(--secondary); margin: 0; }
+  .wk-mast .dates { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+  .wk-close { margin-left: auto; font-size: var(--text-base); font-weight: 600; color: var(--primary); background: transparent; border: 0; border-bottom: 1.5px solid var(--primary); border-radius: 0; padding-bottom: 2px; cursor: pointer; }
+  .wk-affirm { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h3); line-height: 1.3; color: var(--primary); margin: var(--space-20) 0 0; max-width: 620px; }
+  .wk-body { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--space-64); margin-top: var(--space-48); align-items: start; }
+  .species { display: grid; grid-template-columns: 1.6fr 1fr 0.8fr; gap: var(--space-40); }
+  .col-h { margin-bottom: var(--space-12); padding-bottom: 6px; border-bottom: var(--rule-faint); }
+  .col-h.no-rule { border-bottom: 0; }
+  .eyebrow.lead { color: var(--primary); }
+  .could { display: flex; gap: 10px; border: 1px dashed var(--ink-18); border-left: 3px solid var(--c-current, var(--accent)); border-radius: 0 4px 4px 0; padding: 10px 10px 10px var(--space-12); margin-bottom: 8px; }
+  .could.done { background: color-mix(in srgb, var(--accent) 8%, transparent); border-style: solid; }
+  .ring { width: 15px; height: 15px; border: 2px solid var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 1px; background: transparent; padding: 0; cursor: pointer; }
+  .could.done .ring { background: var(--accent); }
+  .could-t { font-size: var(--text-md); font-weight: 500; line-height: 1.4; }
+  .could-tag { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-current); margin-top: 3px; }
+  .todo { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: var(--text-sm); font-weight: 500; color: var(--secondary); border-bottom: 1px solid var(--ink-08); cursor: pointer; }
+  .todo .box { width: 13px; height: 13px; border: 1px solid var(--ink-30); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .todo .box svg { width: 9px; height: 9px; opacity: 0; color: var(--muted); }
+  .todo.done { color: var(--muted); } .todo.done .box svg { opacity: 1; }
+  .dont { font-size: var(--text-sm); color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ink-30); padding: 5px 0; opacity: 0.85; }
+  .add { font-size: var(--text-sm); color: var(--muted); padding: 8px 0 0; cursor: text; }
+  .wk-sub { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-40); margin-top: var(--space-64); padding-top: var(--space-24); border-top: var(--rule-faint); }
+  .weekend { border-left: 3px solid var(--ink-30); padding-left: var(--space-16); margin-top: var(--space-12); }
+  .weekend-t { font-family: var(--font); font-style: normal; font-size: var(--text-body); color: var(--primary); line-height: 1.4; }
+  .nx { font-size: var(--text-sm); color: var(--secondary); padding: 5px 0; border-bottom: 1px solid var(--ink-08); }
+  .nx::before { content: "→ "; color: var(--ink-30); }
+  /* light rail */
+  .rail { display: flex; flex-direction: column; gap: var(--space-32); border-left: var(--rule-faint); padding-left: var(--space-32); }
+  .rail-sec .eyebrow { display: block; margin-bottom: var(--space-16); }
+  .fo { display: flex; align-items: baseline; gap: 9px; padding: 6px 0; }
+  .fo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-current, var(--muted)); flex-shrink: 0; align-self: center; }
+  .fo-t { font-size: var(--text-sm); color: var(--primary); }
+  .hab { padding: 9px 0; border-top: var(--rule-faint); } .hab:first-of-type { border-top: 0; padding-top: 0; }
+  .hab-name { font-size: var(--text-sm); color: var(--primary); margin-bottom: 6px; }
+  .hab-week { display: flex; gap: 6px; }
+  .hab-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-12); cursor: pointer; }
+  .hab-dot.on { background: var(--accent); } .hab-dot.today { outline: 1.5px solid var(--ink-30); outline-offset: 2px; }
+  .ev { display: flex; gap: var(--space-12); padding: 8px 0; border-top: var(--rule-faint); } .ev:first-of-type { border-top: 0; padding-top: 0; }
+  .ev-d { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); width: 50px; flex-shrink: 0; }
+  .ev-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.35; }
+
+  /* ════ OVERVIEW (reflection) ════ */
+  .ov-mast { padding: var(--space-24) 0; border-bottom: var(--rule-30); }
+  .ov-mast h1 { font-size: var(--text-h1); font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+  .ov-reflect { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h4); line-height: 1.35; color: var(--secondary); margin: var(--space-16) 0 0; max-width: 760px; }
+  .ov-sec { margin-top: var(--space-64); }
+  .ov-sec > .eyebrow { display: block; margin-bottom: var(--space-12); }
+  .ov-goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-24) var(--space-32); }
+  .goal { border-left: 3px solid var(--c-current, var(--muted)); padding-left: var(--space-16); }
+  .goal-top { display: flex; align-items: center; justify-content: space-between; }
+  .goal-tag { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-current, var(--secondary)); }
+  .goal-stance { width: 8px; height: 8px; flex-shrink: 0; }
+  .goal-stance.active { border-radius: 50%; background: var(--c-current, var(--primary)); }
+  .goal-stance.passive { border-radius: 50%; border: 1.5px solid var(--ink-30); }
+  .goal-outcome { font-size: var(--text-md); font-weight: 500; color: var(--primary); line-height: 1.4; margin: 7px 0 var(--space-12); }
+  .goal-steps { display: flex; flex-direction: column; gap: 4px; }
+  .goal-step { font-size: var(--text-meta); color: var(--ink-30); padding-left: 14px; position: relative; line-height: 1.4; }
+  .goal-step::before { content: "○"; position: absolute; left: 0; font-size: 8px; top: 4px; }
+  .goal-step.done { color: var(--muted); } .goal-step.done::before { content: "●"; color: var(--ink-30); }
+  .goal-step.now { color: var(--primary); font-weight: 500; } .goal-step.now::before { content: "●"; color: var(--c-current, var(--accent)); }
+  .mv { display: flex; gap: 3px; align-items: flex-end; height: 12px; margin-top: var(--space-12); }
+  .mv i { width: 2px; background: var(--c-current, var(--muted)); opacity: 0.4; }
+
+  .lb-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-20); align-items: start; }
+  .lb-block { background: var(--surface); border: var(--rule-faint); border-radius: 4px; padding: var(--space-20); }
+  .lb-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-16); padding-bottom: var(--space-12); border-bottom: var(--rule-30); }
+  .lb-kind { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
+  .lb-when { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  .lb-line { display: flex; gap: 9px; padding: 6px 0; font-size: var(--text-sm); color: var(--secondary); line-height: 1.4; border-bottom: 1px solid var(--ink-08); }
+  .lb-line:last-child { border-bottom: 0; }
+  .lb-line .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--c-current, var(--ink-30)); }
+  .lb-line strong { color: var(--primary); font-weight: 600; }
+  /* cadence: months in their rollup states */
+  .cad { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-20); align-items: start; }
+  .cad-mo { background: var(--surface); border: var(--rule-faint); border-radius: 4px; padding: var(--space-20); }
+  .cad-mo.is-now { border-color: var(--ink-30); }
+  .cad-mo.is-ahead { background: transparent; border-style: dashed; border-color: var(--ink-18); }
+  .cad-mo-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-12); margin-bottom: var(--space-16); padding-bottom: var(--space-12); border-bottom: var(--rule-30); }
+  .cad-mo.is-ahead .cad-mo-h { border-bottom-color: var(--ink-12); }
+  .cad-mo-name { font-size: var(--text-h4); font-weight: 600; letter-spacing: -0.01em; color: var(--primary); }
+  .cad-mo.is-ahead .cad-mo-name { color: var(--ink-30); }
+  .cad-mo-state { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .cad-foot { font-family: var(--font-mono); font-size: 10px; color: var(--ink-30); margin-top: var(--space-12); }
+  .cad-wk { display: flex; gap: var(--space-12); padding: 6px 0; border-bottom: 1px solid var(--ink-08); }
+  .cad-wk-n { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 34px; flex-shrink: 0; }
+  .cad-wk-t { font-size: var(--text-sm); color: var(--secondary); line-height: 1.35; }
+  .cad-wk.is-live .cad-wk-n { color: var(--accent); }
+  .cad-wk.is-live .cad-wk-t { color: var(--primary); font-weight: 500; }
+  .cad-ritual { font-size: var(--text-sm); color: var(--secondary); margin-top: var(--space-16); padding-top: var(--space-12); border-top: var(--rule-faint); line-height: 1.4; }
+  .cad-ritual strong { color: var(--primary); }
+  .cad-ghost { font-size: var(--text-sm); color: var(--ink-30); font-style: italic; }
+  .cad-season { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-20); }
+  .cad-season strong { color: var(--secondary); }
+  button { cursor: pointer; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="cc">
 
-  <div class="cc-eyebrow">Summer · The season of building</div>
-  <div class="cc-statement">Make the work, keep it calm, and let the season carry the weight.</div>
-  <div class="fc-cadence"><span class="on">Summer</span><i>›</i><span class="on">June</span><i>›</i><span>Week 23</span></div>
-
-  <div class="cc-sec-h">This season's intentions</div>
-  <div class="fc-int-grid">
-    <div class="fc-intention" style="--c-current:var(--c-forest)"><div class="fc-intention-n">01</div><div class="fc-intention-t">Ship the CMS to production</div></div>
-    <div class="fc-intention" style="--c-current:var(--c-terracotta)"><div class="fc-intention-n">02</div><div class="fc-intention-t">Publish the UX 2.0 series</div></div>
-    <div class="fc-intention" style="--c-current:var(--c-denim)"><div class="fc-intention-n">03</div><div class="fc-intention-t">Take on two coaching clients</div></div>
-    <div class="fc-intention" style="--c-current:var(--c-amber)"><div class="fc-intention-n">04</div><div class="fc-intention-t">Rebuild the daily writing habit</div></div>
-    <div class="fc-intention" style="--c-current:var(--c-teal)"><div class="fc-intention-n">05</div><div class="fc-intention-t">Train for the autumn race</div></div>
-    <div class="fc-intention" style="--c-current:var(--c-plum)"><div class="fc-intention-n">06</div><div class="fc-intention-t">Protect one slow weekend a month</div></div>
+  <div class="cc-id">
+    <div class="cc-id-l">alex m. chong&nbsp;&nbsp;<em>command center</em></div>
+    <div class="cc-switch"><button class="on" data-view="week">This week</button><button data-view="overview">Overview</button></div>
+    <div class="cc-id-d">FRIDAY · 17 JULY</div>
   </div>
 
-  <div class="cc-sec-h">This week</div>
-  <div class="fc-ritual" style="margin-bottom:var(--space-12)"><span class="fc-ritual-dot"></span><span class="fc-ritual-t"><strong>Open the week.</strong> Name the one thing that has to move by Friday.</span><button class="btn-sec btn-tiny">Begin</button></div>
-  <div class="fc-ritual"><span class="fc-ritual-dot" style="background:var(--ink-30)"></span><span class="fc-ritual-t"><strong>Close the week.</strong> Write down what actually got done.</span><span class="pill pill-scheduled">Fri</span></div>
+  <!-- ══════════ VIEW 1 · THIS WEEK (execution) ══════════ -->
+  <section class="view on" id="view-week">
+    <header class="wk-mast">
+      <div class="wk-mast-row"><h1>This week</h1><span class="dates">JUL 13–19 · WEEK 3</span><button class="wk-close">Close the week →</button></div>
+      <p class="wk-affirm">Protect the deep-work mornings — the migration needs a clear head.</p>
+    </header>
+    <div class="wk-body">
+      <div>
+        <div class="species">
+          <div>
+            <div class="col-h"><span class="eyebrow lead">Could-dos</span></div>
+            <div class="could done" style="--c-current:var(--c-terracotta)"><button class="ring" aria-label="did"></button><div><div class="could-t">Draft §2 of the UX 2.0 piece</div><div class="could-tag">Writing</div></div></div>
+            <div class="could" style="--c-current:var(--c-denim)"><button class="ring" aria-label="did"></button><div><div class="could-t">Run the migration on staging</div><div class="could-tag">The CMS</div></div></div>
+            <div class="could" style="--c-current:var(--c-forest)"><button class="ring" aria-label="did"></button><div><div class="could-t">Three easy runs</div><div class="could-tag">Health</div></div></div>
+            <div class="add">+ a gentle pull…</div>
+          </div>
+          <div>
+            <div class="col-h"><span class="eyebrow">To-dos</span></div>
+            <div class="todo done"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Renew the domain</div>
+            <div class="todo"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Reply to the accountant</div>
+            <div class="todo"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Book the dentist</div>
+            <div class="add">+ add</div>
+          </div>
+          <div>
+            <div class="col-h no-rule"><span class="eyebrow">Not this week</span></div>
+            <div class="dont">A new side project</div>
+            <div class="dont">Doomscroll Twitter</div>
+            <div class="dont">Refile everything</div>
+          </div>
+        </div>
+        <div class="wk-sub">
+          <div><span class="eyebrow">This weekend</span><div class="weekend"><div class="weekend-t">A long walk somewhere new, with no phone.</div></div></div>
+          <div><span class="eyebrow">For next week</span><div style="margin-top:var(--space-12)"><div class="nx">Book the Q3 planning day</div><div class="nx">Call the framer back</div><div class="nx">Outline the talk</div></div></div>
+        </div>
+      </div>
+      <aside class="rail">
+        <div class="rail-sec">
+          <span class="eyebrow">This month's focus</span>
+          <div class="fo" style="--c-current:var(--c-denim)"><span class="fo-dot"></span><span class="fo-t">Migrate &amp; cut over the CMS</span></div>
+          <div class="fo" style="--c-current:var(--c-terracotta)"><span class="fo-dot"></span><span class="fo-t">Draft parts two &amp; three</span></div>
+          <div class="fo" style="--c-current:var(--c-forest)"><span class="fo-dot"></span><span class="fo-t">Three easy runs a week</span></div>
+          <div class="fo" style="--c-current:var(--c-amber)"><span class="fo-dot"></span><span class="fo-t">Broaden the support network</span></div>
+        </div>
+        <div class="rail-sec">
+          <span class="eyebrow">Habits</span>
+          <div class="hab"><div class="hab-name">Morning pages</div><div class="hab-week"><span class="hab-dot on"></span><span class="hab-dot on"></span><span class="hab-dot"></span><span class="hab-dot on"></span><span class="hab-dot on today"></span><span class="hab-dot"></span><span class="hab-dot"></span></div></div>
+          <div class="hab"><div class="hab-name">Move the body</div><div class="hab-week"><span class="hab-dot on"></span><span class="hab-dot"></span><span class="hab-dot on"></span><span class="hab-dot"></span><span class="hab-dot today"></span><span class="hab-dot"></span><span class="hab-dot"></span></div></div>
+          <div class="hab"><div class="hab-name">No screen after 10</div><div class="hab-week"><span class="hab-dot on"></span><span class="hab-dot on"></span><span class="hab-dot on"></span><span class="hab-dot"></span><span class="hab-dot on today"></span><span class="hab-dot"></span><span class="hab-dot"></span></div></div>
+        </div>
+        <div class="rail-sec">
+          <span class="eyebrow">Coming up</span>
+          <div class="ev"><span class="ev-d">Mon 20</span><span class="ev-t">Coaching · Jordan, 4pm</span></div>
+          <div class="ev"><span class="ev-d">Wed 22</span><span class="ev-t">CMS cut-over window</span></div>
+          <div class="ev"><span class="ev-d">Sat 26</span><span class="ev-t">Dinner with M</span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
 
-  <div class="cc-sec-h">How the season is moving</div>
-  <div class="fc-meter">
-    <div class="fc-meter-row"><span class="fc-meter-big">Four of six, underway.</span><span class="fc-meter-sub">Week 23 of 26</span></div>
-    <div class="fc-meter-track"><div class="fc-meter-fill" style="width:64%"></div></div>
-  </div>
+  <!-- ══════════ VIEW 2 · OVERVIEW (reflection) ══════════ -->
+  <section class="view" id="view-overview">
+    <header class="ov-mast">
+      <h1>Summer ’26</h1>
+      <p class="ov-reflect">Month two of three. June is closed; July is three weeks in. Four of the six intentions are moving — the season is finding a calmer pace.</p>
+    </header>
 
-  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-32)">
-    <strong style="color:var(--secondary)">Future components:</strong>
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-cadence</code> ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-intention</code> ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-ritual</code> ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-meter</code> (accomplishment).
-    Parity reused: serif type, <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.pill-* · buttons</code>.
-  </p>
+    <div class="ov-sec">
+      <span class="eyebrow">Seasonal intentions · outcome, the three-month path, and how each is moving</span>
+      <div class="ov-goals">
+        <div class="goal" style="--c-current:var(--c-forest)"><div class="goal-top"><span class="goal-tag">Health</span><span class="goal-stance active"></span></div><div class="goal-outcome">An easy 10k in the legs by September.</div><div class="goal-steps"><span class="goal-step done">Jun — back to walking daily</span><span class="goal-step now">Jul — three easy runs a week</span><span class="goal-step">Aug — hold the 10k base</span></div><div class="mv"><i style="height:8px"></i><i style="height:11px"></i><i style="height:6px"></i><i style="height:12px"></i><i style="height:9px"></i></div></div>
+        <div class="goal" style="--c-current:var(--c-terracotta)"><div class="goal-top"><span class="goal-tag">Writing</span><span class="goal-stance active"></span></div><div class="goal-outcome">A finished UX 2.0 series.</div><div class="goal-steps"><span class="goal-step done">Jun — outline the series</span><span class="goal-step now">Jul — draft parts two &amp; three</span><span class="goal-step">Aug — edit &amp; publish</span></div><div class="mv"><i style="height:12px"></i><i style="height:9px"></i><i style="height:13px"></i><i style="height:7px"></i></div></div>
+        <div class="goal" style="--c-current:var(--c-denim)"><div class="goal-top"><span class="goal-tag">The CMS</span><span class="goal-stance active"></span></div><div class="goal-outcome">Shipped to production, calmly.</div><div class="goal-steps"><span class="goal-step done">Jun — stabilise the editor</span><span class="goal-step now">Jul — migrate &amp; cut over</span><span class="goal-step">Aug — monitor &amp; harden</span></div><div class="mv"><i style="height:10px"></i><i style="height:13px"></i><i style="height:8px"></i><i style="height:12px"></i><i style="height:9px"></i><i style="height:11px"></i></div></div>
+        <div class="goal" style="--c-current:var(--c-amber)"><div class="goal-top"><span class="goal-tag">Family</span><span class="goal-stance active"></span></div><div class="goal-outcome">Aligned, and quietly ready.</div><div class="goal-steps"><span class="goal-step done">Jun — discussion &amp; alignment</span><span class="goal-step now">Jul — broaden the support network</span><span class="goal-step">Aug — active trying</span></div><div class="mv"><i style="height:6px"></i><i style="height:9px"></i><i style="height:7px"></i></div></div>
+        <div class="goal" style="--c-current:var(--c-plum)"><div class="goal-top"><span class="goal-tag">Friendship</span><span class="goal-stance passive"></span></div><div class="goal-outcome">Closer to the few who matter.</div><div class="goal-steps"><span class="goal-step done">Jun — reach back out</span><span class="goal-step now">Jul — one real dinner a fortnight</span><span class="goal-step">Aug — keep the rhythm</span></div><div class="mv"><i style="height:7px"></i><i style="height:6px"></i></div></div>
+        <div class="goal" style="--c-current:var(--c-teal)"><div class="goal-top"><span class="goal-tag">Rest</span><span class="goal-stance passive"></span></div><div class="goal-outcome">A calmer nervous system.</div><div class="goal-steps"><span class="goal-step done">Jun — earlier nights</span><span class="goal-step now">Jul — protect the slow weekend</span><span class="goal-step">Aug — a real week off</span></div><div class="mv"><i style="height:9px"></i><i style="height:7px"></i><i style="height:5px"></i></div></div>
+      </div>
+    </div>
+
+    <div class="ov-sec">
+      <span class="eyebrow">The cadence · weeks roll up into months, months into the season</span>
+      <div class="cad">
+        <!-- June — closed, consolidated into a month rollup -->
+        <div class="cad-mo is-closed">
+          <div class="cad-mo-h"><span class="cad-mo-name">June</span><span class="cad-mo-state">Closed · consolidated</span></div>
+          <div class="lb-line" style="--c-current:var(--c-denim)"><span class="pip"></span><span><strong>The CMS</strong> — editor stabilised; auth landed</span></div>
+          <div class="lb-line" style="--c-current:var(--c-terracotta)"><span class="pip"></span><span><strong>Writing</strong> — the daily habit returned</span></div>
+          <div class="lb-line" style="--c-current:var(--c-amber)"><span class="pip"></span><span><strong>Caught a wing</strong> — said yes to a talk</span></div>
+          <div class="cad-foot">four weeks → one month rollup</div>
+        </div>
+        <!-- July — in progress, weeks gathering, not yet closed -->
+        <div class="cad-mo is-now">
+          <div class="cad-mo-h"><span class="cad-mo-name">July</span><span class="cad-mo-state">3 weeks gathered</span></div>
+          <div class="cad-wk"><span class="cad-wk-n">Wk 1</span><span class="cad-wk-t">Shipped auth fixes · two runs · dinner with M</span></div>
+          <div class="cad-wk"><span class="cad-wk-n">Wk 2</span><span class="cad-wk-t">Outlined §2 · staging spun up</span></div>
+          <div class="cad-wk"><span class="cad-wk-n">Wk 3</span><span class="cad-wk-t">Drafted §2 · migration rehearsed</span></div>
+          <div class="cad-wk is-live"><span class="cad-wk-n">Now</span><span class="cad-wk-t">This week — in progress</span></div>
+          <div class="cad-ritual">Close one more week, then <strong>close July</strong> to consolidate.</div>
+        </div>
+        <!-- August — not started -->
+        <div class="cad-mo is-ahead">
+          <div class="cad-mo-h"><span class="cad-mo-name">August</span><span class="cad-mo-state">Not started</span></div>
+          <div class="cad-ghost">Opens when July closes.</div>
+        </div>
+      </div>
+      <p class="cad-season">Summer's three months close into the season — <strong>the season turn</strong> follows August.</p>
+    </div>
+  </section>
 
 </div>
+
+<script>
+  // Mode switch.
+  var btns = document.querySelectorAll('.cc-switch button');
+  var views = { week: document.getElementById('view-week'), overview: document.getElementById('view-overview') };
+  btns.forEach(function (b) { b.addEventListener('click', function () {
+    btns.forEach(function (x) { x.classList.toggle('on', x === b); });
+    Object.keys(views).forEach(function (k) { views[k].classList.toggle('on', k === b.dataset.view); });
+  }); });
+  // Light interactivity.
+  document.querySelectorAll('.ring').forEach(function (r) { r.addEventListener('click', function () { r.closest('.could').classList.toggle('done'); }); });
+  document.querySelectorAll('.todo').forEach(function (t) { t.addEventListener('click', function () { t.classList.toggle('done'); }); });
+  document.querySelectorAll('.hab-dot').forEach(function (d) { d.addEventListener('click', function () { d.classList.toggle('on'); }); });
+</script>
 </body>
 </html>

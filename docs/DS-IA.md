@@ -164,7 +164,7 @@ direction first.
 - **A · Foundations → Welcome section** ✅ DONE (on staging, 2026-06-06). Final approved copy is live in `index.html` #comp-welcome — lead + how-it-works (live/referenceable, constraints→freedom) + 2 philosophy paras (Bauhaus materiality, 80s brand-guideline structure not paper, grey=computer manual, message-over-theatrics "thick type doesn't make a point bold if the point is thin", systems thinker, anti-vibecoded-portfolio) + brief at-a-glance + purpose/map close. Voice: non-first-person. Built spec-first per [[feedback_no_vibe_spec_first]].
 - **B · CMS tab → rich documentation.** Rework to read like the **Components** tab — components shown *in context with writing/usage*, NOT class-name boxes. (Stays an isolated iframe; `style-cms.css` collides with showcase chrome.) The terse box-catalog belongs in **CSS Library → CMS slice**, not the CMS tab.
 - **C · Applied → light concept showcases.** Inspiration only — capture the *essence*, not a functional UI (depth = today's CMS Panel / Coaching). Each concept = one section, its own isolated `showcase/*.html` (DS CSS + page-scoped future CSS, never in production slices). **New components are documented inside their own concept's section** (not a separate global catalog). Parity first: reuse real components; only genuinely-new things get called out as new (e.g. Analytics' card + progress bars). Split a concept in two if it gets heavy.
-  - Set: refresh **CMS Panel (✓ built), Coaching, Analytics, Mobile** + add **Command Center (View A)** + **Together (View B)** (specs below).
+  - Set + all detail now in `docs/APPLIED-SPECS.md`. Command Center ✅ finished (exemplar). Couples Board next, then Analytics / Coaching / Mobile / CMS Panel.
 - **D · In-CMS viewer** (`/cms/design-system`) = the **CSS Library** (4 by-file slices: Root/Pages/Blocks/CMS) **+ a 5th tab that launches the full `/_ds/` DS**. Nothing else. (Currently it iframes cms.html — needs rebuilding to this.)
 - **E · Existence audit** — document what EXISTS but isn't shown: header/footer **dot / dot-surface** (`--dot-grid`), an **icon list** (nav + action inline SVGs), other undocumented selectors.
 - **F · Close 22.6** — annotate DS-AUDIT, check §3 box, then the **gated prod ship** (backup + deploy), only once A–E are done.
@@ -194,18 +194,11 @@ Insight pulled from Alex (2026-06-06):
 
 **Open question:** voice — keep the confident **system voice** (above) or shift to **first-person (Alex)**? (Undecided.)
 
-### C · New Applied views — specs
-**View A — Command Center** (personal life-rhythm surface). Essence: "what am I oriented toward, and how am I moving" — calm, accomplishment-first.
-- Zones: Season banner (current season + its 6 intentions) · Cadence spine (Season›Month›Week) · This Month · This Week (active) · Rituals (open/close week·month·season) · Reflected progress (accomplishment, narrative).
-- Parity: serif statements, cards, tags/pills, section headers + dividers, buttons, meta.
-- New components (kept in this section): `Intention Card` · `Cadence Nav` · `Ritual Prompt` · `Accomplishment Meter`.
-
-**View B — Together** (private shared dashboard for two). Essence: staying aligned as an act of love.
-- Zones: Paired presence (both people + each other's energy) · Shared week · Shared projects & plans · Touchpoints.
-- Parity: circular author avatar, cards, week layout, pills/tags, section headers.
-- New components: `Energy Indicator` · `Paired Presence` · `Shared Project Card`.
-
-Shared-across-views future components: `Accomplishment / progress bar` (Analytics + Command Center), `Energy Indicator` (Together + Command Center).
+### C · Applied — see `docs/APPLIED-SPECS.md`
+All Applied concept detail, the build process, and the remaining open concepts
+(Couples Board next, then Analytics / Coaching / Mobile / CMS Panel) now live in
+**`docs/APPLIED-SPECS.md`**. Command Center is finished (the polished exemplar);
+its planning detail was removed. Build under `docs/BUILD-DISCIPLINE.md` §6.1.
 
 ---
 
@@ -233,4 +226,4 @@ Shared-across-views future components: `Accomplishment / progress bar` (Analytic
 
 **Undocumented selector families** (in `blocks.css`, absent from showcase + CSS Library): `.index-page(--editorial/--series)`, `.index-section(--hero/--curated/--feed)`, `.index-section-header.is-big`, `.index-section-pills`, `.editorial-hero*` (~20), `.cards-grid(.is-carousel)`, `.article-hero*`, `.article-key-statement`.
 
-**STATUS (2026-06-06, on staging):** ✅ A Welcome+preview · ✅ Icons · ✅ Article Hero · ✅ Editorial Index Heroes · ✅ Editorial Index refresh (+filter pills) · ✅ P2 (carousel, series watermark, key-statement) · ✅ B CMS tab rich doc (+ cms-classes split) · ✅ D in-CMS viewer (CSS Library 4 slices + launch). ✅ **C Applied** — rebuilt as 6 isolated real-CSS concept iframes (CMS Panel, Coaching, Analytics, Mobile + NEW Command Center & Together); future components page-scoped + `fc-` prefixed per BUILD-DISCIPLINE §6.1. ⏳ **Gated prod ship** only (staging-only until Alex signs off 22.6b). Closing note in `docs/DS-AUDIT.md`.
+**STATUS (2026-06-06, on staging):** ✅ A Welcome+preview · ✅ Icons · ✅ Article Hero · ✅ Editorial Index Heroes · ✅ Editorial Index refresh (+filter pills) · ✅ P2 (carousel, series watermark, key-statement) · ✅ B CMS tab rich doc (+ cms-classes split) · ✅ D in-CMS viewer (CSS Library 4 slices + launch). 🔄 **C Applied** — 6 isolated real-CSS concept iframes exist. **Command Center finished** (product-design + UI-craft exemplar). Remaining to elevate via the process in `docs/APPLIED-SPECS.md`: **Couples Board (next)**, Analytics, Coaching, Mobile, CMS Panel. ⏳ **Gated prod ship** of `/_ds/` only after Applied is done (staging-only; Alex's call). Closing note in `docs/DS-AUDIT.md`.

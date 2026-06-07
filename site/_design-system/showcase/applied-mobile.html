@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Mobile — the public DS at phone width. Parity: the real public
+     components (cards, article hero, type) inside a FUTURE COMPONENT device
+     frame (fc-phone). Loads the real public stylesheets. -->
+<link rel="stylesheet" href="/_ds/css/tokens.css">
+<link rel="stylesheet" href="/_ds/css/public/pages.css">
+<link rel="stylesheet" href="/_ds/css/public/blocks.css">
+<style>
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .wrap { padding: var(--space-40) var(--space-32) var(--space-48); display: flex; gap: var(--space-40); flex-wrap: wrap; justify-content: center; }
+  /* fc-phone — device frame (future component) */
+  .fc-phone { width: 300px; flex: 0 0 300px; }
+  .fc-phone-screen { border: 1px solid var(--ink-30); border-radius: 26px; background: var(--neutral); overflow: hidden; height: 600px; display: flex; flex-direction: column; box-shadow: 0 1px 0 var(--ink-08); }
+  .fc-phone-bar { height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 1px solid var(--ink-12); }
+  .fc-phone-notch { width: 96px; height: 6px; border-radius: 99px; background: var(--ink-18); }
+  .fc-phone-body { flex: 1; overflow-y: auto; padding: var(--space-20); }
+  .fc-phone-cap { text-align: center; font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-16); }
+  .fc-mtitle { font-family: var(--font-serif); font-style: italic; font-size: 26px; line-height: 1.15; color: var(--primary); margin: var(--space-12) 0; }
+  .fc-mbody { font-size: var(--text-md); line-height: 1.7; color: var(--secondary); }
+  .fc-mcat { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
+  .fc-mhero { width: 100%; aspect-ratio: 3/2; border-radius: var(--r-card); border: var(--rule-faint); background: linear-gradient(135deg,#d6d5d2,#c2c1be); margin-bottom: var(--space-12); }
+  .fc-mmeta { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  a { cursor: default; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Article reader -->
+  <div class="fc-phone">
+    <div class="fc-phone-screen">
+      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
+      <div class="fc-phone-body">
+        <div class="fc-mcat" style="color:var(--c-terracotta)">UX Industry</div>
+        <div class="fc-mhero"></div>
+        <div class="fc-mtitle">A Discipline Reset</div>
+        <div class="fc-mmeta">Mar 4, 2026 · 14 min</div>
+        <p class="fc-mbody" style="margin-top:var(--space-16)">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely, and the discipline is being corrected in real time.</p>
+      </div>
+    </div>
+    <div class="fc-phone-cap">Article reader</div>
+  </div>
+
+  <!-- Index (real cards stacked) -->
+  <div class="fc-phone">
+    <div class="fc-phone-screen">
+      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
+      <div class="fc-phone-body" style="background:var(--neutral)">
+        <div class="cards-grid" style="grid-template-columns:1fr;gap:var(--space-16)">
+          <div class="card card--article" data-type="article" data-category="forest">
+            <div class="card-header"><span class="cat">Leading Design</span></div>
+            <div class="card-body"><h2 class="title" style="margin-bottom:var(--space-12)">The Designer Who Runs the Room</h2><p class="excerpt">Authority is quieter than it looks.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Leadership</span></div><span class="arrow">→</span></div></div>
+            <div class="meta-strip"><span>Feb 12</span><span>17 min</span></div>
+          </div>
+          <div class="card card--article" data-type="article" data-category="denim">
+            <div class="card-header"><span class="cat">For Designers</span></div>
+            <div class="card-body"><h2 class="title" style="margin-bottom:var(--space-12)">Notes Toward a Practice</h2><p class="excerpt">Designing with restraint.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Craft</span></div><span class="arrow">→</span></div></div>
+            <div class="meta-strip"><span>May 30</span><span>7 min</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-phone-cap">Index · real cards</div>
+  </div>
+
+  <!-- Coaching session -->
+  <div class="fc-phone">
+    <div class="fc-phone-screen">
+      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
+      <div class="fc-phone-body">
+        <div class="fc-mcat" style="color:var(--c-forest)">Session · Jordan Lee</div>
+        <div class="fc-mtitle">Holding altitude</div>
+        <div class="fc-mmeta">Jun 9, 2026 · 45 min</div>
+        <p class="fc-mbody" style="margin-top:var(--space-16)">Last time: reframed the team's roadmap conversation around decisions, not deliverables.</p>
+        <p class="fc-mbody" style="margin-top:var(--space-12);font-family:var(--font-serif);font-style:italic;color:var(--primary)">“The gap between strategist and executor is where leadership lives.”</p>
+      </div>
+    </div>
+    <div class="fc-phone-cap">Coaching session</div>
+  </div>
+
+</div>
+
+<p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;text-align:center;padding:0 var(--space-32) var(--space-32)">
+  <strong style="color:var(--secondary)">Future component:</strong>
+  <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-phone</code> (device frame). Parity reused: real <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.card · .title · .tag · .meta-strip</code> at phone width.
+</p>
+</body>
+</html>

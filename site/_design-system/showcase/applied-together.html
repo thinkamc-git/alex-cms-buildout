@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · Together</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Together (View B) — a private shared dashboard for two. Essence:
+     staying aligned as an act of care. Parity from the real CMS CSS (avatars,
+     cards, pills, type). New widgets are FUTURE COMPONENTS (fc-paired,
+     fc-energy, fc-project): page-scoped, tokens-only. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-40) var(--space-40) var(--space-48); }
+  .tg-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .tg-statement { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.2; color: var(--primary); margin: var(--space-12) 0 var(--space-24); max-width: 640px; }
+  .tg-sec-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-40) 0 var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
+  /* fc-paired — two-person presence */
+  .fc-paired { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); }
+  .fc-person { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); display: flex; align-items: center; gap: var(--space-16); }
+  .fc-person-av { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--ink-18); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-cond); font-weight: 700; color: var(--secondary); }
+  .fc-person-name { font-size: var(--text-body); font-weight: 600; color: var(--primary); }
+  /* fc-energy — a calm energy indicator */
+  .fc-energy { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+  .fc-energy-lbl { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+  .fc-energy-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-18); }
+  .fc-energy-pip.on { background: var(--c-current, var(--accent)); }
+  /* fc-project — shared project card */
+  .fc-proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-12); }
+  .fc-proj { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16) var(--space-20); }
+  .fc-proj-t { font-size: var(--text-body); font-weight: 600; color: var(--primary); }
+  .fc-proj-m { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); margin-top: 4px; }
+  .fc-proj-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-12); }
+  /* shared week */
+  .tg-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .tg-day { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-tag); padding: var(--space-12) 6px; text-align: center; min-height: 64px; }
+  .tg-day-n { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .tg-day-dot { width: 6px; height: 6px; border-radius: 50%; margin: 6px auto 0; }
+  a, button { cursor: default; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="tg-eyebrow">Together · Week of June 8</div>
+  <div class="tg-statement">Staying aligned, on purpose — the small act of keeping each other in view.</div>
+
+  <div class="tg-sec-h">Where we each are</div>
+  <div class="fc-paired">
+    <div class="fc-person">
+      <div class="fc-person-av">A</div>
+      <div><div class="fc-person-name">Alex</div>
+        <div class="fc-energy" style="--c-current:var(--c-forest)"><span class="fc-energy-lbl">Energy</span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip"></span></div>
+      </div>
+    </div>
+    <div class="fc-person">
+      <div class="fc-person-av">S</div>
+      <div><div class="fc-person-name">Sam</div>
+        <div class="fc-energy" style="--c-current:var(--c-amber)"><span class="fc-energy-lbl">Energy</span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip"></span><span class="fc-energy-pip"></span><span class="fc-energy-pip"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tg-sec-h">Our week</div>
+  <div class="tg-week">
+    <div class="tg-day"><div class="tg-day-n">Mon</div><div class="tg-day-dot" style="background:var(--c-forest)"></div></div>
+    <div class="tg-day"><div class="tg-day-n">Tue</div></div>
+    <div class="tg-day"><div class="tg-day-n">Wed</div><div class="tg-day-dot" style="background:var(--c-terracotta)"></div></div>
+    <div class="tg-day"><div class="tg-day-n">Thu</div></div>
+    <div class="tg-day"><div class="tg-day-n">Fri</div><div class="tg-day-dot" style="background:var(--c-denim)"></div></div>
+    <div class="tg-day"><div class="tg-day-n">Sat</div><div class="tg-day-dot" style="background:var(--accent)"></div></div>
+    <div class="tg-day"><div class="tg-day-n">Sun</div></div>
+  </div>
+
+  <div class="tg-sec-h">Shared projects</div>
+  <div class="fc-proj-grid">
+    <div class="fc-proj"><div class="fc-proj-t">The kitchen</div><div class="fc-proj-m">started Apr · slow burn</div><div class="fc-proj-foot"><span class="pill pill-draft">In progress</span><span class="fc-proj-m">next: tiles</span></div></div>
+    <div class="fc-proj"><div class="fc-proj-t">Autumn trip</div><div class="fc-proj-m">planning</div><div class="fc-proj-foot"><span class="pill pill-outline">Idea</span><span class="fc-proj-m">next: dates</span></div></div>
+  </div>
+
+  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-32)">
+    <strong style="color:var(--secondary)">Future components:</strong>
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-paired</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-energy</code> (shared candidate with Command Center) ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-project</code>.
+    Parity reused: circular avatars, <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.pill-* · cards · type</code>.
+  </p>
+
+</div>
+</body>
+</html>

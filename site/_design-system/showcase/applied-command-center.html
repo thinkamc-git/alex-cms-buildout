@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Command Center (View A) — a personal life-rhythm surface. Calm,
+     accomplishment-first. Parity from the real CMS CSS (type, cards, pills,
+     buttons). New widgets are FUTURE COMPONENTS (fc-cadence, fc-intention,
+     fc-ritual, fc-meter): page-scoped, tokens-only. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-40) var(--space-40) var(--space-48); }
+  .cc-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+  .cc-statement { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.2; color: var(--primary); margin: var(--space-12) 0 var(--space-24); max-width: 680px; }
+  .cc-sec-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-40) 0 var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
+  /* fc-cadence — Season › Month › Week spine */
+  .fc-cadence { display: flex; align-items: center; gap: var(--space-12); font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .fc-cadence span { color: var(--muted); }
+  .fc-cadence .on { color: var(--primary); }
+  .fc-cadence i { color: var(--ink-30); font-style: normal; }
+  /* fc-intention — intention card */
+  .fc-int-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-12); }
+  .fc-intention { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); border-left: 3px solid var(--c-current, var(--accent)); padding: var(--space-16); }
+  .fc-intention-n { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  .fc-intention-t { font-size: var(--text-sm); font-weight: 600; color: var(--primary); margin-top: 4px; line-height: 1.35; }
+  /* fc-ritual — ritual prompt */
+  .fc-ritual { display: flex; align-items: center; gap: var(--space-16); background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16) var(--space-20); }
+  .fc-ritual-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .fc-ritual-t { flex: 1; font-size: var(--text-sm); color: var(--secondary); }
+  .fc-ritual-t strong { color: var(--primary); }
+  /* fc-meter — accomplishment, narrative-first */
+  .fc-meter { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20) var(--space-24); }
+  .fc-meter-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-12); }
+  .fc-meter-big { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h3); color: var(--primary); }
+  .fc-meter-sub { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+  .fc-meter-track { height: 8px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
+  .fc-meter-fill { height: 100%; border-radius: 99px; background: var(--accent); }
+  a, button { cursor: default; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cc-eyebrow">Summer · The season of building</div>
+  <div class="cc-statement">Make the work, keep it calm, and let the season carry the weight.</div>
+  <div class="fc-cadence"><span class="on">Summer</span><i>›</i><span class="on">June</span><i>›</i><span>Week 23</span></div>
+
+  <div class="cc-sec-h">This season's intentions</div>
+  <div class="fc-int-grid">
+    <div class="fc-intention" style="--c-current:var(--c-forest)"><div class="fc-intention-n">01</div><div class="fc-intention-t">Ship the CMS to production</div></div>
+    <div class="fc-intention" style="--c-current:var(--c-terracotta)"><div class="fc-intention-n">02</div><div class="fc-intention-t">Publish the UX 2.0 series</div></div>
+    <div class="fc-intention" style="--c-current:var(--c-denim)"><div class="fc-intention-n">03</div><div class="fc-intention-t">Take on two coaching clients</div></div>
+    <div class="fc-intention" style="--c-current:var(--c-amber)"><div class="fc-intention-n">04</div><div class="fc-intention-t">Rebuild the daily writing habit</div></div>
+    <div class="fc-intention" style="--c-current:var(--c-teal)"><div class="fc-intention-n">05</div><div class="fc-intention-t">Train for the autumn race</div></div>
+    <div class="fc-intention" style="--c-current:var(--c-plum)"><div class="fc-intention-n">06</div><div class="fc-intention-t">Protect one slow weekend a month</div></div>
+  </div>
+
+  <div class="cc-sec-h">This week</div>
+  <div class="fc-ritual" style="margin-bottom:var(--space-12)"><span class="fc-ritual-dot"></span><span class="fc-ritual-t"><strong>Open the week.</strong> Name the one thing that has to move by Friday.</span><button class="btn-sec btn-tiny">Begin</button></div>
+  <div class="fc-ritual"><span class="fc-ritual-dot" style="background:var(--ink-30)"></span><span class="fc-ritual-t"><strong>Close the week.</strong> Write down what actually got done.</span><span class="pill pill-scheduled">Fri</span></div>
+
+  <div class="cc-sec-h">How the season is moving</div>
+  <div class="fc-meter">
+    <div class="fc-meter-row"><span class="fc-meter-big">Four of six, underway.</span><span class="fc-meter-sub">Week 23 of 26</span></div>
+    <div class="fc-meter-track"><div class="fc-meter-fill" style="width:64%"></div></div>
+  </div>
+
+  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-32)">
+    <strong style="color:var(--secondary)">Future components:</strong>
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-cadence</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-intention</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-ritual</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-meter</code> (accomplishment).
+    Parity reused: serif type, <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.pill-* · buttons</code>.
+  </p>
+
+</div>
+</body>
+</html>

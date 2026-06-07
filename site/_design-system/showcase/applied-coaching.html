@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · Coaching</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Coaching — the DS as a 1:1 coaching dashboard. Parity from the real
+     CMS CSS (view-header, pills, tags, buttons). The engagement meter is a FUTURE
+     COMPONENT (fc-progress), page-scoped + tokens-only. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .wrap { padding: var(--space-32) var(--space-40) var(--space-48); }
+  .fc-client-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
+  .fc-client { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); display: flex; flex-direction: column; gap: var(--space-12); }
+  .fc-client-top { display: flex; align-items: center; gap: var(--space-12); }
+  .fc-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--neutral); border: 1px solid var(--ink-18); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-cond); font-weight: 700; font-size: var(--text-meta); color: var(--secondary); }
+  .fc-client-name { font-size: var(--text-body); font-weight: 600; color: var(--primary); }
+  .fc-client-role { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .fc-client-focus { font-family: var(--font-serif); font-style: italic; font-size: var(--text-sm); color: var(--secondary); line-height: 1.4; }
+  /* fc-progress — engagement meter (future component, shared candidate) */
+  .fc-progress { display: flex; flex-direction: column; gap: 6px; }
+  .fc-progress-lbl { display: flex; justify-content: space-between; font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .fc-progress-track { height: 8px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
+  .fc-progress-fill { height: 100%; border-radius: 99px; background: var(--c-current, var(--accent)); }
+  .fc-client-foot { display: flex; align-items: center; justify-content: space-between; padding-top: var(--space-12); border-top: var(--rule-faint); }
+  .fc-next { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
+  a, button { cursor: default; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="view-header" style="padding:0;border:0;margin-bottom:var(--space-24)">
+    <div class="view-header-left">
+      <div class="view-title">Coaching</div>
+      <div class="view-subtitle">Active clients · focus, momentum, and the next touchpoint at a glance</div>
+    </div>
+    <div class="view-header-actions"><button class="btn-pri">+ New client</button></div>
+  </div>
+
+  <div class="fc-client-grid">
+    <div class="fc-client">
+      <div class="fc-client-top"><div class="fc-avatar">JL</div><div><div class="fc-client-name">Jordan Lee</div><div class="fc-client-role">VP Product · Series B</div></div></div>
+      <div class="fc-client-focus">“Holding altitude without losing the craft.”</div>
+      <div class="fc-progress" style="--c-current:var(--c-forest)"><div class="fc-progress-lbl"><span>Momentum</span><span>High</span></div><div class="fc-progress-track"><div class="fc-progress-fill" style="width:82%"></div></div></div>
+      <div class="fc-client-foot"><span class="pill pill-live">On track</span><span class="fc-next">Next · Jun 9</span></div>
+    </div>
+    <div class="fc-client">
+      <div class="fc-client-top"><div class="fc-avatar">MC</div><div><div class="fc-client-name">Marcus Chen</div><div class="fc-client-role">Senior UX · Enterprise</div></div></div>
+      <div class="fc-client-focus">“Deciding what kind of designer to become next.”</div>
+      <div class="fc-progress" style="--c-current:var(--c-amber)"><div class="fc-progress-lbl"><span>Momentum</span><span>Steady</span></div><div class="fc-progress-track"><div class="fc-progress-fill" style="width:54%"></div></div></div>
+      <div class="fc-client-foot"><span class="pill pill-draft">Mid-arc</span><span class="fc-next">Next · Jun 11</span></div>
+    </div>
+    <div class="fc-client">
+      <div class="fc-client-top"><div class="fc-avatar">PN</div><div><div class="fc-client-name">Priya Nair</div><div class="fc-client-role">Founding Designer · Fintech</div></div></div>
+      <div class="fc-client-focus">“Building a team without losing her own practice.”</div>
+      <div class="fc-progress" style="--c-current:var(--c-terracotta)"><div class="fc-progress-lbl"><span>Momentum</span><span>Needs a nudge</span></div><div class="fc-progress-track"><div class="fc-progress-fill" style="width:28%"></div></div></div>
+      <div class="fc-client-foot"><span class="pill pill-outline">Re-engage</span><span class="fc-next">Next · unscheduled</span></div>
+    </div>
+  </div>
+
+  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-24)">
+    <strong style="color:var(--secondary)">Future components:</strong>
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-client</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-progress</code> (momentum meter — shared candidate with Analytics / Command Center).
+    Parity reused: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.view-header · .pill-* · buttons</code>.
+  </p>
+
+</div>
+</body>
+</html>

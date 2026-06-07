@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applied · Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Analytics — the DS used for a performance dashboard. Parity comes
+     from the real CMS CSS (view-header, cms-table, cat-label, pills). The new
+     widgets (stat cards + progress bars) are FUTURE COMPONENTS: page-scoped,
+     fc- prefixed, tokens-only. Never in a production slice. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .wrap { padding: var(--space-32) var(--space-40) var(--space-48); }
+  /* ── Future components (Analytics) — fc- prefix, page-scoped, tokens only ── */
+  .fc-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-16); margin-bottom: var(--space-32); }
+  .fc-stat-card { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
+  .fc-stat-num { font-size: var(--text-h1); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--primary); }
+  .fc-stat-lbl { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
+  .fc-stat-delta { font-family: var(--font-mono); font-size: var(--text-meta); margin-top: var(--space-12); color: var(--c-forest); }
+  .fc-stat-delta.is-down { color: var(--c-terracotta); }
+  .fc-panel { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-24); margin-bottom: var(--space-24); }
+  .fc-panel-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--secondary); margin: 0 0 var(--space-20); }
+  .fc-bars { display: flex; flex-direction: column; gap: var(--space-16); }
+  .fc-bar-row { display: grid; grid-template-columns: 150px 1fr 52px; align-items: center; gap: var(--space-16); }
+  .fc-bar-track { height: 10px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
+  .fc-bar-fill { height: 100%; border-radius: 99px; background: var(--c-current, var(--primary)); }
+  .fc-bar-val { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); text-align: right; }
+  a, button { cursor: default; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="view-header" style="padding:0;border:0;margin-bottom:var(--space-24)">
+    <div class="view-header-left">
+      <div class="view-title">Analytics</div>
+      <div class="view-subtitle">Site and content performance · last 30 days</div>
+    </div>
+    <div class="view-header-actions"><button class="btn-sec">Export</button></div>
+  </div>
+
+  <!-- fc-stat-card × 4 -->
+  <div class="fc-stat-grid">
+    <div class="fc-stat-card"><div class="fc-stat-num">8,420</div><div class="fc-stat-lbl">Visitors</div><div class="fc-stat-delta">▲ 12% vs prior</div></div>
+    <div class="fc-stat-card"><div class="fc-stat-num">3,190</div><div class="fc-stat-lbl">Reads</div><div class="fc-stat-delta">▲ 8%</div></div>
+    <div class="fc-stat-card"><div class="fc-stat-num">4:36</div><div class="fc-stat-lbl">Avg. read time</div><div class="fc-stat-delta is-down">▼ 3%</div></div>
+    <div class="fc-stat-card"><div class="fc-stat-num">214</div><div class="fc-stat-lbl">New subscribers</div><div class="fc-stat-delta">▲ 21%</div></div>
+  </div>
+
+  <!-- fc-bar (progress) — reads by category, tinted to category colour -->
+  <div class="fc-panel">
+    <h3 class="fc-panel-h">Reads by category</h3>
+    <div class="fc-bars">
+      <div class="fc-bar-row" style="--c-current:var(--c-terracotta)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:84%"></div></div><span class="fc-bar-val">1,180</span></div>
+      <div class="fc-bar-row" style="--c-current:var(--c-forest)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:61%"></div></div><span class="fc-bar-val">860</span></div>
+      <div class="fc-bar-row" style="--c-current:var(--c-denim)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:44%"></div></div><span class="fc-bar-val">620</span></div>
+      <div class="fc-bar-row" style="--c-current:var(--c-purple)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-purple)"></span>Experiments</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:23%"></div></div><span class="fc-bar-val">330</span></div>
+    </div>
+  </div>
+
+  <!-- Parity: real cms-table for top content -->
+  <div class="fc-panel" style="padding:0">
+    <div class="table-card" style="border:0">
+      <table class="cms-table">
+        <thead><tr><th style="width:56%">Top content</th><th>Category</th><th>Reads</th></tr></thead>
+        <tbody>
+          <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span></td><td class="td-mono">512</td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">The Designer Who Runs the Room</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td class="td-mono">418</td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">Notes Toward a Practice</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span></td><td class="td-mono">377</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-24)">
+    <strong style="color:var(--secondary)">Future components:</strong>
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-stat-card</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-bar</code> (progress bar, tinted via <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">--c-current</code>).
+    Page-scoped here; promote into the DS if they prove out. Parity reused: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.view-header · .cms-table · .cat-label · buttons</code>.
+  </p>
+
+</div>
+</body>
+</html>

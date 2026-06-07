@@ -12,7 +12,8 @@
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
   .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-40) var(--space-40) var(--space-48); }
   .tg-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
   .tg-statement { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.2; color: var(--primary); margin: var(--space-12) 0 var(--space-24); max-width: 640px; }

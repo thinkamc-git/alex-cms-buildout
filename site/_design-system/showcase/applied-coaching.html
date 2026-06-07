@@ -11,7 +11,8 @@
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
   .wrap { padding: var(--space-32) var(--space-40) var(--space-48); }
   .fc-client-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
   .fc-client { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); display: flex; flex-direction: column; gap: var(--space-12); }

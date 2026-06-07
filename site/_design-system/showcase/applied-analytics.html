@@ -12,7 +12,8 @@
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
   .wrap { padding: var(--space-32) var(--space-40) var(--space-48); }
   /* ── Future components (Analytics) — fc- prefix, page-scoped, tokens only ── */
   .fc-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-16); margin-bottom: var(--space-32); }

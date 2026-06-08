@@ -166,3 +166,36 @@ tokens-only, footnoted) and **promotion to production still requires full Stage-
    c. Stage 2 — promote into the system properly,
       document/show it, remove the prototype.               (done)
 ```
+
+---
+
+## 9. Working workflow — plan-first, no "vibe loop"
+
+> Alex is a professional and expects to work like a professional development team.
+> The default is **plan → confirm → build → verify**, NOT "build something, then have
+> Alex react to it." Reacting to a finished artifact is "vibing." It is amateur, it
+> wastes resources, and it pushes the burden of direction onto Alex's gut reaction
+> instead of onto a deliberate plan. **Do not slip into it.**
+
+### 9.1 The two modes
+
+- **Plan-first (DEFAULT for any non-trivial design/build request).**
+  1. **Intake** — restate the request and the intent/constraints; surface assumptions.
+  2. **Design pass** — reason from first principles (use the design subagent to produce a *plan/spec*: the approach, options with trade-offs, the usability/IA principles applied, a sketch if useful). The subagent must work *critically*, not lay out elements or pattern-match.
+  3. **Confirm the PLAN with Alex** — he reviews and steers the *plan*, before any code. This is the check-in. Lead with a clear recommendation, not a menu.
+  4. **Build** the agreed plan in one pass — to spec, lean, token-clean.
+  5. **Verify** — lint custom props vs `tokens.css`, deploy, confirm live (md5), present what was built *against the plan*.
+
+- **Direct-execute (ONLY when explicitly invoked).** When Alex says "build it", "just do it", "let's see where it is", "prototype this", or similar, skip the plan and implement directly so we can look at it. This is a deliberate, Alex-initiated exception — never the default.
+
+### 9.2 Anti-patterns observed (do not repeat)
+
+- **Build → Alex vibes → rebuild → repeat.** (coaching went cards→list→table→roster→cards; the launcher went grid→table→board — all reactive, no upfront plan.)
+- **Pattern-matching the wrong model** — shoving an existing element (e.g. the editorial article card) into a different context (a software launcher) because it was handy.
+- **Chasing symptoms, not root cause** — guessing the same fix repeatedly (the "scrollbar" width bug was actually a flex-body box-model issue; many turns wasted before diagnosing methodically).
+- **Over-correcting** when a slight, judged change was asked for.
+- **Shipping unverified** (undefined `--space-28` tokens broke CSS; inconsistent one-page-only fixes). Always lint + verify before handing back.
+
+### 9.3 The rule
+
+For substantive design/build work, **produce and confirm a plan before building.** Bugs: **diagnose the root cause before applying a fix** (don't guess-and-redeploy). The only time to build-first is when Alex explicitly asks to. Default to structured and planning-oriented; protect Alex from the vibe loop.

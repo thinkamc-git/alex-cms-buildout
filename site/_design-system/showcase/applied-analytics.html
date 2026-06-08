@@ -5,72 +5,237 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Applied · Analytics</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Applied · Analytics — the DS used for a performance dashboard. Parity comes
-     from the real CMS CSS (view-header, cms-table, cat-label, pills). The new
-     widgets (stat cards + progress bars) are FUTURE COMPONENTS: page-scoped,
-     fc- prefixed, tokens-only. Never in a production slice. -->
+<!-- Applied · Analytics — the DS over a Google-Analytics-style content dashboard.
+     Grounded in what GA4 actually pulls: Users/Views/engagement KPIs, a daily
+     trend, acquisition by channel + top referrers (where readers come from),
+     devices, content by category, and top pages. Hierarchy: verdict → KPIs →
+     trend + channels → referrers + devices → category + timing → top pages.
+     Parity from the real CMS CSS (view-header, cms-table, cat-label). Charts are
+     FUTURE COMPONENTS: page-scoped, fc-, tokens-only, flat geometric SVG. -->
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
   /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
   body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
-  .wrap { padding: var(--space-32) var(--space-40) var(--space-48); }
-  /* ── Future components (Analytics) — fc- prefix, page-scoped, tokens only ── */
-  .fc-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-16); margin-bottom: var(--space-32); }
+  html { overflow-y: scroll; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: var(--space-32) var(--space-48) var(--space-48); }
+
+  /* header + verdict */
+  .an-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-24); margin-bottom: var(--space-20); }
+  .an-title { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.05; color: var(--primary); }
+  .an-sub { font-size: var(--text-sm); color: var(--secondary); margin-top: 6px; }
+  .an-source { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .an-source::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c-forest); }
+  .an-verdict { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h4); line-height: 1.4; color: var(--secondary); max-width: 760px; margin-bottom: var(--space-24); }
+  .an-verdict strong { font-style: normal; font-family: var(--font); font-weight: 600; color: var(--primary); }
+
+  /* panels */
+  .fc-panel { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-24); }
+  .fc-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-16); margin-bottom: var(--space-20); }
+  .fc-panel-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--secondary); margin: 0; }
+  .fc-panel-note { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+  .fc-panel-note.up { color: var(--c-forest); }
+
+  /* KPI strip */
+  .fc-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-16); margin-bottom: var(--space-16); }
   .fc-stat-card { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
-  .fc-stat-num { font-size: var(--text-h1); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--primary); }
-  .fc-stat-lbl { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-top: 8px; }
-  .fc-stat-delta { font-family: var(--font-mono); font-size: var(--text-meta); margin-top: var(--space-12); color: var(--c-forest); }
+  .fc-stat-lbl { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+  .fc-stat-num { font-size: var(--text-h2); font-weight: 600; letter-spacing: -0.02em; line-height: 1; color: var(--primary); margin: var(--space-12) 0; }
+  .fc-stat-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-12); }
+  .fc-stat-delta { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--c-forest); }
   .fc-stat-delta.is-down { color: var(--c-terracotta); }
-  .fc-panel { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-24); margin-bottom: var(--space-24); }
-  .fc-panel-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--secondary); margin: 0 0 var(--space-20); }
+  .fc-spark { width: 76px; height: 22px; display: block; flex-shrink: 0; }
+  .fc-spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+
+  /* layout rows */
+  .fc-2up { display: grid; grid-template-columns: 1.7fr 1fr; gap: var(--space-16); margin-bottom: var(--space-16); }
+  .fc-cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); margin-bottom: var(--space-16); }
+
+  /* trend (compact, realistic) */
+  .fc-chart { display: block; width: 100%; }
+  .fc-chart-trend { height: 168px; }
+  .fc-grid line { stroke: var(--ink-08); stroke-width: 1; }
+  .fc-area { fill: var(--accent); opacity: 0.08; }
+  .fc-line { fill: none; stroke: var(--accent); stroke-width: 1.75; stroke-linejoin: round; stroke-linecap: round; }
+  .fc-axis-x { font-family: var(--font-mono); font-size: 10px; fill: var(--muted); }
+
+  /* donut — channels */
+  .fc-donut-wrap { display: flex; align-items: center; gap: var(--space-24); }
+  .fc-donut { width: 128px; height: 128px; flex-shrink: 0; }
+  .fc-donut circle { fill: none; stroke-width: 17; }
+  .fc-donut .track { stroke: var(--ink-08); }
+  .fc-donut-total { font-size: var(--text-h5); font-weight: 600; fill: var(--primary); }
+  .fc-donut-totl { font-family: var(--font-cond); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; fill: var(--muted); }
+  .fc-legend2 { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 0; }
+  .fc-leg { display: grid; grid-template-columns: 11px 1fr auto; align-items: center; gap: 10px; }
+  .fc-leg-sw { width: 11px; height: 11px; border-radius: 3px; }
+  .fc-leg-name { font-size: var(--text-sm); font-weight: 500; color: var(--secondary); }
+  .fc-leg-val { font-family: var(--font-mono); font-size: var(--text-meta); font-weight: 500; color: var(--primary); }
+
+  /* referrers list */
+  .fc-ref-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-12); padding: 11px 0; border-bottom: 1px solid var(--ink-08); }
+  .fc-ref-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .fc-ref-src { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--primary); }
+  .fc-ref-med { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-left: 9px; }
+  .fc-ref-val { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); }
+
+  /* bars (category + devices) */
   .fc-bars { display: flex; flex-direction: column; gap: var(--space-16); }
-  .fc-bar-row { display: grid; grid-template-columns: 150px 1fr 52px; align-items: center; gap: var(--space-16); }
+  .fc-bar-row { display: grid; grid-template-columns: 124px 1fr 46px; align-items: center; gap: var(--space-12); }
   .fc-bar-track { height: 10px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
   .fc-bar-fill { height: 100%; border-radius: 99px; background: var(--c-current, var(--primary)); }
   .fc-bar-val { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); text-align: right; }
+  .fc-bar-lbl { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--secondary); }
+
+  /* weekday columns */
+  .fc-col-bar { fill: var(--ink-18); }
+  .fc-col-bar.peak { fill: var(--accent); }
+  .fc-col-x { font-family: var(--font-cond); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; fill: var(--muted); text-anchor: middle; text-transform: uppercase; }
+
+  /* finish bar inside table */
+  .td-finish { width: 150px; }
+  .fc-finish { display: flex; align-items: center; gap: var(--space-12); }
+  .fc-finish-track { flex: 1; height: 6px; background: var(--ink-08); border-radius: 99px; overflow: hidden; }
+  .fc-finish-fill { height: 100%; border-radius: 99px; background: var(--c-current, var(--accent)); }
+  .fc-finish-val { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); width: 34px; text-align: right; }
+
   a, button { cursor: default; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="view-header" style="padding:0;border:0;margin-bottom:var(--space-24)">
-    <div class="view-header-left">
-      <div class="view-title">Analytics</div>
-      <div class="view-subtitle">Site and content performance · last 30 days</div>
+  <div class="an-head">
+    <div>
+      <div class="an-title">Analytics</div>
+      <div class="an-sub">Content performance · last 30 days</div>
     </div>
-    <div class="view-header-actions"><button class="btn-sec">Export</button></div>
+    <span class="an-source">Google Analytics 4</span>
   </div>
 
-  <!-- fc-stat-card × 4 -->
+  <p class="an-verdict">This month <strong>landed</strong> — Users grew despite the usual weekend dips, and <strong>A Discipline Reset</strong> carried it. Nearly half of readers arrive from <strong>organic search</strong>; the next thing to write leans <strong>UX Industry</strong>.</p>
+
+  <!-- KPI strip (GA4) -->
   <div class="fc-stat-grid">
-    <div class="fc-stat-card"><div class="fc-stat-num">8,420</div><div class="fc-stat-lbl">Visitors</div><div class="fc-stat-delta">▲ 12% vs prior</div></div>
-    <div class="fc-stat-card"><div class="fc-stat-num">3,190</div><div class="fc-stat-lbl">Reads</div><div class="fc-stat-delta">▲ 8%</div></div>
-    <div class="fc-stat-card"><div class="fc-stat-num">4:36</div><div class="fc-stat-lbl">Avg. read time</div><div class="fc-stat-delta is-down">▼ 3%</div></div>
-    <div class="fc-stat-card"><div class="fc-stat-num">214</div><div class="fc-stat-lbl">New subscribers</div><div class="fc-stat-delta">▲ 21%</div></div>
-  </div>
-
-  <!-- fc-bar (progress) — reads by category, tinted to category colour -->
-  <div class="fc-panel">
-    <h3 class="fc-panel-h">Reads by category</h3>
-    <div class="fc-bars">
-      <div class="fc-bar-row" style="--c-current:var(--c-terracotta)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:84%"></div></div><span class="fc-bar-val">1,180</span></div>
-      <div class="fc-bar-row" style="--c-current:var(--c-forest)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:61%"></div></div><span class="fc-bar-val">860</span></div>
-      <div class="fc-bar-row" style="--c-current:var(--c-denim)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:44%"></div></div><span class="fc-bar-val">620</span></div>
-      <div class="fc-bar-row" style="--c-current:var(--c-purple)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-purple)"></span>Experiments</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:23%"></div></div><span class="fc-bar-val">330</span></div>
+    <div class="fc-stat-card">
+      <div class="fc-stat-lbl">Users</div><div class="fc-stat-num">3,190</div>
+      <div class="fc-stat-foot"><span class="fc-stat-delta">▲ 18%</span><svg class="fc-spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,34 13.3,31 26.7,32 40,27 53.3,24 66.7,18 80,20 93.3,13 106.7,9 120,4"/></svg></div>
+    </div>
+    <div class="fc-stat-card">
+      <div class="fc-stat-lbl">Views</div><div class="fc-stat-num">8,420</div>
+      <div class="fc-stat-foot"><span class="fc-stat-delta">▲ 14%</span><svg class="fc-spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,33 13.3,30 26.7,31 40,26 53.3,27 66.7,19 80,21 93.3,14 106.7,10 120,4"/></svg></div>
+    </div>
+    <div class="fc-stat-card">
+      <div class="fc-stat-lbl">Avg. engagement</div><div class="fc-stat-num">2m 38s</div>
+      <div class="fc-stat-foot"><span class="fc-stat-delta">▲ 6%</span><svg class="fc-spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,34 13.3,28 26.7,30 40,23 53.3,25 66.7,17 80,19 93.3,13 106.7,8 120,4"/></svg></div>
+    </div>
+    <div class="fc-stat-card">
+      <div class="fc-stat-lbl">New subscribers</div><div class="fc-stat-num">214</div>
+      <div class="fc-stat-foot"><span class="fc-stat-delta">▲ 21%</span><svg class="fc-spark" viewBox="0 0 120 36" preserveAspectRatio="none"><polyline points="0,34 13.3,31 26.7,33 40,29 53.3,25 66.7,26 80,21 93.3,16 106.7,10 120,4"/></svg></div>
     </div>
   </div>
 
-  <!-- Parity: real cms-table for top content -->
+  <!-- Trend + Channels donut -->
+  <div class="fc-2up">
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">Users over time</h3><span class="fc-panel-note up">▲ 18% vs prior 30 days</span></div>
+      <svg class="fc-chart fc-chart-trend" viewBox="0 0 480 150" preserveAspectRatio="none" role="img" aria-label="Daily users, last 30 days">
+        <g class="fc-grid"><line x1="0" y1="12" x2="480" y2="12"/><line x1="0" y1="72" x2="480" y2="72"/><line x1="0" y1="132" x2="480" y2="132"/></g>
+        <path class="fc-area" d="M4.0,80.3 L20.3,79.0 L36.6,68.0 L52.8,75.2 L69.1,74.5 L85.4,101.0 L101.7,99.1 L117.9,71.3 L134.2,60.3 L150.5,64.8 L166.8,56.4 L183.0,66.1 L199.3,93.2 L215.6,93.9 L231.9,59.0 L248.1,45.4 L264.4,51.3 L280.7,46.1 L297.0,54.5 L313.2,86.1 L329.5,86.8 L345.8,50.0 L362.1,33.2 L378.3,34.5 L394.6,33.8 L410.9,48.0 L427.2,73.9 L443.4,84.2 L459.7,35.7 L476.0,20.9 L476.0,132 L4.0,132 Z"/>
+        <path class="fc-line" d="M4.0,80.3 L20.3,79.0 L36.6,68.0 L52.8,75.2 L69.1,74.5 L85.4,101.0 L101.7,99.1 L117.9,71.3 L134.2,60.3 L150.5,64.8 L166.8,56.4 L183.0,66.1 L199.3,93.2 L215.6,93.9 L231.9,59.0 L248.1,45.4 L264.4,51.3 L280.7,46.1 L297.0,54.5 L313.2,86.1 L329.5,86.8 L345.8,50.0 L362.1,33.2 L378.3,34.5 L394.6,33.8 L410.9,48.0 L427.2,73.9 L443.4,84.2 L459.7,35.7 L476.0,20.9"/>
+      </svg>
+      <div style="display:flex;justify-content:space-between;margin-top:8px"><span class="fc-axis-x">May 8</span><span class="fc-axis-x">May 22</span><span class="fc-axis-x">Jun 6</span></div>
+    </div>
+
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">Acquisition by channel</h3></div>
+      <div class="fc-donut-wrap">
+        <svg class="fc-donut" viewBox="0 0 140 140" role="img" aria-label="Users by acquisition channel">
+          <circle class="track" cx="70" cy="70" r="54"/>
+          <g transform="rotate(-90 70 70)">
+            <circle cx="70" cy="70" r="54" stroke="var(--primary)"  stroke-dasharray="149.29 190.00" stroke-dashoffset="0"/>
+            <circle cx="70" cy="70" r="54" stroke="var(--c-forest)" stroke-dasharray="64.47 274.83"  stroke-dashoffset="-149.29"/>
+            <circle cx="70" cy="70" r="54" stroke="var(--c-amber)"  stroke-dasharray="54.29 285.01"  stroke-dashoffset="-213.75"/>
+            <circle cx="70" cy="70" r="54" stroke="var(--c-denim)"  stroke-dasharray="47.50 291.79"  stroke-dashoffset="-268.04"/>
+            <circle cx="70" cy="70" r="54" stroke="var(--ink-30)"   stroke-dasharray="23.75 315.54"  stroke-dashoffset="-315.54"/>
+          </g>
+          <text class="fc-donut-total" x="70" y="68" text-anchor="middle">3,190</text>
+          <text class="fc-donut-totl" x="70" y="83" text-anchor="middle">USERS</text>
+        </svg>
+        <div class="fc-legend2">
+          <div class="fc-leg"><span class="fc-leg-sw" style="background:var(--primary)"></span><span class="fc-leg-name">Organic Search</span><span class="fc-leg-val">44%</span></div>
+          <div class="fc-leg"><span class="fc-leg-sw" style="background:var(--c-forest)"></span><span class="fc-leg-name">Direct</span><span class="fc-leg-val">19%</span></div>
+          <div class="fc-leg"><span class="fc-leg-sw" style="background:var(--c-amber)"></span><span class="fc-leg-name">Email</span><span class="fc-leg-val">16%</span></div>
+          <div class="fc-leg"><span class="fc-leg-sw" style="background:var(--c-denim)"></span><span class="fc-leg-name">Organic Social</span><span class="fc-leg-val">14%</span></div>
+          <div class="fc-leg"><span class="fc-leg-sw" style="background:var(--ink-30)"></span><span class="fc-leg-name">Referral</span><span class="fc-leg-val">7%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top referrers + Devices -->
+  <div class="fc-cols2">
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">Top sources</h3><span class="fc-panel-note">source / medium · sessions</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">google</span><span class="fc-ref-med">organic</span></div><span class="fc-ref-val">1,402</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">(direct)</span><span class="fc-ref-med">none</span></div><span class="fc-ref-val">612</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">newsletter</span><span class="fc-ref-med">email</span></div><span class="fc-ref-val">528</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">t.co</span><span class="fc-ref-med">referral</span></div><span class="fc-ref-val">233</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">linkedin.com</span><span class="fc-ref-med">referral</span></div><span class="fc-ref-val">181</span></div>
+      <div class="fc-ref-row"><div><span class="fc-ref-src">news.ycombinator.com</span><span class="fc-ref-med">referral</span></div><span class="fc-ref-val">96</span></div>
+    </div>
+
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">Devices</h3><span class="fc-panel-note">share of users</span></div>
+      <div class="fc-bars">
+        <div class="fc-bar-row" style="--c-current:var(--primary)"><span class="fc-bar-lbl">Desktop</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:58%"></div></div><span class="fc-bar-val">58%</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--c-denim)"><span class="fc-bar-lbl">Mobile</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:38%"></div></div><span class="fc-bar-val">38%</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--ink-30)"><span class="fc-bar-lbl">Tablet</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:4%"></div></div><span class="fc-bar-val">4%</span></div>
+      </div>
+      <div class="fc-panel-head" style="margin:var(--space-24) 0 var(--space-16)"><h3 class="fc-panel-h">Returning</h3><span class="fc-panel-note">vs new</span></div>
+      <div class="fc-bars">
+        <div class="fc-bar-row" style="--c-current:var(--c-forest)"><span class="fc-bar-lbl">New</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:64%"></div></div><span class="fc-bar-val">64%</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--c-ochre)"><span class="fc-bar-lbl">Returning</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:36%"></div></div><span class="fc-bar-val">36%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category + weekday -->
+  <div class="fc-cols2">
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">Views by category</h3></div>
+      <div class="fc-bars">
+        <div class="fc-bar-row" style="--c-current:var(--c-terracotta)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:84%"></div></div><span class="fc-bar-val">1,180</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--c-forest)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:61%"></div></div><span class="fc-bar-val">860</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--c-denim)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:44%"></div></div><span class="fc-bar-val">620</span></div>
+        <div class="fc-bar-row" style="--c-current:var(--c-purple)"><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-purple)"></span>Experiments</span><div class="fc-bar-track"><div class="fc-bar-fill" style="width:23%"></div></div><span class="fc-bar-val">330</span></div>
+      </div>
+    </div>
+
+    <div class="fc-panel">
+      <div class="fc-panel-head"><h3 class="fc-panel-h">When readers show up</h3><span class="fc-panel-note">by weekday</span></div>
+      <svg class="fc-chart" viewBox="0 0 720 150" preserveAspectRatio="none" style="height:150px" role="img" aria-label="Views by weekday">
+        <rect class="fc-col-bar" x="28.4" y="53.3" width="46" height="74.7" rx="2"/><text class="fc-col-x" x="51.4" y="146">Mon</text>
+        <rect class="fc-col-bar" x="131.3" y="24.1" width="46" height="103.9" rx="2"/><text class="fc-col-x" x="154.3" y="146">Tue</text>
+        <rect class="fc-col-bar peak" x="234.1" y="11.5" width="46" height="116.5" rx="2"/><text class="fc-col-x" x="257.1" y="146">Wed</text>
+        <rect class="fc-col-bar" x="337.0" y="17.5" width="46" height="110.5" rx="2"/><text class="fc-col-x" x="360.0" y="146">Thu</text>
+        <rect class="fc-col-bar" x="439.9" y="4.9" width="46" height="123.1" rx="2"/><text class="fc-col-x" x="462.9" y="146">Fri</text>
+        <rect class="fc-col-bar" x="542.7" y="67.0" width="46" height="61.0" rx="2"/><text class="fc-col-x" x="565.7" y="146">Sat</text>
+        <rect class="fc-col-bar" x="645.6" y="84.6" width="46" height="43.4" rx="2"/><text class="fc-col-x" x="668.6" y="146">Sun</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Top pages -->
   <div class="fc-panel" style="padding:0">
     <div class="table-card" style="border:0">
       <table class="cms-table">
-        <thead><tr><th style="width:56%">Top content</th><th>Category</th><th>Reads</th></tr></thead>
+        <thead><tr><th style="width:44%">Top pages</th><th>Category</th><th>Views</th><th class="td-finish">Avg. scroll</th></tr></thead>
         <tbody>
-          <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span></td><td class="td-mono">512</td></tr>
-          <tr class="row-clickable"><td class="td-title"><div class="t">The Designer Who Runs the Room</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td class="td-mono">418</td></tr>
-          <tr class="row-clickable"><td class="td-title"><div class="t">Notes Toward a Practice</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span></td><td class="td-mono">377</td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span></td><td class="td-mono">512</td><td class="td-finish" style="--c-current:var(--c-terracotta)"><div class="fc-finish"><div class="fc-finish-track"><div class="fc-finish-fill" style="width:79%"></div></div><span class="fc-finish-val">79%</span></div></td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">The Designer Who Runs the Room</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td class="td-mono">418</td><td class="td-finish" style="--c-current:var(--c-forest)"><div class="fc-finish"><div class="fc-finish-track"><div class="fc-finish-fill" style="width:71%"></div></div><span class="fc-finish-val">71%</span></div></td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">Notes Toward a Practice</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span></td><td class="td-mono">377</td><td class="td-finish" style="--c-current:var(--c-denim)"><div class="fc-finish"><div class="fc-finish-track"><div class="fc-finish-fill" style="width:64%"></div></div><span class="fc-finish-val">64%</span></div></td></tr>
+          <tr class="row-clickable"><td class="td-title"><div class="t">What the Tools Can't Do</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-purple)"></span>Experiments</span></td><td class="td-mono">295</td><td class="td-finish" style="--c-current:var(--c-purple)"><div class="fc-finish"><div class="fc-finish-track"><div class="fc-finish-fill" style="width:58%"></div></div><span class="fc-finish-val">58%</span></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -78,9 +243,12 @@
 
   <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-24)">
     <strong style="color:var(--secondary)">Future components:</strong>
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-stat-card</code> ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-bar</code> (progress bar, tinted via <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">--c-current</code>).
-    Page-scoped here; promote into the DS if they prove out. Parity reused: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.view-header · .cms-table · .cat-label · buttons</code>.
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-chart</code> (line + column) ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-donut</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-spark</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-bar</code> ·
+    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-finish</code>.
+    Flat geometric SVG, tokens-only, page-scoped. Parity reused: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.view-header · .cms-table · .cat-label</code>.
   </p>
 
 </div>

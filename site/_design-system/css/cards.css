@@ -1,0 +1,36 @@
+/* ════════════════════════════════════════════════════════════════
+   Dashboard cards — surface containers for dashboard / app / tool UIs.
+
+   Distinct from the public content .card (views.css), which is the
+   article/index card with header, title, and meta. These are the plain
+   surface containers used to group and frame content in dashboards.
+
+   TWO ROLES — choose by what the card holds:
+
+   · .dash-card            CONTENT role (the default). A plain surface
+                           container for disposable, simple grouped
+                           content: panels, list groups, sections, a
+                           cluster of rows. No accent — it's a container,
+                           not an object.
+
+   · .dash-card--callout   CALLOUT role. Adds a 3px hue left-edge
+                           (--c-current). For cards that carry their own
+                           identity / standing and are referenced,
+                           featured, or launched — NOT disposable.
+                           e.g. seasonal intentions, the tools/app
+                           launcher. The hue marks it as a "thing,"
+                           not just a container.
+
+   Set the hue per card inline: style="--c-current: var(--c-forest)".
+   ════════════════════════════════════════════════════════════════ */
+
+.dash-card {
+  background: var(--surface);
+  border: var(--rule-faint);
+  border-radius: var(--r-card);
+  padding: var(--space-20);
+}
+
+.dash-card--callout {
+  border-left: 3px solid var(--c-current, var(--accent));
+}

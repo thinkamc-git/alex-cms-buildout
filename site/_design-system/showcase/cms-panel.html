@@ -10,7 +10,16 @@
      with the showcase chrome — hence the iframe). Mirrors the real /cms shell. -->
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
-<style> body { margin: 0; } a { cursor: default; } </style>
+<style>
+  /* style-cms.css is a fixed 100vh app shell; this specimen relaxes only its
+     viewport-fit so it flows to content height inside the content-sized Applied
+     iframe. Every class below is the real production component — untouched. */
+  body { margin: 0; height: auto; min-height: 0; overflow: visible; display: block; background: var(--neutral); }
+  .layout, .main, .content-area { overflow: visible; }
+  .view, .view.active { height: auto; overflow: visible; }
+  .cms-parity-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); line-height: 1.6; padding: var(--space-20) var(--space-24) var(--space-24); }
+  a { cursor: default; }
+</style>
 </head>
 <body>
 
@@ -30,7 +39,7 @@
     </div>
     <div class="nav-section">
       <span class="nav-label">Library</span>
-      <a class="nav-item is-active" href="#" aria-current="page"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Articles</a>
+      <a class="nav-item active" href="#" aria-current="page"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Articles</a>
       <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Journals</a>
       <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg>Live Sessions</a>
       <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Experiments</a>
@@ -71,7 +80,7 @@
             <table class="cms-table">
               <thead><tr><th>Title</th><th>Category</th><th>Stage</th><th>Updated</th><th></th></tr></thead>
               <tbody>
-                <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td><span class="pill pill-published" style="display:none"></span><span class="pill pill-live">Live</span></td><td class="td-mono">Jun 4</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
+                <tr class="row-clickable"><td class="td-title"><div class="t">A Discipline Reset</div><div class="slug">/articles/a-discipline-reset</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td><span class="pill pill-live">Live</span></td><td class="td-mono">Jun 4</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
                 <tr class="row-clickable"><td class="td-title"><div class="t">The Tools Don't Matter</div><div class="slug">/articles/tools-dont-matter</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-terracotta)"></span>UX Industry</span></td><td><span class="pill pill-draft">Draft</span></td><td class="td-mono">Jun 2</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
                 <tr class="row-clickable"><td class="td-title"><div class="t">Notes Toward a Practice</div><div class="slug">/articles/notes-toward-a-practice</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-denim)"></span>For Designers</span></td><td><span class="pill pill-outline">Outline</span></td><td class="td-mono">May 30</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
                 <tr class="row-clickable"><td class="td-title"><div class="t">What Senior Really Means</div><div class="slug">/articles/what-senior-means</div></td><td><span class="cat-label"><span class="cat-label-dot" style="background:var(--c-forest)"></span>Leading Design</span></td><td><span class="pill pill-concept">Concept</span></td><td class="td-mono">May 27</td><td class="cell-actions"><button class="btn-sec btn-tiny">Edit</button></td></tr>
@@ -79,6 +88,7 @@
             </table>
           </div>
         </div>
+        <p class="cms-parity-note">The parity anchor — composed entirely of production CMS components: the real <code>.topbar</code>, <code>.sidebar</code>, <code>.view-header</code>, <code>.filter-bar</code>, and <code>.cms-table</code> (with live stage pills). Zero page-scoped CSS — this is the actual admin shell, not a re-composition.</p>
       </div>
     </div>
   </main>

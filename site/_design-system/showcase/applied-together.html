@@ -3,92 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Applied · Together</title>
+<title>Applied · Together Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Applied · Together (View B) — a private shared dashboard for two. Essence:
-     staying aligned as an act of care. Parity from the real CMS CSS (avatars,
-     cards, pills, type). New widgets are FUTURE COMPONENTS (fc-paired,
-     fc-energy, fc-project): page-scoped, tokens-only. -->
+<!-- Applied · Together Dashboard — a private shared dashboard for two.
+     Composed in three material registers:
+       ATTUNE  (the face — generous, warm, the only loud zone)
+       TOGETHER (the warm middle — joy/anticipation/shared finds)
+       FLOOR   (shared ops — dense, recessive, flat-on-canvas ledger)
+     New: "Between you" derived intersection. Foundation kept: notice + claim only;
+     terse factual system text; sage = the single action accent; identity hues mark
+     objects; tokens only; nothing below 11px. -->
 <link rel="stylesheet" href="/_ds/css/system-cms.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
 <style>
-  /* style-cms.css forces body to a 100vh flex shell; override so the doc page flows. */
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: var(--space-40) var(--space-40) var(--space-48); }
-  .tg-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
-  .tg-statement { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h2); line-height: 1.2; color: var(--primary); margin: var(--space-12) 0 var(--space-24); max-width: 640px; }
-  .tg-sec-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: var(--space-40) 0 var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
-  /* fc-paired — two-person presence */
-  .fc-paired { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); }
-  .fc-person { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); display: flex; align-items: center; gap: var(--space-16); }
-  .fc-person-av { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--ink-18); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-cond); font-weight: 700; color: var(--secondary); }
-  .fc-person-name { font-size: var(--text-body); font-weight: 600; color: var(--primary); }
-  /* fc-energy — a calm energy indicator */
-  .fc-energy { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
-  .fc-energy-lbl { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-  .fc-energy-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-18); }
-  .fc-energy-pip.on { background: var(--c-current, var(--accent)); }
-  /* fc-project — shared project card */
-  .fc-proj-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-12); }
-  .fc-proj { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16) var(--space-20); }
-  .fc-proj-t { font-size: var(--text-body); font-weight: 600; color: var(--primary); }
-  .fc-proj-m { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); margin-top: 4px; }
-  .fc-proj-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-12); }
-  /* shared week */
-  .tg-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-  .tg-day { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-tag); padding: var(--space-12) 6px; text-align: center; min-height: 64px; }
-  .tg-day-n { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  .tg-day-dot { width: 6px; height: 6px; border-radius: 50%; margin: 6px auto 0; }
-  a, button { cursor: default; }
+  /* style-cms.css forces a 100vh flex shell; override so the doc page flows. */
+  body { margin: 0; display: block; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; }
+  html { overflow-y: scroll; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: var(--space-32) var(--space-48) var(--space-48); }
+
+  /* ── Top bar — just you. Partner presence lives in the hero now. ── */
+  .tb { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-32); padding-bottom: var(--space-16); border-bottom: var(--rule-30); margin-bottom: var(--space-32); }
+  .tb-mark { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .tb-greet { font-size: var(--text-h4); font-weight: 500; letter-spacing: -0.01em; color: var(--primary); }
+  .tb-right { display: flex; align-items: center; gap: var(--space-24); }
+  .tb-you { display: flex; align-items: center; gap: var(--space-12); }
+  .tb-you-lbl { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  .tb-mood { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-forest); }
+  .pips { display: inline-flex; gap: 3px; }
+  .pips i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-12); display: inline-block; }
+  .pips i.on { background: var(--c-current, var(--accent)); }
+  .tb-logout { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: none; border: 0; border-bottom: 1.5px solid var(--ink-18); padding-bottom: 2px; cursor: pointer; }
+
+  /* avatars (shared) */
+  .av { border-radius: 50%; background: var(--neutral); border: 1px solid var(--ink-18); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-cond); font-weight: 700; color: var(--secondary); flex-shrink: 0; }
+  .av.sm { width: 22px; height: 22px; font-size: var(--text-tiny); }
+  .av.md { width: 32px; height: 32px; font-size: var(--text-sm); }
+  .av.lg { width: 52px; height: 52px; font-size: var(--text-h5); }
+  .av.ring { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--c-current, var(--ink-18)); }
+  .av.ghost { background: transparent; border: 1.5px dashed var(--ink-30); color: var(--ink-30); font-weight: 600; }
+
+  .stage { display: grid; grid-template-columns: minmax(0,1fr) 332px; gap: var(--space-40); align-items: start; }
+  .main { min-width: 0; display: flex; flex-direction: column; }
+
+  /* register label — the one section tier above card labels */
+  .reg-h { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--secondary); display: flex; align-items: center; gap: var(--space-12); margin: 0 0 var(--space-16); }
+  .reg-h::after { content: ""; flex: 1; height: 1px; background: var(--ink-08); }
+  .micro { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+  /* ════ REGISTER 1 · ATTUNE — the face. generous, warm, the only loud zone ════ */
+  .attune { margin-bottom: var(--space-40); }
+  .ph { background: var(--white); border: var(--rule-faint); border-left: 3px solid var(--c-plum); border-radius: var(--r-card); }
+  .ph-head { display: flex; align-items: center; gap: var(--space-16); padding: var(--space-24) var(--space-24) var(--space-20); border-bottom: var(--rule-faint); }
+  .ph-id { min-width: 0; }
+  .ph-name { font-size: var(--text-h3); font-weight: 600; letter-spacing: -0.015em; color: var(--primary); line-height: 1.05; }
+  .ph-voice { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h5); color: var(--secondary); line-height: 1.3; margin-top: 4px; }
+  .ph-presence { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .ph-here { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-forest); }
+  .ph-here::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c-forest); }
+  .ph-seen { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); margin-top: 5px; }
+  .ph-body { display: grid; grid-template-columns: 1fr 1fr 1.15fr; }
+  .ph-col { padding: var(--space-20) var(--space-24); border-left: var(--rule-faint); }
+  .ph-col:first-child { border-left: 0; }
+  .ph-col-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-16); }
+  .mtr { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--space-12); }
+  .mtr:last-child { margin-bottom: 0; }
+  .mtr-top { display: flex; align-items: baseline; justify-content: space-between; }
+  .mtr-name { font-size: var(--text-sm); color: var(--primary); }
+  .mtr-val { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--secondary); }
+  .mtr .pips i { width: 8px; height: 8px; }
+  .mtr.faded { opacity: 0.66; }
+  .mtr.faded .pips i.on { background: var(--ink-30); }
+  .mtr-stale { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); margin-top: 6px; }
+  .cal { display: flex; gap: var(--space-12); padding: 4px 0; }
+  .cal-t { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); width: 44px; flex-shrink: 0; padding-top: 1px; }
+  .cal-e { font-size: var(--text-sm); color: var(--primary); line-height: 1.35; }
+  .mind-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.4; }
+  .mind-sub { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+  .mind-goal { font-size: var(--text-sm); color: var(--primary); line-height: 1.4; margin-top: var(--space-16); }
+  .mind-acts { display: flex; align-items: center; gap: var(--space-12); margin-top: var(--space-8); }
+  .act { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--ink-18); border-radius: var(--r-pill); padding: 4px var(--space-12); background: none; cursor: pointer; transition: all 0.12s; }
+  .act:hover { border-color: var(--accent); color: var(--accent); }
+  .act.given { background: color-mix(in srgb, var(--accent) 12%, transparent); border-color: var(--accent); color: var(--accent); }
+
+  /* between you — the derived intersection. the new soul element. */
+  .between { display: flex; align-items: center; gap: var(--space-16); margin-top: var(--space-12); padding: var(--space-16) var(--space-20); background: color-mix(in srgb, var(--c-plum) 5%, var(--white)); border: 1px solid color-mix(in srgb, var(--c-plum) 18%, transparent); border-radius: var(--r-card); }
+  .between-ic { width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--c-plum) 12%, transparent); color: var(--c-plum); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .between-ic svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .between-txt { min-width: 0; }
+  .between-lead { font-size: var(--text-md); color: var(--primary); line-height: 1.3; }
+  .between-lead b { font-weight: 600; }
+  .between-sub { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+  .between-cta { margin-left: auto; flex-shrink: 0; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--r-pill); padding: 5px var(--space-16); background: none; cursor: pointer; transition: all 0.12s; }
+  .between-cta:hover { background: var(--accent); color: var(--white); }
+
+  /* ════ REGISTER 2 · TOGETHER — warm middle ════ */
+  .together { margin-bottom: var(--space-40); }
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); }
+  .plan { background: var(--white); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16); display: flex; flex-direction: column; min-height: 168px; }
+  .plan-top { display: flex; align-items: flex-start; gap: var(--space-12); }
+  .plan-ic { width: 36px; height: 36px; border-radius: 9px; background: var(--c-current, var(--accent)); color: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .plan-ic svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .plan-when { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .plan-name { font-size: var(--text-body); font-weight: 600; color: var(--primary); margin-top: 3px; line-height: 1.2; }
+  .enth { margin-top: auto; padding-top: var(--space-12); border-top: var(--rule-faint); }
+  .enth-score { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--r-pill); padding: 5px var(--space-12); background: none; cursor: pointer; }
+  .enth-pending { display: flex; align-items: center; gap: var(--space-8); }
+  .enth-pending .num { font-family: var(--font-mono); font-size: var(--text-md); font-weight: 500; color: var(--primary); }
+  .enth-pending .who { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .enth-pending .wait { margin-left: auto; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .enth-read { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--secondary); margin-bottom: 7px; }
+  .enth-nums { display: flex; align-items: center; gap: var(--space-16); }
+  .enth-n { display: flex; flex-direction: column; gap: 1px; }
+  .enth-n .num { font-family: var(--font-mono); font-size: var(--text-body); font-weight: 500; color: var(--primary); }
+  .enth-n .who { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .enth-div { width: 1px; align-self: stretch; background: var(--ink-12); }
+
+  /* ════ REGISTER 3 · FLOOR — shared ops. flat on canvas, dense, recessive ════ */
+  .floor { border-top: 2px solid var(--ink-12); padding-top: var(--space-20); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-32); }
+  .fl-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: var(--space-12); display: flex; align-items: baseline; justify-content: space-between; }
+  .fl-h .n { font-family: var(--font-mono); font-weight: 400; letter-spacing: 0; color: var(--muted); }
+
+  /* needs a hand (the only sage in the floor) */
+  .hand { display: flex; align-items: center; gap: var(--space-12); padding: 8px 0; border-bottom: 1px solid var(--ink-08); }
+  .hand:last-of-type { border-bottom: 0; }
+  .hand-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.3; }
+  .claim { margin-left: auto; flex-shrink: 0; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent); border-radius: var(--r-pill); padding: 3px var(--space-12); background: none; cursor: pointer; transition: all 0.12s; }
+  .claim:hover { background: var(--accent); color: var(--white); }
+  .hand.mine .hand-t { color: var(--secondary); }
+  .hand-rest { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-12); }
+
+  /* this week — next 3 days, compact ledger */
+  .wk { display: flex; flex-direction: column; }
+  .wk-row { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: var(--space-12); padding: 8px 0; border-bottom: 1px solid var(--ink-08); }
+  .wk-row:last-of-type { border-bottom: 0; }
+  .wk-day { font-family: var(--font-mono); font-size: var(--text-meta); text-transform: uppercase; color: var(--secondary); }
+  .wk-din { font-size: var(--text-sm); color: var(--primary); display: inline-flex; align-items: center; gap: 6px; }
+  .wk-din svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.5; color: var(--secondary); }
+  .wk-din.open { color: var(--muted); }
+  .wk-home { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+  .wk-rest { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-12); cursor: pointer; }
+
+  /* building — slim freshness rail */
+  .proj { padding: 9px 0; border-bottom: 1px solid var(--ink-08); }
+  .proj:last-of-type { border-bottom: 0; }
+  .proj-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-8); }
+  .proj-name { font-size: var(--text-sm); font-weight: 600; color: var(--primary); }
+  .proj-stage { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--c-current, var(--secondary)); }
+  .proj-bar { height: 4px; border-radius: 2px; background: var(--ink-08); margin-top: 7px; overflow: hidden; }
+  .proj-bar i { display: block; height: 100%; background: var(--c-current, var(--accent)); border-radius: 2px; }
+  .proj.dorm .proj-stage { color: var(--c-terracotta); }
+  .proj.dorm .proj-bar i { background: var(--ink-30); }
+
+  /* ════ RIGHT RAIL · DRAWER — quiet material, hairlines, no callouts ════ */
+  .rail { display: flex; flex-direction: column; gap: var(--space-32); }
+  .rail-tabs { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; margin-bottom: var(--space-8); }
+  .rtab { padding: 7px; border: 1px solid var(--ink-18); margin-left: -1px; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; color: var(--muted); background: var(--neutral); cursor: pointer; }
+  .rtab:first-child { margin-left: 0; border-radius: var(--r-pill) 0 0 var(--r-pill); }
+  .rtab:last-child { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
+  .rtab.on { background: var(--primary); color: var(--white); border-color: var(--primary); }
+  .rsec-h { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--secondary); margin-bottom: var(--space-12); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); display: flex; align-items: baseline; justify-content: space-between; }
+  .rsec-h .n { font-family: var(--font-mono); font-weight: 400; letter-spacing: 0; color: var(--muted); }
+
+  /* shared finds (ambient) */
+  .find { display: flex; gap: var(--space-12); padding: 9px 0; border-bottom: 1px solid var(--ink-08); }
+  .find:last-of-type { border-bottom: 0; }
+  .find-body { min-width: 0; }
+  .find-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.35; }
+  .find-t.link { color: var(--c-denim); }
+  .find-m { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); margin-top: 4px; }
+  .find-new { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); flex-shrink: 0; }
+
+  /* for you */
+  .loop { padding: 8px 0; border-bottom: 1px solid var(--ink-08); }
+  .loop:last-of-type { border-bottom: 0; }
+  .loop-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.4; }
+  .loop-m { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); margin-top: 4px; }
+  .noticing { margin-top: var(--space-16); }
+  .amb { display: flex; align-items: center; gap: var(--space-8); padding: 7px 0; }
+  .amb-ic { display: inline-flex; color: var(--muted); flex-shrink: 0; }
+  .amb-ic svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .amb-t { font-size: var(--text-sm); color: var(--secondary); }
+  .amb-ago { margin-left: auto; font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+
+  .note { font-size: var(--text-sm); color: var(--secondary); line-height: 1.45; padding: 7px 0; border-bottom: 1px solid var(--ink-08); }
+  .note:last-of-type { border-bottom: 0; }
+  .groc { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: var(--text-sm); color: var(--secondary); cursor: pointer; }
+  .groc .box { width: 14px; height: 14px; border: 1px solid var(--ink-30); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .groc.done { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ink-30); }
+  .groc.done .box { background: var(--primary); border-color: var(--primary); }
+  .groc.done .box::after { content: "✓"; color: var(--white); font-size: var(--text-pill); }
+  .groc-trip { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-top: var(--space-12); cursor: pointer; }
+
+  .pagenote { font-family: var(--font-mono); font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: var(--space-40); padding-top: var(--space-16); border-top: var(--rule-faint); }
+  a, button { cursor: pointer; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="tg-eyebrow">Together · Week of June 8</div>
-  <div class="tg-statement">Staying aligned, on purpose — the small act of keeping each other in view.</div>
+  <!-- ══ Top bar — just you ══ -->
+  <div class="tb">
+    <div>
+      <div class="tb-mark">Together</div>
+      <div class="tb-greet">Good morning, Alex</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-you">
+        <div class="av md ring" style="--c-current:var(--c-forest)">A</div>
+        <div>
+          <div class="tb-you-lbl">You · <span class="tb-mood">Steady</span></div>
+          <div class="pips" style="--c-current:var(--c-forest);margin-top:4px"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+        </div>
+      </div>
+      <button class="tb-logout">Logout</button>
+    </div>
+  </div>
 
-  <div class="tg-sec-h">Where we each are</div>
-  <div class="fc-paired">
-    <div class="fc-person">
-      <div class="fc-person-av">A</div>
-      <div><div class="fc-person-name">Alex</div>
-        <div class="fc-energy" style="--c-current:var(--c-forest)"><span class="fc-energy-lbl">Energy</span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip"></span></div>
+  <div class="stage">
+
+    <!-- ════════════ MAIN ════════════ -->
+    <div class="main">
+
+      <!-- ═══ REGISTER 1 · ATTUNE ═══ -->
+      <div class="attune">
+        <div class="ph">
+          <div class="ph-head">
+            <div class="av lg ring" style="--c-current:var(--c-plum)">P</div>
+            <div class="ph-id">
+              <div class="ph-name">Partner</div>
+              <div class="ph-voice">“Heavy week — deadline Thu.”</div>
+            </div>
+            <div class="ph-presence">
+              <div class="ph-here">Here now</div>
+              <div class="ph-seen">last seen 4m ago</div>
+            </div>
+          </div>
+          <div class="ph-body">
+            <div class="ph-col">
+              <div class="ph-col-h">How they're doing</div>
+              <div class="mtr" style="--c-current:var(--c-amber)"><div class="mtr-top"><span class="mtr-name">Social</span><span class="mtr-val">Low ↓</span></div><span class="pips"><i class="on"></i><i></i><i></i><i></i><i></i></span></div>
+              <div class="mtr" style="--c-current:var(--c-forest)"><div class="mtr-top"><span class="mtr-name">Drive</span><span class="mtr-val">High ↑</span></div><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+              <div class="mtr faded" style="--c-current:var(--c-teal)"><div class="mtr-top"><span class="mtr-name">Recovery</span><span class="mtr-val">—</span></div><span class="pips"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><div class="mtr-stale">set 2 days ago</div></div>
+            </div>
+            <div class="ph-col">
+              <div class="ph-col-h">Their day</div>
+              <div class="cal"><span class="cal-t">10:00</span><span class="cal-e">Design review</span></div>
+              <div class="cal"><span class="cal-t">1:00</span><span class="cal-e">Lunch w/ Priya</span></div>
+              <div class="cal"><span class="cal-t">6:30</span><span class="cal-e">Pottery class</span></div>
+            </div>
+            <div class="ph-col">
+              <div class="ph-col-h">On their mind</div>
+              <div class="mind-t">Ship the studio site</div>
+              <div class="mind-sub">Project · this month</div>
+              <div class="mind-goal">“Getting back to an easy 10k.”</div>
+              <div class="mind-acts">
+                <button class="act"><span>✋</span> High five</button>
+                <button class="act">+ Offer support</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- between you — the derived intersection -->
+        <div class="between">
+          <span class="between-ic"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><circle cx="17" cy="12" r="4"/></svg></span>
+          <div class="between-txt">
+            <div class="between-lead">You're <b>both home after 6:30</b> tonight.</div>
+            <div class="between-sub">No shared plan yet · you also overlap Fri eve &amp; Sun</div>
+          </div>
+          <button class="between-cta">Make a plan</button>
+        </div>
+      </div>
+
+      <!-- ═══ REGISTER 2 · TOGETHER ═══ -->
+      <div class="together">
+        <div class="reg-h">To look forward to</div>
+        <div class="plans">
+          <div class="plan">
+            <div class="plan-top">
+              <span class="plan-ic" style="--c-current:var(--c-rose)"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.4 5.2 5.6.6-4.2 3.8 1.2 5.5-5-2.9-5 2.9 1.2-5.5L4 9.3l5.6-.6z"/></svg></span>
+              <div><div class="plan-when">This Saturday · Date</div><div class="plan-name">Studio opening</div></div>
+            </div>
+            <div class="enth"><button class="enth-score" id="score-this">Score this</button></div>
+          </div>
+          <div class="plan">
+            <div class="plan-top">
+              <span class="plan-ic" style="--c-current:var(--c-amber)"><svg viewBox="0 0 24 24"><path d="M7 3h10l-1.2 7.5a3.8 3.8 0 0 1-7.6 0z"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8.5" y1="21" x2="15.5" y2="21"/></svg></span>
+              <div><div class="plan-when">2 weeks away · Friends</div><div class="plan-name">Dinner at the Lees'</div></div>
+            </div>
+            <div class="enth">
+              <div class="enth-pending">
+                <span class="num">+4</span><span class="who">You</span>
+                <span class="wait"><span class="av sm ghost" style="margin-right:6px;vertical-align:middle">P</span>Pending</span>
+              </div>
+            </div>
+          </div>
+          <div class="plan">
+            <div class="plan-top">
+              <span class="plan-ic" style="--c-current:var(--c-teal)"><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <div><div class="plan-when">Next month · Date</div><div class="plan-name">Weekend in Vancouver</div></div>
+            </div>
+            <div class="enth">
+              <div class="enth-read">Mixed</div>
+              <div class="enth-nums"><div class="enth-n"><span class="num">+5</span><span class="who">You</span></div><span class="enth-div"></span><div class="enth-n"><span class="num">0</span><span class="who">Partner</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ REGISTER 3 · FLOOR (shared ops) ═══ -->
+      <div class="floor">
+        <div>
+          <div class="fl-h">Needs a hand <span class="n">2</span></div>
+          <div class="hand"><span class="hand-t">Call plumber back</span><button class="claim">Claim</button></div>
+          <div class="hand"><span class="hand-t">Water balcony plants</span><button class="claim">Claim</button></div>
+          <div class="hand mine"><span class="av sm">A</span><span class="hand-t">Book dentist</span></div>
+          <div class="hand-rest">2 done today · + notice</div>
+        </div>
+        <div>
+          <div class="fl-h">This week</div>
+          <div class="wk">
+            <div class="wk-row"><span class="wk-day">Mon</span><span class="wk-din"><svg viewBox="0 0 24 24"><path d="M7 3v18"/><path d="M5 3v5a2 2 0 0 0 4 0V3"/><path d="M16 3v18"/><path d="M16 3a3 3 0 0 0-3 3v5h3"/></svg>Alex cooks</span><span class="wk-home">Both home</span></div>
+            <div class="wk-row"><span class="wk-day">Tue</span><span class="wk-din open">Open</span><span class="wk-home">Alex</span></div>
+            <div class="wk-row"><span class="wk-day">Wed</span><span class="wk-din"><svg viewBox="0 0 24 24"><path d="M7 3v18"/><path d="M5 3v5a2 2 0 0 0 4 0V3"/><path d="M16 3v18"/><path d="M16 3a3 3 0 0 0-3 3v5h3"/></svg>Partner</span><span class="wk-home">Both</span></div>
+          </div>
+          <div class="wk-rest">Rest of week →</div>
+        </div>
+        <div>
+          <div class="fl-h">Building together</div>
+          <div class="proj" style="--c-current:var(--c-clay)"><div class="proj-top"><span class="proj-name">Kitchen</span><span class="proj-stage">Tiling</span></div><div class="proj-bar"><i style="width:62%"></i></div></div>
+          <div class="proj" style="--c-current:var(--c-denim)"><div class="proj-top"><span class="proj-name">Taiwan, spring</span><span class="proj-stage">Flights</span></div><div class="proj-bar"><i style="width:38%"></i></div></div>
+          <div class="proj dorm" style="--c-current:var(--c-amber)"><div class="proj-top"><span class="proj-name">Studio</span><span class="proj-stage">Quiet 5d</span></div><div class="proj-bar"><i style="width:55%"></i></div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════ RIGHT RAIL · DRAWER ════════════ -->
+    <div class="rail">
+      <div class="rail-tabs">
+        <button class="rtab on">Your panel</button>
+        <button class="rtab">Calendar</button>
+      </div>
+
+      <div>
+        <div class="rsec-h">Look at this <span class="n">2 new</span></div>
+        <div class="find">
+          <div class="find-body"><div class="find-t link">“Calm software”</div><div class="find-m">every.to · from Partner</div></div>
+          <span class="find-new">New</span>
+        </div>
+        <div class="find">
+          <div class="find-body"><div class="find-t link">Bookshop in Taipei</div><div class="find-m">eslite.com · from Partner</div></div>
+          <span class="find-new">New</span>
+        </div>
+        <div class="find"><div class="find-body"><div class="find-t">Revisit the kitchen colour.</div><div class="find-m">thought · from you</div></div></div>
+      </div>
+
+      <div>
+        <div class="rsec-h">For you</div>
+        <div class="loop"><div class="loop-t">Book flight to Vancouver</div><div class="loop-m">by Fri · only you</div></div>
+        <div class="loop"><div class="loop-t">Score the studio opening</div></div>
+        <div class="loop"><div class="loop-t">2 unseen from Partner</div></div>
+        <div class="noticing">
+          <div class="micro" style="margin-bottom:6px">Worth noticing</div>
+          <div class="amb"><span class="av sm">P</span><span class="amb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 12l3 3 7-7"/></svg></span><span class="amb-t">Order tiles</span><span class="amb-ago">1d</span></div>
+          <div class="amb"><span class="av sm">P</span><span class="amb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span><span class="amb-t">10k goal</span><span class="amb-ago">2d</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="rsec-h">Private notes <span class="n">just you</span></div>
+        <div class="note">Surprise dinner for their birthday.</div>
+        <div class="note">Pick up their dry cleaning before Fri.</div>
+      </div>
+
+      <div>
+        <div class="rsec-h">Groceries <span class="n">3 left</span></div>
+        <div class="groc done"><span class="box"></span>Oat milk</div>
+        <div class="groc"><span class="box"></span>Coffee</div>
+        <div class="groc"><span class="box"></span>Olive oil</div>
+        <div class="groc"><span class="box"></span>Tomatoes</div>
+        <div class="groc-trip">Set next grocery trip →</div>
       </div>
     </div>
-    <div class="fc-person">
-      <div class="fc-person-av">S</div>
-      <div><div class="fc-person-name">Sam</div>
-        <div class="fc-energy" style="--c-current:var(--c-amber)"><span class="fc-energy-lbl">Energy</span><span class="fc-energy-pip on"></span><span class="fc-energy-pip on"></span><span class="fc-energy-pip"></span><span class="fc-energy-pip"></span><span class="fc-energy-pip"></span></div>
-      </div>
-    </div>
+
   </div>
 
-  <div class="tg-sec-h">Our week</div>
-  <div class="tg-week">
-    <div class="tg-day"><div class="tg-day-n">Mon</div><div class="tg-day-dot" style="background:var(--c-forest)"></div></div>
-    <div class="tg-day"><div class="tg-day-n">Tue</div></div>
-    <div class="tg-day"><div class="tg-day-n">Wed</div><div class="tg-day-dot" style="background:var(--c-terracotta)"></div></div>
-    <div class="tg-day"><div class="tg-day-n">Thu</div></div>
-    <div class="tg-day"><div class="tg-day-n">Fri</div><div class="tg-day-dot" style="background:var(--c-denim)"></div></div>
-    <div class="tg-day"><div class="tg-day-n">Sat</div><div class="tg-day-dot" style="background:var(--accent)"></div></div>
-    <div class="tg-day"><div class="tg-day-n">Sun</div></div>
-  </div>
-
-  <div class="tg-sec-h">Shared projects</div>
-  <div class="fc-proj-grid">
-    <div class="fc-proj"><div class="fc-proj-t">The kitchen</div><div class="fc-proj-m">started Apr · slow burn</div><div class="fc-proj-foot"><span class="pill pill-draft">In progress</span><span class="fc-proj-m">next: tiles</span></div></div>
-    <div class="fc-proj"><div class="fc-proj-t">Autumn trip</div><div class="fc-proj-m">planning</div><div class="fc-proj-foot"><span class="pill pill-outline">Idea</span><span class="fc-proj-m">next: dates</span></div></div>
-  </div>
-
-  <p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;margin-top:var(--space-32)">
-    <strong style="color:var(--secondary)">Future components:</strong>
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-paired</code> ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-energy</code> (shared candidate with Command Center) ·
-    <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-project</code>.
-    Parity reused: circular avatars, <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.pill-* · cards · type</code>.
-  </p>
+  <p class="pagenote"><strong style="color:var(--secondary)">Page-scoped components (tokens-only):</strong>
+    three material registers — <strong style="color:var(--secondary)">Attune</strong> (<code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.ph</code> partner hero + <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.between</code> derived intersection) ·
+    <strong style="color:var(--secondary)">Together</strong> (<code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.plan / .enth</code> blind-enthusiasm, incl. ghost-avatar pending state) ·
+    <strong style="color:var(--secondary)">Floor</strong> (<code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.floor</code> flat-on-canvas ledger — <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.hand / .wk / .proj</code>).
+    Reused: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.av · pips · pills</code>. Foundation: notice + claim only (never assign); <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">--c-terracotta</code> for the one dormant case.</p>
 
 </div>
+
+<script>
+  document.querySelectorAll('.act').forEach(function (b) { b.addEventListener('click', function () { b.classList.toggle('given'); }); });
+  var s = document.getElementById('score-this');
+  if (s) s.addEventListener('click', function () {
+    s.closest('.enth').innerHTML = '<div class="enth-pending"><span class="num">+5</span><span class="who">You</span><span class="wait"><span class="av sm ghost" style="margin-right:6px;vertical-align:middle">P</span>Pending</span></div>';
+  });
+  document.querySelectorAll('.claim').forEach(function (c) { c.addEventListener('click', function () {
+    var row = c.closest('.hand'); row.classList.add('mine');
+    c.outerHTML = '<span class="av sm" style="margin-left:auto">A</span>';
+  }); });
+  document.querySelectorAll('.groc').forEach(function (g) { g.addEventListener('click', function () { g.classList.toggle('done'); }); });
+  document.querySelectorAll('.rtab').forEach(function (t) { t.addEventListener('click', function () { document.querySelectorAll('.rtab').forEach(function (x) { x.classList.toggle('on', x === t); }); }); });
+</script>
 </body>
 </html>

@@ -4,91 +4,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Applied · Mobile</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Applied · Mobile — the public DS at phone width. Parity: the real public
-     components (cards, article hero, type) inside a FUTURE COMPONENT device
-     frame (fc-phone). Loads the real public stylesheets. -->
-<link rel="stylesheet" href="/_ds/css/tokens.css">
-<link rel="stylesheet" href="/_ds/css/public/pages.css">
-<link rel="stylesheet" href="/_ds/css/public/blocks.css">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Applied · Mobile — three SEPARATE conceptual native apps built on the brand
+     aesthetic (NOT mobile views of the website): a coaching app, a weekly
+     command-center app, and a couples app. They preview the other Applied
+     concepts in native-mobile form. Loads the real design-system tokens via the
+     system-cms barrel (tokens/base/typography — no admin shell). Everything is
+     page-scoped here; the device frame + app widgets are future components. -->
+<link rel="stylesheet" href="/_ds/css/system-cms.css">
 <style>
-  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
-  .wrap { padding: var(--space-40) var(--space-32) var(--space-48); display: flex; gap: var(--space-40); flex-wrap: wrap; justify-content: center; }
-  /* fc-phone — device frame (future component) */
-  .fc-phone { width: 300px; flex: 0 0 300px; }
-  .fc-phone-screen { border: 1px solid var(--ink-30); border-radius: 26px; background: var(--neutral); overflow: hidden; height: 600px; display: flex; flex-direction: column; box-shadow: 0 1px 0 var(--ink-08); }
-  .fc-phone-bar { height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-bottom: 1px solid var(--ink-12); }
-  .fc-phone-notch { width: 96px; height: 6px; border-radius: 99px; background: var(--ink-18); }
-  .fc-phone-body { flex: 1; overflow-y: auto; padding: var(--space-20); }
-  .fc-phone-cap { text-align: center; font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-16); }
-  .fc-mtitle { font-family: var(--font-serif); font-style: italic; font-size: 26px; line-height: 1.15; color: var(--primary); margin: var(--space-12) 0; }
-  .fc-mbody { font-size: var(--text-md); line-height: 1.7; color: var(--secondary); }
-  .fc-mcat { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-  .fc-mhero { width: 100%; aspect-ratio: 3/2; border-radius: var(--r-card); border: var(--rule-faint); background: linear-gradient(135deg,#d6d5d2,#c2c1be); margin-bottom: var(--space-12); }
-  .fc-mmeta { font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-  a { cursor: default; }
+  body { margin: 0; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); height: auto; min-height: 100%; overflow: visible; display: block; }
+  .stage { display: flex; flex-wrap: wrap; gap: var(--space-32); justify-content: center; align-items: flex-start; padding: var(--space-40) var(--space-32) var(--space-24); }
+  .phone-wrap { flex: 0 0 320px; }
+  .phone { width: 320px; background: var(--surface); border: var(--rule); border-radius: 22px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.10); display: flex; flex-direction: column; min-height: 640px; }
+  .ph-status { background: var(--neutral); padding: var(--space-12) var(--space-20) var(--space-8); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .ph-time { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 600; color: var(--secondary); }
+  .ph-dots { font-size: var(--text-label); color: var(--secondary); letter-spacing: 1px; }
+  .ph-body { padding: var(--space-20); flex: 1; }
+  .ph-nav { border-top: 1px solid var(--ink-12); padding: var(--space-12) var(--space-20); display: flex; justify-content: space-around; flex-shrink: 0; }
+  .ph-nav svg { width: 20px; height: 20px; }
+  .ph-cap { text-align: center; font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-16); }
+  .ph-cap strong { color: var(--secondary); }
+
+  /* shared type helpers */
+  .ey { font-family: var(--font-cond); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; }
+  .mono { font-family: var(--font-mono); }
+
+  /* app-specific future components (page-scoped) ---------------------------- */
+  /* check rows (weekly app) */
+  .wk-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--ink-08); }
+  .wk-box { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--ink-30); flex-shrink: 0; margin-top: 1px; }
+  .wk-box.done { background: var(--primary); border-color: var(--primary); position: relative; }
+  .wk-box.done::after { content: "✓"; color: var(--white); font-size: var(--text-label); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .wk-box.could { border-style: dashed; border-color: var(--accent); border-radius: 50%; }
+  .wk-txt { font-size: var(--text-sm); font-weight: 500; color: var(--primary); line-height: 1.4; }
+  .wk-txt.done { color: var(--muted); text-decoration: line-through; }
+  .wk-tag { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-current, var(--muted)); margin-top: 3px; }
+  /* habit dots */
+  .hab-dots { display: flex; gap: 7px; }
+  .hab-dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--c-forest); display: inline-block; }
+  .hab-dots i.off { background: var(--ink-12); }
+  .hab-dots i.today { background: transparent; border: 1.5px solid var(--c-forest); }
+  /* enthusiasm pips (couples app) */
+  .pips { display: flex; gap: 7px; }
+  .pips i { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--ink-30); display: inline-block; }
+  .pips i.on { background: var(--accent); border-color: var(--accent); }
+  .pips i.hidden { background: repeating-linear-gradient(45deg, var(--ink-08), var(--ink-08) 3px, transparent 3px, transparent 6px); }
+
+  a, button { cursor: default; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="stage">
 
-  <!-- Article reader -->
-  <div class="fc-phone">
-    <div class="fc-phone-screen">
-      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
-      <div class="fc-phone-body">
-        <div class="fc-mcat" style="color:var(--c-terracotta)">UX Industry</div>
-        <div class="fc-mhero"></div>
-        <div class="fc-mtitle">A Discipline Reset</div>
-        <div class="fc-mmeta">Mar 4, 2026 · 14 min</div>
-        <p class="fc-mbody" style="margin-top:var(--space-16)">UX 1.0 was a discipline built around scarcity — scarce access to users, scarce ability to prototype, scarce tools to test. AI dissolved the scarcity entirely, and the discipline is being corrected in real time.</p>
-      </div>
-    </div>
-    <div class="fc-phone-cap">Article reader</div>
-  </div>
+  <!-- ════ APP 1 · Coaching (the coach's session view) ════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="ph-status"><span class="ph-time">9:41</span><span class="ph-dots">●●●</span></div>
+      <div class="ph-body">
+        <div class="ey" style="font-size:var(--text-label);color:var(--muted);margin-bottom:6px">Session 7 of 12</div>
+        <div style="font-size:var(--text-h5);font-weight:700;letter-spacing:-0.01em;margin-bottom:var(--space-4)">Jordan Lee</div>
+        <div style="font-size:var(--text-meta);font-weight:500;color:var(--secondary);margin-bottom:var(--space-16)">Career transition · Senior → Lead</div>
 
-  <!-- Index (real cards stacked) -->
-  <div class="fc-phone">
-    <div class="fc-phone-screen">
-      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
-      <div class="fc-phone-body" style="background:var(--neutral)">
-        <div class="cards-grid" style="grid-template-columns:1fr;gap:var(--space-16)">
-          <div class="card card--article" data-type="article" data-category="forest">
-            <div class="card-header"><span class="cat">Leading Design</span></div>
-            <div class="card-body"><h2 class="title" style="margin-bottom:var(--space-12)">The Designer Who Runs the Room</h2><p class="excerpt">Authority is quieter than it looks.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Leadership</span></div><span class="arrow">→</span></div></div>
-            <div class="meta-strip"><span>Feb 12</span><span>17 min</span></div>
-          </div>
-          <div class="card card--article" data-type="article" data-category="denim">
-            <div class="card-header"><span class="cat">For Designers</span></div>
-            <div class="card-body"><h2 class="title" style="margin-bottom:var(--space-12)">Notes Toward a Practice</h2><p class="excerpt">Designing with restraint.</p><div class="push-divider"></div><div class="row-between"><div class="tag-row"><span class="tag">Craft</span></div><span class="arrow">→</span></div></div>
-            <div class="meta-strip"><span>May 30</span><span>7 min</span></div>
-          </div>
+        <div style="margin-bottom:var(--space-20)">
+          <div style="height:5px;background:var(--ink-12);border-radius:3px;overflow:hidden;margin-bottom:var(--space-4)"><div style="height:100%;width:58%;background:var(--c-forest);border-radius:3px"></div></div>
+          <div class="mono" style="font-size:var(--text-label);color:var(--muted)">6 of 12 sessions complete</div>
+        </div>
+
+        <div style="background:var(--neutral);border-radius:4px;padding:14px;margin-bottom:var(--space-16);border:var(--rule-faint)">
+          <div class="ey" style="font-size:var(--text-label);letter-spacing:0.14em;color:var(--muted);margin-bottom:6px">Today's focus</div>
+          <div style="font-size:var(--text-meta);font-weight:600;color:var(--primary)">Navigating the promotion conversation</div>
+        </div>
+
+        <div style="margin-bottom:var(--space-16)">
+          <div class="ey" style="font-size:var(--text-label);letter-spacing:0.14em;color:var(--muted);margin-bottom:var(--space-8)">Session notes</div>
+          <div style="font-size:var(--text-meta);font-weight:500;color:var(--secondary);line-height:1.65;border-left:2px solid var(--ink-18);padding-left:var(--space-12)">Avoiding the direct conversation with her manager — fears being told to wait without a path. Reframe: the ask is for clarity on what the path looks like.</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button style="padding:10px 14px;background:var(--primary);color:var(--white);border:none;border-radius:4px;font-family:var(--font-cond);font-size:var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:left">Save notes →</button>
+          <button style="padding:10px 14px;background:transparent;color:var(--primary);border:1px solid var(--primary);border-radius:4px;font-family:var(--font-cond);font-size:var(--text-label);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;text-align:left">Schedule next session</button>
         </div>
       </div>
-    </div>
-    <div class="fc-phone-cap">Index · real cards</div>
-  </div>
-
-  <!-- Coaching session -->
-  <div class="fc-phone">
-    <div class="fc-phone-screen">
-      <div class="fc-phone-bar"><span class="fc-phone-notch"></span></div>
-      <div class="fc-phone-body">
-        <div class="fc-mcat" style="color:var(--c-forest)">Session · Jordan Lee</div>
-        <div class="fc-mtitle">Holding altitude</div>
-        <div class="fc-mmeta">Jun 9, 2026 · 45 min</div>
-        <p class="fc-mbody" style="margin-top:var(--space-16)">Last time: reframed the team's roadmap conversation around decisions, not deliverables.</p>
-        <p class="fc-mbody" style="margin-top:var(--space-12);font-family:var(--font-serif);font-style:italic;color:var(--primary)">“The gap between strategist and executor is where leadership lives.”</p>
+      <div class="ph-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--primary)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </div>
     </div>
-    <div class="fc-phone-cap">Coaching session</div>
+    <div class="ph-cap"><strong>Coaching</strong> · session view</div>
+  </div>
+
+  <!-- ════ APP 2 · Weekly command center ════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="ph-status"><span class="ph-time">9:41</span><span class="ph-dots">●●●</span></div>
+      <div class="ph-body">
+        <div class="ey" style="font-size:var(--text-label);color:var(--muted);margin-bottom:6px">This week · Jun 8–14</div>
+        <div class="serif" style="font-size:var(--text-h5);line-height:1.25;color:var(--primary);margin-bottom:var(--space-20)">Make room for the work that actually matters.</div>
+
+        <div class="ey" style="font-size:var(--text-label);letter-spacing:0.14em;color:var(--muted);margin-bottom:6px">Today</div>
+        <div class="wk-row"><span class="wk-box done"></span><div><div class="wk-txt done">Ship the onboarding revision</div></div></div>
+        <div class="wk-row"><span class="wk-box"></span><div><div class="wk-txt">Write the Q3 narrative draft</div><div class="wk-tag" style="--c-current:var(--c-denim)">Deep work</div></div></div>
+        <div class="wk-row" style="border-bottom:none"><span class="wk-box could"></span><div><div class="wk-txt">Could: sketch the pricing page</div><div class="wk-tag" style="--c-current:var(--accent)">If there's room</div></div></div>
+
+        <div style="margin-top:var(--space-20);padding-top:var(--space-16);border-top:var(--rule-faint)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="ey" style="font-size:var(--text-label);letter-spacing:0.14em;color:var(--muted)">Habits</span><span class="mono" style="font-size:var(--text-label);color:var(--muted)">Mon–Sun</span></div>
+          <div class="hab-dots"><i></i><i></i><i></i><i></i><i class="today"></i><i class="off"></i><i class="off"></i></div>
+          <div style="font-size:var(--text-sm);font-weight:500;color:var(--secondary);margin-top:10px">Morning pages — 4 days running</div>
+        </div>
+
+        <div style="margin-top:var(--space-20);padding:14px;border-radius:4px;background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 22%, transparent)">
+          <div class="serif" style="font-size:var(--text-md);color:var(--primary)">3 of 5 intentions are moving.</div>
+        </div>
+      </div>
+      <div class="ph-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--primary)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+    <div class="ph-cap"><strong>Command center</strong> · this week</div>
+  </div>
+
+  <!-- ════ APP 3 · Couples ════ -->
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="ph-status"><span class="ph-time">9:41</span><span class="ph-dots">●●●</span></div>
+      <div class="ph-body" style="padding-bottom:var(--space-16)">
+        <div class="ey" style="font-size:var(--text-label);color:var(--muted);margin-bottom:var(--space-16)">Together · Partner &amp; you</div>
+
+        <!-- partner leads -->
+        <div style="display:flex;align-items:center;gap:var(--space-12);margin-bottom:var(--space-12)">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--neutral);border:1px solid var(--ink-18);display:flex;align-items:center;justify-content:center;font-family:var(--font-cond);font-weight:700;color:var(--secondary)">P</div>
+          <div><div style="font-size:var(--text-body);font-weight:600;color:var(--primary)">Partner</div><div style="display:inline-flex;align-items:center;gap:6px;margin-top:3px"><span style="width:7px;height:7px;border-radius:50%;background:var(--c-amber)"></span><span class="ey" style="font-size:var(--text-label);letter-spacing:0.08em;color:var(--c-amber)">Running low</span></div></div>
+        </div>
+        <div style="font-size:var(--text-sm);color:var(--secondary);line-height:1.5;margin-bottom:10px">Light week — back-to-back deadlines through Thursday.</div>
+        <div class="serif" style="font-size:var(--text-md);color:var(--primary);border-left:2px solid var(--ink-18);padding-left:var(--space-12);margin-bottom:var(--space-16)">Just wants a couple of quiet evenings.</div>
+
+        <!-- between you (threads the desktop's derived-intersection element) -->
+        <div style="display:flex;align-items:center;gap:9px;padding:9px var(--space-12);border-radius:4px;background:color-mix(in srgb, var(--c-plum) 5%, var(--surface));border:1px solid color-mix(in srgb, var(--c-plum) 16%, transparent);margin-bottom:var(--space-16)">
+          <span style="color:var(--c-plum);display:inline-flex;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="12" r="4"/><circle cx="17" cy="12" r="4"/></svg></span>
+          <span style="font-size:var(--text-sm);color:var(--primary);line-height:1.3">Both home after <strong style="font-weight:600">6:30</strong> tonight.</span>
+        </div>
+
+        <!-- your strip -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:4px;background:var(--neutral);border:var(--rule-faint);margin-bottom:var(--space-16)">
+          <span class="ey" style="font-size:var(--text-label);letter-spacing:0.1em;color:var(--muted)">You</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:var(--c-forest)"></span><span class="ey" style="font-size:var(--text-label);letter-spacing:0.08em;color:var(--c-forest)">Good energy</span></span>
+        </div>
+
+        <!-- volunteered -->
+        <div style="font-size:var(--text-sm);color:var(--primary);line-height:1.45;margin-bottom:var(--space-16)">You offered to <strong style="font-weight:600">cook Thu &amp; Fri</strong> so Partner can decompress. <span class="mono" style="font-size:var(--text-label);color:var(--muted)">— you</span></div>
+
+        <!-- blind enthusiasm -->
+        <div style="padding:14px;border-radius:4px;border:var(--rule-faint)">
+          <div class="ey" style="font-size:var(--text-label);letter-spacing:0.12em;color:var(--muted);margin-bottom:6px">Weekend — how keen are you?</div>
+          <div style="font-size:var(--text-sm);font-weight:600;color:var(--primary);margin-bottom:10px">Cabin overnight vs. quiet at home</div>
+          <div style="display:flex;align-items:center;justify-content:space-between"><span class="pips"><i></i><i></i><i class="on"></i><i></i><i></i></span><span class="mono" style="font-size:var(--text-label);color:var(--muted)">Partner: hidden ●</span></div>
+        </div>
+
+        <!-- ambient -->
+        <div style="font-size:var(--text-meta);color:var(--muted);line-height:1.5;margin-top:var(--space-16)">Partner added 3 photos to <span class="serif" style="color:var(--secondary)">Taiwan 2027</span>.</div>
+      </div>
+      <div class="ph-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--primary)"><circle cx="9" cy="8" r="3.2"/><circle cx="16" cy="9" r="2.6"/><path d="M4 20v-1.5a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4V20"/><path d="M14.5 14.2a3.4 3.4 0 0 1 4.5 3.2V20"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--muted)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+    <div class="ph-cap"><strong>Couples</strong> · shared board</div>
   </div>
 
 </div>
 
-<p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;text-align:center;padding:0 var(--space-32) var(--space-32)">
-  <strong style="color:var(--secondary)">Future component:</strong>
-  <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.fc-phone</code> (device frame). Parity reused: real <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.card · .title · .tag · .meta-strip</code> at phone width.
+<p style="font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.6;text-align:center;padding:0 var(--space-32) var(--space-40);max-width:820px;margin:0 auto">
+  <strong style="color:var(--secondary)">Three conceptual native apps</strong> on the brand aesthetic — not website screens.
+  New (page-scoped) components: <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.phone</code> frame ·
+  <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.hab-dots</code> (habit streak) ·
+  <code style="background:var(--ink-08);padding:1px 5px;border-radius:2px">.pips</code> (blind-enthusiasm rating). Built only from tokens — promote into the DS if any prove out.
 </p>
 </body>
 </html>

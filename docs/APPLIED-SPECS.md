@@ -41,4 +41,7 @@
 6. Each concept earns ONE structural idea and commits to it; no two share a skeleton; interesting = composition.
 
 ## Status
-✅ Command Center (finished exemplar). ⏳ Couples Board (next) · Analytics · Coaching · Mobile · CMS Panel (first-pass on staging, to elevate). ⏳ Gated prod ship of `/_ds/` — Alex's decision once Applied is done.
+✅ All six concepts elevated & on staging (2026-06-08): Command Center (exemplar) · **Together** (overhauled to three material registers + "between you") · Analytics (verdict masthead + evidence) · Coaching (full-measure folios, momentum-word, stuck-rises) · Mobile (three conceptual native apps; couples phone threaded to the Together desktop) · CMS Panel (real-shell parity anchor, "production components" footnote). Family sweep passed — each concept commits to one distinct structural idea.
+⏳ **Only open item: the gated prod ship of `/_ds/`** — Alex's decision (backup + staging→prod). Staging stays Alex's working reference until then.
+
+> **Render/assess any concept locally:** headless Brave against a temp docroot (`/tmp/together-render`, symlinks `_ds`→`site/_design-system`, `cms`→`site/cms`) served on `:8799` — screenshot + visually verify before deploy. See the `project_together_dashboard` memory.

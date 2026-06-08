@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/typography.css?v=4">
 <link rel="stylesheet" href="css/shell.css?v=4">
 <link rel="stylesheet" href="css/components.css?v=4">
+<link rel="stylesheet" href="css/cards.css?v=4">
 <link rel="stylesheet" href="css/tables.css?v=4">
 <link rel="stylesheet" href="css/status.css?v=4">
 <link rel="stylesheet" href="css/views.css?v=4">
@@ -562,6 +563,7 @@
       <a data-scroll-panel="components" data-scroll-section="card-articles" class="sidebar-link">Articles</a>
       <a data-scroll-panel="components" data-scroll-section="card-events" class="sidebar-link">Events</a>
       <a data-scroll-panel="components" data-scroll-section="card-experiments" class="sidebar-link">Experiments</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-dash-cards" class="sidebar-link">Dashboard Cards</a>
       <a data-scroll-panel="components" data-scroll-section="card-journal" class="sidebar-link">Journal</a>
       <a data-scroll-panel="components" data-scroll-section="card-nav" class="sidebar-link">Nav & Filtering</a>
       <a data-scroll-panel="components" data-scroll-section="card-meta" class="sidebar-link">Meta Strip</a>
@@ -705,7 +707,50 @@
     </div>
   </div>
 
-  <!-- Card system documentation lives on the dedicated Content Cards tab — this Components tab covers tokens and primitives. -->
+  <!-- Public content-card docs (article/index cards) live on the dedicated Content Cards tab. Below: the dashboard/app surface card. -->
+
+  <!-- ══ 09 DASHBOARD CARDS ══ -->
+  <div class="section" id="comp-dash-cards">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div class="section-title">Dashboard Cards</div>
+      <div class="section-desc">Surface containers for dashboard, app, and tool UIs — distinct from the content card (article/index cards with headers and meta). Two roles; pick by what the card holds.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Content card · <code class="ctoken">.dash-card</code></span>
+      <div style="margin-bottom: var(--space-16)">
+        <div class="dash-card" style="max-width:260px">
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-8)">A grouping</div>
+          <div style="font-size: var(--text-sm);color:var(--secondary);line-height:1.5">Plain surface for disposable, simple grouped content — panels, list groups, sections.</div>
+        </div>
+      </div>
+      <div class="spec-grid" style="max-width:480px">
+        <span class="spec-key">use</span><span class="spec-val">disposable / simple grouped content — a container, not an object</span>
+        <span class="spec-key">shell</span><span class="spec-val">surface · rule-faint border · r-card radius · space-20 padding</span>
+        <span class="spec-key">accent</span><span class="spec-val">none</span>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Callout card · <code class="ctoken">.dash-card--callout</code></span>
+      <div style="display:flex;gap: var(--space-16);flex-wrap:wrap;margin-bottom: var(--space-16)">
+        <div class="dash-card dash-card--callout" style="max-width:240px;--c-current:var(--c-forest)">
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-forest);margin-bottom: var(--space-8)">Health</div>
+          <div style="font-size: var(--text-sm);color:var(--primary);font-weight:500;line-height:1.4">An easy 10k by September.</div>
+        </div>
+        <div class="dash-card dash-card--callout" style="max-width:240px;--c-current:var(--c-denim)">
+          <div style="font-family:var(--font-cond);font-size: var(--text-label);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--c-denim);margin-bottom: var(--space-8)">The CMS</div>
+          <div style="font-size: var(--text-sm);color:var(--primary);font-weight:500;line-height:1.4">Shipped to production, calmly.</div>
+        </div>
+      </div>
+      <div class="spec-grid" style="max-width:480px">
+        <span class="spec-key">use</span><span class="spec-val">cards with their own identity/standing — referenced, featured, or launched (seasonal intentions, the tools/app launcher). Not disposable.</span>
+        <span class="spec-key">accent</span><span class="spec-val">3px left edge in the card's hue — set <code class="ctoken">--c-current</code> per card</span>
+        <span class="spec-key">base</span><span class="spec-val">extends <code class="ctoken">.dash-card</code></span>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ 08 PILLS & BADGES ══ -->
   <div class="section" id="comp-pills">

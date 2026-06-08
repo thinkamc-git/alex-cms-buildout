@@ -8,62 +8,80 @@
 <!-- Applied · Command Center — two modes that switch:
      · THIS WEEK (execution): the working week + light priority reminders.
      · OVERVIEW (reflection): seasonal goals, weekly rollups, sense of progress.
+     White-card-on-grey for object/group clarity (consistent w/ coaching+analytics).
+     View switch reuses the CMS segmented control (.status-sel/.status-opt).
      No counts/%/streaks. Brand-language anchored; titles = Barlow 600. -->
 <link rel="stylesheet" href="/_ds/css/tokens.css">
 <link rel="stylesheet" href="/_ds/css/base.css">
 <link rel="stylesheet" href="/_ds/css/typography.css">
+<link rel="stylesheet" href="/_ds/css/cards.css">
 <style>
-  body { margin: 0; color: var(--primary); font-family: var(--font);
-    background-color: var(--neutral);
-    background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%224%22%20height%3D%224%22%3E%3Crect%20width%3D%224%22%20height%3D%224%22%20fill%3D%22%23e8e8e8%22/%3E%3Ccircle%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221.5%22%20fill%3D%22%23b8b6b2%22%20opacity%3D%220.15%22/%3E%3C/svg%3E");
-    background-size: 4px 4px; }
-  .cc { max-width: 1280px; margin: 0 auto; padding: var(--space-24) var(--space-40) var(--space-80); }
+  body { margin: 0; display: block; color: var(--primary); font-family: var(--font); background: var(--canvas-bg); }
+  html { overflow-y: scroll; }
+  .cc { max-width: 1200px; margin: 0 auto; padding: var(--space-24) var(--space-48) var(--space-80); }
 
+  /* identity bar */
   .cc-id { display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-16); border-bottom: var(--rule-30); }
   .cc-id-l { font-size: var(--text-base); font-weight: 500; }
   .cc-id-l em { font-style: normal; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-  .cc-switch { display: inline-flex; border: 1px solid var(--ink-30); border-radius: 4px; overflow: hidden; }
-  .cc-switch button { font-family: var(--font); font-size: var(--text-base); font-weight: 600; padding: 6px 16px; background: var(--surface); color: var(--muted); border: 0; border-right: 1px solid var(--ink-18); cursor: pointer; }
-  .cc-switch button:last-child { border-right: 0; }
-  .cc-switch button.on { background: var(--primary); color: var(--surface); }
-  .cc-id-d { font-family: var(--font-mono); font-size: var(--text-meta); letter-spacing: 0.08em; color: var(--muted); }
+
+  /* view switch — the CMS segmented control (.status-sel/.status-opt) */
+  .status-sel { display: inline-flex; }
+  .status-opt { width: 112px; padding: 7px 12px; border: 1px solid var(--ink-18); margin-left: -1px; font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; text-align: center; cursor: pointer; color: var(--muted); background: var(--neutral); transition: all 0.1s; box-sizing: border-box; }
+  .status-opt:first-child { margin-left: 0; border-radius: var(--r-pill) 0 0 var(--r-pill); }
+  .status-opt:last-child { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
+  .status-opt:hover { background: var(--canvas-bg); }
+  .status-opt.on { background: var(--primary); color: var(--white); border-color: var(--primary); position: relative; z-index: 1; }
+
+  /* designed date (not lazy mono) — condensed, two-tier */
+  .cc-date { text-align: right; line-height: 1.12; }
+  .cc-date-dow { display: block; font-family: var(--font-cond); font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
+  .cc-date-dm { display: block; font-family: var(--font-cond); font-size: var(--text-label); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 
   .eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .eyebrow.lead { color: var(--primary); }
   .view { display: none; }
   .view.on { display: block; }
+
+  /* card — the shared shell (group container) */
+  .cc-card { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
+  .cc-card-h { margin-bottom: var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
+  .cc-card-h.plain { border-bottom: 0; }
 
   /* ════ THIS WEEK (execution) ════ */
   .wk-mast { padding: var(--space-24) 0; border-bottom: var(--rule-30); }
   .wk-mast-row { display: flex; align-items: baseline; gap: var(--space-16); }
   .wk-mast h1 { font-size: var(--text-h4); font-weight: 500; letter-spacing: -0.01em; color: var(--secondary); margin: 0; }
-  .wk-mast .dates { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+  .wk-mast .dates { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   .wk-close { margin-left: auto; font-size: var(--text-base); font-weight: 600; color: var(--primary); background: transparent; border: 0; border-bottom: 1.5px solid var(--primary); border-radius: 0; padding-bottom: 2px; cursor: pointer; }
   .wk-affirm { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h3); line-height: 1.3; color: var(--primary); margin: var(--space-20) 0 0; max-width: 620px; }
-  .wk-body { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--space-64); margin-top: var(--space-48); align-items: start; }
-  .species { display: grid; grid-template-columns: 1.6fr 1fr 0.8fr; gap: var(--space-40); }
-  .col-h { margin-bottom: var(--space-12); padding-bottom: 6px; border-bottom: var(--rule-faint); }
-  .col-h.no-rule { border-bottom: 0; }
-  .eyebrow.lead { color: var(--primary); }
-  .could { display: flex; gap: 10px; border: 1px dashed var(--ink-18); border-left: 3px solid var(--c-current, var(--accent)); border-radius: 0 4px 4px 0; padding: 10px 10px 10px var(--space-12); margin-bottom: 8px; }
-  .could.done { background: color-mix(in srgb, var(--accent) 8%, transparent); border-style: solid; }
+  .wk-body { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: var(--space-16); margin-top: var(--space-32); align-items: start; }
+  .species { display: grid; grid-template-columns: 1.6fr 1fr 0.8fr; gap: var(--space-16); align-items: stretch; }
+
+  /* could-dos = objects inside the card (hue edge only) */
+  .could { display: flex; gap: 10px; border-left: 3px solid var(--c-current, var(--accent)); padding: 10px 8px 10px var(--space-12); border-bottom: 1px solid var(--ink-08); }
+  .could.done { background: color-mix(in srgb, var(--accent) 7%, transparent); }
   .ring { width: 15px; height: 15px; border: 2px solid var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 1px; background: transparent; padding: 0; cursor: pointer; }
   .could.done .ring { background: var(--accent); }
   .could-t { font-size: var(--text-md); font-weight: 500; line-height: 1.4; }
   .could-tag { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-current); margin-top: 3px; }
-  .todo { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: var(--text-sm); font-weight: 500; color: var(--secondary); border-bottom: 1px solid var(--ink-08); cursor: pointer; }
+  .todo { display: flex; align-items: center; gap: 9px; padding: 7px 0; font-size: var(--text-sm); font-weight: 500; color: var(--secondary); border-bottom: 1px solid var(--ink-08); cursor: pointer; }
   .todo .box { width: 13px; height: 13px; border: 1px solid var(--ink-30); border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
   .todo .box svg { width: 9px; height: 9px; opacity: 0; color: var(--muted); }
   .todo.done { color: var(--muted); } .todo.done .box svg { opacity: 1; }
-  .dont { font-size: var(--text-sm); color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ink-30); padding: 5px 0; opacity: 0.85; }
-  .add { font-size: var(--text-sm); color: var(--muted); padding: 8px 0 0; cursor: text; }
-  .wk-sub { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-40); margin-top: var(--space-64); padding-top: var(--space-24); border-top: var(--rule-faint); }
-  .weekend { border-left: 3px solid var(--ink-30); padding-left: var(--space-16); margin-top: var(--space-12); }
-  .weekend-t { font-family: var(--font); font-style: normal; font-size: var(--text-body); color: var(--primary); line-height: 1.4; }
-  .nx { font-size: var(--text-sm); color: var(--secondary); padding: 5px 0; border-bottom: 1px solid var(--ink-08); }
+  .dont { font-size: var(--text-sm); color: var(--muted); text-decoration: line-through; text-decoration-color: var(--ink-30); padding: 7px 0; opacity: 0.85; border-bottom: 1px solid var(--ink-08); }
+  .dont:last-child { border-bottom: 0; }
+  .add { font-size: var(--text-sm); color: var(--muted); padding: var(--space-8) 0 0; cursor: text; }
+  .wk-sub { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-16); margin-top: var(--space-16); }
+  .weekend-t { font-family: var(--font); font-style: normal; font-size: var(--text-body); color: var(--primary); line-height: 1.45; }
+  .nx { font-size: var(--text-sm); color: var(--secondary); padding: 6px 0; border-bottom: 1px solid var(--ink-08); }
+  .nx:last-child { border-bottom: 0; }
   .nx::before { content: "→ "; color: var(--ink-30); }
-  /* light rail */
-  .rail { display: flex; flex-direction: column; gap: var(--space-32); border-left: var(--rule-faint); padding-left: var(--space-32); }
-  .rail-sec .eyebrow { display: block; margin-bottom: var(--space-16); }
+
+  /* rail — carded sections, consistent with the work surface */
+  .rail { display: flex; flex-direction: column; gap: var(--space-16); border-left: var(--rule-faint); padding-left: var(--space-16); }
+  .rail-sec { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
+  .rail-sec .eyebrow { display: block; margin-bottom: var(--space-16); padding-bottom: var(--space-8); border-bottom: var(--rule-faint); }
   .fo { display: flex; align-items: baseline; gap: 9px; padding: 6px 0; }
   .fo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c-current, var(--muted)); flex-shrink: 0; align-self: center; }
   .fo-t { font-size: var(--text-sm); color: var(--primary); }
@@ -73,43 +91,36 @@
   .hab-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-12); cursor: pointer; }
   .hab-dot.on { background: var(--accent); } .hab-dot.today { outline: 1.5px solid var(--ink-30); outline-offset: 2px; }
   .ev { display: flex; gap: var(--space-12); padding: 8px 0; border-top: var(--rule-faint); } .ev:first-of-type { border-top: 0; padding-top: 0; }
-  .ev-d { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); width: 50px; flex-shrink: 0; }
+  .ev-d { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 50px; flex-shrink: 0; }
   .ev-t { font-size: var(--text-sm); color: var(--primary); line-height: 1.35; }
 
   /* ════ OVERVIEW (reflection) ════ */
   .ov-mast { padding: var(--space-24) 0; border-bottom: var(--rule-30); }
   .ov-mast h1 { font-size: var(--text-h1); font-weight: 600; letter-spacing: -0.015em; margin: 0; }
   .ov-reflect { font-family: var(--font-serif); font-style: italic; font-size: var(--text-h4); line-height: 1.35; color: var(--secondary); margin: var(--space-16) 0 0; max-width: 760px; }
-  .ov-sec { margin-top: var(--space-64); }
-  .ov-sec > .eyebrow { display: block; margin-bottom: var(--space-12); }
-  .ov-goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-24) var(--space-32); }
-  .goal { border-left: 3px solid var(--c-current, var(--muted)); padding-left: var(--space-16); }
+  .ov-sec { margin-top: var(--space-32); }
+  .ov-sec > .eyebrow { display: block; margin-bottom: var(--space-16); }
+
+  /* goals = object cards (hue edge), equal height */
+  .ov-goals { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); grid-auto-rows: 1fr; }
+  .goal { display: flex; flex-direction: column; }
   .goal-top { display: flex; align-items: center; justify-content: space-between; }
   .goal-tag { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-current, var(--secondary)); }
   .goal-stance { width: 8px; height: 8px; flex-shrink: 0; }
   .goal-stance.active { border-radius: 50%; background: var(--c-current, var(--primary)); }
   .goal-stance.passive { border-radius: 50%; border: 1.5px solid var(--ink-30); }
-  .goal-outcome { font-size: var(--text-md); font-weight: 500; color: var(--primary); line-height: 1.4; margin: 7px 0 var(--space-12); }
+  .goal-outcome { font-size: var(--text-md); font-weight: 500; color: var(--primary); line-height: 1.4; margin: 9px 0 var(--space-12); }
   .goal-steps { display: flex; flex-direction: column; gap: 4px; }
   .goal-step { font-size: var(--text-meta); color: var(--ink-30); padding-left: 14px; position: relative; line-height: 1.4; }
   .goal-step::before { content: "○"; position: absolute; left: 0; font-size: 8px; top: 4px; }
   .goal-step.done { color: var(--muted); } .goal-step.done::before { content: "●"; color: var(--ink-30); }
   .goal-step.now { color: var(--primary); font-weight: 500; } .goal-step.now::before { content: "●"; color: var(--c-current, var(--accent)); }
-  .mv { display: flex; gap: 3px; align-items: flex-end; height: 12px; margin-top: var(--space-12); }
+  .mv { display: flex; gap: 3px; align-items: flex-end; height: 12px; margin-top: auto; padding-top: var(--space-16); }
   .mv i { width: 2px; background: var(--c-current, var(--muted)); opacity: 0.4; }
 
-  .lb-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-20); align-items: start; }
-  .lb-block { background: var(--surface); border: var(--rule-faint); border-radius: 4px; padding: var(--space-20); }
-  .lb-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-16); padding-bottom: var(--space-12); border-bottom: var(--rule-30); }
-  .lb-kind { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--primary); }
-  .lb-when { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); }
-  .lb-line { display: flex; gap: 9px; padding: 6px 0; font-size: var(--text-sm); color: var(--secondary); line-height: 1.4; border-bottom: 1px solid var(--ink-08); }
-  .lb-line:last-child { border-bottom: 0; }
-  .lb-line .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--c-current, var(--ink-30)); }
-  .lb-line strong { color: var(--primary); font-weight: 600; }
-  /* cadence: months in their rollup states */
-  .cad { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-20); align-items: start; }
-  .cad-mo { background: var(--surface); border: var(--rule-faint); border-radius: 4px; padding: var(--space-20); }
+  /* cadence — months as rollup-state cards */
+  .cad { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-16); align-items: start; }
+  .cad-mo { background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-20); }
   .cad-mo.is-now { border-color: var(--ink-30); }
   .cad-mo.is-ahead { background: transparent; border-style: dashed; border-color: var(--ink-18); }
   .cad-mo-h { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-12); margin-bottom: var(--space-16); padding-bottom: var(--space-12); border-bottom: var(--rule-30); }
@@ -118,6 +129,10 @@
   .cad-mo.is-ahead .cad-mo-name { color: var(--ink-30); }
   .cad-mo-state { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
   .cad-foot { font-family: var(--font-mono); font-size: 10px; color: var(--ink-30); margin-top: var(--space-12); }
+  .cad-roll { display: flex; gap: 9px; padding: 6px 0; font-size: var(--text-sm); color: var(--secondary); line-height: 1.4; border-bottom: 1px solid var(--ink-08); }
+  .cad-roll:last-of-type { border-bottom: 0; }
+  .cad-roll .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; background: var(--c-current, var(--ink-30)); }
+  .cad-roll strong { color: var(--primary); font-weight: 600; }
   .cad-wk { display: flex; gap: var(--space-12); padding: 6px 0; border-bottom: 1px solid var(--ink-08); }
   .cad-wk-n { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); width: 34px; flex-shrink: 0; }
   .cad-wk-t { font-size: var(--text-sm); color: var(--secondary); line-height: 1.35; }
@@ -128,6 +143,26 @@
   .cad-ghost { font-size: var(--text-sm); color: var(--ink-30); font-style: italic; }
   .cad-season { font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-20); }
   .cad-season strong { color: var(--secondary); }
+
+  /* ════ TOOLS (launch board — icon-led app cards) ════ */
+  .launch-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-16); align-items: start; margin-top: var(--space-32); }
+  .launch-col { display: flex; flex-direction: column; gap: var(--space-12); }
+  .launch-col > .eyebrow { display: block; margin-bottom: var(--space-4); }
+  .app-card { padding: var(--space-16); cursor: pointer; transition: border-color 0.1s; }
+  .app-card:hover { border-color: var(--ink-30); border-left-color: var(--c-current); }
+  .app-head { display: flex; align-items: center; gap: var(--space-12); }
+  .app-icon { width: 42px; height: 42px; border-radius: 10px; background: var(--c-current, var(--primary)); color: var(--white); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .app-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .app-meta { flex: 1; min-width: 0; display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-8); }
+  .app-name { font-size: var(--text-md); font-weight: 600; color: var(--primary); }
+  .app-when { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+  .app-state { font-size: var(--text-sm); color: var(--muted); line-height: 1.4; margin: var(--space-12) 0; }
+  .app-state.needs { color: var(--c-terracotta); font-weight: 500; }
+  .app-state.needs::before { content: ""; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--c-terracotta); margin-right: 6px; vertical-align: middle; }
+  .app-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .app-act { font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--secondary); border: 1px solid var(--ink-18); border-radius: var(--r-card); padding: 4px var(--space-8); cursor: pointer; transition: border-color 0.1s, color 0.1s; }
+  .app-act:hover { border-color: var(--accent); color: var(--accent); }
+
   button { cursor: pointer; }
 </style>
 </head>
@@ -136,43 +171,43 @@
 
   <div class="cc-id">
     <div class="cc-id-l">alex m. chong&nbsp;&nbsp;<em>command center</em></div>
-    <div class="cc-switch"><button class="on" data-view="week">This week</button><button data-view="overview">Overview</button></div>
-    <div class="cc-id-d">FRIDAY · 17 JULY</div>
+    <div class="status-sel"><button class="status-opt on" data-view="week">This week</button><button class="status-opt" data-view="overview">Overview</button><button class="status-opt" data-view="tools">Tools</button></div>
+    <div class="cc-date"><span class="cc-date-dow">Friday</span><span class="cc-date-dm">17 July 2026</span></div>
   </div>
 
   <!-- ══════════ VIEW 1 · THIS WEEK (execution) ══════════ -->
   <section class="view on" id="view-week">
     <header class="wk-mast">
-      <div class="wk-mast-row"><h1>This week</h1><span class="dates">JUL 13–19 · WEEK 3</span><button class="wk-close">Close the week →</button></div>
+      <div class="wk-mast-row"><h1>This week</h1><span class="dates">Jul 13–19 · Week 3</span><button class="wk-close">Close the week →</button></div>
       <p class="wk-affirm">Protect the deep-work mornings — the migration needs a clear head.</p>
     </header>
     <div class="wk-body">
       <div>
         <div class="species">
-          <div>
-            <div class="col-h"><span class="eyebrow lead">Could-dos</span></div>
+          <div class="cc-card">
+            <div class="cc-card-h"><span class="eyebrow lead">Could-dos</span></div>
             <div class="could done" style="--c-current:var(--c-terracotta)"><button class="ring" aria-label="did"></button><div><div class="could-t">Draft §2 of the UX 2.0 piece</div><div class="could-tag">Writing</div></div></div>
             <div class="could" style="--c-current:var(--c-denim)"><button class="ring" aria-label="did"></button><div><div class="could-t">Run the migration on staging</div><div class="could-tag">The CMS</div></div></div>
             <div class="could" style="--c-current:var(--c-forest)"><button class="ring" aria-label="did"></button><div><div class="could-t">Three easy runs</div><div class="could-tag">Health</div></div></div>
             <div class="add">+ a gentle pull…</div>
           </div>
-          <div>
-            <div class="col-h"><span class="eyebrow">To-dos</span></div>
+          <div class="cc-card">
+            <div class="cc-card-h"><span class="eyebrow">To-dos</span></div>
             <div class="todo done"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Renew the domain</div>
             <div class="todo"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Reply to the accountant</div>
             <div class="todo"><span class="box"><svg viewBox="0 0 14 14" fill="none"><path d="M2 7.5l3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Book the dentist</div>
             <div class="add">+ add</div>
           </div>
-          <div>
-            <div class="col-h no-rule"><span class="eyebrow">Not this week</span></div>
+          <div class="cc-card">
+            <div class="cc-card-h"><span class="eyebrow">Not this week</span></div>
             <div class="dont">A new side project</div>
             <div class="dont">Doomscroll Twitter</div>
             <div class="dont">Refile everything</div>
           </div>
         </div>
         <div class="wk-sub">
-          <div><span class="eyebrow">This weekend</span><div class="weekend"><div class="weekend-t">A long walk somewhere new, with no phone.</div></div></div>
-          <div><span class="eyebrow">For next week</span><div style="margin-top:var(--space-12)"><div class="nx">Book the Q3 planning day</div><div class="nx">Call the framer back</div><div class="nx">Outline the talk</div></div></div>
+          <div class="cc-card"><div class="cc-card-h"><span class="eyebrow">This weekend</span></div><div class="weekend-t">A long walk somewhere new, with no phone.</div></div>
+          <div class="cc-card"><div class="cc-card-h"><span class="eyebrow">For next week</span></div><div class="nx">Book the Q3 planning day</div><div class="nx">Call the framer back</div><div class="nx">Outline the talk</div></div>
         </div>
       </div>
       <aside class="rail">
@@ -209,12 +244,12 @@
     <div class="ov-sec">
       <span class="eyebrow">Seasonal intentions · outcome, the three-month path, and how each is moving</span>
       <div class="ov-goals">
-        <div class="goal" style="--c-current:var(--c-forest)"><div class="goal-top"><span class="goal-tag">Health</span><span class="goal-stance active"></span></div><div class="goal-outcome">An easy 10k in the legs by September.</div><div class="goal-steps"><span class="goal-step done">Jun — back to walking daily</span><span class="goal-step now">Jul — three easy runs a week</span><span class="goal-step">Aug — hold the 10k base</span></div><div class="mv"><i style="height:8px"></i><i style="height:11px"></i><i style="height:6px"></i><i style="height:12px"></i><i style="height:9px"></i></div></div>
-        <div class="goal" style="--c-current:var(--c-terracotta)"><div class="goal-top"><span class="goal-tag">Writing</span><span class="goal-stance active"></span></div><div class="goal-outcome">A finished UX 2.0 series.</div><div class="goal-steps"><span class="goal-step done">Jun — outline the series</span><span class="goal-step now">Jul — draft parts two &amp; three</span><span class="goal-step">Aug — edit &amp; publish</span></div><div class="mv"><i style="height:12px"></i><i style="height:9px"></i><i style="height:13px"></i><i style="height:7px"></i></div></div>
-        <div class="goal" style="--c-current:var(--c-denim)"><div class="goal-top"><span class="goal-tag">The CMS</span><span class="goal-stance active"></span></div><div class="goal-outcome">Shipped to production, calmly.</div><div class="goal-steps"><span class="goal-step done">Jun — stabilise the editor</span><span class="goal-step now">Jul — migrate &amp; cut over</span><span class="goal-step">Aug — monitor &amp; harden</span></div><div class="mv"><i style="height:10px"></i><i style="height:13px"></i><i style="height:8px"></i><i style="height:12px"></i><i style="height:9px"></i><i style="height:11px"></i></div></div>
-        <div class="goal" style="--c-current:var(--c-amber)"><div class="goal-top"><span class="goal-tag">Family</span><span class="goal-stance active"></span></div><div class="goal-outcome">Aligned, and quietly ready.</div><div class="goal-steps"><span class="goal-step done">Jun — discussion &amp; alignment</span><span class="goal-step now">Jul — broaden the support network</span><span class="goal-step">Aug — active trying</span></div><div class="mv"><i style="height:6px"></i><i style="height:9px"></i><i style="height:7px"></i></div></div>
-        <div class="goal" style="--c-current:var(--c-plum)"><div class="goal-top"><span class="goal-tag">Friendship</span><span class="goal-stance passive"></span></div><div class="goal-outcome">Closer to the few who matter.</div><div class="goal-steps"><span class="goal-step done">Jun — reach back out</span><span class="goal-step now">Jul — one real dinner a fortnight</span><span class="goal-step">Aug — keep the rhythm</span></div><div class="mv"><i style="height:7px"></i><i style="height:6px"></i></div></div>
-        <div class="goal" style="--c-current:var(--c-teal)"><div class="goal-top"><span class="goal-tag">Rest</span><span class="goal-stance passive"></span></div><div class="goal-outcome">A calmer nervous system.</div><div class="goal-steps"><span class="goal-step done">Jun — earlier nights</span><span class="goal-step now">Jul — protect the slow weekend</span><span class="goal-step">Aug — a real week off</span></div><div class="mv"><i style="height:9px"></i><i style="height:7px"></i><i style="height:5px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-forest)"><div class="goal-top"><span class="goal-tag">Health</span><span class="goal-stance active"></span></div><div class="goal-outcome">An easy 10k in the legs by September.</div><div class="goal-steps"><span class="goal-step done">Jun — back to walking daily</span><span class="goal-step now">Jul — three easy runs a week</span><span class="goal-step">Aug — hold the 10k base</span></div><div class="mv"><i style="height:8px"></i><i style="height:11px"></i><i style="height:6px"></i><i style="height:12px"></i><i style="height:9px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-terracotta)"><div class="goal-top"><span class="goal-tag">Writing</span><span class="goal-stance active"></span></div><div class="goal-outcome">A finished UX 2.0 series.</div><div class="goal-steps"><span class="goal-step done">Jun — outline the series</span><span class="goal-step now">Jul — draft parts two &amp; three</span><span class="goal-step">Aug — edit &amp; publish</span></div><div class="mv"><i style="height:12px"></i><i style="height:9px"></i><i style="height:13px"></i><i style="height:7px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-denim)"><div class="goal-top"><span class="goal-tag">The CMS</span><span class="goal-stance active"></span></div><div class="goal-outcome">Shipped to production, calmly.</div><div class="goal-steps"><span class="goal-step done">Jun — stabilise the editor</span><span class="goal-step now">Jul — migrate &amp; cut over</span><span class="goal-step">Aug — monitor &amp; harden</span></div><div class="mv"><i style="height:10px"></i><i style="height:13px"></i><i style="height:8px"></i><i style="height:12px"></i><i style="height:9px"></i><i style="height:11px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-amber)"><div class="goal-top"><span class="goal-tag">Family</span><span class="goal-stance active"></span></div><div class="goal-outcome">Aligned, and quietly ready.</div><div class="goal-steps"><span class="goal-step done">Jun — discussion &amp; alignment</span><span class="goal-step now">Jul — broaden the support network</span><span class="goal-step">Aug — active trying</span></div><div class="mv"><i style="height:6px"></i><i style="height:9px"></i><i style="height:7px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-plum)"><div class="goal-top"><span class="goal-tag">Friendship</span><span class="goal-stance passive"></span></div><div class="goal-outcome">Closer to the few who matter.</div><div class="goal-steps"><span class="goal-step done">Jun — reach back out</span><span class="goal-step now">Jul — one real dinner a fortnight</span><span class="goal-step">Aug — keep the rhythm</span></div><div class="mv"><i style="height:7px"></i><i style="height:6px"></i></div></div>
+        <div class="goal dash-card dash-card--callout" style="--c-current:var(--c-teal)"><div class="goal-top"><span class="goal-tag">Rest</span><span class="goal-stance passive"></span></div><div class="goal-outcome">A calmer nervous system.</div><div class="goal-steps"><span class="goal-step done">Jun — earlier nights</span><span class="goal-step now">Jul — protect the slow weekend</span><span class="goal-step">Aug — a real week off</span></div><div class="mv"><i style="height:9px"></i><i style="height:7px"></i><i style="height:5px"></i></div></div>
       </div>
     </div>
 
@@ -224,9 +259,9 @@
         <!-- June — closed, consolidated into a month rollup -->
         <div class="cad-mo is-closed">
           <div class="cad-mo-h"><span class="cad-mo-name">June</span><span class="cad-mo-state">Closed · consolidated</span></div>
-          <div class="lb-line" style="--c-current:var(--c-denim)"><span class="pip"></span><span><strong>The CMS</strong> — editor stabilised; auth landed</span></div>
-          <div class="lb-line" style="--c-current:var(--c-terracotta)"><span class="pip"></span><span><strong>Writing</strong> — the daily habit returned</span></div>
-          <div class="lb-line" style="--c-current:var(--c-amber)"><span class="pip"></span><span><strong>Caught a wing</strong> — said yes to a talk</span></div>
+          <div class="cad-roll" style="--c-current:var(--c-denim)"><span class="pip"></span><span><strong>The CMS</strong> — editor stabilised; auth landed</span></div>
+          <div class="cad-roll" style="--c-current:var(--c-terracotta)"><span class="pip"></span><span><strong>Writing</strong> — the daily habit returned</span></div>
+          <div class="cad-roll" style="--c-current:var(--c-amber)"><span class="pip"></span><span><strong>Caught a wing</strong> — said yes to a talk</span></div>
           <div class="cad-foot">four weeks → one month rollup</div>
         </div>
         <!-- July — in progress, weeks gathering, not yet closed -->
@@ -248,12 +283,81 @@
     </div>
   </section>
 
+  <!-- ══════════ VIEW 3 · TOOLS (launcher) ══════════ -->
+  <section class="view" id="view-tools">
+    <header class="ov-mast">
+      <h1>Tools</h1>
+      <p class="ov-reflect">Ten tools for a working life — each its own workspace, open to where you left off.</p>
+    </header>
+    <div class="launch-board">
+      <div class="launch-col">
+        <span class="eyebrow">Make</span>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-terracotta)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><div class="app-meta"><span class="app-name">Writing Studio</span><span class="app-when">today</span></div></div>
+          <div class="app-state needs">§3 to draft</div>
+          <div class="app-acts"><span class="app-act">New draft</span><span class="app-act">Continue §3</span><span class="app-act">Queue</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-amber)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1v.2h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span><div class="app-meta"><span class="app-name">Idea Studio</span><span class="app-when">4h ago</span></div></div>
+          <div class="app-state needs">3 sparks to sort</div>
+          <div class="app-acts"><span class="app-act">Capture</span><span class="app-act">Develop</span><span class="app-act">Promote</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-denim)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span><div class="app-meta"><span class="app-name">Research Desk</span><span class="app-when">yesterday</span></div></div>
+          <div class="app-state needs">1 digest ready</div>
+          <div class="app-acts"><span class="app-act">New question</span><span class="app-act">Read digest</span><span class="app-act">Sources</span></div>
+        </div>
+      </div>
+      <div class="launch-col">
+        <span class="eyebrow">Coordinate</span>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-forest)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div class="app-meta"><span class="app-name">Coaching</span><span class="app-when">today</span></div></div>
+          <div class="app-state needs">2 awaiting notes</div>
+          <div class="app-acts"><span class="app-act">Start session</span><span class="app-act">+ Client</span><span class="app-act">Notes</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-rose)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><circle cx="16.5" cy="9" r="2.6"/><path d="M3.5 20v-1.5a4 4 0 0 1 4-4h3a4 4 0 0 1 4 4V20"/><path d="M15 14.3a3.4 3.4 0 0 1 5 3.1V20"/></svg></span><div class="app-meta"><span class="app-name">Together</span><span class="app-when">2d ago</span></div></div>
+          <div class="app-state needs">pick the weekend</div>
+          <div class="app-acts"><span class="app-act">Plan weekend</span><span class="app-act">Leave note</span><span class="app-act">Add memory</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-ochre)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span><div class="app-meta"><span class="app-name">Trip Planner</span><span class="app-when">1w ago</span></div></div>
+          <div class="app-state needs">4 nights unbooked</div>
+          <div class="app-acts"><span class="app-act">New trip</span><span class="app-act">Bookings</span><span class="app-act">Itinerary</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-teal)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><div class="app-meta"><span class="app-name">Weekend Planner</span><span class="app-when">3d ago</span></div></div>
+          <div class="app-state">Drafted the options</div>
+          <div class="app-acts"><span class="app-act">Plan Sat/Sun</span><span class="app-act">Invite</span><span class="app-act">Ideas</span></div>
+        </div>
+      </div>
+      <div class="launch-col">
+        <span class="eyebrow">Keep</span>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-indigo)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5.5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><div class="app-meta"><span class="app-name">Finances</span><span class="app-when">5d ago</span></div></div>
+          <div class="app-state needs">invoice out · Aisha</div>
+          <div class="app-acts"><span class="app-act">New invoice</span><span class="app-act">Reconcile</span><span class="app-act">Reports</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-purple)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 8L9 4l-3 8H2"/></svg></span><div class="app-meta"><span class="app-name">Training Log</span><span class="app-when">yesterday</span></div></div>
+          <div class="app-state">Logged a 5k</div>
+          <div class="app-acts"><span class="app-act">Log workout</span><span class="app-act">This week</span><span class="app-act">History</span></div>
+        </div>
+        <div class="app-card dash-card dash-card--callout" style="--c-current:var(--c-plum)">
+          <div class="app-head"><span class="app-icon"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span><div class="app-meta"><span class="app-name">Reading Library</span><span class="app-when">2d ago</span></div></div>
+          <div class="app-state needs">1 due back</div>
+          <div class="app-acts"><span class="app-act">Add book</span><span class="app-act">Shelves</span><span class="app-act">Highlights</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <script>
-  // Mode switch.
-  var btns = document.querySelectorAll('.cc-switch button');
-  var views = { week: document.getElementById('view-week'), overview: document.getElementById('view-overview') };
+  // Mode switch — reuses the segmented control.
+  var btns = document.querySelectorAll('.status-sel .status-opt');
+  var views = { week: document.getElementById('view-week'), overview: document.getElementById('view-overview'), tools: document.getElementById('view-tools') };
   btns.forEach(function (b) { b.addEventListener('click', function () {
     btns.forEach(function (x) { x.classList.toggle('on', x === b); });
     Object.keys(views).forEach(function (k) { views[k].classList.toggle('on', k === b.dataset.view); });

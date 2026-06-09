@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foundations · Texture</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Foundations → Texture. Two surface treatments, shown LIVE from the real CSS:
+     --grain (public pages, via system-public.css) and --dot-grid + .dot-surface
+     (CMS chrome, via style-cms.css). Loading both barrels also demonstrates they
+     now coexist without the old name collision. Embedded as a live-frame in the
+     Foundations tab. Page-scoped specimen chrome only (.tx-*), tokens-only. -->
+<link rel="stylesheet" href="/_ds/css/system-public.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<style>
+  /* style-cms.css ships a 100vh flex shell; relax it so the specimen flows. */
+  body { margin: 0; height: auto; min-height: 0; overflow: visible; display: block; background: var(--canvas-bg); font-family: var(--font); color: var(--primary); }
+  .tx-wrap { padding: var(--space-24); }
+  .tx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-24); }
+  .tx-tile { display: flex; flex-direction: column; }
+  .tx-swatch { position: relative; height: 180px; border: var(--rule-faint); border-radius: var(--r-card); overflow: hidden; }
+  /* Magnified corner inset (8×) — the texture is too fine to read at true scale,
+     so the swatch shows the real surface AND a zoomed crop of the actual pattern. */
+  .tx-zoom { position: absolute; bottom: 0; right: 0; width: 72px; height: 72px; border-left: var(--rule-faint); border-top: var(--rule-faint); }
+  .tx-zoom-tag { position: absolute; bottom: 6px; right: 80px; font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); background: var(--canvas-bg); padding: 1px 5px; border-radius: 2px; }
+  .tx-name { font-size: var(--text-body); font-weight: 600; color: var(--primary); margin-top: var(--space-12); }
+  .tx-token { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); background: var(--ink-08); padding: 1px 6px; border-radius: 2px; align-self: flex-start; margin-top: 6px; }
+  .tx-meta { font-size: var(--text-sm); color: var(--secondary); line-height: 1.45; margin-top: var(--space-8); }
+  .tx-meta b { color: var(--primary); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="tx-wrap">
+  <div class="tx-grid">
+
+    <div class="tx-tile">
+      <div class="tx-swatch dot-surface">
+        <span class="tx-zoom-tag">8×</span>
+        <div class="tx-zoom" style="background-color:var(--neutral);background-image:var(--dot-grid);background-size:32px 32px"></div>
+      </div>
+      <div class="tx-name">Dot grid</div>
+      <span class="tx-token">.dot-surface · --dot-grid</span>
+      <div class="tx-meta"><b>CMS chrome.</b> A regular 4px dot lattice on <code>--neutral</code>, applied through the <code>.dot-surface</code> class — it backs the admin topbar, sidebar, and stat panels.</div>
+    </div>
+
+    <div class="tx-tile">
+      <div class="tx-swatch" style="background-color:var(--neutral);background-image:var(--grain);background-size:200px 200px">
+        <span class="tx-zoom-tag">8×</span>
+        <div class="tx-zoom" style="background-color:var(--neutral);background-image:var(--grain);background-size:1600px 1600px"></div>
+      </div>
+      <div class="tx-name">Grain</div>
+      <span class="tx-token">--grain</span>
+      <div class="tx-meta"><b>Public pages.</b> An added surface texture (a fine grain, not a dot pattern) layered over <code>--neutral</code> as the page background of the marketing site.</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

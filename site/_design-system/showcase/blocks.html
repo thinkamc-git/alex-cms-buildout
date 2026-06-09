@@ -17,6 +17,14 @@
   .bx-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin: var(--space-32) 0 var(--space-12); padding-top: var(--space-16); border-top: var(--rule-faint); }
   .bx-label:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
   .bx-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); line-height: 1.6; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16); margin-bottom: var(--space-24); }
+  /* Family map — the other template families blocks.css owns, listed by selector
+     with a pointer to where each is shown live (not re-rendered here — they're
+     composed under Components/Pages; this completes the by-source-file view). */
+  .bx-fam { display: flex; flex-direction: column; gap: var(--space-12); }
+  .bx-fam-row { border: var(--rule-faint); border-radius: var(--r-card); padding: var(--space-16); background: var(--surface); }
+  .bx-fam-name { font-weight: 600; font-size: var(--text-body); color: var(--primary); margin-bottom: 4px; }
+  .bx-fam-sel { font-family: var(--font-mono); font-size: 11px; color: var(--secondary); line-height: 1.7; }
+  .bx-fam-where { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-top: var(--space-8); }
 </style>
 </head>
 <body>
@@ -75,6 +83,25 @@
     <div class="article-author-bio-extended">
       <div class="article-author-name">Alex M. Chong</div>
       <p>A short author bio in the document register — who wrote this and why it's worth your time, rendered from the shared Author Info.</p>
+    </div>
+  </div>
+
+  <p class="bx-label">— Other template families in this file —</p>
+  <div class="bx-fam">
+    <div class="bx-fam-row">
+      <div class="bx-fam-name">Index pages</div>
+      <div class="bx-fam-sel">.index-page · .index-page-header · .index-eyebrow · .index-title · .index-subtitle · .index-count · .index-grid / .index-hero / .index-featured · .cards-grid</div>
+      <div class="bx-fam-where">Shown live → Pages ▸ Editorial Index · cards under Components ▸ Cards</div>
+    </div>
+    <div class="bx-fam-row">
+      <div class="bx-fam-name">Live Session (event)</div>
+      <div class="bx-fam-sel">.event-card · .event-meta-block-label · .event-date · .event-location · .event-time · .event-cost-detail · .event-card-tags · .event-format-tag (.is-free / .is-in-person) · .article-past-badge</div>
+      <div class="bx-fam-where">Shown live → Components ▸ Cards ▸ Events</div>
+    </div>
+    <div class="bx-fam-row">
+      <div class="bx-fam-name">Editorial sections</div>
+      <div class="bx-fam-sel">.index-section (--hero / --curated / --feed) · .index-section-header.is-big · .index-section-title-big · .index-section-view-all · .index-section-pills · .editorial-hero (+ variants) · .cards-grid.is-carousel</div>
+      <div class="bx-fam-where">Shown live → Pages ▸ Editorial Index · hero under Patterns ▸ Editorial Index Heroes</div>
     </div>
   </div>
 

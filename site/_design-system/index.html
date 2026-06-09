@@ -42,6 +42,7 @@
       <a data-scroll-panel="foundations" data-scroll-section="comp-type" class="sidebar-link">Typography</a>
       <a data-scroll-panel="foundations" data-scroll-section="comp-spacing" class="sidebar-link">Spacing</a>
       <a data-scroll-panel="foundations" data-scroll-section="comp-anatomy" class="sidebar-link">Rules & Dividers</a>
+      <a data-scroll-panel="foundations" data-scroll-section="comp-texture" class="sidebar-link">Texture</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Assets</span>
@@ -450,9 +451,20 @@
     </div>
   </div>
 
-<div class="section" id="comp-icons">
+<div class="section" id="comp-texture">
     <div class="section-header">
       <div class="section-num">05</div>
+      <div class="section-title">Texture</div>
+      <div class="section-desc">Two surface treatments carry the warm-paper feel of the brand. They're applied as background images on <code style="font-family:var(--font-mono);font-size:var(--text-meta);background:var(--ink-08);padding:1px 5px;border-radius:2px">--neutral</code> and are deliberately faint — the swatches below are at true scale, with an 8× crop so the actual pattern reads. Drawn live from the real CSS.</div>
+    </div>
+    <div class="comp-section">
+      <iframe class="live-frame" src="showcase/textures.html" title="Surface textures — dot grid and grain"></iframe>
+    </div>
+  </div>
+
+<div class="section" id="comp-icons">
+    <div class="section-header">
+      <div class="section-num">06</div>
       <div class="section-title">Icons</div>
       <div class="section-desc">A small set of inline SVG glyphs, drawn at the same hairline weight as the rules. Each renders with <code style="font-family:var(--font-mono);font-size:var(--text-meta);background:var(--ink-08);padding:1px 5px;border-radius:2px">currentColor</code>, so it inherits the surrounding text colour — the journal glyphs take their category colour. There is no icon font; icons live inline in the markup.</div>
     </div>
@@ -485,6 +497,33 @@
           <div class="icon-name">Clock · Past Event</div>
           <div class="icon-meta">24×24 · event cards (past)</div>
         </div>
+      </div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">CMS Chrome Glyphs — admin sidebar</span>
+      <p class="comp-rule">The functional glyph set for the CMS admin shell: one per sidebar destination, all drawn on a 14×14 grid at the same 1.2px hairline stroke. They render in <code style="font-family:var(--font-mono);font-size:var(--text-meta);background:var(--ink-08);padding:1px 5px;border-radius:2px">currentColor</code>, so they pick up the nav item's state colour (muted at rest, primary when active). The closing ✕ is the only action glyph — it backs the remove/close buttons.</p>
+      <div class="icon-grid">
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="7.5" y="1" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7.5" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="7.5" y="7.5" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Dashboard</div><div class="icon-meta">Overview</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M1 12h12M3 10V6M6 10V3M9 10V7M12 10V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Analytics</div><div class="icon-meta">Overview</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="3" width="11" height="9.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 6h11" stroke="currentColor" stroke-width="1.2"/><path d="M4 1.5v2.5M10 1.5v2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Post History</div><div class="icon-meta">Overview</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="6" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 10.5h3M6.5 12.5h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Ideation</div><div class="icon-meta">Writer's Desk</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="2.5" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="3" width="2.5" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="2.5" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Draft Writing</div><div class="icon-meta">Writer's Desk</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Articles</div><div class="icon-meta">Library</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Journals</div><div class="icon-meta">Library</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg></div><div class="icon-name">Live Sessions</div><div class="icon-meta">Library</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Experiments</div><div class="icon-meta">Library</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div><div class="icon-name">Pages</div><div class="icon-meta">Site</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Indexes</div><div class="icon-meta">Site</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Navigation</div><div class="icon-meta">Site</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="icon-name">Redirects</div><div class="icon-meta">Site</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Categories</div><div class="icon-meta">Collections</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h1M8.5 7h1" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Series</div><div class="icon-meta">Collections</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11v7h-11z" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4l5.5 4 5.5-4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg></div><div class="icon-name">Subscribers</div><div class="icon-meta">Audience</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Post Templates</div><div class="icon-meta">System</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l.85.6 1.05-.15.45.96.95.46-.15 1.05.6.85-.6.85.15 1.05-.95.46-.45.96-1.05-.15L7 12.5l-.85-.6-1.05.15-.45-.96-.95-.46.15-1.05-.6-.85.6-.85-.15-1.05.95-.46.45-.96 1.05.15z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg></div><div class="icon-name">Settings</div><div class="icon-meta">System</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="4.5" r="3" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><path d="M8.5 1.5h4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="icon-name">Design System</div><div class="icon-meta">System</div></div>
+        <div class="icon-tile"><div class="icon-art"><svg width="26" height="26" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></div><div class="icon-name">Close · Remove</div><div class="icon-meta"><code>.btn-icon</code> · action</div></div>
       </div>
     </div>
 

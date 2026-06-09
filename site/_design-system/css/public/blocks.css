@@ -36,7 +36,7 @@ a { color: inherit; }
    (tokens now come from tokens.css, loaded ahead of this file).
 
    Two exceptions to "verbatim":
-     1. The single self-containment :root below — --dot-grid is the
+     1. The single self-containment :root below — --grain is the
         only local token not yet in tokens.css (asset URL; → 22.6).
      2. .event-format-tag colours swapped from raw hex to --c-*
         tokens (decision 22.1 #3 / audit D8) — see those rules.
@@ -47,7 +47,7 @@ a { color: inherit; }
    until Phase 22.6.
    ──────────────────────────────────────────────────────────── */
 :root {
-  --dot-grid: url("/_layout/background.png");
+  --grain: url("/_layout/background.png");
 }
 
 
@@ -62,7 +62,7 @@ body {
   font-weight: 500;
   color: var(--primary);
   background-color: var(--neutral);
-  background-image: var(--dot-grid);
+  background-image: var(--grain);
   background-size: 200px 200px;
   background-repeat: repeat;
   -webkit-font-smoothing: antialiased;
@@ -95,7 +95,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: var(--dot-grid);
+  background-image: var(--grain);
   background-size: 200px 200px;
   background-repeat: repeat;
   mix-blend-mode: multiply;

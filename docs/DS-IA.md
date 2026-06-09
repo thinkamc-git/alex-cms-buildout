@@ -103,13 +103,24 @@ iframe pages; nothing leaks to the live site.
 > `<style>` per concept, `fc-` prefix, tokens-only, documented per section, promote
 > via Stage 2 — now lives in `docs/BUILD-DISCIPLINE.md` §6.1. Build to that.
 
-## 5. Existence audit — TODO (flagged 2026-06-06)
+## 5. Existence audit — ✅ DONE (2026-06-08)
 
-After Applied, audit for things that EXIST in the CSS/markup but aren't documented
-in the showcase, e.g.:
-- the **header/footer "dot"** (the `--dot-grid` / dot-surface treatment, separator dots)
-- a **list of icons** used across components (nav icons, action icons, the inline SVGs)
-- any other selectors/treatments present in the slices but missing from the tabs.
+Audited for things that EXIST in the CSS/markup but weren't documented in the
+showcase. Resolved:
+- **Texture** — Foundations ▸ new "Texture" section (05), embedding `showcase/textures.html`:
+  two live swatches with 8× insets — `.dot-surface` / `--dot-grid` (CMS chrome) and
+  `--grain` (public pages). Also renamed the public token `--dot-grid`→**`--grain`**
+  in `pages.css` + `blocks.css` (it was an added grain texture, not a dot grid — the
+  collision with the CMS dot pattern was confusing); CMS keeps its own `--dot-grid`.
+- **Icons** — Foundations ▸ Icons: new "CMS Chrome Glyphs" group (the 19 sidebar nav
+  glyphs + the Close/Remove `.btn-icon` ✕), drawn verbatim from `partials/sidebar.php`.
+- **blocks.css template families** — CSS Library ▸ Blocks: article family rendered +
+  a "family map" cataloging the Index / Live-Session(event) / Editorial families by
+  selector, cross-linked to where each is shown live (no re-render — completes the
+  by-source-file view without duplicating Components/Pages).
+
+Deferred (not part of E): dead-code `cms-*` removal (interleaved live+unused — low
+value, not a clean delete); Patterns index-section assemblies (see §7 LOGGED note).
 
 ---
 
@@ -226,4 +237,6 @@ its planning detail was removed. Build under `docs/BUILD-DISCIPLINE.md` §6.1.
 
 **Undocumented selector families** (in `blocks.css`, absent from showcase + CSS Library): `.index-page(--editorial/--series)`, `.index-section(--hero/--curated/--feed)`, `.index-section-header.is-big`, `.index-section-pills`, `.editorial-hero*` (~20), `.cards-grid(.is-carousel)`, `.article-hero*`, `.article-key-statement`.
 
-**STATUS (updated 2026-06-08, on staging):** ✅ A Welcome+preview · ✅ Icons · ✅ Article Hero · ✅ Editorial Index Heroes · ✅ Editorial Index refresh (+filter pills) · ✅ P2 (carousel, series watermark, key-statement) · ✅ B CMS tab rich doc (+ cms-classes split) · ✅ D in-CMS viewer (CSS Library 4 slices + launch). ✅ **C Applied — DONE:** all six concepts elevated & on staging (Command Center exemplar · Together [3 material registers + "between you"] · Analytics · Coaching [folios] · Mobile [3 native apps] · CMS Panel [parity anchor]); family sweep passed. **Remaining for 22.6b: E (existence audit — §5 above) + F (gated prod ship).** ⏳ **Gated prod ship** of `/_ds/` only after E is done (staging-only; Alex's call). Closing note in `docs/DS-AUDIT.md`.
+**LOGGED 2026-06-08 (Alex) — Patterns ▸ index-section assemblies are under-broken-out.** The editorial/index **section assemblies** were all built and are shown *assembled* under Pages ▸ Editorial Index, but in **Patterns** only the **hero** (`index-section--hero` / `editorial-hero`) is broken out as its own entry. The other assemblies that should each get a Patterns entry: **curated stack** (`index-section--curated` + `.cards-grid`), **carousel** (`.cards-grid.is-carousel`), **feed with filter pills** (`index-section--feed` + `.index-section-pills`), and **page mini-index** sections. Not building now — flagged to **determine when it's appropriate** to promote these into Patterns as standalone, composable specimens (vs. only living inside the full page). Relates to §7 P2 "Carousel display mode" above.
+
+**STATUS (updated 2026-06-08, on staging):** ✅ A Welcome+preview · ✅ Icons · ✅ Article Hero · ✅ Editorial Index Heroes · ✅ Editorial Index refresh (+filter pills) · ✅ P2 (carousel, series watermark, key-statement) · ✅ B CMS tab rich doc (+ cms-classes split) · ✅ D in-CMS viewer (CSS Library 4 slices + launch). ✅ **C Applied — DONE:** all six concepts elevated & on staging (Command Center exemplar · Together [3 material registers + "between you"] · Analytics · Coaching [folios] · Mobile [3 native apps] · CMS Panel [parity anchor]); family sweep passed. ✅ **E existence audit — DONE (2026-06-08):** Texture section + token rename (`--grain`), CMS Chrome Glyphs in Icons, blocks.css family map in CSS Library (see §5). ✅ **F gated prod ship — DONE (2026-06-08):** full-site deploy to `alexmchong.ca` after DB backup (`backups/backup-2026-06-08.sql.gz`) + files snapshot (`~/_backups/alexmchong.ca-2026-06-08-pre-ds-ship.tgz`); dry-run reviewed (only 2 empty junk favicons deleted), md5-verified, core routes smoke-tested 200. **Phase 22.6b complete.** Closing note in `docs/DS-AUDIT.md`.

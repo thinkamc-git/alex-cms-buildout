@@ -19,7 +19,7 @@
    the DS location (/_ds/css/public/) as well as the legacy /_layout/.
    (Phase 22.6 may unify this with the DS inline-SVG dot-grid.) */
 :root {
-  --dot-grid: url("/_layout/background.png");
+  --grain: url("/_layout/background.png");
 }
 
 /* ── Reset ──────────────────────────────────────────────── */
@@ -40,7 +40,7 @@ body {
   font-weight: 500;
   color: var(--primary);
   background-color: var(--neutral);
-  background-image: var(--dot-grid);
+  background-image: var(--grain);
   background-size: 200px 200px;
   background-repeat: repeat;
   -webkit-font-smoothing: antialiased;
@@ -77,7 +77,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: var(--dot-grid);
+  background-image: var(--grain);
   background-size: 200px 200px;
   background-repeat: repeat;
   mix-blend-mode: multiply;

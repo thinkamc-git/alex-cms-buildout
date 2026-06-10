@@ -124,6 +124,181 @@ body {
 .layout-nav-links a:hover,
 .layout-nav-links a.is-active { background: var(--primary); color: var(--surface); }
 
+/* Hamburger toggle — hidden on desktop, shown below 1024 (X1). */
+.layout-nav-toggle { display: none; }
+
+/* ── Nav drawer (X1) — hamburger + full-height slide-in drawer for every
+   width below desktop (tablet + phone). Logo aligns to the page gutter and
+   sizes up ~1.1× (X11a). ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .layout-nav {
+    padding-left: var(--space-20);
+    padding-right: var(--space-20);
+    /* Bar keeps its real frosted blur (backdrop-filter from the base rule). */
+  }
+  .layout-nav-logo { position: relative; z-index: 201; } /* stay above the backdrop */
+  .layout-nav-logo img { height: 31px; } /* ~1.1× of 28px (X11a) */
+
+  .layout-nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end; /* bars hug the right so they align to the gutter (= menu items) */
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    padding: 10px 0 10px 10px; /* no right padding → bars sit at the page gutter */
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    position: relative;
+    z-index: 201; /* sit above the open drawer (200) so the X is the close button */
+  }
+  .layout-nav-toggle span {
+    display: block;
+    height: 2px;
+    width: 19px; /* ~0.8× — smaller bars, same 44px tap target */
+    background: var(--primary);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(2) { opacity: 0; }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* Frosted panel — translucent surface + grain texture. (No backdrop-filter:
+     the panel is nested inside the blurred bar, where a nested blur can't work;
+     a slightly-opaque translucent + grain reads frosted without it.) */
+  .layout-nav-links {
+    position: fixed;
+    z-index: 200;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-8);
+    background: var(--surface); /* solid panel + grain texture (::before) */
+    overflow-y: auto;
+    isolation: isolate;
+    /* TABLET: full-height side drawer, animates in from the right. */
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(78vw, 340px);
+    padding: calc(52px + var(--space-16)) var(--space-20) var(--space-24);
+    border-left: var(--rule);
+    transform: translateX(100%);
+    transition: transform 0.25s ease; /* tablet drawer animates in AND out */
+  }
+  /* Grain texture overlay to match the bar (mix-blend multiply). */
+  .layout-nav-links::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--grain);
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .layout-nav-links a {
+    position: relative;
+    z-index: 1;
+    font-size: var(--text-base); /* 14px — the nav/UI token */
+    padding: var(--space-12);
+    border-radius: var(--r-card);
+  }
+  /* Notification dot — in the menu, sit it inline just right of the label and a
+     touch bigger (the tiny absolute corner dot looked lost on full-width items).
+     Overrides the inline styles render_nav emits; desktop bar dot is untouched. */
+  .layout-nav-links a > span[aria-hidden] {
+    position: static !important;
+    top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
+    display: inline-block;
+    width: 11px !important;
+    height: 11px !important;
+    margin-left: var(--space-8);
+    vertical-align: middle;
+    transform: translateY(-1px); /* optical centre — middle sat 1px low */
+  }
+  /* Pill highlight (with text) — same: inline just right of the label, a touch bigger. */
+  .layout-nav-links a > .layout-nav-pill {
+    position: static !important;
+    top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
+    display: inline-block !important;
+    line-height: 1;
+    margin-left: var(--space-8);
+    vertical-align: middle;
+    font-size: var(--text-label) !important;
+    padding: 2px 6px 3px 7px !important; /* pill height + optical centring (Alex-tuned) */
+    border-radius: 5px !important;
+    transform: translateY(-1px);
+  }
+  .layout-nav.is-open .layout-nav-links {
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+  }
+  /* Dim overlay. TABLET (side drawer): full screen incl. the bar. Mobile
+     overrides to start below the bar. Sized in vw/vh because the bar's
+     backdrop-filter makes it the containing block (inset:0 would clip to 52px). */
+  .layout-nav::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.3); /* dim behind the open menu */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+  }
+  .layout-nav.is-open::after {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.22s ease;
+  }
+}
+
+/* MOBILE only — the menu drops DOWN from under the bar (tablet keeps the side
+   drawer above). Uniform space-20 gutter → bar-to-first-item gap == side gutters.
+   Item sizing inherits the tablet size (no enlargement). */
+@media (max-width: 767px) {
+  .layout-nav-links {
+    top: 52px;
+    left: 0;
+    right: 0;
+    height: auto;
+    width: auto;
+    max-height: calc(100vh - 52px);
+    padding: var(--space-20);
+    border-left: 0;
+    border-bottom: var(--rule);
+    /* Unfurl downward from under the bar via clip — never crosses the bar's
+       bottom line (transform translateY would peek into the bar = flicker). */
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .layout-nav.is-open .layout-nav-links {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    visibility: visible;
+    transition: clip-path 0.24s ease, opacity 0.18s ease;
+  }
+  /* Mobile dropdown: dim starts below the bar (bar stays clear). */
+  .layout-nav::after { top: 52px; height: calc(100vh - 52px); }
+}
+
+/* Suppress nav transitions during viewport resize so crossing the
+   desktop/tablet breakpoint doesn't animate ("ghost"). Toggled by the nav JS. */
+html.nav-no-anim .layout-nav-links,
+html.nav-no-anim .layout-nav::after { transition: none !important; }
+
 /* Footer — single flat row. Copyright on the left, utility
    nav on the right. The "Subscribe" entry in the nav row is
    the only newsletter entry point from the chrome — there is
@@ -337,6 +512,10 @@ body {
 .btn-stack--end {
   align-items: flex-end;
 }
+
+/* Breathing room when a CTA row follows lead copy (e.g. the consultation
+   section) — the buttons were sitting too tight under the text. */
+.lead + .btn-row { margin-top: var(--space-24); }
 
 .tag {
   font-family: var(--font-cond);
@@ -1210,23 +1389,7 @@ body {
 
 @media (max-width: 720px) {
 
-  /* Nav — stack logo on top of a wrapping row of links */
-  .layout-nav {
-    flex-direction: column;
-    align-items: flex-start;
-    height: auto;
-    gap: var(--space-12);
-    padding: var(--space-12) var(--space-20);
-  }
-  .layout-nav-links {
-    width: 100%;
-    flex-wrap: wrap;
-    gap: var(--space-4);
-  }
-  .layout-nav-links a {
-    padding: 5px 10px;
-    font-size: var(--text-tiny);
-  }
+  /* Nav drawer (X1) is handled in the dedicated ≤1024 block below. */
 
   /* Page padding — much tighter on mobile */
   .page {
@@ -1251,16 +1414,20 @@ body {
     align-items: start;
   }
 
-  /* Button rows stack and stretch */
+  /* Buttons keep their natural width and stay on one row (X7) — they wrap to
+     the next line only if a row genuinely can't fit. No full-width / no forced
+     vertical stacking; full-width stacked CTAs read as condensed and odd. */
   .btn-row {
-    flex-direction: column;
-    align-items: stretch;
     gap: var(--space-8);
   }
-  .btn-row > a,
-  .btn-row > button {
-    text-align: center;
-    width: 100%;
+  /* Resume header CTAs (Download PDF / Email me) — one right-aligned row on
+     mobile rather than a vertical stack (X7). */
+  .btn-stack--end {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-8);
   }
 
   /* Numbered list — number above the body */
@@ -1291,8 +1458,9 @@ body {
     line-height: 1.15;
     margin-bottom: var(--space-20);
   }
-  .page-header-title { font-size: 32px; }
-  .page-header-title.is-serif { font-size: 38px; }
+  /* page-header-title was too small on mobile — bump ~1.3× (X3) */
+  .page-header-title { font-size: 42px; }
+  .page-header-title.is-serif { font-size: 48px; }
   .serif-intro { font-size: 22px; }
 
   /* Section outro — stack */
@@ -1302,14 +1470,16 @@ body {
     gap: var(--space-20);
   }
 
-  /* Footer — stack copyright above nav links */
+  /* Footer (X6) — centre-aligned, links on top, copyright at the bottom.
+     DOM order is copyright-then-links, so column-reverse puts links first. */
   .layout-footer {
     padding: var(--space-20);
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
     gap: var(--space-12);
   }
-  .layout-footer-right { gap: var(--space-12); }
+  .layout-footer-right { gap: var(--space-12); justify-content: center; }
 
   /* Profile circles step down a touch so they don't dominate */
   .profile-circle.is-lg { width: 96px;  height: 96px; }
@@ -1338,15 +1508,45 @@ body {
     transform: rotate(90deg);
     justify-self: center;
   }
-  .loop { grid-template-columns: 1fr; gap: var(--space-24); }
+  /* Loop — stack with a downward arrow centred in the row gap. Extra row gap
+     + a smaller glyph keep the arrow clear of the labels (BUG-1: arrows were
+     overlapping the text). */
+  .loop { grid-template-columns: 1fr; gap: var(--space-40); }
   .loop-node:not(:last-child)::after {
     content: "↓";
     top: auto;
-    right: 50%;
-    bottom: calc(-1 * var(--space-12));
-    transform: translateX(50%);
+    left: 50%;
+    right: auto;
+    bottom: calc(-1 * var(--space-24));
+    transform: translate(-50%, 50%);
+    font-size: var(--text-h5);
+    font-style: normal; /* desktop arrow is italic-serif → slants the ↓; upright it */
   }
-  .situation-grid { grid-template-columns: 1fr; }
-  .testimonial-grid { grid-template-columns: 1fr; }
+
+  /* "What clients come to me for" + "What clients say" → edge-to-edge carousels
+     on mobile (X4): horizontal scroll-snap, bleeding past the page gutter, with
+     a gutter-proportional edge fade. */
+  .situation-grid,
+  .testimonial-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    grid-template-columns: none;
+    gap: var(--space-16);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-16);
+    margin-left: calc(-1 * var(--space-20));
+    margin-right: calc(-1 * var(--space-20));
+    padding-left: var(--space-20);
+    padding-right: var(--space-20);
+    scroll-padding-left: var(--space-20);
+    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.15) 100%);
+            mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.15) 100%);
+  }
+  .situation-card,
+  .testimonial-card {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+  }
   .faq-list { grid-template-columns: 1fr; gap: 0; }
 }

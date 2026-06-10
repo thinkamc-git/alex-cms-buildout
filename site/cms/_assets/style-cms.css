@@ -2273,16 +2273,16 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   background: linear-gradient(
     180deg,
     rgba(0,0,0,0.15) 0%,
-    rgba(0,0,0,0.55) 65%,
-    rgba(0,0,0,0.85) 100%
+    rgba(0,0,0,0.6) 40%,
+    rgba(0,0,0,0.8) 100%
   );
 }
 .hero-img-preview--bleed-light::after {
   background: linear-gradient(
     180deg,
     rgba(255,255,255,0.10) 0%,
-    rgba(255,255,255,0.55) 55%,
-    rgba(255,255,255,0.92) 100%
+    rgba(255,255,255,0.65) 40%,
+    rgba(255,255,255,0.95) 100%
   );
 }
 .hero-img-preview--bleed-dark .hero-img-preview-title   { color: #fff; }

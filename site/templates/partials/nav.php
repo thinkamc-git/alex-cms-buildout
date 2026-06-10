@@ -21,7 +21,10 @@ if (!function_exists('render_nav')) {
   <a class="layout-nav-logo" href="/" aria-label="Alex M. Chong — home">
     <img src="/_layout/logo.png" alt="Alex M. Chong" />
   </a>
-  <div class="layout-nav-links">
+  <button class="layout-nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="layout-nav-drawer">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="layout-nav-links" id="layout-nav-drawer">
 <?php render_nav('header'); ?>
   </div>
 </nav>
@@ -44,5 +47,31 @@ if (!function_exists('render_nav')) {
       }
     }
     if (bestEl) bestEl.classList.add('is-active');
+  })();
+
+  // Mobile/tablet nav drawer (X1): hamburger toggles a full-height drawer.
+  (function () {
+    var nav = document.querySelector('.layout-nav');
+    var toggle = nav && nav.querySelector('.layout-nav-toggle');
+    var links = nav && nav.querySelector('.layout-nav-links');
+    if (!nav || !toggle || !links) return;
+    function setOpen(open) {
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!nav.classList.contains('is-open'));
+    });
+    document.addEventListener('click', function (e) {
+      if (nav.classList.contains('is-open') && !links.contains(e.target) && !toggle.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+    var rt;
+    window.addEventListener('resize', function () {
+      document.documentElement.classList.add('nav-no-anim');
+      clearTimeout(rt);
+      rt = setTimeout(function () { document.documentElement.classList.remove('nav-no-anim'); }, 250);
+    });
   })();
 </script>

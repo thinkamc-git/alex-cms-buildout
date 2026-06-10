@@ -154,7 +154,7 @@ $grid_rows_for = static function (array $sec): int {
         <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
           <div class="editorial-hero-text">
             <?php if ($eyebrowText !== ''): ?>
-              <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>><?= $e($eyebrowText) ?></div>
+              <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:var(--c-' . $e($hCatColour) . ')"' : '' ?>><?= $e($eyebrowText) ?></div>
             <?php endif; ?>
             <h1 class="editorial-hero-title"><?= $e($hTitle) ?></h1>
             <?php if ($hSummary !== ''): ?>
@@ -172,7 +172,7 @@ $grid_rows_for = static function (array $sec): int {
         <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?> editorial-hero--bg-<?= $e($hBg) ?><?= $hHasSide ? '' : ' is-solo' ?>">
           <div class="editorial-hero-text">
             <?php if ($eyebrowText !== ''): ?>
-              <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:' . $e($hCatColour) . '"' : '' ?>>
+              <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:var(--c-' . $e($hCatColour) . ')"' : '' ?>>
                 <?= $e($eyebrowText) ?>
               </div>
             <?php endif; ?>

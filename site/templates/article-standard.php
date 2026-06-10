@@ -48,11 +48,11 @@ $catLabel  = is_array($cat) ? (string)($cat['label']  ?? '') : '';
   <div class="article-dates">
     <?php render_block('publish-date', $ctx); ?>
     <?php render_block('updated-date', $ctx); ?>
+    <?php render_block('read-time', $ctx); /* X9: read-time inline with the date, not in the author row */ ?>
   </div>
 
   <div class="article-byline-row">
     <?php render_block('author', $ctx); ?>
-    <?php render_block('read-time', $ctx); ?>
   </div>
 
   <?php render_block('hero-image', $ctx); ?>

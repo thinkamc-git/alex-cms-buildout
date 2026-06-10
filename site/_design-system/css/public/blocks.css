@@ -141,6 +141,173 @@ body {
 .layout-nav-links a:hover,
 .layout-nav-links a.is-active { background: var(--primary); color: var(--surface); }
 
+/* Hamburger toggle — hidden on desktop, shown below 1024 (X1). */
+.layout-nav-toggle { display: none; }
+
+/* ── Nav drawer (X1) — hamburger + full-height slide-in drawer below desktop
+   (tablet + phone); logo to the gutter + ~1.1× (X11a). Mirrors pages.css. ── */
+@media (max-width: 1024px) {
+  .layout-nav {
+    padding-left: var(--space-20);
+    padding-right: var(--space-20);
+    /* Bar keeps its real frosted blur (backdrop-filter from the base rule). */
+  }
+  .layout-nav-logo { position: relative; z-index: 201; }
+  .layout-nav-logo img { height: 31px; }
+
+  .layout-nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end; /* bars hug the right → align to the gutter (= menu items) */
+    gap: 4px;
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    padding: 10px 0 10px 10px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    position: relative;
+    z-index: 201;
+  }
+  .layout-nav-toggle span {
+    display: block;
+    height: 2px;
+    width: 19px; /* ~0.8× bars, same 44px tap target */
+    background: var(--primary);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(2) { opacity: 0; }
+  .layout-nav.is-open .layout-nav-toggle span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+  /* Frosted panel — translucent surface + grain texture (no nested blur). */
+  .layout-nav-links {
+    position: fixed;
+    z-index: 200;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-8);
+    background: var(--surface); /* solid panel + grain texture (::before) */
+    overflow-y: auto;
+    isolation: isolate;
+    /* TABLET default: full-height side drawer from the right. */
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: min(78vw, 340px);
+    padding: calc(52px + var(--space-16)) var(--space-20) var(--space-24);
+    border-left: var(--rule);
+    transform: translateX(100%);
+    transition: transform 0.25s ease; /* tablet drawer animates in AND out */
+  }
+  .layout-nav-links::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--grain);
+    background-size: 200px 200px;
+    background-repeat: repeat;
+    mix-blend-mode: multiply;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .layout-nav-links a {
+    position: relative;
+    z-index: 1;
+    font-size: var(--text-base); /* 14px — the nav/UI token */
+    padding: var(--space-12);
+    border-radius: var(--r-card);
+  }
+  /* Notification dot — inline just right of the label, a touch bigger (overrides
+     render_nav's inline corner-dot styles; desktop bar dot untouched). */
+  .layout-nav-links a > span[aria-hidden] {
+    position: static !important;
+    top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
+    display: inline-block;
+    width: 11px !important;
+    height: 11px !important;
+    margin-left: var(--space-8);
+    vertical-align: middle;
+    transform: translateY(-1px); /* optical centre — middle sat 1px low */
+  }
+  /* Pill highlight (with text) — same: inline just right of the label, a touch bigger. */
+  .layout-nav-links a > .layout-nav-pill {
+    position: static !important;
+    top: auto !important; right: auto !important; left: auto !important; bottom: auto !important;
+    display: inline-block !important;
+    line-height: 1;
+    margin-left: var(--space-8);
+    vertical-align: middle;
+    font-size: var(--text-label) !important;
+    padding: 2px 6px 3px 7px !important; /* pill height + optical centring (Alex-tuned) */
+    border-radius: 5px !important;
+    transform: translateY(-1px);
+  }
+  .layout-nav.is-open .layout-nav-links {
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+  }
+  /* Dim overlay. TABLET (side drawer): full screen incl. the bar. Mobile
+     overrides to start below the bar. Sized in vw/vh because the bar's
+     backdrop-filter makes it the containing block (inset:0 would clip to 52px). */
+  .layout-nav::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 199;
+    background: rgba(0, 0, 0, 0.3); /* dim behind the open menu */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+  }
+  .layout-nav.is-open::after {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.22s ease;
+  }
+}
+
+/* MOBILE only — menu drops DOWN from under the bar. Item sizing inherits the
+   tablet drawer size (no enlargement). */
+@media (max-width: 767px) {
+  .layout-nav-links {
+    top: 52px;
+    left: 0;
+    right: 0;
+    height: auto;
+    width: auto;
+    max-height: calc(100vh - 52px);
+    padding: var(--space-20); /* uniform gutter: bar-to-first-item == side gutters */
+    border-left: 0;
+    border-bottom: var(--rule);
+    /* Unfurl downward from under the bar via clip — never crosses the bar line. */
+    transform: none;
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .layout-nav.is-open .layout-nav-links {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    visibility: visible;
+    transition: clip-path 0.24s ease, opacity 0.18s ease;
+  }
+  /* Mobile dropdown: dim starts below the bar (bar stays clear). */
+  .layout-nav::after { top: 52px; height: calc(100vh - 52px); }
+}
+
+/* Suppress nav transitions during viewport resize (no breakpoint-cross ghost). */
+html.nav-no-anim .layout-nav-links,
+html.nav-no-anim .layout-nav::after { transition: none !important; }
+
 .layout-footer {
   margin-top: auto;
   display: flex;
@@ -161,6 +328,19 @@ body {
   text-decoration: none;
 }
 .layout-footer-right { display: flex; gap: var(--space-16); }
+
+/* Footer (X6) — mobile: centre-aligned, links on top, copyright at the bottom.
+   DOM order is copyright-then-links, so column-reverse puts links first. */
+@media (max-width: 600px) {
+  .layout-footer {
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-12);
+    padding: var(--space-20);
+  }
+  .layout-footer-right { gap: var(--space-12); justify-content: center; flex-wrap: wrap; }
+}
 
 
 /* ── 5. Article layout ──────────────────────────────────────
@@ -198,7 +378,9 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  padding: var(--space-16) var(--space-64);
+  /* BUG-2 (X11c): align the breadcrumb gutter to the nav logo gutter (space-48),
+     not the wider space-64 it had — they were visibly misaligned on desktop. */
+  padding: var(--space-16) var(--space-48);
   background: var(--surface);
   border-bottom: var(--rule-faint);
   font-family: var(--font-cond);
@@ -529,7 +711,7 @@ a.article-series-pill:hover {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
-  font-size: var(--text-h5);
+  font-size: calc(var(--text-h5) * 1.05); /* X10: blockquote +1.05× on desktop (tablet/mobile reset below) */
   line-height: 1.45;
   color: var(--primary);
 }
@@ -1021,7 +1203,7 @@ a.article-series-pill:hover {
     padding: var(--space-12) var(--space-16);
   }
   .article-title.is-serif {
-    font-size: 32px;
+    font-size: 35px; /* X2: article title +1.1× on mobile (was 32) */
   }
   .article-summary {
     font-size: 16px;
@@ -1060,13 +1242,13 @@ a.article-series-pill:hover {
 
 @media (max-width: 768px) {
   .article-key-statement {
-    font-size: 28px;
+    font-size: 31px; /* B3: key statement +1.1× from tablet down (was 28) */
     padding-left: var(--space-16);
   }
 }
 @media (max-width: 480px) {
   .article-key-statement {
-    font-size: 22px;
+    font-size: 24px; /* B3: +1.1× (was 22) */
   }
 }
 
@@ -1304,7 +1486,7 @@ a.article-series-pill:hover {
   .index-grid,
   .index-hero,
   .index-featured { padding: var(--space-24); }
-  .index-title { font-size: var(--text-h4); }
+  .index-title { font-size: calc(var(--text-h4) * 1.1); } /* X2: index title +1.1× on mobile */
 }
 
 /* ── Editorial section stack (Phase 21.7) ──
@@ -1391,10 +1573,39 @@ a.article-series-pill:hover {
   border-bottom: 1px solid var(--ink-18);
   background: transparent;
 }
-/* Restore breathing room for the section that follows the hero —
-   the global "+ .index-section { padding-top:0 }" collapse was
-   pushing the next section's header flush against the hero rule. */
-.index-section--hero + .index-section { padding-top: var(--space-48); }
+/* Editorial heroes stack as flush blocks — no vertical section padding, so the
+   hero's framing rules + internal padding ARE the block (hero↔hero is flush). */
+.index-section:has(.editorial-hero) { padding-top: 0; padding-bottom: 0; }
+/* Hero↔module transitions (either order) get a top gutter so the spacing around
+   heroes matches the module-to-module rhythm. Hero→hero stays flush. */
+.index-section:has(.editorial-hero) + .index-section:not(:has(.editorial-hero)),
+.index-section:not(:has(.editorial-hero)) + .index-section:has(.editorial-hero) {
+  padding-top: var(--space-48);
+}
+/* Faint divider between adjacent card-grid (module) sections — INSET to the
+   content gutter (not full-bleed) so it lines up with the cards. */
+.index-section:not(:has(.editorial-hero)) + .index-section:not(:has(.editorial-hero)) {
+  position: relative;
+  padding-top: var(--space-48);
+}
+.index-section:not(:has(.editorial-hero)) + .index-section:not(:has(.editorial-hero))::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--space-48);
+  right: var(--space-48);
+  border-top: var(--rule-faint);
+}
+@media (max-width: 900px) {
+  .index-section:not(:has(.editorial-hero)) + .index-section:not(:has(.editorial-hero))::before {
+    left: var(--space-32); right: var(--space-32);
+  }
+}
+@media (max-width: 600px) {
+  .index-section:not(:has(.editorial-hero)) + .index-section:not(:has(.editorial-hero))::before {
+    left: var(--space-24); right: var(--space-24);
+  }
+}
 
 .editorial-hero {
   display: grid;
@@ -1435,17 +1646,30 @@ a.article-series-pill:hover {
   background: linear-gradient(
     180deg,
     rgba(0,0,0,0.15) 0%,
-    rgba(0,0,0,0.55) 65%,
-    rgba(0,0,0,0.85) 100%
+    rgba(0,0,0,0.6) 40%,
+    rgba(0,0,0,0.8) 100%
   );
 }
 .editorial-hero--bleed-light::before {
   background: linear-gradient(
     180deg,
     rgba(255,255,255,0.10) 0%,
-    rgba(255,255,255,0.55) 55%,
-    rgba(255,255,255,0.92) 100%
+    rgba(255,255,255,0.65) 40%,
+    rgba(255,255,255,0.95) 100%
   );
+}
+/* Progressive-ish blur on the light bleed: a blur layer that's full at the
+   bottom (behind the text) and masked to fade to clear toward the top. */
+.editorial-hero--bleed-light::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0; /* above bg image, below text (text is z-index:1) */
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 80%);
+          mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 80%);
 }
 .editorial-hero--bleed-dark .editorial-hero-text,
 .editorial-hero--bleed-light .editorial-hero-text {
@@ -1467,8 +1691,14 @@ a.article-series-pill:hover {
   background: var(--primary);
   color: var(--surface);
 }
+/* On the dark bleed hero the category colour needs to be lightened (mixed
+   toward white) to read against the dark image. Same hue, token unchanged.
+   (Light bleed is rare and reads fine, so no darken rule.) */
+.editorial-hero--bleed-dark .editorial-hero-eyebrow {
+  color: color-mix(in srgb, var(--c-current, var(--c-terracotta)), #fff 50%);
+}
 /* Eyebrow follows the post's category colour across every layout.
-   The inline style="--c-current: <hex>" set in the template overrides;
+   The inline style="--c-current: var(--c-<name>)" set in the template overrides;
    fallback is terracotta. */
 .editorial-hero-eyebrow { color: var(--c-current, var(--c-terracotta, var(--primary))); }
 
@@ -1620,6 +1850,18 @@ a.article-series-pill:hover {
   flex: 0 0 320px;
   scroll-snap-align: start;
 }
+/* Translucent-black scrollbar (~18% — the system's --ink-18), readable on the
+   light track. WebKit = full control; Firefox uses scrollbar-color. */
+.cards-grid.is-carousel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-18) transparent;
+}
+.cards-grid.is-carousel::-webkit-scrollbar { height: 10px; }
+.cards-grid.is-carousel::-webkit-scrollbar-track { background: transparent; }
+.cards-grid.is-carousel::-webkit-scrollbar-thumb {
+  background: var(--ink-18);
+  border-radius: 999px;
+}
 @media (max-width: 900px) {
   .cards-grid.is-carousel {
     margin-left:  calc(-1 * var(--space-32));
@@ -1628,6 +1870,9 @@ a.article-series-pill:hover {
     padding-right: var(--space-32);
     scroll-padding-left: var(--space-32);
     scroll-padding-right: var(--space-32);
+    /* fade must match the gutter exactly (was stuck at the desktop space-48) */
+    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-32), #000 calc(100% - var(--space-32)), rgba(0,0,0,0.2) 100%);
+            mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-32), #000 calc(100% - var(--space-32)), rgba(0,0,0,0.2) 100%);
   }
 }
 @media (max-width: 600px) {
@@ -1638,15 +1883,48 @@ a.article-series-pill:hover {
     padding-right: var(--space-24);
     scroll-padding-left: var(--space-24);
     scroll-padding-right: var(--space-24);
+    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.2) 100%);
+            mask-image: linear-gradient(to right, rgba(0,0,0,0.2) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.2) 100%);
   }
 }
 
 @media (max-width: 900px) {
   .index-section { padding: var(--space-24) var(--space-32); }
+  /* X12: keep the bleed hero full-bleed below desktop — the generic
+     .index-section padding above was re-introducing side gutters + the rule
+     under it. Hero stays edge-to-edge with no underline. */
+  .index-section--hero { padding: 0; border-bottom: 0; }
 }
 @media (max-width: 600px) {
   .index-section { padding: var(--space-24); }
-  .index-section-header { flex-direction: column; align-items: flex-start; gap: var(--space-8); }
+  .index-section--hero { padding: 0; border-bottom: 0; }
+  /* X13: keep the section title + "View all" on one row (View all anchored
+     right); wrap only if it can't fit. (Was stacking into a column.) */
+  .index-section-header { flex-wrap: wrap; gap: var(--space-8); }
+}
+
+/* C3: "within" hero (text + side image/card) — faint rules above + below at
+   ALL widths to frame it as the hero bounds. Image stacks ABOVE the text only
+   on mobile/tablet (≤900); side-by-side on desktop. */
+.editorial-hero:not(.is-solo):not(.editorial-hero--bleed-dark):not(.editorial-hero--bleed-light) {
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+}
+/* When the within hero is the lead (very top of the page), drop its top line. */
+.index-section--hero .editorial-hero { border-top: 0; }
+@media (max-width: 900px) {
+  .editorial-hero-side { order: -1; }
+}
+
+/* X8: Topic/filter bar (listing index) — align to the page gutter at each
+   width; mobile hides the "Topic" label so the first pill sits at the gutter.
+   Scoped to .index-page so the shared CMS .controller is untouched. */
+@media (max-width: 900px) {
+  .index-page .controller-row { padding-left: var(--space-32); padding-right: var(--space-32); }
+}
+@media (max-width: 600px) {
+  .index-page .controller-row { padding-left: var(--space-24); padding-right: var(--space-24); }
+  .index-page .ctrl-label { display: none; }
 }
 
 /* docs/MOTION.md §5 — html-body article fade-in.

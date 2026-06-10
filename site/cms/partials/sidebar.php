@@ -160,7 +160,7 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       Post Templates
     </a>
     <a class="nav-item<?= $activeClass('settings') ?>"<?= $activeAria('settings') ?> href="/cms/settings" data-nav-id="settings">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l.85.6 1.05-.15.45.96.95.46-.15 1.05.6.85-.6.85.15 1.05-.95.46-.45.96-1.05-.15L7 12.5l-.85-.6-1.05.15-.45-.96-.95-.46.15-1.05-.6-.85.6-.85-.15-1.05.95-.46.45-.96 1.05.15z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg>
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
       Settings
     </a>
     <a class="nav-item<?= $activeClass('design-system') ?>"<?= $activeAria('design-system') ?> href="/cms/design-system" data-nav-id="design-system">

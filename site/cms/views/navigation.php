@@ -342,7 +342,7 @@ require __DIR__ . '/../partials/topbar.php';
                   </span>
                   <select name="highlight" onchange="navHighlightChanged(this)">
                     <?php foreach (NAV_HIGHLIGHTS as $h): ?>
-                      <option value="<?= $h ?>"<?= ($it['highlight']===$h)?' selected':'' ?>><?= $h ?></option>
+                      <option value="<?= $h ?>"<?= ($it['highlight']===$h)?' selected':'' ?>><?= $h === 'none' ? '—' : $h ?></option>
                     <?php endforeach; ?>
                   </select>
                   <?= $renderMarkCell((string)$it['highlight'], (string)$it['highlight_text'], (string)$it['highlight_color']) ?>

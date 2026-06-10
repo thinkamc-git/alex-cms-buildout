@@ -1389,6 +1389,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 /* Pill cells (Stage / status) hold a fixed-width chip — never truncate them to
    "…" when the fixed-layout table gets narrow; show the chip in full. */
 .content-block .cms-table td:has(.pill) { overflow: visible; text-overflow: clip; }
+/* Action cells hold hover-reveal buttons (.row-actions-hover is visibility:hidden,
+   so it still reserves width) — never truncate them to "…". */
+.content-block .cms-table td.cell-actions { overflow: visible; text-overflow: clip; }
 
 /* Inline hint that sits on its own line under a chip (e.g. "no folder" /
    "no file picked" under the Content Type pill in experiments). */

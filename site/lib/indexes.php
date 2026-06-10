@@ -597,6 +597,7 @@ function _index_section_normalize(array $row): array
     $row['hero_image_url']  = (string)($row['hero_image_url']  ?? '');
     $row['hero_layout']     = (string)($row['hero_layout']     ?? 'within');
     $row['hero_background'] = (string)($row['hero_background'] ?? 'transparent');
+    $row['hero_blur']       = (int)($row['hero_blur'] ?? 0);
     $row['item_limit']      = isset($row['item_limit']) && $row['item_limit'] !== null
                               ? (int)$row['item_limit'] : null;
     return $row;
@@ -683,6 +684,9 @@ function save_index_section(array $data): array
     if (!in_array($heroLayout, INDEX_SECTION_HERO_LAYOUTS, true)) $heroLayout = 'within';
     $heroBg = (string)($data['hero_background'] ?? ($existing['hero_background'] ?? 'transparent'));
     if (!in_array($heroBg, INDEX_SECTION_HERO_BGS, true)) $heroBg = 'transparent';
+    $heroBlur = isset($data['hero_blur'])
+        ? (int)(bool)$data['hero_blur']
+        : (int)($existing['hero_blur'] ?? 0);
 
     // Display layer — only meaningful for curated/feed. Hero ignores it
     // but we still store sane defaults so the row is consistent.
@@ -759,6 +763,7 @@ function save_index_section(array $data): array
         ':himg'        => $heroImgUrl,
         ':hlayout'     => $heroLayout,
         ':hbg'         => $heroBg,
+        ':hblur'       => $heroBlur,
         ':fmt'         => $format,
         ':limit'       => $item_limit,
         ':rows'        => $grid_rows,
@@ -776,14 +781,14 @@ function save_index_section(array $data): array
     if ($id === 0) {
         $sql = 'INSERT INTO index_sections
                   (index_id, position, section_type, title, header_style,
-                   hero_image_mode, hero_image_url, hero_layout, hero_background,
+                   hero_image_mode, hero_image_url, hero_layout, hero_background, hero_blur,
                    display_format, item_limit, grid_rows, see_more_label, see_more_target,
                    feed_types, feed_categories, feed_sort,
                    filter_show, filter_by, filter_options,
                    item_ids)
                 VALUES
                   (:iid, :pos, :type, :title, :hstyle,
-                   :himode, :himg, :hlayout, :hbg,
+                   :himode, :himg, :hlayout, :hbg, :hblur,
                    :fmt, :limit, :rows, :see_label, :see_target,
                    :ftypes, :fcats, :fsort,
                    :fshow, :fby, :fopts,
@@ -801,6 +806,7 @@ function save_index_section(array $data): array
               hero_image_url = :himg,
               hero_layout = :hlayout,
               hero_background = :hbg,
+              hero_blur = :hblur,
               display_format = :fmt,
               item_limit = :limit,
               grid_rows = :rows,

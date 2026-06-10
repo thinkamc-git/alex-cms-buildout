@@ -587,6 +587,7 @@
     <div class="sidebar-group">
       <span class="sidebar-group-label">Selection & Filters</span>
       <a data-scroll-panel="components" data-scroll-section="comp-filter" class="sidebar-link">Filter Controls</a>
+      <a data-scroll-panel="components" data-scroll-section="comp-checkbox" class="sidebar-link">Checkbox</a>
     </div>
     <div class="sidebar-group">
       <span class="sidebar-group-label">Status & Feedback</span>
@@ -742,6 +743,37 @@
           <span class="usage-label">✗ Don't</span>
           <p class="usage-text">Use Barlow Condensed outside of pills · Use for AND logic without making that explicit · Use more than 8 pills in a row — wrap is fine but consider grouping</p>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="comp-checkbox">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <div class="section-title">Checkbox</div>
+      <div class="section-desc">Near-square box, hairline border on surface; checked fills <code style="font-family:var(--font-mono);font-size:var(--text-meta);background:var(--ink-08);padding:1px 5px;border-radius:2px">--primary</code> with a white check — the same "selected = primary" language as the filter pills and active nav. Keyboard focus uses the DS denim ring.</div>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">States — Live</span>
+      <div style="display:flex;gap:var(--space-32);align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <label class="ds-check"><input type="checkbox"><span class="ds-check-box"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7.5 6 10.5 11 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Unchecked</label>
+        <label class="ds-check"><input type="checkbox" checked><span class="ds-check-box"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7.5 6 10.5 11 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Checked</label>
+        <label class="ds-check is-disabled"><input type="checkbox" disabled><span class="ds-check-box"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7.5 6 10.5 11 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Disabled</label>
+      </div>
+      <p style="font-size:var(--text-meta);font-weight:500;color:var(--muted);line-height:1.6">Click to toggle. Tab to a checkbox to see the focus ring.</p>
+    </div>
+
+    <div class="comp-section">
+      <span class="section-label">Specs</span>
+      <div class="spec-grid" style="max-width:520px">
+        <span class="spec-key">box</span><span class="spec-val">18×18 · border-radius var(--r-card) (4px) · flat</span>
+        <span class="spec-key">unchecked</span><span class="spec-val">hairline var(--rule) on var(--surface)</span>
+        <span class="spec-key">checked</span><span class="spec-val">var(--primary) fill · white check (currentColor = surface)</span>
+        <span class="spec-key">hover</span><span class="spec-val">border → var(--primary)</span>
+        <span class="spec-key">focus</span><span class="spec-val">var(--focus-ring) — denim, :focus-visible only</span>
+        <span class="spec-key">disabled</span><span class="spec-val">var(--ink-08) fill · 0.5 opacity</span>
+        <span class="spec-key">markup</span><span class="spec-val">label.ds-check &gt; input + span.ds-check-box (svg check)</span>
       </div>
     </div>
   </div>

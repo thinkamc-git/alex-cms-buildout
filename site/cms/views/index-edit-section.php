@@ -163,7 +163,7 @@ $catsForThis = $catsForTypes($ftypes);
       <div class="form-side" data-hero-preview-pane>
         <div class="field-group">
           <label class="field-label">Preview</label>
-          <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?>" data-hero-preview>
+          <div class="hero-img-preview hero-img-preview--<?= $e($hlayout) ?> hero-img-preview--bg-<?= $e($hbg) ?><?= $hblur ? ' hero-img-preview--blur' : '' ?>" data-hero-preview>
             <div class="hero-img-preview-text" aria-hidden="true">
               <div class="hero-img-preview-eyebrow" data-hero-preview-eyebrow style="<?= $stitle === '' ? 'display:none' : '' ?>"><?= $e(strtoupper($stitle)) ?></div>
               <div class="hero-img-preview-title">Title Example</div>
@@ -201,6 +201,18 @@ $catsForThis = $catsForTypes($ftypes);
             </div>
           </div>
           <input type="hidden" name="<?= $inputBase ?>[hero_background]" value="<?= $e($hbg) ?>">
+        </div>
+
+        <div class="field-group" data-hero-blur-field style="margin-bottom:0;<?= in_array($hlayout, ['bleed-dark','bleed-light'], true) ? '' : 'display:none' ?>">
+          <label class="field-label">Background blur</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:nowrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_blur]">
+              <?php foreach (['1' => 'On', '0' => 'Off'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= (int)$hblur === (int)$v ? 'active' : '' ?>" data-pill-value="<?= $e((string)$v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_blur]" value="<?= $e((string)$hblur) ?>">
         </div>
       </div>
     </div><!-- /.form-grid hero 2-col -->

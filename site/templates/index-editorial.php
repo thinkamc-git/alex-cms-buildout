@@ -115,6 +115,7 @@ $grid_rows_for = static function (array $sec): int {
           $hSeriesTot = $hSeriesId > 0 ? count_series_published($hSeriesId) : 0;
           $hLayout    = (string)($sec['hero_layout']     ?? 'within');
           $hBg        = (string)($sec['hero_background'] ?? 'transparent');
+          $hBlur      = (int)($sec['hero_blur'] ?? 0);
           $hImgMode   = (string)($sec['hero_image_mode'] ?? 'auto');
           $hImgCustom = (string)($sec['hero_image_url']  ?? '');
           // Resolve the image — used as side panel (within) or full bg (bleed).
@@ -151,7 +152,7 @@ $grid_rows_for = static function (array $sec): int {
               : '';
       ?>
       <?php if ($isBleed): ?>
-        <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
+        <div class="editorial-hero editorial-hero--<?= $e($hLayout) ?><?= $hBlur ? ' editorial-hero--blur' : '' ?>" <?= $bleedStyle !== '' ? 'style="' . $bleedStyle . '"' : '' ?>>
           <div class="editorial-hero-text">
             <?php if ($eyebrowText !== ''): ?>
               <div class="editorial-hero-eyebrow"<?= $hCatColour ? ' style="--c-current:var(--c-' . $e($hCatColour) . ')"' : '' ?>><?= $e($eyebrowText) ?></div>

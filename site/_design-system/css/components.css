@@ -87,6 +87,29 @@
 .row-btn { padding: 3px 9px; border-radius: 2px; background: transparent; border: 1px solid var(--primary); color: var(--secondary); font-family: var(--font-cond); font-size: var(--text-tiny); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.12s; }
 .row-btn:hover { border-color: var(--primary); color: var(--primary); }
 
+/* ── Checkbox ──────────────────────────────────────────────
+   Near-square 4px box, hairline border on surface; checked fills
+   --primary with a white check (matches "selected = primary"). The
+   native input is visually hidden and drives the .ds-check-box via
+   the adjacent-sibling selector. Keyboard focus uses the DS ring. */
+.ds-check { display: inline-flex; align-items: center; gap: var(--space-8); cursor: pointer; font-size: var(--text-md); color: var(--primary); user-select: none; }
+.ds-check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ds-check-box {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border: var(--rule); border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--surface); /* the check (currentColor) reads white on the primary fill */
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.ds-check-box svg { width: 12px; height: 12px; opacity: 0; transition: opacity 0.1s ease; }
+.ds-check:hover .ds-check-box { border-color: var(--primary); }
+.ds-check input:checked + .ds-check-box { background: var(--primary); border-color: var(--primary); }
+.ds-check input:checked + .ds-check-box svg { opacity: 1; }
+.ds-check input:focus-visible + .ds-check-box { box-shadow: var(--focus-ring); border-color: var(--c-focus); }
+.ds-check input:disabled + .ds-check-box { background: var(--ink-08); border-color: var(--ink-12); }
+.ds-check.is-disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── Nav pills — rectangular ── */
 .npbar { display: flex; flex-wrap: wrap; }
 .npbar a {

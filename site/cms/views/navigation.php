@@ -50,6 +50,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 'highlight'       => (string)($_POST['highlight'] ?? 'none'),
                 'highlight_text'  => (string)($_POST['highlight_text'] ?? ''),
                 'highlight_color' => (string)($_POST['highlight_color'] ?? ''),
+                // "Show on mobile" checkbox (default on). Stored inverted as
+                // hide_mobile: shown → 0, hidden → 1.
+                'hide_mobile'     => (($_POST['show_mobile'] ?? '1') === '1') ? 0 : 1,
                 // Items are active unless the nightly broken-target sweep
                 // deactivates them. The editor has no manual hide toggle.
                 'is_active'       => 1,
@@ -168,9 +171,10 @@ $renderMarkCell = static function (string $highlight, string $pill_text, string 
       80px                  /* highlight                  */
       96px                  /* pill text / dot preview    */
       92px                  /* color                      */
-      auto                  /* save                       */
-      auto                  /* delete                     */
-      auto;                 /* broken pill                */
+      44px                  /* hide on mobile             */
+      64px                  /* save   — FIXED so the header grid matches the   */
+      34px                  /* delete   row grid (empty header cells vs buttons */
+      auto;                 /* broken   made the fr columns resolve differently */
   }
   .nav-row.is-broken { background:#fff5f5; border-color:#f5b0b0; }
   .nav-row .grip { cursor:grab; color:var(--muted); user-select:none; text-align:center; font-size:14px; }
@@ -282,9 +286,12 @@ require __DIR__ . '/../partials/topbar.php';
               <span>Key</span>
               <span>Type</span>
               <span>Target</span>
-              <span>Style</span>
               <span>Mark</span>
+              <span>Label</span>
               <span>Color</span>
+              <span title="Show on mobile (phone ≤767) — checked = visible" style="display:inline-flex;justify-content:center">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-label="Show on mobile"><rect x="4" y="1.5" width="6" height="11" rx="1" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="10.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </span>
               <span></span>
               <span></span>
               <span></span>
@@ -340,6 +347,11 @@ require __DIR__ . '/../partials/topbar.php';
                   </select>
                   <?= $renderMarkCell((string)$it['highlight'], (string)$it['highlight_text'], (string)$it['highlight_color']) ?>
                   <input type="text" name="highlight_color" value="<?= $e((string)$it['highlight_color']) ?>" placeholder="#d63031" data-color<?= $it['highlight']==='none' ? ' class="is-off"' : '' ?>>
+                  <label class="ds-check" title="Show on mobile (phone ≤767) — uncheck to hide" style="justify-self:center">
+                    <input type="hidden" name="show_mobile" value="0">
+                    <input type="checkbox" name="show_mobile" value="1"<?= empty($it['hide_mobile']) ? ' checked' : '' ?>>
+                    <span class="ds-check-box"><svg viewBox="0 0 14 14" fill="none"><path d="M3 7.5 6 10.5 11 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  </label>
                   <button type="submit" class="btn-sec btn-tiny" data-save-btn>Save</button>
                 </form>
                 <form method="post" action="/cms/navigation" style="display:inline" data-confirm="Delete &quot;<?= $e((string)$it['label']) ?>&quot;? This removes the link from the public site.">

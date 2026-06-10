@@ -40,9 +40,11 @@
     var layout = layoutH.value;
     var mode   = modeH.value;
     var bgField = sec.querySelector('[data-hero-bg-field]');
+    var blurField = sec.querySelector('[data-hero-blur-field]');
     var imgMode = sec.querySelector('[data-hero-image-mode-field]');
     var imgUrl  = sec.querySelector('[data-hero-image-url]');
     if (bgField) bgField.style.display = (layout === 'plain' || layout === 'within') ? '' : 'none';
+    if (blurField) blurField.style.display = (layout === 'bleed-dark' || layout === 'bleed-light') ? '' : 'none';
     if (imgMode) imgMode.style.display = (layout === 'plain') ? 'none' : '';
     if (imgUrl)  imgUrl.style.display  = (layout !== 'plain' && mode === 'custom') ? '' : 'none';
     syncHeroPreview(sec);
@@ -78,6 +80,9 @@
       pane.classList.remove('hero-img-preview--bg-' + k);
     });
     pane.classList.add('hero-img-preview--bg-' + bg);
+    // Bottom-blur preview (bleed only) mirrors the hero_blur toggle.
+    var blurH = sec.querySelector('input[type="hidden"][name$="[hero_blur]"]');
+    pane.classList.toggle('hero-img-preview--blur', !!(blurH && blurH.value === '1'));
 
     // Repopulate the imgwrap; leave the .hero-img-preview-text overlay
     // alone so the placeholder Title / Caption stay rendered.
@@ -163,7 +168,8 @@
     if (hidden && hidden.name &&
         (hidden.name.indexOf('[hero_layout]') > -1 ||
          hidden.name.indexOf('[hero_image_mode]') > -1 ||
-         hidden.name.indexOf('[hero_background]') > -1)) {
+         hidden.name.indexOf('[hero_background]') > -1 ||
+         hidden.name.indexOf('[hero_blur]') > -1)) {
       var sec3 = pill.closest('[data-section]');
       if (sec3) syncHeroFieldVisibility(sec3);
     }

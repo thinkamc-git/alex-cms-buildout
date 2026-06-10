@@ -52,7 +52,7 @@ function nav_contrast_text(string $bg): string
 function list_nav_items(?string $zone = null, bool $only_active = false): array
 {
     $sql = 'SELECT id, zone, label, nav_key, target_type, target_id, target_slug,
-                   custom_url, highlight, highlight_text, highlight_color,
+                   custom_url, highlight, highlight_text, highlight_color, hide_mobile,
                    position, is_active, created_at, updated_at
               FROM nav_items';
     $where = [];
@@ -102,6 +102,7 @@ function save_nav_item(array $data): int
     $highlight   = in_array($data['highlight'] ?? '', NAV_HIGHLIGHTS, true) ? $data['highlight'] : 'none';
     $highlight_text  = trim((string)($data['highlight_text'] ?? '')) ?: null;
     $highlight_color = trim((string)($data['highlight_color'] ?? '')) ?: null;
+    $hide_mobile = isset($data['hide_mobile']) ? (int)(bool)$data['hide_mobile'] : 0;
     $is_active   = isset($data['is_active']) ? (int)(bool)$data['is_active'] : 1;
     $position    = isset($data['position']) ? (int)$data['position'] : 0;
 
@@ -110,13 +111,13 @@ function save_nav_item(array $data): int
             'UPDATE nav_items
                 SET zone=?, label=?, nav_key=?, target_type=?, target_id=?,
                     target_slug=?, custom_url=?, highlight=?, highlight_text=?,
-                    highlight_color=?, position=?, is_active=?
+                    highlight_color=?, hide_mobile=?, position=?, is_active=?
               WHERE id=?'
         );
         $stmt->execute([
             $zone, $label, $nav_key, $target_type, $target_id, $target_slug,
             $custom_url, $highlight, $highlight_text, $highlight_color,
-            $position, $is_active, $id,
+            $hide_mobile, $position, $is_active, $id,
         ]);
         return $id;
     }
@@ -130,13 +131,13 @@ function save_nav_item(array $data): int
     $stmt = db()->prepare(
         'INSERT INTO nav_items
            (zone, label, nav_key, target_type, target_id, target_slug,
-            custom_url, highlight, highlight_text, highlight_color,
+            custom_url, highlight, highlight_text, highlight_color, hide_mobile,
             position, is_active)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
         $zone, $label, $nav_key, $target_type, $target_id, $target_slug,
-        $custom_url, $highlight, $highlight_text, $highlight_color,
+        $custom_url, $highlight, $highlight_text, $highlight_color, $hide_mobile,
         $position, $is_active,
     ]);
     return (int)db()->lastInsertId();
@@ -266,6 +267,8 @@ function render_nav(string $zone): void
         if (!empty($item['nav_key'])) {
             $key_attr = ' data-nav-key="' . htmlspecialchars((string)$item['nav_key'], ENT_QUOTES, 'UTF-8') . '"';
         }
+        // Hide-on-mobile (phone ≤767): CSS hides .is-hide-mobile in the menu.
+        $class_attr = !empty($item['hide_mobile']) ? ' class="is-hide-mobile"' : '';
 
         $extra_style = '';
         $highlight_html = '';
@@ -291,7 +294,7 @@ function render_nav(string $zone): void
             $highlight_html = '<span class="layout-nav-pill" style="position:absolute;' . $pill_pos . ';background:' . $color_attr . ';color:' . $fg . ';font-family:var(--font-cond,sans-serif);font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;padding:1px 6px;border-radius:4px;z-index:1;white-space:nowrap;pointer-events:none">' . $pill_text . '</span>';
         }
 
-        echo "<a href=\"$href_attr\"$key_attr$extra_style>$label_html$highlight_html</a>\n";
+        echo "<a href=\"$href_attr\"$class_attr$key_attr$extra_style>$label_html$highlight_html</a>\n";
     }
 }
 

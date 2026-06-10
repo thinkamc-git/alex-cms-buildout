@@ -73,9 +73,18 @@ Legend: ⬜ todo · ✅ pass · ⚠️ issue (see bug log)
 
 ---
 
-## ⏳ Deferred follow-up — Bleed-hero blur toggle (CMS feature)
+## ⏳ Deferred follow-up — CMS toggles (build these two together)
 
-Requested 2026-06-09, deferred (out of mobile-polish scope; it's a schema+CMS feature). Build later as its own task:
+Two small schema+CMS features requested 2026-06-09, deferred out of mobile-polish scope. **Bundle into one "CMS toggles" task** (one migration pass).
+
+### A · Nav item "hide on mobile" toggle
+- **Scope:** **phone only (≤767)** — hidden at phone widths; still shows in the tablet drawer + desktop bar.
+- **DB migration:** `hide_mobile` boolean on `nav_items`.
+- **`lib/nav.php`:** persist it + emit a class (e.g. `is-hide-mobile`) on the `<a>` when on.
+- **CMS Navigation editor:** per-item toggle.
+- **CSS:** `@media (max-width:767px) .layout-nav-links a.is-hide-mobile { display: none }` (both nav surfaces).
+
+### B · Bleed-hero blur toggle
 - **DB migration:** new `hero_blur` column on the index hero settings.
 - **`lib/indexes.php`:** read/write/default (default **dark = off, light = on**).
 - **CMS editor:** toggle UI in `index-edit-section.php` + live preview in `index-edit.js` / `style-cms.css`.

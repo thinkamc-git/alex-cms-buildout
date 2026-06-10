@@ -302,6 +302,10 @@ body {
   }
   /* Mobile dropdown: dim starts below the bar (bar stays clear). */
   .layout-nav::after { top: 52px; height: calc(100vh - 52px); }
+  /* Per-item "hide on mobile" (phone only) — set via the Navigation editor.
+     Applies to both the header menu and the footer link row. */
+  .layout-nav-links a.is-hide-mobile,
+  .layout-footer-right a.is-hide-mobile { display: none; }
 }
 
 /* Suppress nav transitions during viewport resize (no breakpoint-cross ghost). */
@@ -1658,9 +1662,11 @@ a.article-series-pill:hover {
     rgba(255,255,255,0.95) 100%
   );
 }
-/* Progressive-ish blur on the light bleed: a blur layer that's full at the
-   bottom (behind the text) and masked to fade to clear toward the top. */
-.editorial-hero--bleed-light::after {
+/* Optional bottom blur (CMS toggle → .editorial-hero--blur): a blur layer full
+   at the bottom (behind the text), masked to fade to clear toward the top.
+   Bleed layouts only — never on plain/within. */
+.editorial-hero--bleed-dark.editorial-hero--blur::after,
+.editorial-hero--bleed-light.editorial-hero--blur::after {
   content: '';
   position: absolute;
   inset: 0;

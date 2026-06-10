@@ -292,6 +292,10 @@ body {
   }
   /* Mobile dropdown: dim starts below the bar (bar stays clear). */
   .layout-nav::after { top: 52px; height: calc(100vh - 52px); }
+  /* Per-item "hide on mobile" (phone only) — set via the Navigation editor.
+     Applies to both the header menu and the footer link row. */
+  .layout-nav-links a.is-hide-mobile,
+  .layout-footer-right a.is-hide-mobile { display: none; }
 }
 
 /* Suppress nav transitions during viewport resize so crossing the

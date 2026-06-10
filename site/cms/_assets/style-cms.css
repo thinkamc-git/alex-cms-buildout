@@ -1947,6 +1947,11 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 /* Match the input's border(1) + padding(7) inset so the header label
    sits flush with the input/select text below it. */
 .rowform-headers > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
+/* Empty header cells (grip / save / delete / broken) must not reserve the 8px
+   padding — otherwise an `auto` column with an empty header is wider than the
+   matching row cell, throwing the flexible columns out of alignment as the
+   table widens. */
+.rowform-headers > span:empty { padding: 0; }
 .rowform-row {
   display:grid;
   grid-template-columns: var(--rowform-cols, 1fr auto auto);
@@ -2284,6 +2289,20 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
     rgba(255,255,255,0.65) 40%,
     rgba(255,255,255,0.95) 100%
   );
+}
+/* Bottom-blur preview — mirrors the public .editorial-hero--blur effect:
+   a blur over the image, full at the bottom, fading to clear toward the top. */
+.hero-img-preview--bleed-dark.hero-img-preview--blur .hero-img-preview-imgwrap::after,
+.hero-img-preview--bleed-light.hero-img-preview--blur .hero-img-preview-imgwrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 80%);
+          mask-image: linear-gradient(to top, #000 0%, #000 35%, transparent 80%);
 }
 .hero-img-preview--bleed-dark .hero-img-preview-title   { color: #fff; }
 .hero-img-preview--bleed-dark .hero-img-preview-caption { color: rgba(255,255,255,0.86); }

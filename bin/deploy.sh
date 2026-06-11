@@ -154,6 +154,8 @@ cp site/cms/_assets/confirm.js          "$STAGE/cms/_assets/"
 cp site/cms/_assets/row-click.js        "$STAGE/cms/_assets/"
 # Phase 21.7: Editorial Index section-stack builder JS.
 cp site/cms/_assets/index-edit.js       "$STAGE/cms/_assets/"
+# Shared drag-to-reorder helper (single drop-line) — navigation, series, etc.
+cp site/cms/_assets/reorder.js          "$STAGE/cms/_assets/"
 
 # Phase 6b: public Article rendering. Templates live under /templates/
 # (PHP wrappers + per-block partials). lib/render.php is the entry point

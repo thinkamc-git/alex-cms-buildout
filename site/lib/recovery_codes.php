@@ -89,6 +89,43 @@ final class RecoveryCodes
             ->execute([':id' => $id, ':u' => $uid]);
     }
 
+    /** Delete every spent (used) code for the user. Returns the count removed. */
+    public static function purge_used(int $uid): int
+    {
+        $st = db()->prepare('DELETE FROM recovery_codes WHERE user_id = :u AND used_at IS NOT NULL');
+        $st->execute([':u' => $uid]);
+        return $st->rowCount();
+    }
+
+    /** Delete ALL of the user's codes (used + unused). */
+    public static function purge_all(int $uid): void
+    {
+        db()->prepare('DELETE FROM recovery_codes WHERE user_id = :u')->execute([':u' => $uid]);
+    }
+
+    /**
+     * Top up to MAX *unused* codes (additive, non-destructive): clear spent
+     * codes — dead weight that otherwise blocks the cap — then generate enough
+     * NEW codes to reach MAX. Existing UNUSED codes are preserved and stay
+     * valid. Returns only the new codes (shown once).
+     */
+    public static function top_up(int $uid): array
+    {
+        self::purge_used($uid);
+        return self::add($uid, self::MAX);   // add() caps at MAX − total
+    }
+
+    /**
+     * Replace the WHOLE set: purge everything and issue a fresh MAX codes.
+     * Invalidates every existing code (use only when codes may be compromised).
+     * Returns the new codes (shown once).
+     */
+    public static function replace_all(int $uid): array
+    {
+        self::purge_all($uid);
+        return self::add($uid, self::MAX);
+    }
+
     /**
      * Verify a submitted code against the user's unused codes; consume it on
      * match. Input is normalised (lowercased, non-alphanumerics stripped).

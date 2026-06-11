@@ -342,6 +342,14 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
 
 /* Section header */
 .content-block { margin-bottom:var(--space-32); }
+/* Account-tab sections (password / recovery / sign-out) are separate forms +
+   bare blocks rather than one form like Site Settings. Give every section the
+   SAME 48px gap by spacing the content-blocks themselves and zeroing the
+   wrapper form's margin — otherwise the flex <form> around Change Password
+   doesn't collapse its inner block margin and that gap reads larger than the
+   others. Scoped to the account panel. */
+[data-tab-panel="account"] .content-block { margin-bottom:var(--space-48); }
+[data-tab-panel="account"] > form { margin-bottom:0; }
 .content-block-header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:var(--space-16); padding-bottom:var(--space-12); border-bottom:var(--rule-faint); }
 .content-block-label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:var(--secondary); }
 .content-block-sublabel { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:500; letter-spacing:0.06em; color:var(--muted); margin-left:var(--space-8); }
@@ -539,6 +547,17 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    overflow-y:auto), so unlike clickable table rows the card can't lift with a
    box-shadow — a full --primary border is the clear affordance instead. */
 .kcard:hover { border-color: var(--primary); }
+/* Draggable in-flight cards (Concept / Outline / Draft) get a grab cursor + a
+   grip handle as the drag affordance. Scheduled / Recently Published cards are
+   sorted, not draggable — no grip, normal pointer. */
+.kcard--draggable { position: relative; cursor: grab; }
+.kcard--draggable:active { cursor: grabbing; }
+/* Grip pinned to the card's top-right corner; title reserves room so the text
+   never runs under it. */
+.kcard--draggable .kcard-title,
+.kcard--draggable .idea-card-title { padding-right: var(--space-16); }
+.kcard-grip { position:absolute; top:var(--space-8); right:var(--space-12); color:var(--muted); font-size:14px; line-height:1; letter-spacing:-3px; cursor:grab; user-select:none; transition:color 0.12s; }
+.kcard--draggable:hover .kcard-grip { color:var(--primary); }
 .kcard-head { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-8); margin-bottom:var(--space-8); }
 .kcard-title { font-family:var(--font); font-size:var(--text-meta); font-weight:600; color:var(--primary); line-height:1.4; flex:1; }
 .kcard-summary { font-family:var(--font); font-size:var(--text-tiny); font-weight:400; color:var(--muted); line-height:1.65; margin-top:var(--space-4); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
@@ -1319,18 +1338,26 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
    codes are struck through. */
 .recovery-codes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-8); margin:var(--space-8) 0 0; }
 .recovery-code { font-family:var(--font-mono); font-size:var(--text-md); letter-spacing:0.04em; color:var(--primary); background:var(--canvas-raised); border:var(--rule-faint); border-radius:var(--r-card); padding:var(--space-8) var(--space-12); text-align:center; user-select:all; }
-/* Each code lives in a slot with a hover-trash; empty slots generate one. */
-.recovery-slot { position:relative; display:flex; }
-.recovery-slot > .recovery-code { display:block; flex:1 1 auto; min-width:0; box-sizing:border-box; padding-right:var(--space-32); }
-.recovery-slot-del { position:absolute; top:0; bottom:0; right:var(--space-8); display:flex; align-items:center; margin:0; }
-.recovery-slot-trash { appearance:none; -webkit-appearance:none; border:0; background:transparent; padding:4px; cursor:pointer; color:var(--muted); opacity:0; transition:opacity .12s, color .12s; display:inline-flex; }
-.recovery-slot:hover .recovery-slot-trash { opacity:1; }
-.recovery-slot-trash:hover { color:var(--c-terracotta); }
-.recovery-slot--used .recovery-code { opacity:0.4; }
-.recovery-slot--used .recovery-slot-trash { opacity:1; }   /* used → trash shown by default */
-.recovery-slot--empty { margin:0; }
-.recovery-slot-gen { width:100%; box-sizing:border-box; appearance:none; -webkit-appearance:none; cursor:pointer; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); background:transparent; border:1px dashed var(--ink-18); border-radius:var(--r-card); padding:var(--space-8) var(--space-12); transition:color .12s, border-color .12s; }
-.recovery-slot-gen:hover { color:var(--primary); border-color:var(--primary); }
+/* One-time reveal panel: the freshly generated codes, shown once, on a faint
+   "success" tint to read as "save these now". Reuses the .recovery-codes grid. */
+.recovery-reveal { margin:var(--space-8) 0 var(--space-16); padding:var(--space-16); border:1px solid color-mix(in srgb, var(--stage-published) 40%, var(--ink-18)); border-radius:var(--r-card); background:color-mix(in srgb, var(--stage-published) 6%, transparent); }
+.recovery-reveal-head { font-size:var(--text-meta); color:var(--secondary); line-height:1.5; margin:0 0 var(--space-12); }
+.recovery-reveal .recovery-codes { grid-template-columns:repeat(4, minmax(0,1fr)); margin:0 0 var(--space-12); }
+/* Status line — the key body fact (how many codes you have), at body size. */
+.recovery-status { font-size:var(--text-md); color:var(--primary); line-height:1.5; margin:0; }
+.recovery-note { font-size:var(--text-meta); color:var(--muted); line-height:1.55; margin:var(--space-4) 0 0; }
+/* Actions row — generate + the quiet replace trigger. No divider line (the
+   section header underline is the only rule in the block). */
+.recovery-actions { margin-top:var(--space-16); }
+.recovery-actions-row { display:flex; align-items:center; gap:var(--space-16); }
+/* Destructive "Replace all": a quiet underline trigger that expands a gated
+   confirmation panel — deliberately a two-step, not a one-click. */
+.recovery-danger-trigger { appearance:none; -webkit-appearance:none; border:0; background:transparent; padding:0; cursor:pointer; font-family:var(--font); font-size:var(--text-meta); color:var(--muted); border-bottom:1px solid var(--ink-18); transition:color .15s, border-color .15s; }
+.recovery-danger-trigger:hover { color:var(--c-terracotta); border-color:var(--c-terracotta); }
+.recovery-danger-confirm { margin-top:var(--space-12); padding:var(--space-12) var(--space-16); border:1px solid color-mix(in srgb, var(--c-terracotta) 30%, transparent); background:color-mix(in srgb, var(--c-terracotta) 6%, transparent); border-radius:var(--r-card); }
+.recovery-danger-confirm[hidden] { display:none; }
+.recovery-danger-warn { font-size:var(--text-meta); color:var(--secondary); line-height:1.55; margin:0 0 var(--space-12); }
+.recovery-danger-actions { display:flex; gap:var(--space-8); align-items:center; }
 
 /* Author photo (Settings → Author Info). Circular preview + upload controls. */
 .author-photo-row { display:flex; gap:var(--space-16); align-items:center; }
@@ -1342,8 +1369,6 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 .author-photo-choose { margin:0; cursor:pointer; }
 .author-photo-filename { font-size:var(--text-meta); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .author-photo-controls .field-hint { margin:0; }
-.recovery-code--mask { color:var(--muted); letter-spacing:0.16em; user-select:none; }
-.recovery-code--used { color:var(--ink-30); text-decoration:line-through; user-select:none; background:transparent; }
 /* A just-generated code: shown in full, ringed so it stands out to copy now. */
 .recovery-code--new { color:var(--primary); box-shadow:0 0 0 2px color-mix(in srgb, var(--stage-published) 45%, transparent); }
 
@@ -2045,10 +2070,9 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 .rowform-row:focus-within .btn-danger,
 .rowform-row:hover .btn-icon-danger,
 .rowform-row:focus-within .btn-icon-danger { visibility:visible; }
-/* Drag-affordance states (navigation only — redirects don't reorder). */
+/* Drag-affordance state. Insertion point is shown by a single `.drop-line`
+   (shared CmsReorder), not an edge highlight on the hovered row. */
 .rowform-row.is-dragging { opacity:0.4; }
-.rowform-row.is-over-top    { box-shadow: 0 -2px 0 0 var(--c-denim); }
-.rowform-row.is-over-bottom { box-shadow: 0  2px 0 0 var(--c-denim); }
 /* Add-row uses the same grid template, distinguished by tint. */
 .rowform-add-row { background:var(--bg-soft); }
 /* Phase 21.7 — row-level hover only on draggable rowform rows
@@ -2113,7 +2137,13 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
    the cards where the dragging element will land. The JS injects a
    .drop-line div in that position; it occupies the gap's vertical
    space (rendered between siblings, no overlap on either card). */
-.drop-line { height: 2px; background: var(--primary); border-radius: 2px; margin: 0; }
+.drop-line { height: 2px; background: var(--primary); border-radius: 2px; margin: 0; animation: none; opacity: 1; transform: none; }
+/* The line should sit INSIDE the existing gap between cards, not push them
+   apart. In gap-based flex columns each inserted item also gets the column gap
+   on both sides, so pull the line back with negative margins sized to the gap
+   (kanban lanes use space-8 → -5px; rowform lists use 6px → -4px). */
+.lane-cards .drop-line   { margin: -5px 0; }
+.rowform-list .drop-line { margin: -4px 0; }
 .sec-list .drop-line { margin: -1px 0; }
 .posts-table tr.drop-line-row > td { padding: 0; border: none; height: 2px; background: var(--primary); }
 

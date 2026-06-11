@@ -128,7 +128,8 @@ require __DIR__ . '/../partials/topbar.php';
                 $cnotes  = (string)($card['notes'] ?? '');
                 $cupd    = relative_time((string)($card['updated_at'] ?? ''));
               ?>
-                <a href="/cms/articles/edit?id=<?= $cid ?>&from=ideation" class="idea-card kcard" data-id="<?= $cid ?>" draggable="true">
+                <a href="/cms/articles/edit?id=<?= $cid ?>&from=ideation" class="idea-card kcard kcard--draggable" data-id="<?= $cid ?>" draggable="true">
+                  <span class="kcard-grip" aria-hidden="true" title="Drag to reorder">⋮⋮</span>
                   <div class="idea-card-title"><?= $e($ctitle) ?></div>
                   <?php if ($cnotes !== ''): ?>
                     <div class="idea-card-desc"><?= $e($cnotes) ?></div>

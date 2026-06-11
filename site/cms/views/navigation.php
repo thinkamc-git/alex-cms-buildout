@@ -423,6 +423,7 @@ require __DIR__ . '/../partials/topbar.php';
   </main>
 </div>
 
+<script src="/cms/_assets/reorder.js"></script>
 <script>
   // Type-change: show only the relevant picker; pre-populate the
   // single canonical target_id hidden field from the visible select.
@@ -521,48 +522,22 @@ require __DIR__ . '/../partials/topbar.php';
     f.addEventListener('submit', () => navSyncTargetId(f));
   });
 
-  // Drag-reorder within a zone.
+  // Drag-reorder within a zone — single drop-line indicator (shared CmsReorder).
   document.querySelectorAll('.nav-list').forEach(list => {
     const zone = list.getAttribute('data-zone');
     const csrf = list.getAttribute('data-csrf');
-    let dragged = null;
-
-    list.querySelectorAll('.nav-row[draggable=true]').forEach(row => {
-      row.addEventListener('dragstart', e => {
-        dragged = row;
-        row.classList.add('is-dragging');
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      row.addEventListener('dragend', () => {
-        row.classList.remove('is-dragging');
-        list.querySelectorAll('.nav-row').forEach(r => r.classList.remove('is-over-top','is-over-bottom'));
-      });
-      row.addEventListener('dragover', e => {
-        e.preventDefault();
-        if (!dragged || dragged === row) return;
-        const r = row.getBoundingClientRect();
-        const top = (e.clientY - r.top) < (r.height / 2);
-        row.classList.toggle('is-over-top', top);
-        row.classList.toggle('is-over-bottom', !top);
-      });
-      row.addEventListener('dragleave', () => {
-        row.classList.remove('is-over-top','is-over-bottom');
-      });
-      row.addEventListener('drop', e => {
-        e.preventDefault();
-        if (!dragged || dragged === row) return;
-        const r = row.getBoundingClientRect();
-        const top = (e.clientY - r.top) < (r.height / 2);
-        if (top) row.parentNode.insertBefore(dragged, row);
-        else     row.parentNode.insertBefore(dragged, row.nextSibling);
-        // Persist new order.
-        const ids = Array.from(list.querySelectorAll('.nav-row[data-id]')).map(el => el.getAttribute('data-id'));
+    CmsReorder.wire({
+      container: list,
+      itemSelector: '.nav-row[draggable="true"]',
+      tailSelector: '.nav-add-row',
+      onDrop: info => {
         fetch('/cms/navigation/reorder', {
-          method:'POST',
-          headers:{'Content-Type':'application/x-www-form-urlencoded'},
-          body: 'csrf_token=' + encodeURIComponent(csrf) + '&zone=' + encodeURIComponent(zone) + '&ids=' + encodeURIComponent(ids.join(','))
-        }).catch(() => alert('Reorder failed — refresh and try again.'));
-      });
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'csrf_token=' + encodeURIComponent(csrf) + '&zone=' + encodeURIComponent(zone) + '&ids=' + encodeURIComponent(info.orderedIds.join(','))
+        }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); })
+          .catch(() => { info.revert(); alert('Reorder failed — refresh and try again.'); });
+      }
     });
   });
 </script>

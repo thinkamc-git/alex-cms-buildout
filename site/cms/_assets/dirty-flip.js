@@ -99,9 +99,20 @@
     btn.addEventListener('click', function (e) {
       if (!btn.classList.contains('btn-pri')) return; // nothing to save
       e.preventDefault();
+
+      // Validate BEFORE faking any submitting state. If the form is invalid
+      // (e.g. a too-short password), surface the browser's native validation
+      // UI and bail — never disable the button or claim a save for a submit
+      // that won't happen. (This previously flashed "Saved", then the blocked
+      // submit popped a validation message and prompted the password manager.)
+      if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+        if (typeof form.reportValidity === 'function') form.reportValidity();
+        return;
+      }
+
       var label = btn.textContent;
-      btn.textContent = 'Saved';
-      btn.disabled = true;
+      btn.textContent = 'Saving…';  // honest: the POST is in flight — the
+      btn.disabled = true;          // reloaded page shows the real result.
 
       // Programmatic .submit() drops the submit button's name/value pair.
       // If the button carries name="action", inject a hidden input so the

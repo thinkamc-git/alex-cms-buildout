@@ -429,6 +429,7 @@ require __DIR__ . '/../partials/topbar.php';
 </div>
 
 <?php if (!$isNew && $partsCount > 0): ?>
+<script src="/cms/_assets/reorder.js"></script>
 <script>
 (function () {
   'use strict';
@@ -443,11 +444,6 @@ require __DIR__ . '/../partials/topbar.php';
 
   var seriesId = list.getAttribute('data-series-id');
   if (!seriesId) return;
-
-  function rowsArray() {
-    return Array.prototype.slice.call(list.querySelectorAll('.rowform-row[data-id]'));
-  }
-  var prevOrder = rowsArray();
 
   function renumber() {
     // Re-derive the published-only number sequence client-side so the
@@ -489,41 +485,9 @@ require __DIR__ . '/../partials/topbar.php';
     });
   }
 
-  list.addEventListener('dragstart', function (e) {
-    var row = e.target.closest('.rowform-row[data-id]');
-    if (!row) return;
-    prevOrder = rowsArray();
-    row.classList.add('is-dragging');
-    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
-  });
-
-  list.addEventListener('dragend', function (e) {
-    var row = e.target.closest('.rowform-row[data-id]');
-    if (row) row.classList.remove('is-dragging');
-  });
-
-  list.addEventListener('dragover', function (e) {
-    e.preventDefault();
-    var dragging = list.querySelector('.rowform-row.is-dragging');
-    if (!dragging) return;
-
-    var siblings = Array.prototype.slice.call(
-      list.querySelectorAll('.rowform-row[data-id]:not(.is-dragging)')
-    );
-    var after = siblings.find(function (sib) {
-      var box = sib.getBoundingClientRect();
-      return e.clientY < box.top + box.height / 2;
-    });
-    if (after) {
-      list.insertBefore(dragging, after);
-    } else {
-      // Insert before the add-row so the new row lands at the end of
-      // the data rows, not after the trailing "+ Add" affordance.
-      var addRow = list.querySelector('.rowform-add-row');
-      if (addRow) list.insertBefore(dragging, addRow);
-      else        list.appendChild(dragging);
-    }
-  });
+  // Drag mechanics (single drop-line indicator + element move) are handled by
+  // the shared CmsReorder helper; this view supplies the persistence, the
+  // published-number renumber, and the Publish-button save pulse via onDrop.
 
   // Narrate the auto-save through the Publish button so the user sees
   // a clear "saving → saved" pulse instead of the previous silent
@@ -558,22 +522,21 @@ require __DIR__ . '/../partials/topbar.php';
     alert('Reorder failed: ' + msg);
   }
 
-  list.addEventListener('drop', function (e) {
-    e.preventDefault();
-    renumber();
-    pulseSaving();
-    persist().then(function () {
-      pulseSaved();
-    }).catch(function (err) {
-      // Revert DOM on failure so the visible order matches the DB.
-      var addRow = list.querySelector('.rowform-add-row');
-      prevOrder.forEach(function (el) {
-        if (addRow) list.insertBefore(el, addRow);
-        else        list.appendChild(el);
-      });
+  CmsReorder.wire({
+    container: list,
+    itemSelector: '.rowform-row[data-id]',
+    tailSelector: '.rowform-add-row',
+    onDrop: function (info) {
       renumber();
-      pulseError(err && err.message ? err.message : 'unknown error');
-    });
+      pulseSaving();
+      persist().then(function () {
+        pulseSaved();
+      }).catch(function (err) {
+        info.revert();   // helper restores the pre-drag order
+        renumber();
+        pulseError(err && err.message ? err.message : 'unknown error');
+      });
+    }
   });
 })();
 </script>

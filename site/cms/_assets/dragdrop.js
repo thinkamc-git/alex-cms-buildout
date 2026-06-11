@@ -83,6 +83,16 @@
       }
     }
 
+    // Single drop-line indicator (consistent with navigation/series/index).
+    function makeLine() {
+      const d = document.createElement('div');
+      d.className = 'drop-line';
+      return d;
+    }
+    function clearLines() {
+      board.querySelectorAll('.drop-line').forEach(n => n.remove());
+    }
+
     // ── Drag lifecycle ────────────────────────────────────────────────
     board.addEventListener('dragstart', function (e) {
       const card = e.target.closest('.kcard');
@@ -102,6 +112,7 @@
       const card = e.target.closest('.kcard');
       if (card) card.classList.remove('dragging');
       board.querySelectorAll('.kanban-lane').forEach(l => l.classList.remove('drag-over'));
+      clearLines();
     });
 
     board.addEventListener('dragover', function (e) {
@@ -121,17 +132,18 @@
       board.querySelectorAll('.kanban-lane.drag-over').forEach(l => l.classList.remove('drag-over'));
       lane.classList.add('drag-over');
 
-      // Live placement: find which card to insert above based on cursor Y.
+      // Show a single drop-line at the insertion point — the card itself stays
+      // put until drop (no live re-flow). Find which card to insert above.
       const cardsHost = lane.querySelector('.lane-cards');
       if (!cardsHost) return;
+      clearLines();
       const target = findInsertTarget(cardsHost, e.clientY);
+      const line = makeLine();
       if (target == null) {
-        cardsHost.appendChild(dragging);
-      } else if (target !== dragging) {
-        cardsHost.insertBefore(dragging, target);
+        cardsHost.appendChild(line);
+      } else {
+        cardsHost.insertBefore(line, target);
       }
-      // Remove "empty" placeholder from the lane we just dragged into.
-      cardsHost.querySelectorAll('.idea-lane-empty').forEach(n => n.remove());
     });
 
     board.addEventListener('drop', function (e) {
@@ -142,6 +154,18 @@
 
       const cardsHost = lane.querySelector('.lane-cards');
       if (!cardsHost) return;
+
+      // Move the dragged card to where the drop-line sits (it stayed in place
+      // during the drag), then clear the line + any empty-lane placeholder.
+      const dragging = board.querySelector('.kcard.dragging');
+      const line     = cardsHost.querySelector('.drop-line');
+      if (dragging) {
+        if (line) cardsHost.insertBefore(dragging, line);
+        else      cardsHost.appendChild(dragging);
+      }
+      clearLines();
+      cardsHost.querySelectorAll('.idea-lane-empty').forEach(n => n.remove());
+
       const newIds = Array.from(cardsHost.querySelectorAll('.kcard'))
                           .map(c => c.getAttribute('data-id'));
       const laneKey = lane.getAttribute('data-key') || '';

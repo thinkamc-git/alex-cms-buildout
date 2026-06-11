@@ -71,20 +71,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 $pwError = (string)$res['error'];
                 break;
 
-            case 'gen_all_recovery':
-                $justGenerated = RecoveryCodes::add($uid, RecoveryCodes::MAX);
-                $pwFlash       = 'Recovery codes generated. Save them now — they will not be shown again.';
+            case 'generate_recovery':
+                // Additive top-up: clears spent codes, then fills back to MAX
+                // unused. Existing unused codes stay valid; only the new ones
+                // are returned (shown once).
+                $justGenerated = RecoveryCodes::top_up($uid);
+                $pwFlash       = $justGenerated
+                    ? 'Generated ' . count($justGenerated) . ' new recovery code' . (count($justGenerated) === 1 ? '' : 's') . '. Save them now — they will not be shown again. Your existing unused codes still work.'
+                    : 'You already have the maximum number of unused recovery codes.';
                 break;
 
-            case 'add_recovery_code':
-                $justGenerated = RecoveryCodes::add($uid, 1);
-                $pwFlash       = 'New recovery code generated. Save it now — it will not be shown again.';
+            case 'replace_recovery':
+                // Destructive: invalidates every existing code and issues a
+                // fresh set. Gated behind a two-step confirmation in the UI.
+                $justGenerated = RecoveryCodes::replace_all($uid);
+                $replacedAll   = true;
+                $pwFlash       = 'Replaced all recovery codes. Every previous code is now invalid. Save the new set — it will not be shown again.';
                 break;
-
-            case 'delete_recovery_code':
-                RecoveryCodes::delete_one($uid, (int)($_POST['code_id'] ?? 0));
-                header('Location: /cms/settings?tab=account&flash=' . rawurlencode('Recovery code deleted.'));
-                exit;
 
             case 'force_logout':
                 Auth::logout_other_sessions(); // keeps THIS session
@@ -176,7 +179,7 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css?v=<?= @filemtime(__DIR__ . '/../_assets/style-cms.css') ?: '1' ?>">
 <link rel="stylesheet" href="/cms/_assets/codemirror/codemirror.min.css">
 <style>
   /* Integrations snippet rendered as a CodeMirror code view (htmlmixed) —
@@ -358,50 +361,65 @@ require __DIR__ . '/../partials/topbar.php';
           </form>
 
           <!-- Recovery codes -->
+          <?php $unused = (int)$unusedCodes; $room = RecoveryCodes::MAX - $unused; $hasCodes = ($unused > 0 || count($codeStatus) > 0); ?>
           <div class="content-block">
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Recovery codes</span>
-                <span class="content-block-sublabel">One-time codes to sign in if you lose your password. Stored only as hashes — shown once.</span>
+                <span class="content-block-sublabel">Backup codes to sign in if you lose your password</span>
               </div>
-              <span class="content-block-count"><?= (int)$unusedCodes ?> unused</span>
+              <span class="content-block-count"><?= $unused ?> unused</span>
             </div>
 
-            <?php if (count($codeStatus) === 0): ?>
-              <p class="field-hint">You have no recovery codes yet. Generate a set and store them somewhere safe.</p>
-              <form method="post" action="/cms/settings?tab=account">
-                <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                <input type="hidden" name="action" value="gen_all_recovery">
-                <div class="form-actions">
-                  <button type="submit" class="btn-sec" data-loading-btn data-loading-label="Generating…">Generate recovery codes</button>
+            <?php if (!empty($justMap)): ?>
+              <!-- One-time reveal: the codes just generated. Shown only here, once. -->
+              <div class="recovery-reveal" role="group" aria-label="Your new recovery codes">
+                <p class="recovery-reveal-head"><strong>Save these now</strong> — they won’t be shown again. <?= !empty($replacedAll) ? 'Every previous code is now invalid.' : 'Your existing unused codes still work too.' ?></p>
+                <div class="recovery-codes" id="recovery-new-codes">
+                  <?php foreach ($justMap as $code): ?><code class="recovery-code recovery-code--new"><?= $e($code) ?></code><?php endforeach; ?>
                 </div>
-              </form>
-            <?php else: ?>
-              <div class="recovery-codes" role="group" aria-label="Recovery codes">
-                <?php foreach ($codeStatus as $c):
-                    $isNew = isset($justMap[(int)$c['id']]);
-                    $cls   = $isNew ? 'recovery-code--new' : ($c['used'] ? 'recovery-code--used' : 'recovery-code--mask');
-                ?>
-                  <div class="recovery-slot<?= $c['used'] ? ' recovery-slot--used' : '' ?>">
-                    <code class="recovery-code <?= $cls ?>"<?= $c['used'] ? ' title="Used"' : '' ?>><?= $isNew ? $e($justMap[(int)$c['id']]) : '••••-••••' ?></code>
-                    <form method="post" action="/cms/settings?tab=account" class="recovery-slot-del" onsubmit="return confirm('Delete this recovery code? This can’t be undone.');">
+                <button type="button" class="btn-sec btn-tiny" data-copy-codes="#recovery-new-codes">Copy all</button>
+              </div>
+            <?php endif; ?>
+
+            <p class="recovery-status">
+              <?php if ($unused === 0): ?>
+                You have <strong>no</strong> recovery codes yet.
+              <?php else: ?>
+                You have <strong><?= $unused ?></strong> unused recovery code<?= $unused === 1 ? '' : 's' ?><?= $room <= 0 ? ' — the maximum of ' . RecoveryCodes::MAX : '' ?>.
+              <?php endif; ?>
+            </p>
+            <p class="recovery-note">Each works once. They’re stored as hashes and shown only when generated — so save them then.</p>
+
+            <div class="recovery-actions" data-replace-all>
+              <div class="recovery-actions-row">
+                <?php if ($room > 0): ?>
+                  <form method="post" action="/cms/settings?tab=account">
+                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+                    <input type="hidden" name="action" value="generate_recovery">
+                    <button type="submit" class="btn-sec" data-loading-btn data-loading-label="Generating…"><?= $unused === 0 ? 'Generate ' . RecoveryCodes::MAX . ' codes' : 'Generate ' . $room . ' more' ?></button>
+                  </form>
+                <?php endif; ?>
+                <?php if ($hasCodes): ?>
+                  <button type="button" class="recovery-danger-trigger" data-replace-toggle>Replace all codes&hellip;</button>
+                <?php endif; ?>
+              </div>
+              <?php if ($hasCodes): ?>
+                <!-- Destructive replace-all — two-step inline confirm so a single
+                     click can't wipe a saved set. -->
+                <div class="recovery-danger-confirm" hidden>
+                  <p class="recovery-danger-warn">This <strong>immediately invalidates every recovery code you have</strong> — including ones you’ve already saved — and issues a brand-new set. Only do this if you think your codes have leaked. You’ll see the new set once.</p>
+                  <div class="recovery-danger-actions">
+                    <button type="button" class="btn-sec btn-tiny" data-replace-cancel>Cancel</button>
+                    <form method="post" action="/cms/settings?tab=account" style="display:inline">
                       <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                      <input type="hidden" name="action" value="delete_recovery_code">
-                      <input type="hidden" name="code_id" value="<?= (int)$c['id'] ?>">
-                      <button type="submit" class="recovery-slot-trash" title="Delete this code" aria-label="Delete this code"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.5 4h11M6 4V2.6h4V4M4.2 4l.5 9.4h6.6l.5-9.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                      <input type="hidden" name="action" value="replace_recovery">
+                      <button type="submit" class="btn-danger btn-tiny" data-loading-btn data-loading-label="Replacing…">Yes, replace all codes</button>
                     </form>
                   </div>
-                <?php endforeach; ?>
-                <?php for ($i = count($codeStatus); $i < RecoveryCodes::MAX; $i++): ?>
-                  <form method="post" action="/cms/settings?tab=account" class="recovery-slot recovery-slot--empty">
-                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                    <input type="hidden" name="action" value="add_recovery_code">
-                    <button type="submit" class="recovery-slot-gen" title="Generate a new code">+ Generate</button>
-                  </form>
-                <?php endfor; ?>
-              </div>
-              <p class="field-hint" style="margin-top:var(--space-12)"><?php if (!empty($justMap)): ?><strong>Save <?= count($justMap) === 1 ? 'this code' : 'these' ?> now</strong> — shown once. <?php endif; ?>Hover a code to delete it; a freed slot can generate a new one. Used codes fade out.</p>
-            <?php endif; ?>
+                </div>
+              <?php endif; ?>
+            </div>
           </div>
 
           <!-- Sign out other sessions -->
@@ -568,6 +586,43 @@ require __DIR__ . '/../partials/topbar.php';
           }
         }
       });
+    });
+  })();
+
+  // Recovery codes: "Copy all" the one-time set, and the two-step "Replace
+  // all" reveal (a quiet trigger expands a gated confirm panel — never a
+  // single-click purge).
+  (function () {
+    document.querySelectorAll('[data-copy-codes]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var host = document.querySelector(btn.getAttribute('data-copy-codes'));
+        if (!host) return;
+        var text = Array.prototype.map.call(host.querySelectorAll('.recovery-code'), function (c) {
+          return c.textContent.trim();
+        }).join('\n');
+        var done = function () {
+          var orig = btn.textContent;
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = orig; }, 1200);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () {});
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) {}
+          ta.remove();
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-replace-all]').forEach(function (wrap) {
+      var trigger = wrap.querySelector('[data-replace-toggle]');
+      var panel   = wrap.querySelector('.recovery-danger-confirm');
+      var cancel  = wrap.querySelector('[data-replace-cancel]');
+      if (!trigger || !panel) return;
+      trigger.addEventListener('click', function () { panel.hidden = false; trigger.hidden = true; });
+      if (cancel) cancel.addEventListener('click', function () { panel.hidden = true; trigger.hidden = false; });
     });
   })();
 

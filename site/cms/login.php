@@ -96,7 +96,7 @@ header('Content-Type: text/html; charset=utf-8');
      .btn-pri, .content-block-label) come from the CMS design system above. */
   /* Same dot-grid surface the rest of the CMS uses (base.css / .dot-surface). */
   body { min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center; padding: var(--space-24); background-color: var(--neutral); background-image: var(--dot-grid); background-size: 4px 4px; }
-  .auth-card { width: 100%; max-width: 360px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); box-shadow: var(--shadow); padding: var(--space-32); }
+  .auth-card { position: relative; width: 100%; max-width: 360px; background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); box-shadow: var(--shadow); padding: var(--space-32); }
   /* Mirrors the CMS topbar logo: sans "alexmchong" + small italic-serif "cms". */
   .auth-brand { font-family: var(--font); font-weight: 600; font-size: 22px; letter-spacing: -0.02em; color: var(--primary); line-height: 1; margin-bottom: var(--space-24); }
   .auth-brand em { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 1.1em; color: var(--muted); margin-left: 4px; }
@@ -113,7 +113,17 @@ header('Content-Type: text/html; charset=utf-8');
   /* Env-switcher: pill (label) + Switch button + countdown status, sitting on
      the brand baseline. Button reuses .btn-sec.btn-tiny. */
   .env-switch { display: inline-flex; align-items: center; gap: var(--space-8); vertical-align: middle; }
-  .env-switch-status { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); letter-spacing: 0.04em; white-space: nowrap; }
+  /* Switch control — an underline text link with a trailing arrow (matches the
+     .auth-alt link convention used below). */
+  .env-switch-link { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font); font-size: var(--text-meta); font-weight: 500; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--ink-18); padding-bottom: 1px; transition: color 0.15s, border-color 0.15s; }
+  .env-switch-link:hover { color: var(--primary); border-color: var(--primary); }
+  .env-switch-arrow { font-size: 1.05em; line-height: 1; }
+  /* "Switching…" overlay — a translucent white veil over the card with a
+     centred spinner while the redirect to the other env loads. */
+  .auth-switching { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-12); background: color-mix(in srgb, var(--surface) 90%, transparent); border-radius: var(--r-card); z-index: 5; }
+  .auth-switching[hidden] { display: none; }
+  .auth-switching .spinner { width: 22px; height: 22px; border-width: 2.5px; margin: 0; color: var(--primary); }
+  .auth-switching-label { font-size: var(--text-meta); color: var(--secondary); letter-spacing: 0.01em; }
 </style>
 </head>
 <body>
@@ -131,9 +141,14 @@ header('Content-Type: text/html; charset=utf-8');
       $swName   = $isProd ? 'Staging' : 'Production';
   ?><span class="env-switch">
       <span class="<?= $pillCls ?>" title="<?= ucfirst($pillTxt) ?> environment"><?= $pillTxt ?></span>
-      <button type="button" class="btn-sec btn-tiny env-switch-btn" data-target="<?= $swTarget ?>" data-name="<?= $swName ?>">Switch</button>
-      <span class="env-switch-status" role="status" aria-live="polite" hidden></span>
+      <a href="<?= $swTarget ?>" class="env-switch-link" data-target="<?= $swTarget ?>" data-name="<?= $swName ?>">Switch <span class="env-switch-arrow" aria-hidden="true">&nearr;</span></a>
     </span><?php endif; ?></div>
+  <?php if (isset($swName)): ?>
+  <div class="auth-switching" hidden role="status" aria-live="polite">
+    <span class="spinner" aria-hidden="true"></span>
+    <span class="auth-switching-label">Switching to <?= $swName ?>&hellip;</span>
+  </div>
+  <?php endif; ?>
   <?= $flash_html ?>
   <?= $error_html ?>
   <?php if (!$recoveryMode): ?>
@@ -178,30 +193,18 @@ header('Content-Type: text/html; charset=utf-8');
   <?php endif; ?>
 </div>
 <script>
-  // Env-switch countdown: on click, hide the button, show a "Switching to …"
-  // status that ticks down ~2s, then redirect to the other env's /cms/.
-  document.querySelectorAll('.env-switch-btn').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var target = btn.getAttribute('data-target');
-      var name   = btn.getAttribute('data-name');
+  // Env switch: on click, veil the card with the white "Switching…" overlay +
+  // spinner, then redirect to the other env's /cms/. The overlay stays up while
+  // the target page loads. Progressive-enhancement: the link's href is the real
+  // target, so it still works if JS is off (just without the overlay).
+  document.querySelectorAll('.env-switch-link').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      var target = link.getAttribute('data-target');
       if (!target) return;
-      var wrap   = btn.closest('.env-switch');
-      var status = wrap ? wrap.querySelector('.env-switch-status') : null;
-      btn.hidden = true;
-      if (!status) { window.location.href = target; return; }
-      var n = 2;
-      status.hidden = false;
-      status.textContent = 'Switching to ' + name + '… ' + n;
-      var iv = setInterval(function () {
-        n -= 1;
-        if (n <= 0) {
-          clearInterval(iv);
-          status.textContent = 'Switching to ' + name + '…';
-          window.location.href = target;
-          return;
-        }
-        status.textContent = 'Switching to ' + name + '… ' + n;
-      }, 1000);
+      var overlay = document.querySelector('.auth-switching');
+      if (overlay) overlay.hidden = false;
+      setTimeout(function () { window.location.href = target; }, 500);
     });
   });
 </script>

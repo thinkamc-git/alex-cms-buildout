@@ -145,9 +145,10 @@ $renderInFlightCard = static function (array $r, string $stage) use ($e, $editUr
     // Phase 20.3: drop slug from Draft Writing cards (not useful at-a-glance
     // while drafting); type badge moves to the foot so the title gets the
     // full head width.
-    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard kcard--draggable' . $variant . '" data-id="' . $id . '" draggable="true" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
+         . '<span class="kcard-grip" aria-hidden="true" title="Drag to reorder">⋮⋮</span>'
          . '</div>'
          . '<div class="kcard-foot">'
          . '<span class="type-badge ' . $badgeClass . '">' . $badgeLabel . '</span>'

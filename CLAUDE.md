@@ -14,43 +14,34 @@ A custom CMS for **alexmchong.ca**, a single-author personal site (designer / wr
 
 ## Where we are right now
 
-The schema is locked, the UI mockup is feature-complete, and the execution plan is drafted. We're at the start of Phase 0 of the build.
-
-| Phase | Status |
-|---|---|
-| 1 — UI polish (mockup) | ✅ Complete |
-| 2 — System decisions / edge cases | ✅ Complete |
-| 3 — Documentation (spec + conventions) | ✅ Complete |
-| 4 — Execution plan | ✅ Complete (`docs/BUILD-PLAN.md`) |
-| 5 — Build (Phase 0 → Phase 15, vertical-slice) | ⏳ Phase 0 starting |
+**The CMS is built and live in production. The project is in maintenance.** Every planned phase shipped — the full content system (four content types end-to-end, categories / series / indexes, redirects, subscribers, scheduling), the v2.1 design-system reorg, the mobile pass, and the public cutover (2026-06-10). See **`docs/BUILD-PLAN.md`** for the lean build record + the forward backlog; the full historical plan and audits are archived in **`docs/_completed/`**.
 
 The single canonical spec is **`docs/CMS-STRUCTURE.md`**. Read it for any system-level question (schema, view inventory, content types, render rules).
 
+### How we work now (the maintenance loop)
+
+Most new work follows the same loop — and this is the one to follow when picking work back up:
+
+1. **Explore in a sandbox** under `docs/design-mockups/` — a throwaway HTML mock or spike. Play until the direction is right.
+2. **Promote** the validated work into the real system (tokens, components, views) per **`docs/BUILD-DISCIPLINE.md`** (default to reuse; new patterns need sign-off; preview ≠ done).
+3. **Archive the sandbox** into `docs/design-mockups/_completed/` so the working area stays clean — promoted sandboxes never linger. Finished audits/specs move to `docs/_completed/` the same way.
+
 ## Documentation map (read-on-demand, not all at once)
 
-**The reading flow is intentionally narrow to keep context cost low.** A fresh Claude Code session should:
+Keep context cost low: read this file, then only the canonical doc relevant to the task. The working set in `docs/` (everything build-era is archived in `docs/_completed/` and not needed for maintenance):
 
-1. **`CLAUDE.md`** (this file) — orientation. Read once.
-2. **`docs/BUILD-PLAN.md`** §3 — find the current phase (the first unchecked box).
-3. **The current phase's Session brief** (top of that phase's section in `docs/BUILD-PLAN.md`). The brief lists exactly which other files to read at start, which to touch, which to leave alone, and what to update on exit.
-4. **Only the files the brief names.** Do not pre-load the full doc chain.
+- **`docs/CMS-STRUCTURE.md`** — the canonical system spec (schema, view inventory, content types, render rules). The source of truth; check it first for any system-level question.
+- **`docs/BUILD-PLAN.md`** — lean build record (what shipped) + the forward backlog / future ideas. Start here for "what's next."
+- **`docs/ENGINEERING.md`** — code conventions. Read before writing PHP/CSS/JS.
+- **`docs/BLOCKS.md`** — block contract (slugs, modes, composition). See the linkage rule below.
+- **`docs/BUILD-DISCIPLINE.md`** — how to build leanly + the sandbox → promote → archive workflow. Read before any non-trivial change.
+- **`docs/DESIGN.md`** · **`docs/DS-IA.md`** · **`docs/MOTION.md`** — design-system brief, information architecture, motion reference.
+- **`docs/AUTH-SECURITY.md`** — auth + security model.
+- **`docs/DEPLOYMENT.md`** — deploy + cron + backup ops. Read before any deploy.
+- **`docs/APPLIED-SPECS.md`** — how to build "Applied" concept pages (the sandbox-driven process).
+- **`docs/RELEASES.md`** — release log.
 
-That's the standard entry. Don't read `docs/ENGINEERING.md`, `docs/CMS-STRUCTURE.md`, `docs/BLOCKS.md`, etc. unless the current phase's brief points you at them.
-
-**Companion documents (referenced from briefs, not read by default):**
-
-- **`docs/BUILD-PLAN.md`** — the 17-phase execution plan (15 active + 2 deferred), structured as vertical slices so each content type ships end-to-end. Each phase has its own Session brief with an autonomy tier and a Decisions block that Alex answers BEFORE the session starts. You only ever need the section for the current phase.
-- **`docs/ENGINEERING.md`** — code conventions. Referenced from briefs in phases that write PHP/CSS/JS.
-- **`docs/CMS-STRUCTURE.md`** — system spec. Referenced from briefs in phases that touch schema, render logic, or content types.
-- **`docs/BLOCKS.md`** — block contract. Referenced from briefs in Phase 8a/8b.
-- **`docs/AUTH-SECURITY.md`** — drafted at the start of Phase 4. Referenced from Phase 4 + Phase 12 briefs.
-- **`docs/DEPLOYMENT.md`** — drafted during Phase 1, extended in Phase 3. Referenced from any phase touching deploy or cron.
-- **`docs/LEGACY-ROUTES.md`** — pre-migration URL inventory. Drafted Phase 0, consumed by `.htaccess` in Phase 1, migrated into the CMS in Phase 10a.
-- **`docs/onboarding/`** — Phase 0 lessons for Alex. A Claude doing build work doesn't need to read these unless Alex asks for help with one of those tools.
-
-**Why this matters.** Reading 5+ docs at the start of every session burns ~30K tokens before any code is written. With the Session brief pattern, entry cost is ~2K–5K tokens — enough to do the phase right, not so much that the session runs out of room.
-
-**The autonomy unlock.** Every phase brief opens with a **Decisions to capture before starting** block. Alex fills in the answers (or accepts the defaults) BEFORE the Claude Code session starts. Claude then reads the brief — Decisions included — and runs straight through without asking for clarification mid-stream. Auto and Semi-auto phases (roughly 70% of the build) execute unattended; Alex steps back in for the Verification checklist. Manual phases stay interactive throughout. See `docs/BUILD-PLAN.md` §1.2 and §1.3.
+Build-era history (the full 24-phase plan, the DS + mobile audits, phase notes, onboarding) lives in **`docs/_completed/`** — history only, not part of the working set.
 
 ---
 
@@ -63,18 +54,16 @@ alex-cms-buildout/
 ├── .gitignore
 │
 ├── docs/                           ← reference material · NEVER deployed
-│   ├── BUILD-PLAN.md               ← 17-phase execution plan
+│   ├── BUILD-PLAN.md               ← lean build record + forward backlog
 │   ├── CMS-STRUCTURE.md            ← canonical system spec (source of truth)
 │   ├── ENGINEERING.md              ← code conventions
-│   ├── LEGACY-ROUTES.md            ← legacy URL inventory + redirect plan
 │   ├── BLOCKS.md                   ← block contract (slugs, modes, composition)
-│   ├── DESIGN.md                   ← design system brief
-│   ├── onboarding/                 ← Phase 0 lessons for Alex
-│   └── design-mockups/             ← design sandboxes (NOT references once built)
-│       ├── motion-mock.html        ← active sandbox (CMS load-motion design)
-│       ├── landing-postcms.html    ← future-nav landing canvas (not live)
-│       └── _completed/             ← retired mockups · archived, do NOT reference
-│           └── cms-ui.html         ← pre-build CMS mockup · superseded by site/cms/
+│   ├── BUILD-DISCIPLINE.md         ← lean-build rule + sandbox→promote→archive loop
+│   ├── DESIGN.md · DS-IA.md · MOTION.md      ← design system brief / IA / motion
+│   ├── AUTH-SECURITY.md · DEPLOYMENT.md · APPLIED-SPECS.md · RELEASES.md
+│   ├── _completed/                 ← build-era archive (full plan, audits, onboarding) · history only
+│   └── design-mockups/             ← sandbox area for new work (intake → promote)
+│       └── _completed/             ← archived sandboxes · do NOT reference as source of truth
 │
 └── site/                           ← deployable source · rsynced to DreamHost
     ├── _pages/                     ← standalone marketing pages (NOT CMS)

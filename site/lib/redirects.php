@@ -95,9 +95,9 @@ function emit_redirect(array $row): never
 function list_redirects(): array
 {
     return db()->query(
-        'SELECT id, old_slug, new_slug, status_code, created_at
+        'SELECT id, old_slug, new_slug, status_code, created_at, updated_at
            FROM redirects
-       ORDER BY created_at DESC, id DESC'
+       ORDER BY updated_at DESC, id DESC'
     )->fetchAll() ?: [];
 }
 

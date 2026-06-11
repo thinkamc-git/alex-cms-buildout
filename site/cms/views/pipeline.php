@@ -170,7 +170,7 @@ $renderScheduledCard = static function (array $r) use ($e, $editUrlFor, $display
 
     // Phase 20.3: top-right gets a green date pill — that's the salient
     // detail for a scheduled card. Type badge moves to the foot.
-    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" draggable="false" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
          . '<span class="kcard-schedule-pill" title="Scheduled to publish">' . $e($when) . '</span>'
@@ -193,7 +193,7 @@ $renderPublishedCard = static function (array $r) use ($e, $editUrlFor, $display
     $display     = $displayOf($r);
     [$badgeClass, $badgeLabel] = $typeBadge((string)$r['type']);
 
-    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" style="text-decoration:none;display:block;color:inherit">'
+    return '<a href="' . $e($editUrlFor($r)) . '" class="kcard" data-id="' . $id . '" draggable="false" style="text-decoration:none;display:block;color:inherit">'
          . '<div class="kcard-head">'
          . '<div class="kcard-title">' . $e($display) . '</div>'
          . '</div>'

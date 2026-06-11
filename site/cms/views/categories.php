@@ -294,13 +294,32 @@ require __DIR__ . '/../partials/topbar.php';
     var nameSpan = picker.querySelector('.cat-colour-name');
     if (!trigger || !menu || !hidden) return;
 
+    // The menu is position:fixed and PORTALED to <body> on open. Portaling is
+    // essential: the table rows keep a lingering `transform: translateY(0)`
+    // from the reveal animation, and any transformed ancestor becomes the
+    // containing block for position:fixed — which would anchor the menu to the
+    // row (off-screen) instead of the viewport. As a direct child of <body>
+    // there's no transformed ancestor, so fixed resolves against the viewport.
+    function positionMenu() {
+      if (menu.parentNode !== document.body) document.body.appendChild(menu);
+      var r = trigger.getBoundingClientRect();
+      menu.style.left  = r.left + 'px';
+      menu.style.top   = (r.bottom + 4) + 'px';
+      menu.style.width = r.width + 'px';
+    }
+
     trigger.addEventListener('click', function (e) {
       e.stopPropagation();
       document.querySelectorAll('.cat-colour-menu').forEach(function (m) {
         if (m !== menu) m.hidden = true;
       });
-      menu.hidden = !menu.hidden;
+      var willOpen = menu.hidden;
+      menu.hidden = !willOpen;
+      if (willOpen) positionMenu();
     });
+
+    window.addEventListener('scroll', function () { if (!menu.hidden) positionMenu(); }, true);
+    window.addEventListener('resize', function () { if (!menu.hidden) positionMenu(); });
 
     menu.querySelectorAll('.cat-colour-opt').forEach(function (opt) {
       opt.addEventListener('click', function (e) {

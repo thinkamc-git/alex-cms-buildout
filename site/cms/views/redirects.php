@@ -102,16 +102,25 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <style>
   /* Redirects row-form — shared mechanics (grid container, dirty-flip,
      hover-reveal delete, add-row tint) live in style-cms.css under
-     .rowform-*. View-specific bits: the 5-column grid template. No drag
-     handle — redirects don't reorder. */
+     .rowform-*. View-specific bits: the 6-column grid template. No drag
+     handle — redirects don't reorder.
+     Action columns (save/delete) are FIXED widths, not `auto`: the header row
+     and the data rows are separate grids, so an `auto` track resolves to the
+     button width in a data row but 0 in the (empty) header — which knocks the
+     flexible columns out of alignment between the two. Fixed tracks compute
+     identically in both grids, so the headers line up with their columns. */
   .red-list {
     --rowform-cols:
-      minmax(220px, 1.4fr)   /* from   */
-      minmax(240px, 1.6fr)   /* to     */
-      90px                   /* status */
-      auto                   /* save   */
-      auto;                  /* delete */
+      minmax(200px, 1.5fr)   /* from    */
+      minmax(240px, 1.5fr)   /* to      */
+      80px                   /* status  */
+      116px                  /* updated */
+      72px                   /* save    */
+      40px;                  /* delete  */
   }
+  /* Read-only "last touched" log cell — muted, mono, centred. Left inset (8px)
+     matches the header span padding so the date sits under its "Updated" head. */
+  .red-date { font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted); align-self: center; white-space: nowrap; padding: 0 8px; }
 </style>
 </head>
 <body>
@@ -157,6 +166,7 @@ require __DIR__ . '/../partials/topbar.php';
               <span>From URL</span>
               <span>New URL</span>
               <span>Code</span>
+              <span>Updated</span>
               <span></span>
               <span></span>
             </div>
@@ -172,6 +182,8 @@ require __DIR__ . '/../partials/topbar.php';
                     <option value="301"<?= $code === 301 ? ' selected' : '' ?>>301</option>
                     <option value="302"<?= $code === 302 ? ' selected' : '' ?>>302</option>
                   </select>
+                  <?php $ut = (string)($r['updated_at'] ?? ''); $uts = $ut !== '' ? strtotime($ut) : false; ?>
+                  <span class="red-date" title="Last updated"><?= $uts !== false ? $e(date('M j, Y', $uts)) : '—' ?></span>
                   <button type="submit" class="btn-sec btn-tiny" data-save-btn>Save</button>
                 </form>
                 <form method="post" action="/cms/redirects" style="display:inline" data-confirm="Delete redirect &quot;<?= $e((string)$r['old_slug']) ?>&quot;? Anyone hitting that URL will get a 404 unless you re-add it.">
@@ -196,6 +208,7 @@ require __DIR__ . '/../partials/topbar.php';
                   <option value="301" selected>301</option>
                   <option value="302">302</option>
                 </select>
+                <span></span><!-- updated-column placeholder (no date until saved) -->
                 <button type="submit" class="btn-sec btn-tiny">Add</button>
                 <span></span><!-- delete-column placeholder so grid stays aligned -->
               </form>

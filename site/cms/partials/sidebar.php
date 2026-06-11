@@ -115,6 +115,10 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
 
   <div class="nav-section">
     <span class="nav-label">Site</span>
+    <a class="nav-item<?= $activeClass('navigation') ?>"<?= $activeAria('navigation') ?> href="/cms/navigation" data-nav-id="navigation">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Navigation<?= $count('navigation') ?>
+    </a>
     <a class="nav-item<?= $activeClass('pages') ?>"<?= $activeAria('pages') ?> href="/cms/pages" data-nav-id="pages">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
       Pages<?= $count('pages') ?>
@@ -122,10 +126,6 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
     <a class="nav-item<?= $activeClass('indexes') ?>"<?= $activeAria('indexes') ?> href="/cms/indexes" data-nav-id="indexes">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Indexes<?= $count('indexes') ?>
-    </a>
-    <a class="nav-item<?= $activeClass('navigation') ?>"<?= $activeAria('navigation') ?> href="/cms/navigation" data-nav-id="navigation">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Navigation<?= $count('navigation') ?>
     </a>
     <a class="nav-item<?= $activeClass('redirects') ?>"<?= $activeAria('redirects') ?> href="/cms/redirects" data-nav-id="redirects">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -135,13 +135,13 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
 
   <div class="nav-section">
     <span class="nav-label">Collections</span>
-    <a class="nav-item<?= $activeClass('categories') ?>"<?= $activeAria('categories') ?> href="/cms/categories" data-nav-id="categories">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
-      Categories
-    </a>
     <a class="nav-item<?= $activeClass('series') ?>"<?= $activeAria('series') ?> href="/cms/series" data-nav-id="series">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h1M8.5 7h1" stroke="currentColor" stroke-width="1.2"/></svg>
       Series<?= $count('series') ?>
+    </a>
+    <a class="nav-item<?= $activeClass('categories') ?>"<?= $activeAria('categories') ?> href="/cms/categories" data-nav-id="categories">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+      Categories
     </a>
   </div>
 
@@ -159,13 +159,13 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>
       Post Templates
     </a>
-    <a class="nav-item<?= $activeClass('settings') ?>"<?= $activeAria('settings') ?> href="/cms/settings" data-nav-id="settings">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
-      Settings
-    </a>
     <a class="nav-item<?= $activeClass('design-system') ?>"<?= $activeAria('design-system') ?> href="/cms/design-system" data-nav-id="design-system">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="4.5" r="3" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><path d="M8.5 1.5h4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Design System
+    </a>
+    <a class="nav-item<?= $activeClass('settings') ?>"<?= $activeAria('settings') ?> href="/cms/settings" data-nav-id="settings">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+      Settings
     </a>
   </div>
 

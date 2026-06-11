@@ -52,7 +52,7 @@ if (!isset($breadcrumb_href) || $breadcrumb_href === '') {
 ?>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="topbar dot-surface" role="banner">
-  <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em><?php if (defined('APP_ENV') && APP_ENV === 'staging'): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php endif; ?></div>
+  <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em><?php if (defined('APP_ENV') && APP_ENV === 'staging'): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php elseif (defined('APP_ENV') && APP_ENV === 'production'): ?><span class="topbar-env-pill topbar-env-pill--prod" title="Production environment">prod</span><?php endif; ?></div>
   <div class="topbar-divider"></div>
   <div class="topbar-breadcrumb" id="breadcrumb">
 <?php

@@ -177,6 +177,13 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/codemirror/codemirror.min.css">
+<style>
+  /* Integrations snippet rendered as a CodeMirror code view (htmlmixed) —
+     syntax-highlighted + monospaced, matching the page/template editors. */
+  #set-analytics + .CodeMirror { border:1px solid var(--border); border-radius:var(--r-card); font-size:13px; height:auto; min-height:96px; }
+  #set-analytics + .CodeMirror .CodeMirror-lines { padding:6px 0; }
+</style>
 </head>
 <body>
 
@@ -296,8 +303,7 @@ require __DIR__ . '/../partials/topbar.php';
 
               <div class="field-group">
                 <label class="field-label" for="set-analytics">Analytics script</label>
-                <textarea class="field-input" id="set-analytics" name="analytics_script" rows="6"
-                          style="font-family:var(--font-mono);font-size:var(--text-small)"
+                <textarea class="field-input" id="set-analytics" name="analytics_script" rows="6" spellcheck="false"
                           placeholder="&lt;script async src=&quot;https://…&quot;&gt;&lt;/script&gt;"><?= $e($settings['analytics_script']) ?></textarea>
                 <p class="field-hint">Paste the full <code>&lt;script&gt;</code> tag(s) from your provider. Renders immediately before <code>&lt;/body&gt;</code> on every public page. Leave blank to disable.</p>
               </div>
@@ -488,6 +494,15 @@ require __DIR__ . '/../partials/topbar.php';
      dirty-flip flips the Save button btn-sec → btn-pri. -->
 <script src="/cms/_assets/preview-tab-guard.js" defer></script>
 <script src="/cms/_assets/dirty-flip.js" defer></script>
+<!-- CodeMirror for the Integrations snippet field (htmlmixed = HTML + inline
+     JS/CSS). htmlmixed depends on xml + javascript + css modes. -->
+<script src="/cms/_assets/codemirror/codemirror.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/xml/xml.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/javascript/javascript.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/css/css.min.js"></script>
+<script src="/cms/_assets/codemirror/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="/cms/_assets/codemirror/addon/edit/matchbrackets.min.js"></script>
+<script src="/cms/_assets/codemirror/addon/edit/closebrackets.min.js"></script>
 <script>
   // Mirror the live Site title value into the example shown in its hint.
   (function () {
@@ -496,6 +511,33 @@ require __DIR__ . '/../partials/topbar.php';
     if (!inp || !out) return;
     inp.addEventListener('input', function () {
       out.textContent = inp.value.trim() !== '' ? inp.value : 'Alex M. Chong';
+    });
+  })();
+
+  // Integrations snippet → CodeMirror code view (htmlmixed, syntax-highlighted,
+  // monospaced). Mirrors edits back to the textarea so dirty-flip + the POST
+  // submit keep working; refreshes on tab show (CM mis-sizes if it initialised
+  // inside a hidden tab panel).
+  (function () {
+    var ta = document.getElementById('set-analytics');
+    if (!ta || typeof CodeMirror === 'undefined') return;
+    var cm = CodeMirror.fromTextArea(ta, {
+      mode: 'htmlmixed',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 2,
+      tabSize: 2,
+      lineWrapping: true,
+      viewportMargin: Infinity,
+    });
+    cm.on('change', function () {
+      ta.value = cm.getValue();
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    setTimeout(function () { cm.refresh(); }, 0);
+    document.querySelectorAll('[data-tab-target]').forEach(function (t) {
+      t.addEventListener('click', function () { setTimeout(function () { cm.refresh(); }, 0); });
     });
   })();
 

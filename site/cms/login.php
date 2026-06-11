@@ -110,11 +110,30 @@ header('Content-Type: text/html; charset=utf-8');
   .auth-staging { margin-top: var(--space-24); padding-top: var(--space-20); border-top: 1px dashed var(--ink-18); }
   .auth-staging .content-block-label { display: block; margin-bottom: var(--space-8); }
   .auth-staging p { font-size: var(--text-tiny); color: var(--muted); line-height: 1.6; margin-bottom: var(--space-12); }
+  /* Env-switcher: pill (label) + Switch button + countdown status, sitting on
+     the brand baseline. Button reuses .btn-sec.btn-tiny. */
+  .env-switch { display: inline-flex; align-items: center; gap: var(--space-8); vertical-align: middle; }
+  .env-switch-status { font-family: var(--font-mono); font-size: var(--text-tiny); color: var(--muted); letter-spacing: 0.04em; white-space: nowrap; }
 </style>
 </head>
 <body>
 <div class="auth-card">
-  <div class="auth-brand">alexmchong<em>cms</em><?php if ($is_staging): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php endif; ?></div>
+  <div class="auth-brand">alexmchong<em>cms</em><?php
+    // Environment pill (label) + a "Switch" button that hops to the OTHER
+    // env's CMS — lands logged-in if a session exists there (it's /cms/, not
+    // an auth page). Clicking shows a brief "Switching to …" countdown then
+    // redirects (JS at the foot of the page).
+    if (defined('APP_ENV') && (APP_ENV === 'staging' || APP_ENV === 'production')):
+      $isProd   = APP_ENV === 'production';
+      $pillCls  = $isProd ? 'topbar-env-pill topbar-env-pill--prod' : 'topbar-env-pill';
+      $pillTxt  = $isProd ? 'prod' : 'staging';
+      $swTarget = $isProd ? 'https://staging.alexmchong.ca/cms/' : 'https://alexmchong.ca/cms/';
+      $swName   = $isProd ? 'Staging' : 'Production';
+  ?><span class="env-switch">
+      <span class="<?= $pillCls ?>" title="<?= ucfirst($pillTxt) ?> environment"><?= $pillTxt ?></span>
+      <button type="button" class="btn-sec btn-tiny env-switch-btn" data-target="<?= $swTarget ?>" data-name="<?= $swName ?>">Switch</button>
+      <span class="env-switch-status" role="status" aria-live="polite" hidden></span>
+    </span><?php endif; ?></div>
   <?= $flash_html ?>
   <?= $error_html ?>
   <?php if (!$recoveryMode): ?>
@@ -158,5 +177,33 @@ header('Content-Type: text/html; charset=utf-8');
   </div>
   <?php endif; ?>
 </div>
+<script>
+  // Env-switch countdown: on click, hide the button, show a "Switching to …"
+  // status that ticks down ~2s, then redirect to the other env's /cms/.
+  document.querySelectorAll('.env-switch-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.getAttribute('data-target');
+      var name   = btn.getAttribute('data-name');
+      if (!target) return;
+      var wrap   = btn.closest('.env-switch');
+      var status = wrap ? wrap.querySelector('.env-switch-status') : null;
+      btn.hidden = true;
+      if (!status) { window.location.href = target; return; }
+      var n = 2;
+      status.hidden = false;
+      status.textContent = 'Switching to ' + name + '… ' + n;
+      var iv = setInterval(function () {
+        n -= 1;
+        if (n <= 0) {
+          clearInterval(iv);
+          status.textContent = 'Switching to ' + name + '…';
+          window.location.href = target;
+          return;
+        }
+        status.textContent = 'Switching to ' + name + '… ' + n;
+      }, 1000);
+    });
+  });
+</script>
 </body>
 </html>

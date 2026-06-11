@@ -87,6 +87,11 @@
     board.addEventListener('dragstart', function (e) {
       const card = e.target.closest('.kcard');
       if (!card) return;
+      // Only reorder cards explicitly opted-in with draggable="true". Static
+      // cards (Scheduled / Recently Published) are <a> links — draggable by
+      // default in browsers — and must not enter the reorder flow, or dropping
+      // them posts a non-stage lane key and the server rejects "Unknown stage."
+      if (card.getAttribute('draggable') !== 'true') return;
       takeSnapshot();
       card.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';

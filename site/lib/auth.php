@@ -11,7 +11,9 @@
  *   - Auth::current_user()       Returns the user row (or null).
  *   - Auth::change_password($current, $new, $confirm)  → result array.
  *
- * Lockout is per-user (counter resets on success). Sliding 14-day session
+ * Brute-force defense is an adaptive per-IP throttle (see LoginThrottle /
+ * AUTH-SECURITY.md §6) — NOT a per-account lockout, which would let an
+ * attacker lock the single legitimate user out. Sliding 14-day session
  * keyed off $_SESSION['last_seen'].
  */
 
@@ -19,13 +21,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/csrf.php';
+require_once __DIR__ . '/login_throttle.php';
 
 final class Auth
 {
     public const SESSION_NAME      = 'amc_sid';
     public const SESSION_TTL_SECS  = 14 * 24 * 60 * 60; // 14 days, sliding
-    public const LOCKOUT_THRESHOLD = 5;
-    public const LOCKOUT_MINUTES   = 15;
     public const MIN_PW_LENGTH     = 12;
     private const DUMMY_HASH       = '$2y$10$abcdefghijklmnopqrstuu0jpHZcLU/zlWvKtN9JzCWvtfTjsB7Ka';
 
@@ -67,7 +68,51 @@ final class Auth
             self::logout();
             return;
         }
+        // Force-All-Logout: a session whose stamped epoch no longer matches
+        // the user's current epoch was invalidated remotely — destroy it.
+        if (!self::session_epoch_valid()) {
+            self::logout();
+            return;
+        }
         $_SESSION['last_seen'] = $now;
+    }
+
+    /**
+     * Compare the session's stamped epoch against the user's current epoch.
+     * Pre-existing sessions (no stamp yet) adopt the current epoch rather
+     * than being kicked, so a deploy doesn't log everyone out spuriously.
+     */
+    private static function session_epoch_valid(): bool
+    {
+        $stmt = db()->prepare('SELECT session_epoch FROM users WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => (int)$_SESSION['uid']]);
+        $cur = $stmt->fetchColumn();
+        if ($cur === false) {
+            return false; // user row gone
+        }
+        if (!isset($_SESSION['epoch'])) {
+            $_SESSION['epoch'] = (int)$cur;
+            return true;
+        }
+        return (int)$cur === (int)$_SESSION['epoch'];
+    }
+
+    /**
+     * Sign out every OTHER session (all other devices), keeping the current
+     * one. Bumps the user's session epoch — invalidating every existing
+     * session on its next request — then re-stamps THIS session with the new
+     * epoch so it survives. Safe: the device clicking this is the trusted one.
+     */
+    public static function logout_other_sessions(): void
+    {
+        $user = self::current_user();
+        if (!$user) {
+            return;
+        }
+        $new = (int)$user['session_epoch'] + 1;
+        db()->prepare('UPDATE users SET session_epoch = :e WHERE id = :id')
+            ->execute([':e' => $new, ':id' => (int)$user['id']]);
+        $_SESSION['epoch'] = $new; // keep this session valid
     }
 
     /**
@@ -77,16 +122,25 @@ final class Auth
     public static function require_login(): void
     {
         self::start_session();
-        if (!empty($_SESSION['uid'])) {
-            return;
+        if (empty($_SESSION['uid'])) {
+            $next = $_SERVER['REQUEST_URI'] ?? '/cms/';
+            // Only forward same-origin paths; treat anything weird as the root.
+            if (!is_string($next) || $next === '' || $next[0] !== '/') {
+                $next = '/cms/';
+            }
+            header('Location: /cms/login?next=' . urlencode($next), true, 302);
+            exit;
         }
-        $next = $_SERVER['REQUEST_URI'] ?? '/cms/';
-        // Only forward same-origin paths; treat anything weird as the root.
-        if (!is_string($next) || $next === '' || $next[0] !== '/') {
-            $next = '/cms/';
+        // Forced password change after a recovery-code login: confine the
+        // session to the account surface until a new password is set.
+        if (!empty($_SESSION['must_change_pw'])) {
+            $path  = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '');
+            $allow = ['/cms/settings', '/cms/account', '/cms/logout'];
+            if (!in_array($path, $allow, true)) {
+                header('Location: /cms/settings?tab=account&force=1', true, 302);
+                exit;
+            }
         }
-        header('Location: /cms/login?next=' . urlencode($next), true, 302);
-        exit;
     }
 
     /**
@@ -97,10 +151,18 @@ final class Auth
     public static function login(string $email, string $password): array
     {
         self::start_session();
+        $ip    = LoginThrottle::client_ip();
         $email = trim($email);
 
+        // Throttle gate — decide before doing any password work. A correct
+        // password is never blocked because we only reach here when allowed.
+        $thr = LoginThrottle::check($ip);
+        if (!$thr['allowed']) {
+            return self::throttle_error($thr);
+        }
+
         if ($email === '' || $password === '') {
-            // Still burn a hash to keep timing flat.
+            // Burn a hash to keep timing flat; don't count empty submits.
             password_verify($password, self::DUMMY_HASH);
             return ['ok' => false, 'error' => 'Invalid email or password.'];
         }
@@ -111,24 +173,18 @@ final class Auth
 
         if (!$row) {
             password_verify($password, self::DUMMY_HASH);
-            return ['ok' => false, 'error' => 'Invalid email or password.'];
-        }
-
-        // Lockout check (does NOT increment counter).
-        if (!empty($row['locked_until'])) {
-            $until = strtotime((string)$row['locked_until']);
-            if ($until !== false && $until > time()) {
-                $mins = max(1, (int)ceil(($until - time()) / 60));
-                return ['ok' => false, 'error' => "Account temporarily locked. Try again in {$mins} minute" . ($mins === 1 ? '' : 's') . '.'];
-            }
+            LoginThrottle::record($ip, false, $email);
+            return self::after_failed_attempt($ip);
         }
 
         if (!password_verify($password, (string)$row['password_hash'])) {
-            self::record_failed_attempt((int)$row['id'], (int)$row['failed_attempts']);
-            return ['ok' => false, 'error' => 'Invalid email or password.'];
+            LoginThrottle::record($ip, false, $email);
+            return self::after_failed_attempt($ip);
         }
 
-        // Success. Reset counters, refresh last_login, regenerate session, rotate CSRF.
+        // Success. Mark the IP trusted, refresh last_login, regenerate session,
+        // rotate CSRF, stamp the session epoch (for Force-All-Logout).
+        LoginThrottle::record($ip, true, $email);
         $update = db()->prepare(
             'UPDATE users SET failed_attempts = 0, locked_until = NULL, last_login = NOW() WHERE id = :id'
         );
@@ -143,25 +199,91 @@ final class Auth
         session_regenerate_id(true);
         Csrf::rotate();
         $_SESSION['uid']       = (int)$row['id'];
+        $_SESSION['epoch']     = (int)($row['session_epoch'] ?? 0);
         $_SESSION['last_seen'] = time();
         return ['ok' => true, 'uid' => (int)$row['id']];
     }
 
-    private static function record_failed_attempt(int $uid, int $current_attempts): void
+    /**
+     * Sign in with a one-time recovery code instead of a password. On success
+     * the code is consumed and the session is flagged to force a password
+     * change (see require_login). Subject to the same throttle as password
+     * login. Returns the same result shape as login().
+     */
+    public static function login_with_recovery_code(string $email, string $code): array
     {
-        $new_attempts = $current_attempts + 1;
-        if ($new_attempts >= self::LOCKOUT_THRESHOLD) {
-            $stmt = db()->prepare(
-                'UPDATE users
-                    SET failed_attempts = 0,
-                        locked_until    = DATE_ADD(NOW(), INTERVAL :mins MINUTE)
-                  WHERE id = :id'
-            );
-            $stmt->execute([':mins' => self::LOCKOUT_MINUTES, ':id' => $uid]);
-            return;
+        self::start_session();
+        $ip    = LoginThrottle::client_ip();
+        $email = trim($email);
+
+        $thr = LoginThrottle::check($ip);
+        if (!$thr['allowed']) {
+            return self::throttle_error($thr);
         }
-        $stmt = db()->prepare('UPDATE users SET failed_attempts = :n WHERE id = :id');
-        $stmt->execute([':n' => $new_attempts, ':id' => $uid]);
+        if ($email === '' || $code === '') {
+            return ['ok' => false, 'error' => 'Invalid email or recovery code.'];
+        }
+
+        $stmt = db()->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
+        $stmt->execute([':email' => $email]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            LoginThrottle::record($ip, false, $email);
+            return self::after_failed_attempt($ip, 'Invalid email or recovery code.');
+        }
+
+        require_once __DIR__ . '/recovery_codes.php';
+        if (!RecoveryCodes::verify_and_consume((int)$row['id'], $code)) {
+            LoginThrottle::record($ip, false, $email);
+            return self::after_failed_attempt($ip, 'Invalid email or recovery code.');
+        }
+
+        // Success — establish session and force a password reset.
+        LoginThrottle::record($ip, true, $email);
+        db()->prepare('UPDATE users SET last_login = NOW() WHERE id = :id')
+            ->execute([':id' => (int)$row['id']]);
+        session_regenerate_id(true);
+        Csrf::rotate();
+        $_SESSION['uid']            = (int)$row['id'];
+        $_SESSION['epoch']          = (int)($row['session_epoch'] ?? 0);
+        $_SESSION['last_seen']      = time();
+        $_SESSION['must_change_pw'] = true;
+        return ['ok' => true, 'uid' => (int)$row['id'], 'must_change_pw' => true];
+    }
+
+    /**
+     * After recording a failed attempt, re-check the throttle: if this very
+     * failure crossed the IP's budget, surface the throttle message now
+     * (friendlier than waiting for the next submit). Otherwise $generic.
+     */
+    private static function after_failed_attempt(string $ip, string $generic = 'Invalid email or password.'): array
+    {
+        $thr = LoginThrottle::check($ip);
+        if (!$thr['allowed']) {
+            return self::throttle_error($thr);
+        }
+        return ['ok' => false, 'error' => $generic];
+    }
+
+    /** Build the throttle error result from a LoginThrottle::check() array. */
+    private static function throttle_error(array $thr): array
+    {
+        $secs = (int)($thr['retry_after_secs'] ?? 0);
+        $mins = max(1, (int)ceil($secs / 60));
+        $msg  = 'Too many failed attempts from your location. For your security, '
+              . 'sign-in from here is paused for about ' . $mins . ' minute'
+              . ($mins === 1 ? '' : 's') . '. If this is you, use a recovery code '
+              . 'below, or reset your password via SSH.';
+        if (!empty($thr['elevated'])) {
+            $msg = 'Heightened protection is active due to unusual sign-in activity. ' . $msg;
+        }
+        return [
+            'ok'          => false,
+            'error'       => $msg,
+            'throttled'   => true,
+            'retry_after' => $secs,
+            'elevated'    => !empty($thr['elevated']),
+        ];
     }
 
     public static function logout(): void
@@ -226,8 +348,46 @@ final class Auth
         );
         $stmt->execute([':h' => $hash, ':id' => (int)$user['id']]);
         session_regenerate_id(true);
+        unset($_SESSION['must_change_pw']); // recovery-code reset satisfied
 
         // Trigger setup.php self-delete (AUTH-SECURITY.md §10).
+        $setup = dirname(__DIR__) . '/setup.php';
+        if (is_file($setup)) {
+            @unlink($setup);
+        }
+        return ['ok' => true];
+    }
+
+    /**
+     * Set a new password WITHOUT the current one — only valid immediately
+     * after a recovery-code login (guarded by $_SESSION['must_change_pw']).
+     * A recovery user can't supply the old password, so this is the path the
+     * forced-change form uses in that state. Returns the same result shape.
+     */
+    public static function set_password_after_recovery(string $new, string $confirm): array
+    {
+        self::start_session();
+        if (empty($_SESSION['must_change_pw'])) {
+            // Not in a recovery flow — refuse; the normal change path applies.
+            return ['ok' => false, 'error' => 'Current password is required.'];
+        }
+        $user = self::current_user();
+        if (!$user) {
+            return ['ok' => false, 'error' => 'Not logged in.'];
+        }
+        if ($new !== $confirm) {
+            return ['ok' => false, 'error' => 'New passwords do not match.'];
+        }
+        $err = self::validate_password_strength($new);
+        if ($err !== null) {
+            return ['ok' => false, 'error' => $err];
+        }
+        $hash = password_hash($new, PASSWORD_DEFAULT);
+        db()->prepare('UPDATE users SET password_hash = :h, password_changed_at = NOW() WHERE id = :id')
+            ->execute([':h' => $hash, ':id' => (int)$user['id']]);
+        session_regenerate_id(true);
+        unset($_SESSION['must_change_pw']);
+
         $setup = dirname(__DIR__) . '/setup.php';
         if (is_file($setup)) {
             @unlink($setup);

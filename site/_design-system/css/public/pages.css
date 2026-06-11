@@ -415,6 +415,15 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   color: var(--secondary);
 }
 
+/* Authored-hero variant (opt-in via .is-authored on .page-header). The
+   sub-headline reads as a deck (one step up the scale) and the byline becomes
+   a symmetric author band — bracketed top and bottom by the same rule, equal
+   gaps. Scoped so other pages' headers and the shared .page-header-sub /
+   .has-rule primitives are untouched. */
+.page-header.is-authored .page-header-sub { font-size: var(--text-h4); line-height: 1.35; }
+.page-header.is-authored .hero-byline { border-top: var(--rule); padding-top: var(--space-32); }
+.page-header.is-authored.has-rule { padding-bottom: var(--space-32); }
+
 
 /* ── 8. Body type ───────────────────────────────────────────
    Three body-copy primitives. .lead is the deck below a hero
@@ -1039,7 +1048,7 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 }
 .journey-col .col-label {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1054,7 +1063,7 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 .journey-arrow {
   align-self: center;
   font-family: var(--font-serif);
-  font-style: italic;
+  font-style: normal; /* the → glyph skews under italic — keep it upright */
   font-size: var(--text-h2);
   color: var(--ink-30);
   line-height: 1;
@@ -1088,7 +1097,7 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 }
 .bar-label {
   font-family: var(--font-cond);
-  font-size: var(--text-label);
+  font-size: var(--text-tiny);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1142,35 +1151,38 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 
 
 /* ── 11g. Loop ──────────────────────────────────────────────
-   Cyclical 4-node process diagram. Each node = circle + label.
-   Reusable for any feedback-loop / iterative-process visual. */
+   Cyclical 4-node feedback diagram. Desktop: a ring of circles
+   around a centred meaning, clockwise arrows closing the cycle.
+   ≤820px: the circles stack left-aligned with labels to the
+   right, down-arrows between them, and one line looping around
+   all the text back to the top. The two SVGs (ring / mobile)
+   are drawn in the markup; CSS positions the nodes 1:1 with
+   each SVG viewBox. Coaching-only. */
 
-.loop {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-24);
-  align-items: start;
+.loop-cycle {
   position: relative;
+  width: 760px;
+  max-width: 100%;
+  height: 600px;
+  margin: var(--space-32) auto 0;
 }
-.loop-node {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-12);
-  position: relative;
+.loop-cycle-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.loop-cycle-svg--mobile { display: none; }
+
+.loop-center {
+  position: absolute; left: 380px; top: 300px;
+  transform: translate(-50%, -50%);
+  width: 190px; text-align: center;
 }
-.loop-node:not(:last-child)::after {
-  content: "→";
-  position: absolute;
-  top: 38px;
-  right: calc(-1 * var(--space-24));
-  transform: translateX(50%) translateY(-50%);
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: var(--text-h3);
-  color: var(--ink-30);
-  line-height: 1;
+.loop-center-main {
+  font-family: var(--font-serif); font-style: italic;
+  font-size: var(--text-h4); line-height: 1.18; color: var(--primary);
 }
+.loop-center-sub {
+  margin-top: var(--space-8);
+  font-size: var(--text-sm); line-height: 1.5; color: var(--secondary);
+}
+
 .loop-circle {
   width: 88px;
   height: 88px;
@@ -1193,6 +1205,34 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   text-align: center;
   max-width: 22ch;
 }
+
+/* Ring nodes. .loop-pt is exactly circle-sized so the CIRCLE (not the
+   circle + its label) centres on the ring point; each label is positioned
+   absolutely, radiating outward, so it never displaces the circle. */
+.loop-pt { position: absolute; width: 92px; height: 92px; }
+.loop-pt .loop-circle { width: 92px; height: 92px; flex: none; }
+.loop-pt .loop-label { position: absolute; margin: 0; max-width: none; }
+.loop-pt--top    { left: 380px; top: 130px; transform: translate(-50%, -50%); }
+.loop-pt--bottom { left: 380px; top: 470px; transform: translate(-50%, -50%); }
+.loop-pt--right  { left: 550px; top: 300px; transform: translate(-50%, -50%); }
+.loop-pt--left   { left: 210px; top: 300px; transform: translate(-50%, -50%); }
+.loop-pt--top .loop-label {
+  bottom: 100%; left: 50%; transform: translateX(-50%);
+  margin-bottom: var(--space-12); width: 220px; text-align: center;
+}
+.loop-pt--bottom .loop-label {
+  top: 100%; left: 50%; transform: translateX(-50%);
+  margin-top: var(--space-12); width: 220px; text-align: center;
+}
+.loop-pt--right .loop-label {
+  left: 100%; top: 50%; transform: translateY(-50%);
+  margin-left: var(--space-12); width: 150px; text-align: left;
+}
+.loop-pt--left .loop-label {
+  right: 100%; top: 50%; transform: translateY(-50%);
+  margin-right: var(--space-12); width: 150px; text-align: right;
+}
+
 .loop-note {
   text-align: center;
   font-family: var(--font-serif);
@@ -1200,6 +1240,30 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   font-size: var(--text-h5);
   color: var(--muted);
   margin-top: var(--space-32);
+}
+
+/* ≤820: circles left-aligned in one column, subtitle to the right of each;
+   the mobile SVG draws the down-arrows + the single wrap-around return line.
+   Fixed 340×590 box so the absolute nodes line up 1:1 with the SVG viewBox. */
+@media (max-width: 820px) {
+  .loop-cycle { width: 340px; max-width: 100%; height: 590px; margin: var(--space-32) auto 0; }
+  .loop-cycle-svg { display: none; }
+  .loop-cycle-svg--mobile { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+  .loop-center { left: 170px; top: 48px; width: 240px; }
+  .loop-center-main { font-size: var(--text-body-lg); }
+  .loop-pt { width: 80px; height: 80px; }
+  .loop-pt .loop-circle { width: 80px; height: 80px; font-size: var(--text-meta); }
+  .loop-pt--top    { left: 48px; top: 168px; }  /* Uncover     */
+  .loop-pt--right  { left: 48px; top: 276px; }  /* Examine     */
+  .loop-pt--bottom { left: 48px; top: 384px; }  /* Co-process  */
+  .loop-pt--left   { left: 48px; top: 492px; }  /* Recalibrate */
+  .loop-pt .loop-label {
+    display: block;
+    left: 100%; right: auto; top: 50%; bottom: auto;
+    transform: translateY(-50%);
+    margin: 0 0 0 var(--space-16);
+    width: 192px; text-align: left;
+  }
 }
 
 
@@ -1222,14 +1286,23 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 }
 .callout p strong { color: var(--primary); font-weight: 600; }
 
+/* Brand-mark variant: a logo (e.g. Slack) on the left, text to the right. */
+.callout--slack { display: flex; align-items: center; gap: var(--space-16); }
+.callout--slack .callout-logo { flex: none; width: 28px; height: 28px; }
+.callout--slack .callout-logo svg { display: block; width: 100%; height: 100%; }
+.callout--slack p { margin: 0; }
+
 
 /* ── 11i. Situation grid ────────────────────────────────────
-   3-up card grid of client scenarios. Each card = italic
-   serif quote + condensed focus label + plain body. */
+   Fluid card grid of client scenarios that collapses 3 → 2 → 1
+   on a min card width (min(280px,100%) guards against overflow
+   on very narrow phones). Each card is an emphasis card: a hue
+   left-edge driven by per-card --c-current, with the focus label
+   tinted to match. Card = italic serif quote + focus label + body. */
 
 .situation-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: var(--space-24);
   list-style: none;
 }
@@ -1240,6 +1313,7 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   padding: var(--space-24);
   background: var(--surface);
   border: var(--rule-faint);
+  border-left: 3px solid var(--c-current, var(--accent));
   border-radius: var(--r-card);
 }
 .situation-quote {
@@ -1255,9 +1329,10 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--primary);
+  color: var(--c-current, var(--primary));
   padding-top: var(--space-12);
   border-top: var(--rule-faint);
+  border-top-color: color-mix(in srgb, var(--c-current, var(--primary)) 30%, transparent);
 }
 .situation-what {
   font-size: var(--text-sm);
@@ -1268,14 +1343,19 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
 
 
 /* ── 11j. Testimonials ──────────────────────────────────────
-   2-up testimonial cards. Blockquote in italic serif, cite
-   in condensed uppercase. No author avatars in this variant. */
+   Testimonial cards: 4-up wide → 2-up tablet → carousel mobile
+   (the ≤720 carousel lives in §13). Blockquote in italic serif,
+   cite in condensed uppercase. No author avatars in this variant. */
 
 .testimonial-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--space-24);
   list-style: none;
+}
+/* Tablet step: range-bounded so it never fights the ≤720 carousel. */
+@media (max-width: 1024px) and (min-width: 721px) {
+  .testimonial-grid { grid-template-columns: repeat(2, 1fr); }
 }
 .testimonial-card {
   display: flex;
@@ -1512,25 +1592,10 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
     transform: rotate(90deg);
     justify-self: center;
   }
-  /* Loop — stack with a downward arrow centred in the row gap. Extra row gap
-     + a smaller glyph keep the arrow clear of the labels (BUG-1: arrows were
-     overlapping the text). */
-  .loop { grid-template-columns: 1fr; gap: var(--space-40); }
-  .loop-node:not(:last-child)::after {
-    content: "↓";
-    top: auto;
-    left: 50%;
-    right: auto;
-    bottom: calc(-1 * var(--space-24));
-    transform: translate(-50%, 50%);
-    font-size: var(--text-h5);
-    font-style: normal; /* desktop arrow is italic-serif → slants the ↓; upright it */
-  }
-
-  /* "What clients come to me for" + "What clients say" → edge-to-edge carousels
-     on mobile (X4): horizontal scroll-snap, bleeding past the page gutter, with
-     a gutter-proportional edge fade. */
-  .situation-grid,
+  /* "What clients say" → edge-to-edge carousel on mobile: horizontal
+     scroll-snap, bleeding past the page gutter, with a gutter-proportional
+     edge fade. ("What clients come to me for" stays a fluid grid — §11i — and
+     the feedback loop has its own ≤820 layout in §11g.) */
   .testimonial-grid {
     display: flex;
     flex-wrap: nowrap;
@@ -1547,7 +1612,6 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
     -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.15) 100%);
             mask-image: linear-gradient(to right, rgba(0,0,0,0.15) 0, #000 var(--space-24), #000 calc(100% - var(--space-24)), rgba(0,0,0,0.15) 100%);
   }
-  .situation-card,
   .testimonial-card {
     flex: 0 0 82%;
     scroll-snap-align: start;

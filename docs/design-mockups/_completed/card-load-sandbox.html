@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Card-Load Motion Sandbox · alexmchong.ca DS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Real production card bundle — identical to master-layout.php so the cards
+       are pixel-true. Motion CSS below is the only sandbox-local addition; the
+       winner gets promoted into public/blocks.css. -->
+  <link rel="stylesheet" href="/_ds/css/tokens.css">
+  <link rel="stylesheet" href="/_ds/css/base.css">
+  <link rel="stylesheet" href="/_ds/css/typography.css">
+  <link rel="stylesheet" href="/_ds/css/components.css">
+  <link rel="stylesheet" href="/_ds/css/status.css">
+  <link rel="stylesheet" href="/_ds/css/views.css">
+  <link rel="stylesheet" href="/_ds/css/public/blocks.css">
+  <style>
+    /* base.css sets body{display:flex} for the app shell — neutralise it for
+       this standalone document (applied-page gotcha). */
+    html, body { display: block; background: var(--neutral); }
+    .sb-wrap { max-width: var(--max); margin: 0 auto; padding: var(--space-40) var(--space-48) var(--space-96); }
+
+    .sb-head { margin-bottom: var(--space-32); }
+    .sb-eyebrow { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-terracotta); margin: 0 0 var(--space-8); }
+    .sb-title { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: var(--text-h1); line-height: 1.05; margin: 0 0 var(--space-12); color: var(--primary); }
+    .sb-lede { font-size: var(--text-md); line-height: 1.55; color: var(--secondary); max-width: 70ch; margin: 0; }
+
+    /* ── Control deck ──────────────────────────────────────────────── */
+    .sb-deck { display: flex; flex-direction: column; gap: var(--space-20); padding: var(--space-20) var(--space-24); background: var(--surface); border: var(--rule-faint); border-radius: var(--r-card); margin-bottom: var(--space-32); }
+    .sb-group { display: flex; flex-direction: column; gap: var(--space-12); }
+    .sb-group + .sb-group { border-top: var(--rule-faint); padding-top: var(--space-20); }
+    .sb-group-title { font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--primary); }
+    .sb-group-body { display: flex; flex-wrap: wrap; gap: var(--space-24) var(--space-32); align-items: flex-end; }
+    .sb-ctrl { display: flex; flex-direction: column; gap: var(--space-8); }
+    .sb-ctrl-label { font-family: var(--font-cond); font-size: var(--text-label); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .sb-segs { display: inline-flex; gap: 3px; }
+    .sb-seg { font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border: 1px solid var(--ink-18); border-radius: var(--r-pill); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+    .sb-seg:hover { border-color: var(--ink-30); color: var(--primary); }
+    .sb-seg.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .sb-replay { border-color: var(--ink-30); color: var(--primary); }
+    .sb-replay:active { background: var(--primary); color: #fff; }
+    .sb-range { display: flex; align-items: center; gap: var(--space-12); }
+    .sb-range input[type=range] { width: 150px; accent-color: var(--primary); }
+    .sb-range output { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--secondary); min-width: 52px; }
+    .sb-note { font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); line-height: 1.5; max-width: 30ch; }
+
+    /* ── Visitor filter bar — mirrors the public .index-section-pills ─── */
+    .sb-filters { display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; margin-bottom: var(--space-24); }
+    .sb-filters .fp { font-family: var(--font-cond); font-size: var(--text-pill); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border: 1px solid var(--ink-18); border-radius: var(--r-pill); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.12s; }
+    .sb-filters .fp:hover { border-color: var(--ink-30); color: var(--primary); }
+    .sb-filters .fp.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .sb-count { margin-left: auto; font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); }
+
+    /* ════════════════════════════════════════════════════════════════
+       MOTION — sandbox-local. Driven by data-mode on .cards-grid + the
+       --sb-dur / --sb-stagger custom props set from the control deck.
+       ════════════════════════════════════════════════════════════════ */
+    .cards-grid { position: relative; }
+
+    /* Start-transform is driven by a CSS var set per load-style on the grid, so
+       .sb-enter and .sb-enter-active stay at EQUAL specificity — otherwise a
+       higher-specificity start rule pins the transform and the move never
+       animates (snaps before/after). translate3d keeps it on the compositor. */
+    .cards-grid                     { --sb-from: translate3d(0,12px,0); }
+    .cards-grid[data-load="cascade"]{ --sb-from: translate3d(0,16px,0); }
+    .cards-grid[data-load="stagger"]{ --sb-from: translate3d(0,12px,0); }
+    .cards-grid[data-load="rise"]   { --sb-from: translate3d(0,34px,0); }
+    .cards-grid[data-load="pop"]    { --sb-from: scale(0.92); }
+
+    /* Outgoing (filtered out) */
+    .cards-grid .card.sb-leaving {
+      transition: opacity var(--sb-dur, 280ms) ease;
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity;
+    }
+    /* Incoming — start state */
+    .cards-grid .card.sb-enter {
+      opacity: 0;
+      transform: var(--sb-from);
+      will-change: transform, opacity;
+    }
+    /* Incoming — played state (equal specificity → transform:none wins by order) */
+    .cards-grid .card.sb-enter-active {
+      transition: opacity var(--sb-dur, 280ms) ease, transform var(--sb-dur, 280ms) cubic-bezier(0.22,0.61,0.36,1);
+      opacity: 1;
+      transform: translate3d(0,0,0);
+    }
+    /* FLIP move — reflow of cards that persist */
+    .cards-grid .card.sb-move {
+      transition: transform var(--sb-dur, 280ms) cubic-bezier(0.22,0.61,0.36,1);
+      will-change: transform;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cards-grid .card.sb-enter, .cards-grid .card.sb-enter-active,
+      .cards-grid .card.sb-move, .cards-grid .card.sb-leaving { transition: none !important; transform: none !important; opacity: 1; }
+    }
+
+    /* ── Skeleton / shimmer mode ── */
+    .sb-skel { border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); padding: var(--space-24); display: flex; flex-direction: column; gap: var(--space-16); overflow: hidden; position: relative; }
+    .sb-skel-line { height: 12px; border-radius: 3px; background: linear-gradient(90deg, var(--ink-08) 25%, var(--ink-12) 37%, var(--ink-08) 63%); background-size: 400% 100%; animation: sb-shimmer 1.2s ease infinite; }
+    .sb-skel-line.w-40 { width: 40%; } .sb-skel-line.w-90 { width: 90%; height: 22px; } .sb-skel-line.w-70 { width: 70%; } .sb-skel-line.w-full { width: 100%; } .sb-skel-line.push { margin-top: auto; }
+    @keyframes sb-shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+    @media (prefers-reduced-motion: reduce) { .sb-skel-line { animation: none; } }
+
+    .sb-foot { margin-top: var(--space-40); font-family: var(--font-mono); font-size: var(--text-meta); color: var(--muted); border-top: var(--rule-faint); padding-top: var(--space-16); }
+  </style>
+</head>
+<body>
+  <div class="sb-wrap">
+    <header class="sb-head">
+      <p class="sb-eyebrow">Design System · Motion Lab</p>
+      <h1 class="sb-title">Card-Load Motion</h1>
+      <p class="sb-lede">Testbed for how a card grid re-lays when a visitor filter changes. Real production cards, real CSS bundle. Pick a mode, click the filters, and feel the difference. The recommended default is <strong>Reflow (FLIP)</strong>; the winner gets promoted into <code>blocks.css</code> and applied to every card grid.</p>
+    </header>
+
+    <section class="sb-deck" aria-label="Motion controls">
+      <div class="sb-group">
+        <span class="sb-group-title">① On load — first paint entrance</span>
+        <div class="sb-group-body">
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Style</span>
+            <div class="sb-segs" id="loadSegs">
+              <button class="sb-seg on" data-load="cascade">Cascade</button>
+              <button class="sb-seg" data-load="stagger">Stagger</button>
+              <button class="sb-seg" data-load="rise">Rise</button>
+              <button class="sb-seg" data-load="pop">Pop</button>
+            </div>
+          </div>
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Duration</span>
+            <div class="sb-range"><input type="range" id="loadDur" min="120" max="700" step="20" value="320"><output id="loadDurOut">320ms</output></div>
+          </div>
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Stagger / card</span>
+            <div class="sb-range"><input type="range" id="loadStag" min="0" max="120" step="5" value="45"><output id="loadStagOut">45ms</output></div>
+          </div>
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">&nbsp;</span>
+            <button class="sb-seg sb-replay" id="replayBtn" title="Replay the on-load entrance">↻ Replay load</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-group">
+        <span class="sb-group-title">② On filter — re-lay when a pill is clicked</span>
+        <div class="sb-group-body">
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Mode</span>
+            <div class="sb-segs" id="modeSegs">
+              <button class="sb-seg on" data-mode="reenter">Re-enter</button>
+              <button class="sb-seg" data-mode="flip">Reflow (FLIP)</button>
+              <button class="sb-seg" data-mode="fade">Cross-fade</button>
+              <button class="sb-seg" data-mode="skeleton">Skeleton</button>
+            </div>
+          </div>
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Duration</span>
+            <div class="sb-range"><input type="range" id="filterDur" min="120" max="700" step="20" value="260"><output id="filterDurOut">260ms</output></div>
+          </div>
+          <div class="sb-ctrl">
+            <span class="sb-ctrl-label">Stagger / card</span>
+            <div class="sb-range"><input type="range" id="filterStag" min="0" max="120" step="5" value="25"><output id="filterStagOut">25ms</output></div>
+          </div>
+          <div class="sb-ctrl" id="latWrap" style="display:none">
+            <span class="sb-ctrl-label">Sim. latency</span>
+            <div class="sb-range"><input type="range" id="latRange" min="0" max="1200" step="50" value="450"><output id="latOut">450ms</output></div>
+          </div>
+          <p class="sb-note" id="modeNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="sb-filters" id="filters" role="group" aria-label="Category filter"></div>
+
+    <div class="cards-grid" id="grid" data-mode="flip" style="--sb-dur:280ms;--sb-stagger:35ms"></div>
+
+    <p class="sb-foot">Sandbox · <code>site/_design-system/showcase/card-load-sandbox.html</code> · not linked from production · remove once the motion is promoted.</p>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ── Category palette (slug → DS colour token + label) ──────────────
+    var CATS = [
+      { slug: 'ux-industry',     label: 'UX Industry',     token: 'terracotta' },
+      { slug: 'leading-design',  label: 'Leading Design',  token: 'forest' },
+      { slug: 'for-designers',   label: 'For Designers',   token: 'ocean' },
+      { slug: 'introspection',   label: 'Introspection',   token: 'indigo' },
+      { slug: 'concept',         label: 'Concept',         token: 'sage' }
+    ];
+    var CAT_LABEL = {}; CATS.forEach(function (c) { CAT_LABEL[c.slug] = c; });
+
+    // ── Sample content (varied types → varied heights, the real reflow test)
+    var TITLES = [
+      'Why the design review keeps failing', 'A field guide to ambiguous problems',
+      'The cost of a missing decision', 'Notes on taste, and how to argue about it',
+      'When the roadmap stops meaning anything', 'Designing for the person who is in a hurry',
+      'The quiet power of a default', 'What I learned shipping the wrong thing first',
+      'Systems that survive their authors', 'On craft, and knowing when to stop',
+      'The meeting that should have been a mock', 'Reading the room is a design skill',
+      'Small teams, sharp edges', 'The brief is never the brief'
+    ];
+    var EXCERPTS = [
+      'A short look at the gap between what we said and what shipped.',
+      'Some patterns that hold up when the problem refuses to sit still.',
+      'Three habits that keep a team honest about scope.',
+      'It is rarely the pixels. It is the conversation around them.'
+    ];
+
+    function pick(arr, i) { return arr[i % arr.length]; }
+
+    // 14 cards across the four content types for height variance.
+    var TYPES = ['article','article','journal','article','experiment','article','journal','article','experiment','article','journal','article','article','journal'];
+    var DATA = TYPES.map(function (type, i) {
+      var cat = CATS[i % CATS.length];
+      // journals lean introspection; experiments lean concept
+      if (type === 'journal') cat = CAT_LABEL['introspection'];
+      if (type === 'experiment') cat = CAT_LABEL['concept'];
+      return {
+        type: type,
+        cat: cat,
+        title: pick(TITLES, i),
+        excerpt: pick(EXCERPTS, i),
+        meta: pick(['Mar 4, 2026','Feb 18, 2026','Jan 27, 2026','Dec 9, 2025'], i),
+        read: (3 + (i % 7)) + ' min read',
+        n: (i + 1)
+      };
+    });
+
+    var bm = '<div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>';
+
+    function cardHTML(d) {
+      var col = 'var(--c-' + d.cat.token + ')';
+      if (d.type === 'journal') {
+        return '<div class="card card--journal" data-type="journal" data-category="' + d.cat.slug + '">'
+          + '<div class="card-header"><span class="cat" style="color:' + col + '">' + d.cat.label + ' ' + String(d.n).padStart(3,'0') + '</span>' + bm + '</div>'
+          + '<div class="card-body">'
+          + '<p class="j-ruled"><a class="card-link" href="#">' + d.title + '</a></p>'
+          + '<p class="excerpt" style="margin-bottom:var(--space-16)">' + d.excerpt + '</p>'
+          + '<div class="j-footer-push"></div>'
+          + '<div style="height:1px;background:var(--ink-18);margin-bottom:18px"></div>'
+          + '<div class="row-between"><span class="j-date">' + d.meta + '</span><span class="arrow">→</span></div>'
+          + '</div></div>';
+      }
+      if (d.type === 'experiment') {
+        return '<div class="card card--experiment" data-type="experiment" data-category="' + d.cat.slug + '" style="background:var(--c-experiment-concept);position:relative">'
+          + '<div class="scrim-concept"></div>'
+          + '<div class="exp-content">'
+          + '<a class="card-link" href="#" aria-label="Open experiment"></a>'
+          + '<div class="card-header" style="position:relative;z-index:2"><span class="od-type">' + d.cat.label + '</span></div>'
+          + '<div style="flex:1;min-height:80px"></div>'
+          + '<div style="padding:0 var(--pad) var(--space-16);position:relative;z-index:2">'
+          + '<h2 class="od-title" style="margin-bottom:10px">' + d.title + '</h2>'
+          + '<p class="od-excerpt" style="margin-bottom:14px">' + d.excerpt + '</p>'
+          + '<span class="od-meta">' + d.meta + '</span>'
+          + '</div>'
+          + '<div class="cta-launch" style="position:relative;z-index:2"><span class="label">Open</span><span class="arrow">→</span></div>'
+          + '</div></div>';
+      }
+      // article
+      return '<div class="card card--article" data-type="article" data-category="' + d.cat.slug + '">'
+        + '<div class="card-header"><span class="cat" style="color:' + col + '">' + d.cat.label + '</span>' + bm + '</div>'
+        + '<div class="card-body">'
+        + '<h2 class="title" style="margin-bottom:var(--space-12)"><a class="card-link" href="#">' + d.title + '</a></h2>'
+        + '<p class="excerpt">' + d.excerpt + '</p>'
+        + '<div class="push-divider"></div>'
+        + '<div class="row-between"><div class="tag-row"><span class="tag">' + d.cat.label + '</span></div><span class="arrow">→</span></div>'
+        + '</div>'
+        + '<div class="meta-strip"><span>' + d.meta + '</span><span>' + d.read + '</span></div>'
+        + '</div>';
+    }
+
+    // ── Build DOM ──────────────────────────────────────────────────────
+    var grid = document.getElementById('grid');
+    DATA.forEach(function (d) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = cardHTML(d);
+      grid.appendChild(tmp.firstChild);
+    });
+
+    var filters = document.getElementById('filters');
+    var pillData = [{ slug: 'all', label: 'All' }].concat(CATS.map(function (c) { return { slug: c.slug, label: c.label }; }));
+    pillData.forEach(function (p, i) {
+      var b = document.createElement('button');
+      b.className = 'fp' + (i === 0 ? ' on' : '');
+      b.setAttribute('data-cat', p.slug);
+      b.textContent = p.label;
+      filters.appendChild(b);
+    });
+    var countEl = document.createElement('span');
+    countEl.className = 'sb-count';
+    filters.appendChild(countEl);
+
+    // ── State ──────────────────────────────────────────────────────────
+    // Two independent phases. `dur`/`stag`/`load`/`mode` are the ACTIVE values,
+    // swapped in from the relevant phase right before each run (usePhase).
+    var state = {
+      loadStyle: 'cascade', loadDur: 320, loadStag: 45,      // ① first-paint entrance
+      filterMode: 'reenter', filterDur: 260, filterStag: 25, // ② filter re-lay
+      lat: 450, active: 'all', busy: false,
+      dur: 320, stag: 45, load: 'cascade', mode: 'reenter'   // active (set by usePhase)
+    };
+
+    function usePhase(phase) {
+      if (phase === 'load') {
+        state.dur = state.loadDur; state.stag = state.loadStag;
+        state.load = state.loadStyle; state.mode = 'flip';
+      } else {
+        state.dur = state.filterDur; state.stag = state.filterStag;
+        state.load = 'stagger'; state.mode = state.filterMode; // filter entries fade flat
+      }
+      setVars();
+    }
+
+    function setVars() {
+      grid.style.setProperty('--sb-dur', state.dur + 'ms');
+      grid.style.setProperty('--sb-stagger', state.stag + 'ms');
+      grid.setAttribute('data-mode', state.mode);
+      grid.setAttribute('data-load', state.load);
+    }
+
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.card'));
+    function shouldShow(card) { return state.active === 'all' || card.getAttribute('data-category') === state.active; }
+    function visibleNow() { return cards.filter(function (c) { return c.style.display !== 'none'; }); }
+    function updateCount() {
+      var n = cards.filter(shouldShow).length;
+      countEl.textContent = n + ' / ' + cards.length + ' shown';
+    }
+
+    // ── Transition engines ─────────────────────────────────────────────
+    function clearClasses(c) {
+      c.classList.remove('sb-leaving','sb-enter','sb-enter-active','sb-move');
+      c.style.transition = ''; c.style.transform = ''; c.style.transitionDelay = '';
+    }
+
+    // Per-card entrance delays. Stagger/rise/pop = flat DOM order; cascade =
+    // diagonal wave keyed off grid row+column (measured from final positions,
+    // so it must run BEFORE any sb-enter transform is applied).
+    function entranceDelays(list) {
+      if (state.load !== 'cascade' || list.length === 0) {
+        return list.map(function (_, i) { return i * state.stag; });
+      }
+      var rows = [], cols = [];
+      function bucket(arr, v) { for (var i = 0; i < arr.length; i++) { if (Math.abs(arr[i] - v) < 10) return i; } arr.push(v); return arr.length - 1; }
+      return list.map(function (c) {
+        var r = c.getBoundingClientRect();
+        return (bucket(rows, Math.round(r.top)) + bucket(cols, Math.round(r.left))) * state.stag;
+      });
+    }
+    function staggerIn(list) {
+      if (!list.length) return;
+      var delays = entranceDelays(list);            // measure clean positions FIRST
+      list.forEach(function (c) { clearClasses(c); c.classList.add('sb-enter'); });
+      void grid.offsetWidth;                        // commit the start state in ONE reflow
+      requestAnimationFrame(function () {
+        list.forEach(function (c, i) {
+          c.style.transitionDelay = delays[i] + 'ms';
+          c.classList.add('sb-enter-active');
+          c.addEventListener('transitionend', function te() { clearClasses(c); c.removeEventListener('transitionend', te); }, { once: true });
+        });
+      });
+    }
+
+    // ── Re-enter (default): fade the current set out fast, swap to the filtered
+    // set, then animate it back in with the entrance — exactly "the cards load
+    // in" when you filter. Robust; no reflow/absolute gymnastics.
+    function runReenter() {
+      var out = Math.max(110, Math.round(state.dur * 0.45));
+      grid.style.transition = 'opacity ' + out + 'ms ease';
+      grid.style.opacity = '0';
+      setTimeout(function () {
+        cards.forEach(function (c) { c.style.display = shouldShow(c) ? '' : 'none'; clearClasses(c); });
+        grid.style.transition = '';
+        grid.style.opacity = '1';
+        void grid.offsetWidth;
+        staggerIn(cards.filter(shouldShow));
+        state.busy = false;
+      }, out);
+    }
+
+    // ── Reflow (FLIP): continuous — persisting cards slide to their new cell.
+    // The grid height is LOCKED then eased to the new height so pinning the
+    // leavers out of flow can't collapse the page (the earlier "crazy" bug).
+    function runFlip() {
+      var gridRect = grid.getBoundingClientRect();
+      var oldH = grid.offsetHeight;
+      var firstRects = new Map();
+      visibleNow().forEach(function (c) { firstRects.set(c, c.getBoundingClientRect()); });
+
+      var leaving = [], entering = [];
+      cards.forEach(function (c) {
+        var show = shouldShow(c), shown = c.style.display !== 'none';
+        if (!show && shown) leaving.push(c);
+        if (show && !shown) entering.push(c);
+      });
+
+      grid.style.height = oldH + 'px';                 // lock — prevents collapse
+
+      leaving.forEach(function (c) {
+        var r = firstRects.get(c);
+        c.style.position = 'absolute';
+        c.style.margin = '0';
+        c.style.width = r.width + 'px';
+        c.style.top = (r.top - gridRect.top) + 'px';
+        c.style.left = (r.left - gridRect.left) + 'px';
+        c.style.zIndex = '0';
+        c.classList.add('sb-leaving');
+        var done = false;
+        function fin() { if (done) return; done = true; c.style.display = 'none'; c.style.position = ''; c.style.margin = ''; c.style.width = ''; c.style.top = ''; c.style.left = ''; c.style.zIndex = ''; clearClasses(c); }
+        c.addEventListener('transitionend', fin, { once: true });
+        setTimeout(fin, state.dur + 100);
+      });
+
+      entering.forEach(function (c) { c.style.display = ''; });
+
+      // Target height with only the in-flow (kept + entering) cards.
+      grid.style.height = 'auto';
+      var newH = grid.offsetHeight;
+      grid.style.height = oldH + 'px';
+
+      var lastRects = new Map();
+      cards.forEach(function (c) { if (shouldShow(c) && c.style.display !== 'none' && c.style.position !== 'absolute') lastRects.set(c, c.getBoundingClientRect()); });
+
+      var movers = [];
+      cards.forEach(function (c) {
+        if (!shouldShow(c) || entering.indexOf(c) !== -1) return;
+        var f = firstRects.get(c), l = lastRects.get(c);
+        if (!f || !l) return;
+        var dx = f.left - l.left, dy = f.top - l.top;
+        if (!dx && !dy) return;
+        c.style.transition = 'none';
+        c.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+        movers.push(c);
+      });
+
+      void grid.offsetWidth; // commit inverted transforms + locked height + leaver opacity
+
+      requestAnimationFrame(function () {
+        grid.style.transition = 'height ' + state.dur + 'ms cubic-bezier(0.22,0.61,0.36,1)';
+        grid.style.height = newH + 'px';
+        movers.forEach(function (c) {
+          c.style.transition = '';
+          c.classList.add('sb-move');
+          c.style.transform = '';
+          c.addEventListener('transitionend', function te() { clearClasses(c); c.removeEventListener('transitionend', te); }, { once: true });
+        });
+      });
+
+      staggerIn(entering);
+
+      setTimeout(function () { grid.style.transition = ''; grid.style.height = ''; },
+                 state.dur + (entering.length * state.stag) + 140);
+    }
+
+    function runFade() {
+      grid.style.transition = 'opacity ' + Math.round(state.dur * 0.5) + 'ms ease';
+      grid.style.opacity = '0';
+      setTimeout(function () {
+        cards.forEach(function (c) { c.style.display = shouldShow(c) ? '' : 'none'; clearClasses(c); });
+        grid.style.opacity = '1';
+        setTimeout(function () { grid.style.transition = ''; state.busy = false; }, state.dur * 0.5);
+      }, state.dur * 0.5);
+    }
+
+    function runSkeleton() {
+      // Settle to the filtered set first, measure each real card's height, then
+      // swap in shimmer placeholders of the SAME height so the reveal is jump-free.
+      cards.forEach(function (c) { c.style.display = shouldShow(c) ? '' : 'none'; clearClasses(c); });
+      var vis = cards.filter(shouldShow);
+      var heights = vis.map(function (c) { return c.offsetHeight; });
+
+      var skelGrid = document.createElement('div');
+      skelGrid.className = 'cards-grid';
+      vis.forEach(function (_, i) {
+        var s = document.createElement('div');
+        s.className = 'sb-skel';
+        s.style.height = heights[i] + 'px';
+        s.innerHTML = '<div class="sb-skel-line w-40"></div><div class="sb-skel-line w-90"></div><div class="sb-skel-line w-full"></div><div class="sb-skel-line w-70"></div><div class="sb-skel-line w-40 push"></div>';
+        skelGrid.appendChild(s);
+      });
+      grid.style.display = 'none';
+      grid.parentNode.insertBefore(skelGrid, grid);
+
+      setTimeout(function () {
+        skelGrid.remove();
+        grid.style.display = '';
+        staggerIn(vis);
+        state.busy = false;
+      }, state.lat);
+    }
+
+    // ── Phase ①: on-load / replay entrance (first-paint feel) ──────────
+    function runLoad() {
+      usePhase('load'); updateCount();
+      cards.forEach(function (c) { c.style.display = shouldShow(c) ? '' : 'none'; clearClasses(c); });
+      staggerIn(cards.filter(shouldShow));
+    }
+
+    // ── Phase ②: on-filter re-lay (pill click) ─────────────────────────
+    function applyFilter() {
+      usePhase('filter');
+      updateCount();
+      if (state.mode === 'reenter') { state.busy = true; runReenter(); }
+      else if (state.mode === 'flip') { runFlip(); state.busy = false; }
+      else if (state.mode === 'fade') { state.busy = true; runFade(); }
+      else { state.busy = true; runSkeleton(); }
+    }
+
+    // ── Wire filters ───────────────────────────────────────────────────
+    filters.addEventListener('click', function (e) {
+      var pill = e.target.closest('.fp'); if (!pill || state.busy) return;
+      filters.querySelectorAll('.fp').forEach(function (p) { p.classList.remove('on'); });
+      pill.classList.add('on');
+      state.active = pill.getAttribute('data-cat');
+      applyFilter();
+    });
+
+    // ── Wire control deck ──────────────────────────────────────────────
+    var NOTES = {
+      reenter: 'Current set fades out, the filtered set animates back in with the entrance — "the cards load in" when you filter. Robust default.',
+      flip: 'Persisting cards slide to their new cell; the grid height eases as cards leave/enter. Continuous, but heavier — best for small changes.',
+      fade: 'Whole grid cross-fades through the swap. Cheapest; hides reflow but no continuity between states.',
+      skeleton: 'Shimmer placeholders stand in during a simulated fetch, then cards resolve. Best when data is actually async.'
+    };
+    var latWrap = document.getElementById('latWrap');
+    var note = document.getElementById('modeNote');
+    function syncNote() { note.textContent = NOTES[state.filterMode]; latWrap.style.display = state.filterMode === 'skeleton' ? '' : 'none'; }
+    syncNote();
+
+    // ② On-filter MODE (FLIP / fade / skeleton)
+    document.getElementById('modeSegs').addEventListener('click', function (e) {
+      var seg = e.target.closest('.sb-seg'); if (!seg) return;
+      this.querySelectorAll('.sb-seg').forEach(function (s) { s.classList.remove('on'); });
+      seg.classList.add('on');
+      state.filterMode = seg.getAttribute('data-mode');
+      syncNote();
+    });
+
+    // ① On-load STYLE (Cascade / Stagger / Rise / Pop) — replays so the choice
+    // is immediately visible.
+    document.getElementById('loadSegs').addEventListener('click', function (e) {
+      var seg = e.target.closest('.sb-seg'); if (!seg || state.busy) return;
+      this.querySelectorAll('.sb-seg').forEach(function (s) { s.classList.remove('on'); });
+      seg.classList.add('on');
+      state.loadStyle = seg.getAttribute('data-load');
+      runLoad();
+    });
+
+    document.getElementById('replayBtn').addEventListener('click', function () {
+      if (state.busy) return;
+      runLoad();
+    });
+
+    // Range → state key. Live-updating the active CSS var only matters for the
+    // phase currently on screen, but storing into the phase key is what counts.
+    function bindRange(id, outId, key, suffix) {
+      var r = document.getElementById(id), o = document.getElementById(outId);
+      r.addEventListener('input', function () { state[key] = +r.value; o.textContent = r.value + suffix; });
+    }
+    bindRange('loadDur','loadDurOut','loadDur','ms');
+    bindRange('loadStag','loadStagOut','loadStag','ms');
+    bindRange('filterDur','filterDurOut','filterDur','ms');
+    bindRange('filterStag','filterStagOut','filterStag','ms');
+    bindRange('latRange','latOut','lat','ms');
+
+    // Deep-link / verification hook: ?cat=<slug> pre-applies a filter.
+    var pcat = new URLSearchParams(location.search).get('cat');
+    if (pcat) {
+      state.active = pcat;
+      filters.querySelectorAll('.fp').forEach(function (p) { p.classList.toggle('on', p.getAttribute('data-cat') === pcat); });
+    }
+
+    setVars();
+    // Wait for web fonts before the first entrance — otherwise the font swap
+    // reflows the cards mid-animation and it reads as jagged. Fallback at 800ms.
+    var started = false;
+    function start() {
+      if (started) return; started = true;
+      runLoad();
+      // Verification hook: ?autofilter=<slug> exercises the click-path filter
+      // after the load settles, so the filtered result can be inspected.
+      var af = new URLSearchParams(location.search).get('autofilter');
+      if (af) setTimeout(function () {
+        var p = filters.querySelector('.fp[data-cat="' + af + '"]');
+        if (p) p.click();
+      }, 1200);
+    }
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(start); }
+    setTimeout(start, 800);
+  })();
+  </script>
+</body>
+</html>

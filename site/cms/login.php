@@ -25,10 +25,23 @@ if (!empty($_SESSION['uid'])) {
 
 $error = '';
 $email = '';
+$recoveryMode = isset($_GET['recovery']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? '')) {
         $error = 'Form expired. Please try again.';
+        $recoveryMode = isset($_POST['recovery_code']);
+    } elseif (isset($_POST['recovery_code'])) {
+        // Recovery-code sign-in. On success the session is flagged to force a
+        // password change → land straight on the Account tab.
+        $email = (string)($_POST['email'] ?? '');
+        $res   = Auth::login_with_recovery_code($email, (string)$_POST['recovery_code']);
+        if ($res['ok']) {
+            header('Location: /cms/settings?tab=account&force=1', true, 302);
+            exit;
+        }
+        $error        = (string)$res['error'];
+        $recoveryMode = true;
     } else {
         $email = (string)($_POST['email'] ?? '');
         $pw    = (string)($_POST['password'] ?? '');
@@ -47,6 +60,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
 $token = Csrf::token();
 $email_attr = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+$next_param = isset($_GET['next']) ? '&amp;next=' . rawurlencode((string)$_GET['next']) : '';
 $error_html = $error !== '' ? '<p class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</p>' : '';
 
 // Staging-only chrome: the heading suffix and the self-serve unlock button
@@ -90,6 +104,9 @@ header('Content-Type: text/html; charset=utf-8');
   .auth-card .btn-pri { width: 100%; justify-content: center; margin-top: var(--space-8); padding: 9px 16px; }
   .error { font-size: var(--text-meta); color: var(--c-terracotta); background: color-mix(in srgb, var(--c-terracotta) 7%, transparent); border: 1px solid color-mix(in srgb, var(--c-terracotta) 25%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
   .flash { font-size: var(--text-meta); color: var(--stage-published); background: color-mix(in srgb, var(--stage-published) 10%, transparent); border: 1px solid color-mix(in srgb, var(--stage-published) 28%, transparent); padding: var(--space-8) var(--space-12); border-radius: var(--r-pill); margin-bottom: var(--space-16); }
+  .auth-alt { margin: var(--space-16) 0 0; text-align: center; }
+  .auth-alt a { font-size: var(--text-meta); color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--ink-18); padding-bottom: 1px; transition: color 0.15s; }
+  .auth-alt a:hover { color: var(--primary); }
   .auth-staging { margin-top: var(--space-24); padding-top: var(--space-20); border-top: 1px dashed var(--ink-18); }
   .auth-staging .content-block-label { display: block; margin-bottom: var(--space-8); }
   .auth-staging p { font-size: var(--text-tiny); color: var(--muted); line-height: 1.6; margin-bottom: var(--space-12); }
@@ -100,6 +117,7 @@ header('Content-Type: text/html; charset=utf-8');
   <div class="auth-brand">alexmchong<em>cms</em><?php if ($is_staging): ?><span class="topbar-env-pill" title="Staging environment">staging</span><?php endif; ?></div>
   <?= $flash_html ?>
   <?= $error_html ?>
+  <?php if (!$recoveryMode): ?>
   <form method="post" action="">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
     <div class="field-group">
@@ -112,14 +130,30 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
     <button type="submit" class="btn-pri">Sign in</button>
   </form>
+  <p class="auth-alt"><a href="?recovery=1<?= $next_param ?>">Lost access? Use a recovery code</a></p>
+  <?php else: ?>
+  <form method="post" action="">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
+    <div class="field-group">
+      <label class="field-label" for="login-email">Email</label>
+      <input class="field-input" id="login-email" type="email" name="email" autocomplete="username" required value="<?= $email_attr ?>">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="login-recovery">Recovery code</label>
+      <input class="field-input" id="login-recovery" type="text" name="recovery_code" autocomplete="one-time-code" inputmode="text" placeholder="xxxx-xxxx" required>
+    </div>
+    <button type="submit" class="btn-pri">Sign in with recovery code</button>
+  </form>
+  <p class="auth-alt"><a href="/cms/login">← Back to password sign-in</a></p>
+  <?php endif; ?>
 
   <?php if ($is_staging): ?>
   <div class="auth-staging">
     <span class="content-block-label">Staging tools</span>
-    <p>Locked out after too many bad guesses? Clear the lock and try again. Staging only — the production login never shows this button.</p>
+    <p>Throttled after too many bad guesses while testing? Clear the login throttle and try again. Staging only — the production login never shows this button.</p>
     <form method="post" action="/cms/unlock-account">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-      <button type="submit" class="btn-sec">Unlock account</button>
+      <button type="submit" class="btn-sec">Clear login throttle</button>
     </form>
   </div>
   <?php endif; ?>

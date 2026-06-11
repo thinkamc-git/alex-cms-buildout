@@ -224,9 +224,11 @@ function render_index(string $slug): void
             } elseif ($type === 'feed') {
                 $cards = list_section_feed($sec, []);
             }
-            $sec['_cards'] = $cards;
-            $sec['_pills'] = $type === 'feed' ? build_section_pills($sec) : null;
-            $sections[]    = $sec;
+            $sec['_cards']  = $cards;
+            $sec['_pills']  = $type === 'feed' ? build_section_pills($sec) : null;
+            // Author Info pulls the site author (Settings → Author Info).
+            $sec['_author'] = $type === 'author-info' ? author_display(get_author()) : null;
+            $sections[]     = $sec;
         }
     }
 

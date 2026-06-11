@@ -1,7 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coaching — Alex M. Chong  ·  SANDBOX</title>
+  <meta name="description" content="Alex coaches designers and design leaders who have lost touch with what made them love this work — and helps them find their way back." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/css/system-public.css" />
+  <!-- ⚠ SANDBOX — standalone preview of site/_pages/_bodies/coaching.html.
+       Edit the <main class="page"> region below; port it back when agreed.
+       Not deployed (lives under docs/). -->
+  <!-- ⚠ PROTOTYPE styles — quarantined; uses real DS tokens. Promote into the
+       DS on sign-off, then delete this block. -->
+  <style id="sandbox-proto">
+    /* Sub-headline one step up the type scale: body-lg (20) → h4 (24),
+       with a slight line-height bump for the two-line deck. */
+    .page-header-sub { font-size: var(--text-h4); line-height: 1.35; }
+    /* Author block: bracket it symmetrically. Top rule matches the
+       page-header's bottom divider exactly (same --rule), and both gaps
+       to the author are space-32 (~70% of the prior space-48). */
+    .hero-byline {
+      border-top: var(--rule);
+      padding-top: var(--space-32);
+    }
+    .page-header.has-rule { padding-bottom: var(--space-32); }
+    /* Testimonials: 4-up wide → 2-up tablet → carousel mobile (mobile lives in
+       the DS at ≤720, left untouched). Tablet rule is range-bounded so it never
+       fights the carousel. */
+    .testimonial-grid { grid-template-columns: repeat(4, 1fr); }
+    @media (max-width: 1024px) and (min-width: 721px) {
+      .testimonial-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    /* Situation cards → emphasis cards (DS .dash-card--callout pattern): 3px hue
+       left-edge driven by per-card --c-current, and the focus label inherits the
+       same hue (DS rule: every coloured element reads from --c-current). */
+    .situation-card { border-left: 3px solid var(--c-current, var(--accent)); }
+    .situation-card .situation-focus {
+      color: var(--c-current, var(--primary));
+      border-top-color: color-mix(in srgb, var(--c-current, var(--primary)) 30%, transparent);
+    }
+    /* "What Clients Come To Me For" → fluid auto-fit grid that collapses
+       3 → 2 → 1 on a min card width (instead of the DS mobile carousel).
+       min(280px,100%) prevents overflow on very narrow phones. */
+    .situation-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    }
+    /* Undo the DS ≤720 carousel for this grid only (testimonials keep theirs). */
+    @media (max-width: 720px) {
+      .situation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: var(--space-24);
+        overflow-x: visible;
+        scroll-snap-type: none;
+        margin-left: 0; margin-right: 0;
+        padding-left: 0; padding-right: 0;
+        -webkit-mask-image: none; mask-image: none;
+      }
+      .situation-card { flex: initial; scroll-snap-align: none; }
+    }
+
+    /* ── Feedback Loop as a TRUE cycle (prototype) ────────────────
+       Ring stage is a fixed 720×520 box so the absolutely-positioned
+       nodes line up 1:1 with the SVG viewBox. Collapses to a calm
+       vertical stack below 820px. */
+    .loop-cycle {
+      position: relative;
+      width: 760px;
+      max-width: 100%;
+      height: 600px;
+      margin: var(--space-32) auto 0;
+    }
+    .loop-cycle-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .loop-cycle-svg--mobile { display: none; }
+    .loop-center {
+      position: absolute; left: 380px; top: 300px;
+      transform: translate(-50%, -50%);
+      width: 190px; text-align: center;
+    }
+    .loop-center-main {
+      font-family: var(--font-serif); font-style: italic;
+      font-size: var(--text-h4); line-height: 1.18; color: var(--primary);
+    }
+    .loop-center-sub {
+      margin-top: var(--space-8);
+      font-size: var(--text-sm); line-height: 1.5; color: var(--secondary);
+    }
+    /* .loop-pt is exactly circle-sized so the CIRCLE (not circle+label)
+       centers on the ring point. Each label is positioned absolutely,
+       radiating outward, so it never displaces the circle. */
+    .loop-pt { position: absolute; width: 92px; height: 92px; }
+    .loop-pt .loop-circle { width: 92px; height: 92px; flex: none; }
+    .loop-pt .loop-label { position: absolute; margin: 0; max-width: none; }
+    .loop-pt--top    { left: 380px; top: 130px; transform: translate(-50%, -50%); }
+    .loop-pt--bottom { left: 380px; top: 470px; transform: translate(-50%, -50%); }
+    .loop-pt--right  { left: 550px; top: 300px; transform: translate(-50%, -50%); }
+    .loop-pt--left   { left: 210px; top: 300px; transform: translate(-50%, -50%); }
+    .loop-pt--top .loop-label {
+      bottom: 100%; left: 50%; transform: translateX(-50%);
+      margin-bottom: var(--space-12); width: 220px; text-align: center;
+    }
+    .loop-pt--bottom .loop-label {
+      top: 100%; left: 50%; transform: translateX(-50%);
+      margin-top: var(--space-12); width: 220px; text-align: center;
+    }
+    .loop-pt--right .loop-label {
+      left: 100%; top: 50%; transform: translateY(-50%);
+      margin-left: var(--space-12); width: 150px; text-align: left;
+    }
+    .loop-pt--left .loop-label {
+      right: 100%; top: 50%; transform: translateY(-50%);
+      margin-right: var(--space-12); width: 150px; text-align: right;
+    }
+    /* ≤820: circles left-aligned in one column, subtitle to the right of
+       each, down-arrows between them, one line looping around all the text.
+       Fixed 340×700 box so the absolute nodes line up 1:1 with the SVG. */
+    @media (max-width: 820px) {
+      .loop-cycle {
+        width: 340px; max-width: 100%; height: 590px;
+        margin: var(--space-32) auto 0;
+      }
+      .loop-cycle-svg { display: none; }
+      .loop-cycle-svg--mobile { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+      .loop-center { left: 170px; top: 48px; width: 240px; }
+      .loop-center-main { font-size: var(--text-body-lg); }
+      .loop-pt { width: 80px; height: 80px; }
+      .loop-pt .loop-circle { width: 80px; height: 80px; font-size: var(--text-meta); }
+      .loop-pt--top    { left: 48px; top: 168px; }  /* Uncover     */
+      .loop-pt--right  { left: 48px; top: 276px; }  /* Examine     */
+      .loop-pt--bottom { left: 48px; top: 384px; }  /* Co-process  */
+      .loop-pt--left   { left: 48px; top: 492px; }  /* Recalibrate */
+      .loop-pt .loop-label {
+        display: block;
+        left: 100%; right: auto; top: 50%; bottom: auto;
+        transform: translateY(-50%);
+        margin: 0 0 0 var(--space-16);
+        width: 192px; text-align: left;
+      }
+    }
+
+    /* Transformation labels: nudge by real scale steps. Column heading up
+       (label 11 → meta 13); bar caption down (label 11 → tiny 10). */
+    .journey-col .col-label { font-size: var(--text-meta); }
+    .bar-label { font-size: var(--text-tiny); }
+
+    /* Slack callout: brand mark on the left, text to the right. */
+    .callout--slack { display: flex; align-items: center; gap: var(--space-16); }
+    .callout--slack .callout-logo { flex: none; width: 28px; height: 28px; }
+    .callout--slack .callout-logo svg { display: block; width: 100%; height: 100%; }
+    .callout--slack p { margin: 0; }
+  </style>
+</head>
+<body>
+
+<!-- ===== BEGIN CHROME: header (mirror of _pages/_layout/header.html) ===== -->
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <button class="layout-nav-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="layout-nav-drawer">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="layout-nav-links" id="layout-nav-drawer">
+    <a href="/ux2.0/how-we-got-here/" data-nav-key="ux2" style="position:relative">What's UX 2.0<span aria-hidden="true" style="position:absolute;top:-5px;right:-4px;width:10px;height:10px;background:#d63031;border-radius:50%"></span></a>
+    <a href="/writing/" data-nav-key="writing">Thoughts</a>
+    <a href="/live-sessions/" data-nav-key="talks">Talks</a>
+    <a href="/work-with-me/" data-nav-key="work">Work with me</a>
+  </div>
+</nav>
+<script>
+  // Adds .is-active to the nav link matching the current URL. Uses prefix
+  // matching so /writing/foo highlights the "Thoughts" link, /live-sessions/x
+  // highlights "Talks", etc. Exact path match wins when present.
+  (function () {
+    var path = location.pathname.replace(/\/$/, '');
+    if (path === '') path = '/';
+    var links = document.querySelectorAll('.layout-nav a[data-nav-key]');
+    var bestEl = null;
+    var bestLen = -1;
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].getAttribute('href').replace(/\/$/, '');
+      if (href === '') continue;
+      if (path === href || path.indexOf(href + '/') === 0) {
+        if (href.length > bestLen) { bestEl = links[i]; bestLen = href.length; }
+      }
+    }
+    if (bestEl) bestEl.classList.add('is-active');
+  })();
+
+  // Mobile/tablet nav drawer (X1): hamburger toggles a full-height drawer.
+  (function () {
+    var nav = document.querySelector('.layout-nav');
+    var toggle = nav && nav.querySelector('.layout-nav-toggle');
+    var links = nav && nav.querySelector('.layout-nav-links');
+    if (!nav || !toggle || !links) return;
+    function setOpen(open) {
+      nav.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    toggle.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setOpen(!nav.classList.contains('is-open'));
+    });
+    document.addEventListener('click', function (e) {
+      if (nav.classList.contains('is-open') && !links.contains(e.target) && !toggle.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+    var rt;
+    window.addEventListener('resize', function () {
+      document.documentElement.classList.add('nav-no-anim');
+      clearTimeout(rt);
+      rt = setTimeout(function () { document.documentElement.classList.remove('nav-no-anim'); }, 250);
+    });
+  })();
+</script>
+
+<!-- ===== BEGIN BODY: editable — port back to _bodies/coaching.html ===== -->
 
   <main class="page">
 
-    <header class="page-header has-rule is-authored">
+    <header class="page-header has-rule">
       <div class="eyebrow">Coaching</div>
       <h1 class="page-header-title">
         For designers &amp; leaders navigating a moment with no clear map — who want to find their way back to work that feels like <em class="serif">theirs</em> again.
@@ -388,3 +608,21 @@
     </section>
 
   </main>
+
+
+<!-- ===== END BODY ===== -->
+
+<!-- ===== BEGIN CHROME: footer (mirror of _pages/_layout/footer.html) ===== -->
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a>
+    <a href="/coaching/">Coaching</a>
+    <a href="/work-with-me/">Services</a>
+    <a href="/resume/">Resume</a>
+    <!-- <a href="/newsletter/">Subscribe</a> -->
+  </div>
+</footer>
+
+</body>
+</html>

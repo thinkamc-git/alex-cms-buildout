@@ -66,10 +66,10 @@ $grid_rows_for = static function (array $sec): int {
       $seeLab  = (string)($sec['see_more_label']  ?? '');
       $seeTgt  = (string)($sec['see_more_target'] ?? '');
       $viewLab = $seeLab !== '' ? $seeLab : 'View all';
-      if ($cards === [] && $stype !== 'feed') continue; // empty hero / curated → skip silently
+      if ($cards === [] && $stype !== 'feed' && $stype !== 'author-info') continue; // empty hero / curated → skip silently
   ?>
     <section class="index-section index-section--<?= $e($stype) ?>">
-      <?php if ($stype !== 'hero' && $stitle !== ''): ?>
+      <?php if ($stype !== 'hero' && $stype !== 'author-info' && $stitle !== ''): ?>
         <?php $viewHref = $seeTgt !== '' ? $seeTgt : '#'; ?>
         <?php if ($hstyle === 'big'): ?>
           <header class="index-section-header is-big">
@@ -208,6 +208,27 @@ $grid_rows_for = static function (array $sec): int {
         </div>
       <?php endif; ?>
 
+      <?php elseif ($stype === 'author-info'):
+          $au        = $sec['_author'] ?? [];
+          $aBg       = (string)($sec['author_background'] ?? 'transparent');
+          $aMode     = (string)($sec['hero_image_mode'] ?? 'auto');
+          $aPhoto    = $aMode === 'custom' ? (string)($sec['hero_image_url'] ?? '')
+                     : ($aMode === 'auto' ? (string)($au['image'] ?? '') : '');
+          $aInitials = (string)($au['initials'] ?? '');
+          $aBodySec  = (string)($sec['author_body'] ?? '');
+          $aBio      = $aBodySec !== '' ? $aBodySec : (string)($au['extended_description'] ?? '');
+          $aLinkLab  = $seeLab !== '' ? $seeLab : 'Author Info';
+          $aHasPhoto = $aMode !== 'none' && ($aPhoto !== '' || $aInitials !== '');
+      ?>
+        <div class="index-author index-author--abg-<?= $e($aBg) ?>">
+          <?php if ($aHasPhoto): ?>
+            <div class="article-author-bio-avatar index-author-avatar">
+              <?php if ($aPhoto !== ''): ?><img src="<?= $e($aPhoto) ?>" alt=""><?php else: ?><?= $e($aInitials) ?><?php endif; ?>
+            </div>
+          <?php endif; ?>
+          <p class="index-author-bio"><?= $e($aBio) ?><?php if ($seeTgt !== ''): ?> <a class="index-author-link" href="<?= $e($seeTgt) ?>"><?= $e($aLinkLab) ?> &rarr;</a><?php endif; ?></p>
+        </div>
+
       <?php elseif ($cards !== []): ?>
         <?php
         $gridStyle = '';
@@ -271,7 +292,9 @@ $grid_rows_for = static function (array $sec): int {
             p.classList.toggle('on');
             if (activeKeys().length === 0 && allPill) allPill.classList.add('on');
           }
-          apply();
+          var grid = section.querySelector('.cards-grid');
+          if (window.CardGrid && grid) window.CardGrid.reenter(grid, apply);
+          else apply();
         });
       });
       apply();

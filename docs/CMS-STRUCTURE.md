@@ -627,6 +627,8 @@ Every section carries a `section_type` and a `title` (optional heading). Curated
 
 **◆ Feed** — a filter-driven, self-updating set. Has all three layers below.
 
+**◆ Author Info** — a **singleton** banner rendering the site author (Settings → Author Info) — photo, name, bio, optional "Read more" link. Once added, the "+ Author Info" button disables. Modeled on Hero and **reuse-first**: it reuses `hero_image_mode`/`hero_image_url` for the photo (auto = the Settings author photo · custom = an uploaded URL · none), `see_more_label`/`see_more_target` for the trailing link (label defaults to "Author Info"), and `title` for the heading. Two new columns (migration `0031`, revised `0032`): `author_background` (**transparent · shaded · white · black** — every option is framed by full-width rules above + below *except* black, whose dark fill is its own frame; shaded = 5% black fill; black flips the foreground to white; styling uses existing DS tokens) and `author_body` (the bio; defaults to the Settings bio when blank). Renders as a compact author line (avatar + bio + optional link). No content query, no display config, no visitor filter.
+
 ### 16.3 The three layers of a section
 
 A section is built from up to three independent layers. Hero uses none of them (the pick is the section, plus its own layout/background/image variant set described in §16.2); Curated uses only Display; Feed uses all three.
@@ -660,25 +662,34 @@ CREATE TABLE index_sections (
   id              INT AUTO_INCREMENT PRIMARY KEY,
   index_id        INT NOT NULL,                          -- FK indexes.id (Editorial pages only)
   position        INT NOT NULL DEFAULT 0,                -- order within the page
-  section_type    ENUM('hero','curated','feed') NOT NULL,
+  section_type    ENUM('hero','curated','feed','author-info') NOT NULL,
   title           VARCHAR(500),                          -- optional section heading
                                                          --  (or eyebrow prefix for hero)
 
   -- Section header style (curated + feed; hero uses its own variant set below)
   header_style    ENUM('small','big') NOT NULL DEFAULT 'small',  -- Tiny | Large
 
-  -- Hero variants (hero only; ignored otherwise)
+  -- Hero variants (hero only; ignored otherwise). Author Info REUSES
+  -- hero_image_mode / hero_image_url for its photo (auto/custom/none).
   hero_image_mode ENUM('auto','custom','none') NOT NULL DEFAULT 'auto',
   hero_image_url  VARCHAR(500) NULL,                     -- when mode = 'custom'
   hero_layout     ENUM('plain','within','bleed-dark','bleed-light') NOT NULL DEFAULT 'within',
   hero_background ENUM('transparent','surface') NOT NULL DEFAULT 'transparent',
 
+  -- Author Info section only (migration 0031; ignored otherwise). Photo reuses
+  -- hero_image_*; trailing link reuses see_more_*; heading reuses title.
+  author_background ENUM('transparent','shaded','white','black') NOT NULL DEFAULT 'transparent',
+  author_body       TEXT NULL,                           -- bio; defaults to Settings bio when blank
+
   -- Display (curated + feed; ignored for hero)
   display_format  ENUM('grid','carousel') NOT NULL DEFAULT 'grid',
   item_limit      INT NULL,                              -- carousel: # posts to show
   grid_rows       VARCHAR(10) NULL,                      -- grid: '1'|'2'|'3'|'4'|'all'
-  see_more_label  VARCHAR(120) NULL,                     -- text on the see-more card
-  see_more_target VARCHAR(255) NULL,                     -- index slug or absolute URL; NULL = no card
+  see_more_label  VARCHAR(120) NULL,                     -- text on the see-more / read-more link
+  see_more_target VARCHAR(255) NULL,                     -- resolved URL (href); NULL = no link
+  see_more_target_type VARCHAR(16) NULL,                 -- nav-parity dimension that produced the URL
+                                                         -- (index|category|series|content|page|custom);
+                                                         -- lets the CMS round-trip the choice (migration 0033)
 
   -- Content query (feed only)
   feed_types      JSON NULL,                             -- ['article','journal',…]; NULL/empty = all

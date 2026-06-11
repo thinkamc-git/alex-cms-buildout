@@ -1,0 +1,7 @@
+# db/.htaccess — deny all direct web access to this folder.
+# migrate.php / reset-password.php are CLI tools (run over SSH); the .sql
+# migrations must never be fetched over HTTP (they'd leak the schema). PHP
+# `require` from the front controller is unaffected — this only blocks
+# browsers from reading these files.
+
+Require all denied

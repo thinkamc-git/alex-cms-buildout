@@ -1478,6 +1478,29 @@ a.article-series-pill:hover {
    out of the active filter set. */
 .cards-grid .card.is-filtered-out { display: none !important; }
 
+/* ── Card-grid motion (load + filter) ──────────────────────────────────
+   Promoted from the card-load sandbox (2026-06). Driven by
+   /_ds/js/public/card-grid.js on every public .cards-grid:
+   • Load   — Stagger entrance (cards fade/translate up on first paint).
+   • Filter — Re-enter (the grid fades out, the filtered set animates back in).
+   --cg-dur is set per phase by the JS (320ms load / 260ms filter); the
+   per-card stagger delay is applied inline. */
+.cards-grid .card.cg-enter {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  will-change: transform, opacity;
+}
+.cards-grid .card.cg-enter-active {
+  transition: opacity var(--cg-dur, 320ms) ease,
+              transform var(--cg-dur, 320ms) cubic-bezier(0.22, 0.61, 0.36, 1);
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cards-grid .card.cg-enter,
+  .cards-grid .card.cg-enter-active { transition: none !important; transform: none !important; opacity: 1; }
+}
+
 @media (max-width: 900px) {
   .index-page-header { padding: var(--space-40) var(--space-32) var(--space-32); }
   .index-grid,
@@ -1577,6 +1600,14 @@ a.article-series-pill:hover {
   border-bottom: 1px solid var(--ink-18);
   background: transparent;
 }
+/* A within/plain hero draws its OWN top+bottom framing rules on the .editorial-
+   hero element. Suppress the redundant SECTION-level border-bottom for those so
+   the two don't stack into a thick double-line (the real source of the double).
+   Solo/bleed heroes have no element border, so they keep the section rule as
+   their divider. (0,5,0) to beat the base rule above. */
+.index-section--hero:has(.editorial-hero:not(.is-solo):not(.editorial-hero--bleed-dark):not(.editorial-hero--bleed-light)) {
+  border-bottom: 0;
+}
 /* Editorial heroes stack as flush blocks — no vertical section padding, so the
    hero's framing rules + internal padding ARE the block (hero↔hero is flush). */
 .index-section:has(.editorial-hero) { padding-top: 0; padding-bottom: 0; }
@@ -1617,6 +1648,10 @@ a.article-series-pill:hover {
   gap: var(--space-48);
   padding: var(--space-64) var(--space-48);
   align-items: stretch;
+  /* Floor so every hero variant reads the same height even when padding is
+     trimmed (first-child, or sitting above an Author block). Content is
+     centered within the floor so short heroes don't sit top-heavy. */
+  min-height: 360px;
 }
 .editorial-hero.is-solo,
 .editorial-hero--plain {
@@ -1711,6 +1746,7 @@ a.article-series-pill:hover {
 .editorial-hero-text {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--space-24);
   min-width: 0;
   max-width: 760px;
@@ -1816,15 +1852,100 @@ a.article-series-pill:hover {
   min-height: 280px;
 }
 
+/* ── Author Info section — a compact author line ───────────────────────
+   Reuses the post author-bio avatar (.article-author-bio-avatar). Photo on
+   the left, the bio flows as one paragraph with an inline "read more" link
+   at the end. The four backgrounds reuse existing tokens — Black flips the
+   foreground to white. */
+.index-author { display: flex; align-items: center; gap: var(--space-20); padding: 0; }
+.index-author-avatar { width: 48px; height: 48px; font-size: 18px; }
+.index-author-bio { font-size: var(--text-md); line-height: 1.6; color: var(--secondary); margin: 0; max-width: 120ch; }
+.index-author-link { font-weight: 600; color: var(--primary); text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.index-author-link:hover { text-decoration-thickness: 2px; }
+/* Filled backgrounds span the band full-bleed; content keeps the page gutter.
+   Transparent rides the canvas with no box. */
+.index-author--abg-shaded { background: rgba(0,0,0,0.05); padding: var(--space-24) var(--space-48); }
+.index-author--abg-white  { background: var(--surface);   padding: var(--space-24) var(--space-48); }
+.index-author--abg-black  { background: var(--primary);   padding: var(--space-24) var(--space-48); }
+/* The section sits as a calm band with small equal vertical padding, framed by
+   full-width rules above + below (like the hero's framing). */
+.index-section--author-info {
+  padding-top: var(--space-24);
+  padding-bottom: var(--space-24);
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+}
+/* Filled backgrounds: zero ALL section padding so the box fills edge-to-edge.
+   The framing rules stay on the section → they sit at the band's top/bottom. */
+.index-section--author-info:has(.index-author--abg-shaded),
+.index-section--author-info:has(.index-author--abg-white),
+.index-section--author-info:has(.index-author--abg-black) { padding: 0; }
+/* Black needs no framing rules — the dark fill is its own frame. */
+.index-section--author-info:has(.index-author--abg-black) { border-top: 0; border-bottom: 0; }
+/* The Author's full-width bottom rule replaces the inset module divider the next
+   module would otherwise draw — suppress the double line. (0,4,1) to beat it. */
+.index-section.index-section--author-info + .index-section:not(:has(.editorial-hero))::before { display: none; }
+/* The Author band stacks FLUSH with heroes on EITHER side (like hero↔hero).
+   These must out-specify the generic hero↔module gutter rules (0,4,0) — hence
+   the doubled .index-section.index-section--author-info. */
+/* hero ABOVE → filled bands sit FLUSH; transparent gets a small breathing gap. */
+.index-section:has(.editorial-hero) + .index-section.index-section--author-info { padding-top: var(--space-24); }
+.index-section:has(.editorial-hero) + .index-section.index-section--author-info:has(.index-author--abg-shaded),
+.index-section:has(.editorial-hero) + .index-section.index-section--author-info:has(.index-author--abg-white),
+.index-section:has(.editorial-hero) + .index-section.index-section--author-info:has(.index-author--abg-black) { padding-top: 0; }
+/* hero BELOW → kill the author's own bottom AND the next hero's top gutter */
+.index-section.index-section--author-info:has(+ .index-section:has(.editorial-hero)) { padding-bottom: 0; }
+.index-section.index-section--author-info + .index-section:has(.editorial-hero) { padding-top: 0; }
+/* At a hero↔Author boundary the HERO keeps its framing rule; the AUTHOR drops
+   its rule on the shared edge so the two don't stack into a thick double-line.
+   (0,4,0) beats the base author border rule (0,2,0). */
+.index-section:has(.editorial-hero) + .index-section.index-section--author-info { border-top: 0; }
+.index-section.index-section--author-info:has(+ .index-section:has(.editorial-hero)) { border-bottom: 0; }
+/* First section (a hero) shouldn't carry an oversized top gap. */
+.index-section:first-child .editorial-hero { padding-top: var(--space-32); }
+/* A hero directly above an Author block sits tight to it — trim the hero's
+   bottom padding so the author band reads as attached, not floating below. The
+   min-height floor (below) keeps the band the same height as untrimmed heroes. */
+.index-section:has(.editorial-hero):has(+ .index-section--author-info) .editorial-hero { padding-bottom: var(--space-32); }
+.index-author--abg-black .index-author-bio { color: rgba(255,255,255,0.84); }
+.index-author--abg-black .index-author-link { color: #fff; }
+.index-author--abg-black .index-author-avatar { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); color: rgba(255,255,255,0.72); }
+
 @media (max-width: 900px) {
   .editorial-hero {
     grid-template-columns: 1fr;
     padding: var(--space-40) var(--space-32);
     gap: var(--space-32);
+    min-height: 0; /* stacked content sets its own height */
+  }
+  /* Filled author band: inner inset tracks the page gutter (space-32 here). */
+  .index-author--abg-shaded,
+  .index-author--abg-white,
+  .index-author--abg-black { padding: var(--space-24) var(--space-32); }
+  /* Bleed-hero scrim: heavier, earlier-ramping haze on tablet/mobile so the
+     eyebrow/title stay legible over busy images. */
+  .editorial-hero--bleed-dark::before {
+    background: linear-gradient(
+      180deg,
+      rgba(0,0,0,0.4) 0%,
+      rgba(0,0,0,0.7) 30%,
+      rgba(0,0,0,0.9) 100%
+    );
+  }
+  .editorial-hero--bleed-light::before {
+    background: linear-gradient(
+      180deg,
+      rgba(255,255,255,0.40) 0%,
+      rgba(255,255,255,0.7) 30%,
+      rgba(255,255,255,0.95) 100%
+    );
   }
 }
 @media (max-width: 600px) {
   .editorial-hero { padding: var(--space-32) var(--space-24); }
+  .index-author--abg-shaded,
+  .index-author--abg-white,
+  .index-author--abg-black { padding: var(--space-20) var(--space-24); }
 }
 
 /* Carousel: horizontal scroll, native scrollbar. v1 — no controls.
@@ -1916,8 +2037,10 @@ a.article-series-pill:hover {
   border-top: var(--rule-faint);
   border-bottom: var(--rule-faint);
 }
-/* When the within hero is the lead (very top of the page), drop its top line. */
-.index-section--hero .editorial-hero { border-top: 0; }
+/* A hero leading the page (first section) drops its top line — nothing above to
+   frame against. Scoped to :first-child + (0,4,0) so it beats the within-hero
+   border rule above and doesn't strip the top line from mid-page heroes. */
+.index-section:first-child.index-section--hero .editorial-hero { border-top: 0; }
 @media (max-width: 900px) {
   .editorial-hero-side { order: -1; }
 }

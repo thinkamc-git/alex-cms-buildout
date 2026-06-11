@@ -155,11 +155,14 @@ function save_editorial_sections_from_post(int $index_id, array $posted): void
             'hero_layout'     => (string)($row['hero_layout']     ?? 'within'),
             'hero_background' => (string)($row['hero_background'] ?? 'transparent'),
             'hero_blur'       => (int)($row['hero_blur'] ?? 0),
+            'author_background' => (string)($row['author_background'] ?? 'transparent'),
+            'author_body'       => (string)($row['author_body'] ?? ''),
             'display_format'  => (string)($row['display_format'] ?? 'grid'),
             'item_limit'      => ($row['item_limit'] ?? '') !== '' ? (int)$row['item_limit'] : null,
             'grid_rows'       => (string)($row['grid_rows'] ?? 'all'),
             'see_more_label'  => (string)($row['see_more_label'] ?? ''),
             'see_more_target' => (string)($row['see_more_target'] ?? ''),
+            'see_more_target_type' => (string)($row['see_more_target_type'] ?? ''),
             'feed_types'      => $feedTypes,
             'feed_categories' => $feedCats,
             'feed_sort'       => (string)($row['feed_sort'] ?? 'newest'),
@@ -211,6 +214,38 @@ foreach ($allCats as $c) {
         'label'  => (string)$c['label'],
         'colour' => (string)($c['colour'] ?? ''),
     ];
+}
+
+// ── See-more / Read-more target options (nav-parity picker) ──────────
+// Each entry is ['url' => resolved href, 'label' => display]. The option VALUE
+// is the resolved URL, so it matches what's stored in see_more_target and
+// round-trips on reload. URL logic mirrors resolve_nav_target() in lib/nav.php.
+$seeTargetOpts = ['index' => [], 'category' => [], 'series' => [], 'content' => [], 'page' => []];
+foreach (db()->query('SELECT slug, title FROM indexes ORDER BY slug') as $r) {
+    $u = '/' . $r['slug'] . '/';
+    $seeTargetOpts['index'][] = ['url' => $u, 'label' => ((string)($r['title'] ?: $r['slug'])) . ' (' . $u . ')'];
+}
+foreach (db()->query('SELECT label, value_slug FROM categories ORDER BY label') as $r) {
+    $seeTargetOpts['category'][] = ['url' => '/writing/?category=' . rawurlencode((string)$r['value_slug']), 'label' => (string)$r['label']];
+}
+foreach (db()->query('SELECT name, slug FROM series ORDER BY name') as $r) {
+    $seeTargetOpts['series'][] = ['url' => '/series/' . $r['slug'] . '/', 'label' => (string)$r['name']];
+}
+$seeContentPrefix = ['article' => '/writing/', 'journal' => '/journal/', 'live-session' => '/live-sessions/', 'experiment' => '/experiments/'];
+foreach (db()->query("SELECT type, slug, title FROM content WHERE status = 'published' ORDER BY type, title") as $r) {
+    $pre = $seeContentPrefix[$r['type']] ?? ('/' . $r['type'] . '/');
+    $seeTargetOpts['content'][] = ['url' => $pre . $r['slug'] . '/', 'label' => ucfirst((string)$r['type']) . ': ' . (string)$r['title']];
+}
+if (!function_exists('list_pages_files') && is_file(__DIR__ . '/../../lib/pages.php')) {
+    require_once __DIR__ . '/../../lib/pages.php';
+}
+if (function_exists('list_pages_files')) {
+    foreach (array_filter(list_pages_files(), static fn($f) => ($f['kind'] ?? '') === 'page') as $f) {
+        $ps = (string)($f['slug'] ?? '');
+        if ($ps === '') continue;
+        $u = '/' . $ps . '/';
+        $seeTargetOpts['page'][] = ['url' => $u, 'label' => ((string)($f['title'] ?? $ps)) . ' (' . $u . ')'];
+    }
 }
 
 // Decode legacy JSON columns for the Basic Listing form.
@@ -271,9 +306,10 @@ $pickLabel = static function (array $row) use ($e): string {
 
 /** Pretty UI labels for section types. 'feed' stores in the DB; 'Filtered' shows in the UI. */
 $secTypeLabel = static function (string $t): string {
-    if ($t === 'hero')    return 'Hero';
-    if ($t === 'curated') return 'Curated';
-    if ($t === 'feed')    return 'Filtered';
+    if ($t === 'hero')        return 'Hero';
+    if ($t === 'curated')     return 'Curated';
+    if ($t === 'feed')        return 'Filtered';
+    if ($t === 'author-info') return 'Author';
     return ucfirst($t);
 };
 
@@ -284,6 +320,10 @@ $sectionSummary = static function (array $s) use ($typeLabels): string {
     $items = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
     if ($type === 'hero') {
         return $items !== [] ? '1 item picked' : 'no pick yet';
+    }
+    if ($type === 'author-info') {
+        return ucfirst((string)($s['author_background'] ?? 'transparent')) . ' · '
+             . ucfirst((string)($s['hero_image_mode'] ?? 'auto')) . ' photo';
     }
     if ($type === 'curated') {
         $n = count($items);
@@ -425,6 +465,8 @@ require __DIR__ . '/../partials/topbar.php';
               $hlayout = (string)($s['hero_layout']     ?? 'within');
               $hbg     = (string)($s['hero_background'] ?? 'transparent');
               $hblur   = (int)($s['hero_blur'] ?? 0);
+              $abg     = (string)($s['author_background'] ?? 'transparent');
+              $abody   = (string)($s['author_body'] ?? '');
               $items   = is_array($s['item_ids'] ?? null) ? $s['item_ids'] : [];
               $ftypes  = is_array($s['feed_types'] ?? null) ? $s['feed_types'] : [];
               $fcats   = is_array($s['feed_categories'] ?? null) ? $s['feed_categories'] : [];
@@ -436,22 +478,25 @@ require __DIR__ . '/../partials/topbar.php';
               $limit   = $s['item_limit'] ?? '';
               $seeLab  = (string)($s['see_more_label']  ?? '');
               $seeTgt  = (string)($s['see_more_target'] ?? '');
+              $seeTgtType = (string)($s['see_more_target_type'] ?? '');
               $fsort   = (string)($s['feed_sort'] ?? 'newest');
           ?>
           <?php require __DIR__ . '/index-edit-section.php'; ?>
           <?php $i++; endforeach; ?>
         </div>
 
+        <?php $hasAuthorInfo = false; foreach ($sections as $_s) { if ((string)($_s['section_type'] ?? '') === 'author-info') { $hasAuthorInfo = true; break; } } ?>
         <div class="form-actions">
           <button type="button" class="btn-sec" data-add-type="hero">+ Hero</button>
           <button type="button" class="btn-sec" data-add-type="curated">+ Curated</button>
           <button type="button" class="btn-sec" data-add-type="feed">+ Filtered</button>
+          <button type="button" class="btn-sec" data-add-type="author-info" data-singleton="author-info"<?= $hasAuthorInfo ? ' disabled aria-disabled="true" title="Only one Author section per page"' : '' ?>>+ Author</button>
           <button type="button" class="btn-sec" disabled title="Coming soon" aria-disabled="true">+ Hero Multi</button>
         </div>
 
         <!-- Section templates for JS-driven Add. Hidden; the JS clones,
              swaps placeholders, and appends to #sec-stack. -->
-        <?php foreach (['hero', 'curated', 'feed'] as $tplType):
+        <?php foreach (['hero', 'curated', 'feed', 'author-info'] as $tplType):
             $s = [
                 'id' => 0, 'section_type' => $tplType, 'title' => '',
                 'item_ids' => [], 'feed_types' => [], 'feed_categories' => [],
@@ -462,9 +507,10 @@ require __DIR__ . '/../partials/topbar.php';
             ];
             $sid = 0; $stype = $tplType; $stitle = ''; $hstyle = 'small';
             $himode = 'auto'; $himgUrl = ''; $hlayout = 'within'; $hbg = 'transparent'; $hblur = 0;
+            $abg = 'transparent'; $abody = '';
             $items = [];
             $ftypes = []; $fcats = []; $fopts = []; $fshow = false; $fby = 'types';
-            $fmt = 'grid'; $gridR = 'all'; $limit = ''; $seeLab = ''; $seeTgt = '';
+            $fmt = 'grid'; $gridR = 'all'; $limit = ''; $seeLab = ''; $seeTgt = ''; $seeTgtType = '';
             $fsort = 'newest';
             $i = '__TPL__';
         ?>

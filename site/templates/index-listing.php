@@ -128,7 +128,9 @@ $catMap  = [];
           p.classList.toggle('on');
           if (activeKeys().length === 0 && allPill) allPill.classList.add('on');
         }
-        apply();
+        var grid = page.querySelector('.cards-grid');
+        if (window.CardGrid && grid) window.CardGrid.reenter(grid, apply);
+        else apply();
       });
     });
 

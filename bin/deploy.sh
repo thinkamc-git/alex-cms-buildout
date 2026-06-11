@@ -105,6 +105,8 @@ cp site/config/.htaccess           "$STAGE/config/"
 cp site/lib/db.php                 "$STAGE/lib/"
 cp site/lib/router.php             "$STAGE/lib/"
 cp site/db/migrate.php             "$STAGE/db/"
+cp site/db/reset-password.php      "$STAGE/db/"
+cp site/db/.htaccess               "$STAGE/db/"
 cp site/db/migrations/*.sql        "$STAGE/db/migrations/"
 
 # Phase 4: auth library, /cms/* pages, one-shot setup.
@@ -114,6 +116,8 @@ cp site/db/migrations/*.sql        "$STAGE/db/migrations/"
 # — which is fine; setup.php is harmless when no user row exists.
 cp site/lib/auth.php               "$STAGE/lib/"
 cp site/lib/csrf.php               "$STAGE/lib/"
+cp site/lib/login_throttle.php     "$STAGE/lib/"
+cp site/lib/recovery_codes.php     "$STAGE/lib/"
 cp site/setup.php                  "$STAGE/"
 mkdir -p "$STAGE/cms"
 cp site/cms/login.php              "$STAGE/cms/"

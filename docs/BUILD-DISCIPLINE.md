@@ -47,6 +47,29 @@ lives — and the provisional version **removed**.
 > **Preview ≠ done.** A task that leaves a prototype, inline style, or one-off in
 > place is **incomplete**, however good it looks.
 
+### 3.1 Sandboxes — archive on promotion, don't leave artifacts
+
+A **sandbox** is a standalone file built to explore/validate a behaviour before
+it lives in the system (e.g. a motion lab, a layout testbed). It may be placed
+somewhere previewable — including temporarily under `site/` so it can be viewed
+on staging — but it is **not part of the product** and must never ship to prod.
+
+When the sandbox work is promoted into the real system, do a **clean archive** in
+the same pass — this is part of "done", not a later chore:
+
+1. **Promote** the validated behaviour into the proper module(s) (CSS slice, JS,
+   templates) and **verify** it works on the real surfaces.
+2. **Move** the sandbox file(s) into a `_completed/` archive that is **not
+   deployed** — `docs/design-mockups/_completed/`. Never leave a sandbox sitting
+   in `site/` after promotion (it would keep shipping and clutter the tree).
+3. **Remove** any temporary wiring that only existed to preview it (e.g. a deploy
+   include, a nav link).
+4. Note in the session close what was promoted and where the sandbox was archived.
+
+The goal: no orphaned previews, stubs, or one-off files accumulating in the repo.
+Every sandbox ends in one of two states — **promoted + archived**, or **deleted**.
+See also the `reference/` → `reference/_completed/` intake convention.
+
 ---
 
 ## 4. Exceptions require assessment + explicit permission

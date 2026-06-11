@@ -80,8 +80,9 @@ $nowTs        = date('Y-m-d H:i:s');
 setcookie('cms_subs_last_seen', $nowTs, [
     'expires'  => time() + 60 * 60 * 24 * 365,
     'path'     => '/cms/',
-    'samesite' => 'Lax',
+    'samesite' => 'Strict',
     'httponly' => true,
+    'secure'   => !empty($_SERVER['HTTPS']),
 ]);
 
 $rows    = list_subscribers([

@@ -2,20 +2,18 @@
 /**
  * cms/views/post-template.php — Post Template admin (Phase 14.5).
  *
- * Read-only port of the design-mockups Content Template view, with the
- * Author info tab editable so the single-row `author` config can be
- * updated from the CMS.
+ * Read-only port of the design-mockups Content Template view. (Author editing
+ * moved to Settings → Author Info; this view is now a read-only catalogue.)
  *
  * Left pane: Master Template card + 6 sub-template rows.
  *   Click → updates ?tpl=<slug>.
  *
  * Right pane:
- *   - tpl=master → 4 tabs (Content Blocks / Field Reference / Author info / PHP Layout File)
+ *   - tpl=master → 4 tabs (Content Blocks / Field Reference / PHP Layout File / Preview)
  *   - tpl=<sub-template> → single panel (visibility table + PHP file preview)
  *     No "Save Template" button — sub-template visibility is read-only in α.
  *
  * Data layer: lib/blocks_data.php (hardcoded, sourced from docs/BLOCKS.md).
- * Author CRUD: lib/author.php (UPDATE the single-row table).
  *
  * No new schema; no render-layer changes; staging-only ship.
  */
@@ -26,7 +24,6 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../lib/csrf.php';
 require_once __DIR__ . '/../../lib/blocks_data.php';
-require_once __DIR__ . '/../../lib/author.php';
 
 Auth::require_login();
 $csrf_token = Csrf::token();
@@ -34,26 +31,8 @@ $csrf_token = Csrf::token();
 $errors = [];
 $flash  = '';
 
-// POST: Author save
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
-    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
-        $errors[] = 'Session expired. Reload the page and try again.';
-    } else {
-        $action = (string)($_POST['action'] ?? '');
-        if ($action === 'save-author') {
-            save_author(
-                (string)($_POST['name'] ?? ''),
-                (string)($_POST['short_description'] ?? ''),
-                (string)($_POST['extended_description'] ?? ''),
-                (string)($_POST['image'] ?? '')
-            );
-            header('Location: /cms/post-template?tpl=master&tab=author&flash=' . rawurlencode('Author saved.'));
-            exit;
-        } else {
-            $errors[] = 'Unknown action.';
-        }
-    }
-}
+// Author editing moved to Settings → Author Info (Phase: Author Info). This
+// view is now a read-only template catalogue.
 
 if ($flash === '' && isset($_GET['flash'])) {
     $flash = (string)$_GET['flash'];
@@ -65,20 +44,19 @@ $fields = fields_reference();
 $subs   = sub_templates_reference();
 $matrix = content_type_matrix();
 $notes  = block_mode_notes();
-$author = get_author();
 
 $selected = (string)($_GET['tpl'] ?? 'master');
 $validTpl = array_merge(['master'], array_keys($subs));
 if (!in_array($selected, $validTpl, true)) $selected = 'master';
 
-// Master uses: blocks / fields / author / php / preview
+// Master uses: blocks / fields / php / preview
 // Sub uses:    visibility / php / preview
 $isSub = ($selected !== 'master');
 $defaultTab = $isSub ? 'visibility' : 'blocks';
 $activeTab = (string)($_GET['tab'] ?? $defaultTab);
 $validTab  = $isSub
     ? ['visibility', 'php', 'preview']
-    : ['blocks', 'fields', 'author', 'php', 'preview'];
+    : ['blocks', 'fields', 'php', 'preview'];
 if (!in_array($activeTab, $validTab, true)) $activeTab = $defaultTab;
 
 // Template file reader for the PHP Layout File tab / sub-template preview.
@@ -136,12 +114,6 @@ $tabHref = static function (string $tab) use ($selected): string {
   /* PHP file preview viewer — CodeMirror-driven, syntax-highlighted. */
   .ct-code-editor + .CodeMirror { border:1px solid var(--border); border-radius:var(--r-card); font-size:13px; height:520px; }
   .ct-code-missing { font-family:var(--font-mono); font-size:var(--text-meta); color:var(--muted); border:1px dashed var(--ink-18); padding:var(--space-24); text-align:center; border-radius:var(--r-card); }
-  /* Author info layout. */
-  .ct-author-grid { display:flex; gap:var(--space-24); margin-top:var(--space-24); align-items:flex-start; }
-  .ct-author-avatar-col { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:var(--space-8); }
-  .ct-author-avatar { width:96px; height:96px; border-radius:50%; background:var(--canvas-raised); border:1px solid var(--ink-18); display:flex; align-items:center; justify-content:center; font-family:var(--font-serif); font-style:italic; font-size:36px; color:var(--muted); overflow:hidden; }
-  .ct-author-avatar img { width:100%; height:100%; object-fit:cover; }
-  .ct-author-fields { flex:1; min-width:0; }
   /* Required asterisk. */
   .field-req { font-family:var(--font-cond); font-size:10px; color:var(--c-terracotta); margin-left:var(--space-4); letter-spacing:0.06em; text-transform:uppercase; }
   /* Phase 14.5 read-only note on sub-template panels. */
@@ -200,12 +172,11 @@ require __DIR__ . '/../partials/topbar.php';
         <div class="tpl-detail">
           <?php if ($selected === 'master'): ?>
             <!-- ─── Master Template: 4 tabs ─── -->
-            <div class="tpl-tabs">
-              <a class="tpl-tab<?= $activeTab === 'blocks' ? ' active' : '' ?>" href="<?= $e($tabHref('blocks')) ?>" style="text-decoration:none">Content Blocks</a>
-              <a class="tpl-tab<?= $activeTab === 'fields' ? ' active' : '' ?>" href="<?= $e($tabHref('fields')) ?>" style="text-decoration:none">Field Reference</a>
-              <a class="tpl-tab<?= $activeTab === 'author' ? ' active' : '' ?>" href="<?= $e($tabHref('author')) ?>" style="text-decoration:none">Author info</a>
-              <a class="tpl-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
-              <a class="tpl-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
+            <div class="cms-tabs">
+              <a class="cms-tab<?= $activeTab === 'blocks' ? ' active' : '' ?>" href="<?= $e($tabHref('blocks')) ?>" style="text-decoration:none">Content Blocks</a>
+              <a class="cms-tab<?= $activeTab === 'fields' ? ' active' : '' ?>" href="<?= $e($tabHref('fields')) ?>" style="text-decoration:none">Field Reference</a>
+              <a class="cms-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
+              <a class="cms-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
             </div>
 
             <?php if ($activeTab === 'blocks'): ?>
@@ -260,55 +231,6 @@ require __DIR__ . '/../partials/topbar.php';
                 ?>
               </div>
 
-            <?php elseif ($activeTab === 'author'): ?>
-              <div class="tpl-panel is-server-active reveal-page">
-                <div class="info-box">
-                  The author block renders next to the byline on every template that includes the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">$author</code> fields. Sub-templates can hide it on a per-content basis via the <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author</code> / <code style="font-family:var(--font-mono);font-size:var(--text-tiny)">show_author_bio</code> booleans on each content row.
-                </div>
-                <form method="post" action="/cms/post-template">
-                  <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                  <input type="hidden" name="action" value="save-author">
-                  <div class="ct-author-grid">
-                    <div class="ct-author-avatar-col">
-                      <div class="ct-author-avatar">
-                        <?php
-                        $imgUrl = trim((string)($author['image'] ?? ''));
-                        if ($imgUrl !== ''):
-                        ?>
-                          <img src="<?= $e($imgUrl) ?>" alt="">
-                        <?php else: ?>
-                          <?= $e(author_initials($author['name'] ?? null) ?: 'AC') ?>
-                        <?php endif; ?>
-                      </div>
-                      <div class="field-note-box" style="font-size:var(--text-tiny);text-align:center;max-width:160px">96×96 recommended. Paste the URL or relative path below.</div>
-                    </div>
-                    <div class="ct-author-fields">
-                      <div class="field-group">
-                        <div class="field-label">Image URL</div>
-                        <input class="field-input" type="text" name="image" value="<?= $e((string)($author['image'] ?? '')) ?>" placeholder="/uploads/author.jpg or https://…">
-                      </div>
-                      <div class="field-group">
-                        <div class="field-label">Name <span class="field-req">required</span></div>
-                        <input class="field-input" type="text" name="name" value="<?= $e((string)($author['name'] ?? '')) ?>" placeholder="Alex M. Chong">
-                      </div>
-                      <div class="field-group">
-                        <div class="field-label">Short Description</div>
-                        <textarea class="field-input" name="short_description" style="min-height:80px" placeholder="A short bio that appears alongside articles…"><?= $e((string)($author['short_description'] ?? '')) ?></textarea>
-                        <div class="field-note-box">Displays beside the byline on every article that includes the author block. Keep it short — one or two sentences.</div>
-                      </div>
-                      <div class="field-group">
-                        <div class="field-label">Extended Description</div>
-                        <textarea class="field-input" name="extended_description" style="min-height:160px" placeholder="The fuller bio rendered in the Author Bio block…"><?= $e((string)($author['extended_description'] ?? '')) ?></textarea>
-                        <div class="field-note-box">Renders in the <strong>Author Bio</strong> block — the footer "About the author" panel. Independently toggleable from the inline Author byline.</div>
-                      </div>
-                      <div style="margin-top:var(--space-16)">
-                        <button class="btn-pri" type="submit">Save Author</button>
-                      </div>
-                    </div>
-                  </div>
-                </form>
-              </div>
-
             <?php elseif ($activeTab === 'php'): ?>
               <?php $masterCode = $readTemplate('master-layout.php'); ?>
               <div class="tpl-panel is-server-active reveal-page">
@@ -345,10 +267,10 @@ require __DIR__ . '/../partials/topbar.php';
             $rowMatrix = $matrix[$selected] ?? [];
             $subCode = $readTemplate($info['php_file']);
           ?>
-            <div class="tpl-tabs">
-              <a class="tpl-tab<?= $activeTab === 'visibility' ? ' active' : '' ?>" href="<?= $e($tabHref('visibility')) ?>" style="text-decoration:none">Block Visibility</a>
-              <a class="tpl-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
-              <a class="tpl-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
+            <div class="cms-tabs">
+              <a class="cms-tab<?= $activeTab === 'visibility' ? ' active' : '' ?>" href="<?= $e($tabHref('visibility')) ?>" style="text-decoration:none">Block Visibility</a>
+              <a class="cms-tab<?= $activeTab === 'php' ? ' active' : '' ?>" href="<?= $e($tabHref('php')) ?>" style="text-decoration:none">PHP Layout File</a>
+              <a class="cms-tab<?= $activeTab === 'preview' ? ' active' : '' ?>" href="<?= $e($tabHref('preview')) ?>" style="text-decoration:none">Preview</a>
             </div>
 
             <?php if ($activeTab === 'visibility'): ?>

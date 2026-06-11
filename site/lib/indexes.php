@@ -555,7 +555,7 @@ function count_series_published(int $series_id): int
 // NULL-able and ignored when not applicable. See migration 0021 for the
 // full schema.
 
-const INDEX_SECTION_TYPES   = ['hero', 'curated', 'feed'];
+const INDEX_SECTION_TYPES   = ['hero', 'curated', 'feed', 'author-info'];
 const INDEX_SECTION_FORMATS = ['grid', 'carousel'];
 const INDEX_SECTION_ROWS    = ['1', '2', '3', '4', 'all'];
 const INDEX_SECTION_SORTS   = ['newest', 'oldest'];
@@ -564,6 +564,8 @@ const INDEX_SECTION_HEADERS = ['small', 'big'];
 const INDEX_SECTION_HERO_IMG = ['auto', 'custom', 'none'];
 const INDEX_SECTION_HERO_LAYOUTS = ['plain', 'within', 'bleed-dark', 'bleed-light'];
 const INDEX_SECTION_HERO_BGS     = ['transparent', 'surface'];
+// Author Info section — 4 backgrounds (black flips foreground to white).
+const INDEX_SECTION_AUTHOR_BGS   = ['transparent', 'shaded', 'white', 'black'];
 
 /**
  * Decode a JSON column that may arrive as either a string (raw from
@@ -598,6 +600,8 @@ function _index_section_normalize(array $row): array
     $row['hero_layout']     = (string)($row['hero_layout']     ?? 'within');
     $row['hero_background'] = (string)($row['hero_background'] ?? 'transparent');
     $row['hero_blur']       = (int)($row['hero_blur'] ?? 0);
+    $row['author_background'] = (string)($row['author_background'] ?? 'transparent');
+    $row['author_body']       = (string)($row['author_body'] ?? '');
     $row['item_limit']      = isset($row['item_limit']) && $row['item_limit'] !== null
                               ? (int)$row['item_limit'] : null;
     return $row;
@@ -688,6 +692,12 @@ function save_index_section(array $data): array
         ? (int)(bool)$data['hero_blur']
         : (int)($existing['hero_blur'] ?? 0);
 
+    // Author Info section — background choice + bio body (reuses hero_image_*
+    // for the photo and see_more_* for the trailing link).
+    $authorBg = (string)($data['author_background'] ?? ($existing['author_background'] ?? 'transparent'));
+    if (!in_array($authorBg, INDEX_SECTION_AUTHOR_BGS, true)) $authorBg = 'transparent';
+    $authorBody = trim((string)($data['author_body'] ?? ($existing['author_body'] ?? ''))) ?: null;
+
     // Display layer — only meaningful for curated/feed. Hero ignores it
     // but we still store sane defaults so the row is consistent.
     $format = (string)($data['display_format'] ?? ($existing['display_format'] ?? 'grid'));
@@ -698,6 +708,12 @@ function save_index_section(array $data): array
     if (!in_array($grid_rows, INDEX_SECTION_ROWS, true)) $grid_rows = 'all';
     $see_label  = trim((string)($data['see_more_label']  ?? ($existing['see_more_label']  ?? ''))) ?: null;
     $see_target = trim((string)($data['see_more_target'] ?? ($existing['see_more_target'] ?? ''))) ?: null;
+    // Which dimension produced the resolved URL (for editor round-trip). Only
+    // meaningful when a target is set; validated against the nav-parity kinds.
+    $see_target_type = (string)($data['see_more_target_type'] ?? ($existing['see_more_target_type'] ?? ''));
+    if ($see_target === null || !in_array($see_target_type, ['index', 'category', 'series', 'content', 'page', 'custom'], true)) {
+        $see_target_type = null;
+    }
 
     // Content query — only feed uses it; hero/curated store NULL.
     $feed_types_json = null;
@@ -734,6 +750,15 @@ function save_index_section(array $data): array
         $opts = is_array($opts)
             ? array_values(array_unique(array_filter(array_map('strval', $opts), static fn($o) => $o !== '')))
             : [];
+        // Single-dimension guard: the visitor filter renders ONE pill row, so
+        // keep only options matching filter_by. Types must be real feed types;
+        // categories are everything else. Drops stale cross-dimension slugs even
+        // if the editor's JS gate is bypassed.
+        if ($filter_by === 'types') {
+            $opts = array_values(array_filter($opts, static fn($o) => in_array($o, INDEX_FEED_TYPES, true)));
+        } elseif ($filter_by === 'categories') {
+            $opts = array_values(array_filter($opts, static fn($o) => !in_array($o, INDEX_FEED_TYPES, true)));
+        }
         $filter_opts_js = $opts === [] ? null : json_encode($opts);
     }
 
@@ -764,11 +789,14 @@ function save_index_section(array $data): array
         ':hlayout'     => $heroLayout,
         ':hbg'         => $heroBg,
         ':hblur'       => $heroBlur,
+        ':abg'         => $authorBg,
+        ':abody'       => $authorBody,
         ':fmt'         => $format,
         ':limit'       => $item_limit,
         ':rows'        => $grid_rows,
         ':see_label'   => $see_label,
         ':see_target'  => $see_target,
+        ':see_ttype'   => $see_target_type,
         ':ftypes'      => $feed_types_json,
         ':fcats'       => $feed_cats_json,
         ':fsort'       => $feed_sort,
@@ -782,14 +810,16 @@ function save_index_section(array $data): array
         $sql = 'INSERT INTO index_sections
                   (index_id, position, section_type, title, header_style,
                    hero_image_mode, hero_image_url, hero_layout, hero_background, hero_blur,
-                   display_format, item_limit, grid_rows, see_more_label, see_more_target,
+                   author_background, author_body,
+                   display_format, item_limit, grid_rows, see_more_label, see_more_target, see_more_target_type,
                    feed_types, feed_categories, feed_sort,
                    filter_show, filter_by, filter_options,
                    item_ids)
                 VALUES
                   (:iid, :pos, :type, :title, :hstyle,
                    :himode, :himg, :hlayout, :hbg, :hblur,
-                   :fmt, :limit, :rows, :see_label, :see_target,
+                   :abg, :abody,
+                   :fmt, :limit, :rows, :see_label, :see_target, :see_ttype,
                    :ftypes, :fcats, :fsort,
                    :fshow, :fby, :fopts,
                    :items)';
@@ -807,11 +837,14 @@ function save_index_section(array $data): array
               hero_layout = :hlayout,
               hero_background = :hbg,
               hero_blur = :hblur,
+              author_background = :abg,
+              author_body = :abody,
               display_format = :fmt,
               item_limit = :limit,
               grid_rows = :rows,
               see_more_label = :see_label,
               see_more_target = :see_target,
+              see_more_target_type = :see_ttype,
               feed_types = :ftypes,
               feed_categories = :fcats,
               feed_sort = :fsort,

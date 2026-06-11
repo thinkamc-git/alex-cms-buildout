@@ -8,6 +8,19 @@
 # PHP so the favicon and similar can env-gate.
 ErrorDocument 404 /404.php
 
+# === Security headers (Phase 24 hardening) ==================================
+# Cheap, zero-breakage defense-in-depth. CSP is deliberately minimal: it sets
+# only object-src/base-uri/frame-ancestors — NOT script-src — because the
+# Settings page lets the author paste an external analytics <script>, which a
+# strict script-src would block. A full nonce-based CSP is deferred.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set Content-Security-Policy "object-src 'none'; base-uri 'self'; frame-ancestors 'self'"
+</IfModule>
+
 RewriteEngine On
 
 # === Legacy redirects (Phase 13) ============================================

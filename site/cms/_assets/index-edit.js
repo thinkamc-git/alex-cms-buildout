@@ -34,9 +34,16 @@
   // the section's current hero_layout and hero_image_mode hidden inputs.
   function syncHeroFieldVisibility(sec) {
     if (!sec) return;
-    var layoutH = sec.querySelector('input[type="hidden"][name$="[hero_layout]"]');
     var modeH   = sec.querySelector('input[type="hidden"][name$="[hero_image_mode]"]');
-    if (!layoutH || !modeH) return;
+    if (!modeH) return;
+    var layoutH = sec.querySelector('input[type="hidden"][name$="[hero_layout]"]');
+    var imgUrlEl = sec.querySelector('[data-hero-image-url]');
+    // Author Info reuses the image-mode field but has no layout — the custom
+    // URL field simply follows the mode (shown only when Custom).
+    if (!layoutH) {
+      if (imgUrlEl) imgUrlEl.style.display = (modeH.value === 'custom') ? '' : 'none';
+      return;
+    }
     var layout = layoutH.value;
     var mode   = modeH.value;
     var bgField = sec.querySelector('[data-hero-bg-field]');
@@ -133,6 +140,61 @@
     }
   });
 
+  // ── Author Info live preview ────────────────────────────────────────
+  function authorHasTarget(sec) {
+    var st = sec.querySelector('[data-see-type]');
+    if (!st) return false;
+    var pick = sec.querySelector('[data-see-pick="' + st.value + '"]');
+    return !!(pick && (pick.value || '').trim());
+  }
+  function syncAuthorPreview(sec) {
+    if (!sec) return;
+    var pv = sec.querySelector('[data-author-preview]');
+    if (!pv) return;
+    var bg    = (sec.querySelector('input[name$="[author_background]"]') || {}).value || 'transparent';
+    var mode  = (sec.querySelector('input[name$="[hero_image_mode]"]') || {}).value || 'auto';
+    var urlIn = sec.querySelector('[data-hero-img-url-input]');
+    var bioTa = sec.querySelector('textarea[name$="[author_body]"]');
+    var labIn = sec.querySelector('input[name$="[see_more_label]"]');
+    ['plain', 'transparent', 'shaded', 'white', 'black'].forEach(function (k) { pv.classList.remove('is-abg-' + k); });
+    pv.classList.add('is-abg-' + bg);
+    // Photo: custom URL / the Settings auto photo / none.
+    var photo = mode === 'custom' ? (urlIn ? (urlIn.value || '').trim() : '')
+              : (mode === 'auto' ? (pv.getAttribute('data-author-photo') || '') : '');
+    var initials = pv.getAttribute('data-author-initials') || '';
+    var avatar = pv.querySelector('[data-author-preview-avatar]');
+    if (avatar) {
+      var hasPhoto = mode !== 'none' && (photo || initials);
+      avatar.style.display = hasPhoto ? '' : 'none';
+      if (photo) avatar.innerHTML = '<img src="' + escapeHtml(photo) + '" alt="">';
+      else { avatar.innerHTML = ''; avatar.textContent = initials; }
+    }
+    // Bio (falls back to the Settings default) + inline read-more link.
+    var bio = bioTa ? (bioTa.value || '').trim() : '';
+    if (!bio) bio = pv.getAttribute('data-author-bio-default') || '';
+    var label = labIn ? (labIn.value || '').trim() : '';
+    if (!label) label = 'Author Info';
+    var bioEl = pv.querySelector('[data-author-preview-bio]');
+    if (bioEl) {
+      bioEl.textContent = bio;
+      if (authorHasTarget(sec)) {
+        bioEl.appendChild(document.createTextNode(' '));
+        var a = document.createElement('a');
+        a.className = 'index-author-preview-link';
+        a.textContent = label + ' →';
+        bioEl.appendChild(a);
+      }
+    }
+  }
+  form.addEventListener('input', function (e) {
+    var sec = e.target && e.target.closest('[data-section][data-section-type="author-info"]');
+    if (sec) syncAuthorPreview(sec);
+  });
+  form.addEventListener('change', function (e) {
+    var sec = e.target && e.target.closest('[data-section][data-section-type="author-info"]');
+    if (sec) syncAuthorPreview(sec);
+  });
+
   // ── Pill single-select (data-pill-group="single") ───────────────────
   // Each .filter-group with data-pill-group="single" pairs with a hidden
   // <input name=...> that captures the active pill's data-pill-value.
@@ -187,6 +249,11 @@
     if (cb.name && cb.name.indexOf('[feed_types]') > -1) {
       rebuildCategoriesFor(cb.closest('[data-section]'));
     }
+    // Visitor filter is single-dimension: a Type/Category selection disables
+    // the other set and stamps [filter_by].
+    if (cb.name && cb.name.indexOf('[filter_options]') > -1) {
+      syncFilterDimension(cb.closest('[data-section]'));
+    }
     updateSummaryFor(cb.closest('[data-section]'));
   });
 
@@ -219,6 +286,7 @@
     reindexSections();
     updateSectionCount();
     toggleSecEmpty();
+    syncSingletonButtons();
     markDirty();
   });
 
@@ -249,7 +317,29 @@
     toggleSecEmpty();
     card.scrollIntoView({behavior: 'smooth', block: 'nearest'});
     setTimeout(function () { card.classList.remove('is-fresh'); }, 1300);
+    syncSingletonButtons();
+    syncHeroFieldVisibility(card); // wire the (author-info) custom-URL toggle on fresh clones
+    syncAuthorPreview(card);
+    refreshCatRailsIn(card);       // render the (feed) cat-rail …
+    syncFilterDimension(card);     // … and apply the single-dimension gate
     markDirty();
+  }
+
+  // Singleton add buttons (e.g. + Author Info) disable once a section of
+  // their type exists in the stack, and re-enable when it's removed.
+  function syncSingletonButtons() {
+    document.querySelectorAll('button[data-singleton]').forEach(function (btn) {
+      var t = btn.getAttribute('data-singleton');
+      var exists = !!(stack && stack.querySelector('[data-section][data-section-type="' + t + '"]'));
+      btn.disabled = exists;
+      if (exists) {
+        btn.setAttribute('aria-disabled', 'true');
+        btn.setAttribute('title', 'Only one ' + t.replace('-', ' ') + ' section per page');
+      } else {
+        btn.removeAttribute('aria-disabled');
+        btn.removeAttribute('title');
+      }
+    });
   }
 
   function toggleSecEmpty() {
@@ -386,9 +476,9 @@
       var t = type.value;
       var pick = picker.querySelector('[data-see-pick="' + t + '"]');
       if (!pick) { hidden.value = ''; return; }
-      var v = (pick.value || '').trim();
-      if (t === 'index' && v) v = '/' + v;
-      hidden.value = v;
+      // Each dependent picker's value IS the resolved URL (index/category/series/
+      // content/page selects carry URLs; custom is a typed URL) — store as-is.
+      hidden.value = (pick.value || '').trim();
     });
   });
 
@@ -539,6 +629,8 @@
       });
       rail.appendChild(group);
     });
+    // Rebuilt inputs are fresh (un-disabled) — re-apply the dimension gate.
+    syncFilterDimension(sec);
   }
 
   function refreshCatRailsIn(scope) {
@@ -553,13 +645,44 @@
     });
   }
 
+  /*
+   * Filtered section — single-dimension gate. The visitor filter renders ONE
+   * pill row (Types OR Categories), so the editor must commit to one: selecting
+   * from a set disables the other and stamps the hidden [filter_by]. Disabled
+   * inputs don't submit, so only the chosen dimension's slugs reach the server.
+   */
+  function setDimGroupDisabled(group, disabled) {
+    if (!group) return;
+    group.classList.toggle('is-dim-disabled', disabled);
+    group.querySelectorAll('input').forEach(function (inp) { inp.disabled = disabled; });
+  }
+
+  function syncFilterDimension(sec) {
+    if (!sec) return;
+    var typeGroup = sec.querySelector('[data-filter-group="types"]');
+    var catGroup  = sec.querySelector('[data-filter-group="categories"]');
+    if (!typeGroup || !catGroup) return;
+    var typeOn = typeGroup.querySelector('input[type=checkbox]:checked') !== null;
+    var catOn  = catGroup.querySelector('input[type=checkbox]:checked') !== null;
+    var by = typeOn ? 'types' : (catOn ? 'categories' : 'types');
+    // Disable the OTHER set once one dimension is in use; both stay live when
+    // nothing is selected yet (default dimension = types).
+    setDimGroupDisabled(typeGroup, catOn && !typeOn);
+    setDimGroupDisabled(catGroup,  typeOn);
+    var hidden = sec.querySelector('[data-filter-by-input]');
+    if (hidden) hidden.value = by;
+  }
+
   // Initial render of all rails on the page.
   document.querySelectorAll('[data-cat-rail]').forEach(renderCatRail);
 
   // Initial pass on every Hero section so its field visibility lines
   // up with the saved layout + image_mode (covers both server-rendered
   // sections and cloned templates on Add).
-  document.querySelectorAll('[data-section][data-section-type="hero"]').forEach(syncHeroFieldVisibility);
+  document.querySelectorAll('[data-section][data-section-type="hero"], [data-section][data-section-type="author-info"]').forEach(syncHeroFieldVisibility);
+  document.querySelectorAll('[data-section][data-section-type="author-info"]').forEach(syncAuthorPreview);
+  document.querySelectorAll('[data-section][data-section-type="feed"]').forEach(syncFilterDimension);
+  syncSingletonButtons();
 
   // When any Content Query Types pill changes, refresh that section's rails.
   form.addEventListener('change', function (e) {
@@ -653,6 +776,10 @@
       var fmt2  = (sec.querySelector('input[name$="[display_format]"]') || {}).value || 'grid';
       var rows2 = (sec.querySelector('input[name$="[grid_rows]"]') || {}).value || 'all';
       sumEl.textContent = ts + ' · ' + cap(fsort) + ' · ' + cap(fmt2) + (fmt2 === 'grid' ? ' · ' + rows2 + ' rows' : '');
+    } else if (type === 'author-info') {
+      var abg = (sec.querySelector('input[name$="[author_background]"]') || {}).value || 'plain';
+      var apm = (sec.querySelector('input[name$="[hero_image_mode]"]') || {}).value || 'auto';
+      sumEl.textContent = cap(abg) + ' · ' + cap(apm) + ' photo';
     }
     // Also keep the displayed section name in sync with its title input.
     var nameEl = sec.querySelector('[data-section-name]');
@@ -684,6 +811,7 @@
       var sec = e.target.closest('[data-section]');
       var detail = sec ? sec.querySelector('[data-filter-detail]') : null;
       if (detail) detail.style.display = e.target.checked ? '' : 'none';
+      if (sec) syncFilterDimension(sec); // re-assert the single-dimension gate
     }
   });
 

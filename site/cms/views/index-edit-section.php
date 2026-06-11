@@ -45,23 +45,20 @@ $summary     = $sectionSummary([
     'grid_rows'      => $gridR,
 ]);
 $itemIdsStr  = implode(',', array_map('intval', $items));
-$displayName = $stitle !== '' ? $stitle : '(no title)';
+$displayName = $stitle !== '' ? $stitle : ($stype === 'author-info' ? 'Author Bio' : '(no title)');
 
-// See more — split the stored target into ("index"|"custom") + value
-// for the picker. An empty target = no see-more card.
-$seeType = 'index';
-$seeIdxSlug = '';
-$seeCustom  = '';
-if ($seeTgt !== '') {
-    if (preg_match('#^https?://#', $seeTgt)) {
-        $seeType = 'custom';
-        $seeCustom = $seeTgt;
-    } else {
-        // Treat anything else as an index slug (strip leading slash).
-        $seeType = 'index';
-        $seeIdxSlug = ltrim($seeTgt, '/');
-    }
+// See more — the picker dimension comes from see_more_target_type (the column);
+// the picker pre-selects the option whose value === see_more_target. Legacy rows
+// (NULL type) are inferred from the URL shape. An empty target = no link.
+$seeKindsValid = ['index', 'category', 'series', 'content', 'page', 'custom'];
+$seeType   = (string)($seeTgtType ?? '');
+$seeCustom = '';
+if (!in_array($seeType, $seeKindsValid, true)) {
+    // Legacy / unset: infer from the stored URL.
+    $seeType = ($seeTgt !== '' && preg_match('#^https?://#', $seeTgt)) ? 'custom'
+             : ($seeTgt !== '' ? 'index' : 'index');
 }
+if ($seeType === 'custom') $seeCustom = $seeTgt;
 
 // Categories shown in the section's pickers depend on the feed_types
 // selection. Empty types → show all categories.
@@ -267,24 +264,7 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div class="field-group" style="margin-bottom:0">
           <label class="field-label">View all target</label>
-          <div class="see-target-row">
-            <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
-              <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
-              <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
-            </select>
-            <span data-see-picker>
-              <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
-                <option value="">— pick an index —</option>
-                <?php foreach (list_indexes() as $idx):
-                    $idxSlug = (string)$idx['slug'];
-                ?>
-                  <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
-                <?php endforeach; ?>
-              </select>
-              <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
-            </span>
-          </div>
-          <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
+          <?php $seePlaceholder = '— pick a target —'; require __DIR__ . '/_see-target-picker.php'; ?>
         </div>
       </div>
 
@@ -341,6 +321,83 @@ $catsForThis = $catsForTypes($ftypes);
       </div>
     </div>
 
+<?php elseif ($stype === 'author-info'):
+    // Singleton author line. Photo reuses hero_image_mode/url ("auto" = the
+    // Settings → Author Info photo); read-more reuses see_more_*; no heading.
+    $authorRow      = function_exists('get_author') ? get_author() : [];
+    $authorPhoto    = (string)($authorRow['image'] ?? '');
+    $authorBioDef   = trim((string)($authorRow['extended_description'] ?? ''));
+    $authorInitials = function_exists('author_initials') ? author_initials($authorRow['name'] ?? null) : '';
+    $showCustomImg  = $himode === 'custom';
+    // First-render preview state.
+    $pvPhoto    = $himode === 'custom' ? $himgUrl : ($himode === 'auto' ? $authorPhoto : '');
+    $pvBio      = $abody !== '' ? $abody : $authorBioDef;
+    $pvLabel    = $seeLab !== '' ? $seeLab : 'Author Info';
+    $pvHasLink  = $seeTgt !== '';
+    $pvHasPhoto = $himode !== 'none' && ($pvPhoto !== '' || $authorInitials !== '');
+?>
+    <div class="form-grid" style="grid-template-columns: minmax(0,1fr) 360px; gap: var(--space-24)">
+      <div class="form-side">
+        <div class="field-group">
+          <label class="field-label">Bio</label>
+          <textarea class="field-input" name="<?= $inputBase ?>[author_body]" rows="4" placeholder="<?= $e($authorBioDef !== '' ? $authorBioDef : 'Your Author Info bio…') ?>"><?= $e($abody) ?></textarea>
+          <p class="field-hint">Defaults to your Settings → Author Info bio (the placeholder). Type to override; clear to fall back.</p>
+        </div>
+
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Read more link</label>
+          <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="Author Info" value="<?= $e($seeLab) ?>" style="margin-bottom:var(--space-8)">
+          <?php require __DIR__ . '/_see-target-picker.php'; ?>
+          <p class="field-hint">Optional — leave the target empty for no link. Label defaults to "Author Info".</p>
+        </div>
+      </div>
+
+      <div class="form-side">
+        <div class="field-group">
+          <label class="field-label">Preview</label>
+          <div class="index-author-preview is-abg-<?= $e($abg) ?>" data-author-preview
+               data-author-photo="<?= $e($authorPhoto) ?>" data-author-initials="<?= $e($authorInitials) ?>"
+               data-author-bio-default="<?= $e($authorBioDef) ?>">
+            <div class="index-author-preview-avatar" data-author-preview-avatar<?= $pvHasPhoto ? '' : ' style="display:none"' ?>>
+              <?php if ($pvPhoto !== ''): ?><img src="<?= $e($pvPhoto) ?>" alt=""><?php else: ?><?= $e($authorInitials) ?><?php endif; ?>
+            </div>
+            <p class="index-author-preview-bio" data-author-preview-bio><?= $e($pvBio) ?><?php if ($pvHasLink): ?> <a class="index-author-preview-link"><?= $e($pvLabel) ?> &rarr;</a><?php endif; ?></p>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Background</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[author_background]">
+              <?php foreach (['transparent' => 'Transparent', 'shaded' => 'Shaded', 'white' => 'Solid White', 'black' => 'Black'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $abg === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[author_background]" value="<?= $e($abg) ?>">
+        </div>
+
+        <div class="field-group" style="margin-bottom:0">
+          <label class="field-label">Photo</label>
+          <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
+            <div class="filter-group" data-pill-group="single" data-pill-name="<?= $inputBase ?>[hero_image_mode]">
+              <?php foreach (['auto' => 'Author photo', 'custom' => 'Custom', 'none' => 'None'] as $v => $l): ?>
+                <button type="button" class="filter-pill <?= $himode === $v ? 'active' : '' ?>" data-pill-value="<?= $e($v) ?>"><?= $e($l) ?></button>
+              <?php endforeach; ?>
+            </div>
+          </div>
+          <input type="hidden" name="<?= $inputBase ?>[hero_image_mode]" value="<?= $e($himode) ?>">
+          <div data-hero-image-url style="margin-top:var(--space-8);<?= $showCustomImg ? '' : 'display:none' ?>">
+            <div style="display:flex;gap:var(--space-8);align-items:center">
+              <input type="text" class="field-input" name="<?= $inputBase ?>[hero_image_url]" placeholder="/uploads/author.jpg" value="<?= $e($himgUrl) ?>" data-hero-img-url-input style="flex:1;min-width:0">
+              <label class="btn-sec" style="cursor:pointer;white-space:nowrap;margin:0">Upload<input type="file" accept="image/*" data-hero-img-upload style="display:none"></label>
+            </div>
+            <p class="field-hint" data-hero-img-status style="display:none"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
 <?php else: /* feed */ ?>
     <div class="form-grid-3">
       <!-- Col 1 — title + display + trailing card -->
@@ -387,24 +444,7 @@ $catsForThis = $catsForTypes($ftypes);
         </div>
         <div class="field-group" style="margin-bottom:var(--space-4)">
           <label class="field-label">View all target</label>
-          <div class="see-target-row">
-            <select class="field-input" data-see-type onchange="(function(s){var w=s.closest('.see-target-row').querySelector('[data-see-picker]'); w.querySelectorAll('[data-see-pick]').forEach(function(el){el.style.display=(el.getAttribute('data-see-pick')===s.value?'':'none');});})(this)">
-              <option value="index"<?= $seeType === 'index' ? ' selected' : '' ?>>Index</option>
-              <option value="custom"<?= $seeType === 'custom' ? ' selected' : '' ?>>Custom link</option>
-            </select>
-            <span data-see-picker>
-              <select class="field-input" name="<?= $inputBase ?>[see_more_target_index]" data-see-pick="index" style="<?= $seeType === 'index' ? '' : 'display:none' ?>">
-                <option value="">— pick an index —</option>
-                <?php foreach (list_indexes() as $idx):
-                    $idxSlug = (string)$idx['slug'];
-                ?>
-                  <option value="<?= $e($idxSlug) ?>"<?= $seeIdxSlug === $idxSlug ? ' selected' : '' ?>><?= $e((string)($idx['title'] ?? $idxSlug)) ?> (/<?= $e($idxSlug) ?>/)</option>
-                <?php endforeach; ?>
-              </select>
-              <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_target_custom]" data-see-pick="custom" placeholder="https://…" value="<?= $e($seeCustom) ?>" style="<?= $seeType === 'custom' ? '' : 'display:none' ?>">
-            </span>
-          </div>
-          <input type="hidden" name="<?= $inputBase ?>[see_more_target]" value="<?= $e($seeTgt) ?>" data-see-target-resolved>
+          <?php $seePlaceholder = '— pick a target —'; require __DIR__ . '/_see-target-picker.php'; ?>
         </div>
         <div class="field-group" style="margin-bottom:0">
           <input type="text" class="field-input" name="<?= $inputBase ?>[see_more_label]" placeholder="Custom View All Label" value="<?= $e($seeLab) ?>">
@@ -462,7 +502,8 @@ $catsForThis = $catsForTypes($ftypes);
           </label>
         </div>
         <div data-filter-detail style="<?= $fshow ? '' : 'display:none' ?>">
-          <div class="field-group">
+          <p class="field-hint" style="margin:0 0 var(--space-12)">Filter by one dimension. Pick Types <em>or</em> Categories — selecting from one disables the other.</p>
+          <div class="field-group" data-filter-group="types">
             <label class="field-label">Type Toggles</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="filter-group">
@@ -477,7 +518,7 @@ $catsForThis = $catsForTypes($ftypes);
               </div>
             </div>
           </div>
-          <div class="field-group" style="margin-bottom:0">
+          <div class="field-group" data-filter-group="categories" style="margin-bottom:0">
             <label class="field-label">Category Toggles</label>
             <div class="filter-bar" style="padding:0;background:transparent;border-bottom:none;flex-wrap:wrap">
               <div class="cat-rail"
@@ -488,7 +529,7 @@ $catsForThis = $catsForTypes($ftypes);
             </div>
           </div>
         </div>
-        <input type="hidden" name="<?= $inputBase ?>[filter_by]" value="<?= $e($fby ?: 'types') ?>">
+        <input type="hidden" name="<?= $inputBase ?>[filter_by]" value="<?= $e($fby ?: 'types') ?>" data-filter-by-input>
       </div>
     </div>
 <?php endif; ?>

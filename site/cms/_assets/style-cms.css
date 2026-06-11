@@ -306,6 +306,10 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
 .filter-pill[style*="--pill-cat"]:hover { border-color: var(--pill-cat); color: var(--pill-cat); }
 .filter-pill[style*="--pill-cat"].active { background: var(--pill-cat); border-color: var(--pill-cat); color: #fff; }
 .filter-sep { width:1px; height:18px; background:var(--ink-18); margin:0 var(--space-4); }
+/* Filtered card — the inactive dimension (Types or Categories) is dimmed and
+   non-interactive once the other is in use, matching the disabled idiom used
+   elsewhere (opacity + pointer-events:none). */
+.field-group.is-dim-disabled { opacity:0.4; pointer-events:none; }
 
 /* View header */
 .view-header { padding:var(--space-24) var(--space-24) var(--space-20); border-bottom:var(--rule-faint); flex-shrink:0; display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-16); background:var(--surface); }
@@ -614,40 +618,24 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .block-mode-pill.mode-auto     { color:var(--muted); font-style:italic; letter-spacing:0.06em; }
 .block-mode-pill.mode-required { color:var(--c-terracotta); border-color:color-mix(in srgb,var(--c-terracotta) 35%,transparent); }
 .block-slug { font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); }
-/* Canonical .cms-tabs / .cms-tab family (Batch 2 #14). The .tpl-tabs and
-   .post-edit-tabs and .pe-tabs namespaces collapse into this single rule;
-   they're retained as aliases so existing markup keeps rendering.
-   .cms-tabs--filled adds the canvas-raised background used by post-template;
-   .cms-tabs--spaced adds the vertical breathing room used by editors. */
-.cms-tabs,
-.tpl-tabs,
-.post-edit-tabs { display:flex; border-bottom:var(--rule-faint); flex-shrink:0; }
-.cms-tabs--filled,
-.tpl-tabs { background:var(--canvas-raised); }
-.cms-tabs--spaced,
-.post-edit-tabs { margin:var(--space-16) 0 var(--space-24); }
-.cms-tab,
-.tpl-tab,
-.post-edit-tab { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:var(--space-12) var(--space-20); color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; transition:color 0.1s; margin-bottom:-1px; }
-.cms-tab:hover,
-.tpl-tab:hover,
-.post-edit-tab:hover { color:var(--primary); }
+/* ── Tabs — THE canonical CMS tab component ─────────────────────────────
+   One underline-tab style for every CMS surface (settings, post templates,
+   the four post editors, page edit, the DS showcase). Modelled on the
+   post-template tabs: a grey bar, boxed tabs, the active tab popping to the
+   surface colour with a primary underline. Flush (no outer margins) so it
+   sits clean directly under a .view-header.
+
+   The former .tpl-tabs / .post-edit-tabs / .pe-tabs / .ds-tabs / .cms-tabs--*
+   namespaces all collapse into this. Active state accepts .active or
+   .is-active (preview-tab-guard.js sets both) or aria-selected. */
+.cms-tabs { display:flex; background:var(--canvas-raised); border-bottom:var(--rule-faint); flex-shrink:0; }
+/* Normalise both <a> and <button> so a tab looks identical either way
+   (buttons otherwise keep their native border/background/box). */
+.cms-tab { appearance:none; -webkit-appearance:none; background:transparent; border:0; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:var(--space-12) var(--space-20); color:var(--muted); line-height:1.2; cursor:pointer; text-decoration:none; transition:color 0.1s, background 0.1s; }
+.cms-tab:hover { color:var(--primary); }
 .cms-tab.active,
-.tpl-tab.active,
-.post-edit-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
-.tpl-tab.active { background:var(--canvas-bg); }
-/* Page-edit tabs — alias to the canonical family so the page-edit inline
-   stylesheet can be slimmed later without breaking markup.
-   Phase 21.7 #9: .pe-tabs now lives as a direct child of .view (outside
-   .content-area) so it anchors flush below the view-header, mirroring the
-   filter-bar pattern in articles.php. Horizontal padding here gives the
-   first tab its leading space; vertical breathing room comes from the
-   bg + bottom border below. */
-.pe-tabs { display:flex; gap:0; border-bottom:var(--rule-faint); padding:0 var(--space-12); background:var(--canvas-raised); flex-shrink:0; }
-.view > .pe-tabs { margin-bottom:0; }
-.pe-tab { padding:10px 18px; font-family:var(--font-cond); font-size:var(--text-micro); letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); border-bottom:2px solid transparent; cursor:pointer; text-decoration:none; font-weight:600; }
-.pe-tab:hover { color:var(--ink); }
-.pe-tab.is-active { color:var(--ink); border-bottom-color:var(--primary); }
+.cms-tab.is-active,
+.cms-tab[aria-selected="true"] { color:var(--primary); border-bottom-color:var(--primary); background:var(--canvas-bg); }
 .post-preview-frame { border:1px solid var(--border); border-radius:var(--r-card); overflow:hidden; background:#fff; }
 .post-preview-iframe { display:block; width:100%; height:820px; border:0; background:#fff; }
 /* Phase 20.2 redesign: tabs are client-side toggles. Both panels render
@@ -695,7 +683,6 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    but the form fields need breathing room below. Restore the canonical
    16/24 vertical rhythm; top margin keeps the strip clear of the
    stage-bar above, bottom margin gives a proper gap before the form. */
-.post-edit-tabs { margin-top:var(--space-16); margin-bottom:var(--space-16); }
 
 /* Preview-side Save bar (cloned into the preview panel by preview-tab-guard.js).
    Mirrors the Edit-side form-actions-sticky so the visual is identical.
@@ -1052,7 +1039,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .tag-editor-item .tag-remove:hover { color:var(--c-terracotta); }
 .vis-check { display:flex; align-items:center; gap:var(--space-8); padding:5px 0; cursor:pointer; font-size:var(--text-meta); color:var(--secondary); font-weight:500; }
 .vis-check input[type="checkbox"] { accent-color:var(--primary); }
-.form-actions { display:flex; gap:var(--space-8); align-items:center; padding-top:var(--space-20); border-top:var(--rule-faint); margin-top:var(--space-20); }
+.form-actions { display:flex; gap:var(--space-8); align-items:center; padding-top:var(--space-16); border-top:var(--rule-faint); margin-top:var(--space-16); }
 /* Right-align the stage-advance / publish family inside .form-actions so
    the destructive/cancel buttons sit on the left and the forward-motion
    CTA sits on the far right. The .btn-actions-end class earns
@@ -1316,6 +1303,45 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
 .pipeline-header > .flash-success { margin-top:var(--space-12); }
 
 .flash-success { padding:var(--space-8) var(--space-16); margin-bottom:var(--space-16); background:color-mix(in srgb,var(--stage-published) 8%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 25%,transparent); border-radius:var(--r-card); font-size:var(--text-meta); color:var(--stage-published); }
+
+/* Recovery codes (Settings → Account). A monospace grid: real codes are
+   shown once after generation; afterwards each slot is masked, and used
+   codes are struck through. */
+.recovery-codes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-8); margin:var(--space-8) 0 0; }
+.recovery-code { font-family:var(--font-mono); font-size:var(--text-md); letter-spacing:0.04em; color:var(--primary); background:var(--canvas-raised); border:var(--rule-faint); border-radius:var(--r-card); padding:var(--space-8) var(--space-12); text-align:center; user-select:all; }
+/* Each code lives in a slot with a hover-trash; empty slots generate one. */
+.recovery-slot { position:relative; display:flex; }
+.recovery-slot > .recovery-code { display:block; flex:1 1 auto; min-width:0; box-sizing:border-box; padding-right:var(--space-32); }
+.recovery-slot-del { position:absolute; top:0; bottom:0; right:var(--space-8); display:flex; align-items:center; margin:0; }
+.recovery-slot-trash { appearance:none; -webkit-appearance:none; border:0; background:transparent; padding:4px; cursor:pointer; color:var(--muted); opacity:0; transition:opacity .12s, color .12s; display:inline-flex; }
+.recovery-slot:hover .recovery-slot-trash { opacity:1; }
+.recovery-slot-trash:hover { color:var(--c-terracotta); }
+.recovery-slot--used .recovery-code { opacity:0.4; }
+.recovery-slot--used .recovery-slot-trash { opacity:1; }   /* used → trash shown by default */
+.recovery-slot--empty { margin:0; }
+.recovery-slot-gen { width:100%; box-sizing:border-box; appearance:none; -webkit-appearance:none; cursor:pointer; font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); background:transparent; border:1px dashed var(--ink-18); border-radius:var(--r-card); padding:var(--space-8) var(--space-12); transition:color .12s, border-color .12s; }
+.recovery-slot-gen:hover { color:var(--primary); border-color:var(--primary); }
+
+/* Author photo (Settings → Author Info). Circular preview + upload controls. */
+.author-photo-row { display:flex; gap:var(--space-16); align-items:center; }
+.author-photo-preview { flex-shrink:0; width:64px; height:64px; border-radius:50%; overflow:hidden; background:var(--canvas-raised); border:var(--rule-faint); display:inline-flex; align-items:center; justify-content:center; }
+.author-photo-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+.author-photo-initials { font-family:var(--font-cond); font-size:var(--text-md); font-weight:700; letter-spacing:0.04em; color:var(--muted); }
+.author-photo-controls { flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-8); }
+.author-photo-actions { display:flex; align-items:center; gap:var(--space-8); flex-wrap:wrap; }
+.author-photo-choose { margin:0; cursor:pointer; }
+.author-photo-filename { font-size:var(--text-meta); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.author-photo-controls .field-hint { margin:0; }
+.recovery-code--mask { color:var(--muted); letter-spacing:0.16em; user-select:none; }
+.recovery-code--used { color:var(--ink-30); text-decoration:line-through; user-select:none; background:transparent; }
+/* A just-generated code: shown in full, ringed so it stands out to copy now. */
+.recovery-code--new { color:var(--primary); box-shadow:0 0 0 2px color-mix(in srgb, var(--stage-published) 45%, transparent); }
+
+/* Inline button spinner (loading state for Generate / Sign-out). */
+.spinner { display:inline-block; width:13px; height:13px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; vertical-align:-2px; margin-right:var(--space-8); animation:cms-spin 0.6s linear infinite; }
+@keyframes cms-spin { to { transform:rotate(360deg); } }
+button[disabled] .spinner { opacity:0.9; }
+
 .flash-undo { display:inline; margin:0 0 0 var(--space-12); }
 /* Flash banner Undo button — small, inline next to the success message.
    Uses canonical .btn-sec sizing via inheritance, but recolored to the
@@ -2146,6 +2172,21 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   border-radius: 3px;
   overflow: hidden;
 }
+
+/* Author Info section — editor preview (mirrors the public .index-author). */
+.index-author-preview { display: flex; align-items: center; gap: var(--space-16); padding: var(--space-20); border: var(--rule-faint); border-radius: var(--r-card); background: var(--surface); }
+.index-author-preview-avatar { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; background: var(--canvas-bg); border: var(--rule-faint); overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--secondary); }
+.index-author-preview-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.index-author-preview-avatar:has(img) { border: none; } /* ring only when empty (initials) */
+.index-author-preview-bio { font-size: var(--text-tiny); line-height: 1.55; color: var(--secondary); margin: 0; }
+.index-author-preview-link { font-weight: 600; color: var(--primary); text-decoration: underline; white-space: nowrap; }
+.index-author-preview.is-abg-transparent { background: var(--canvas-bg); }
+.index-author-preview.is-abg-shaded { background: rgba(0,0,0,0.05); }
+.index-author-preview.is-abg-white { background: var(--surface); }
+.index-author-preview.is-abg-black { background: var(--primary); }
+.index-author-preview.is-abg-black .index-author-preview-bio { color: rgba(255,255,255,0.84); }
+.index-author-preview.is-abg-black .index-author-preview-link { color: #fff; }
+.index-author-preview.is-abg-black .index-author-preview-avatar { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); color: rgba(255,255,255,0.72); }
 .hero-img-preview:has(img) { border-style: solid; }
 
 /* Background variants — applied to Plain + Within. Bleed ignores

@@ -510,12 +510,12 @@ require __DIR__ . '/../partials/topbar.php';
       </div>
 
       <?php if ($showPreviewTab): ?>
-        <div class="post-edit-tabs" role="tablist" aria-label="Experiment edit and preview">
-          <a class="post-edit-tab<?= $activeTab === 'edit' ? ' active' : '' ?>"
+        <div class="cms-tabs" role="tablist" aria-label="Experiment edit and preview">
+          <a class="cms-tab<?= $activeTab === 'edit' ? ' active' : '' ?>"
              role="tab" data-tab-target="edit"
              aria-selected="<?= $activeTab === 'edit' ? 'true' : 'false' ?>"
              href="/cms/experiments/edit?id=<?= (int)$id ?>&tab=edit">Edit</a>
-          <a class="post-edit-tab<?= $activeTab === 'preview' ? ' active' : '' ?>"
+          <a class="cms-tab<?= $activeTab === 'preview' ? ' active' : '' ?>"
              role="tab" data-tab-target="preview"
              aria-selected="<?= $activeTab === 'preview' ? 'true' : 'false' ?>"
              href="/cms/experiments/edit?id=<?= (int)$id ?>&tab=preview">Preview</a>

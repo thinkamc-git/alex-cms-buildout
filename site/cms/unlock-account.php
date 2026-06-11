@@ -55,11 +55,12 @@ if (!Csrf::verify($_POST['csrf_token'] ?? '')) {
     exit;
 }
 
-$n = db()->exec('UPDATE users SET locked_until = NULL, failed_attempts = 0');
+// Clear the adaptive IP throttle (the current defense — the old per-account
+// locked_until is no longer used). Drops every recorded failure so the
+// per-IP budget resets to full immediately; success rows (trusted IPs) stay.
+$n = db()->exec("DELETE FROM login_attempts WHERE outcome = 'fail'");
 
-$msg = $n > 0
-    ? 'Account unlocked. You can sign in now.'
-    : 'Nothing to unlock — no users in the database.';
+$msg = 'Login throttle cleared. You can sign in now.';
 
 header('Location: /cms/login?flash=' . rawurlencode($msg), true, 302);
 exit;

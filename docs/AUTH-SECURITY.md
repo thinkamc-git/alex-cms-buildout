@@ -128,13 +128,21 @@ A `$_SESSION['last_seen']` timestamp is checked on every request that touches `l
 
 ---
 
-## 6. Login throttle / lockout
+## 6. Login throttle (adaptive, per-IP) — Phase 24
 
-- Threshold: **5 failed attempts in the lifetime of the current `failed_attempts` counter**, which resets to 0 on every successful login.
-- Window: not a sliding 15-minute window — the counter is per-user, not per-time-bucket. A simpler model that's adequate for one user.
-- Lockout: 15 minutes (`locked_until = NOW() + INTERVAL 15 MINUTE`). During lockout, login attempts return a "locked, try again in N minutes" message without incrementing the counter further.
-- Expiry: after `locked_until` passes, the next attempt is allowed; on success, `failed_attempts` and `locked_until` reset.
-- Manual unlock: Alex can clear `locked_until` directly in MySQL if a real lockout happens. Documented in `DEPLOYMENT.md`.
+The original per-account lockout (5 strikes → 15-min lock on the `users` row) was **replaced in Phase 24**. A per-account lock can be weaponised: an attacker who floods wrong passwords against the single user's email locks out the *legitimate* user (a denial of service). The throttle now keys off the client IP, so the attacker can only ever lock *themselves* out.
+
+Implementation: `lib/login_throttle.php` + the `login_attempts` table (migration `0028`). Client IP is `REMOTE_ADDR` (the real TCP peer on DreamHost — not a spoofable `X-Forwarded-For`).
+
+- **Decaying budget by IP.** Within a rolling 15-minute window, each *distinct failing IP* gets a smaller budget than the last, by order of appearance: **1st → 10, 2nd → 5, 3rd → 3, 4th+ → 1.** This is a self-recovery runway for the author (10→5→3→1 across IP switches) and a hard clamp on an attacker rotating IPs.
+- **Correct credentials are never throttled.** The budget governs *failures* only — a correct password or valid recovery code always gets in (the check runs before any password work; a clean IP always reaches the verify step).
+- **Trusted IPs keep the full budget.** Any IP that has successfully logged in within 90 days always gets the full 10, so the author's known locations have their full runway even mid-attack.
+- **Auto-decay.** The window is rolling; 15 minutes of quiet resets an IP to a fresh 10. No manual unlock needed — but a real worst case is covered by recovery codes / SSH reset (§13).
+- **Messaging.** A throttled attempt shows how long sign-in from that location is paused and points to recovery (recovery code / SSH). When ≥2 IPs are failing and the requester isn't trusted, an "unusual sign-in activity" note is shown. Password/email correctness stays generic (§4).
+- **Audit log.** `login_attempts` records every attempt (IP, outcome, email, timestamp), satisfying the §12 audit-log open item. Rows older than 90 days are pruned automatically on successful login.
+- **Manual reset.** `DELETE FROM login_attempts WHERE outcome='fail'` clears the throttle (also exposed as the staging "Clear login throttle" button). Documented in `DEPLOYMENT.md` §7.3.
+
+The `users.failed_attempts` / `locked_until` columns are retained but no longer drive any lockout.
 
 ---
 
@@ -146,6 +154,10 @@ A `$_SESSION['last_seen']` timestamp is checked on every request that touches `l
 - A GET to `/cms/logout` 405s — prevents drive-by logout via image tag or third-party link.
 
 Logout button lives in the CMS topbar partial (top-right), wired in Phase 5 when the topbar partial is built. Phase 4 ships the endpoint and a minimal form; the topbar gets its final placement in Phase 5.
+
+### Sign out other sessions — Phase 24
+
+For the "I left myself logged in somewhere" case. Each user row has a `session_epoch` (migration `0029`) that is stamped into the session at login (`$_SESSION['epoch']`); `Auth::require_login()` re-checks it on every CMS request. **Settings → Account → "Sign out other sessions"** calls `Auth::logout_other_sessions()`, which increments `session_epoch` — invalidating *every* existing session on its next request — then re-stamps the **current** session with the new epoch so it survives. Net effect: all *other* devices are signed out, the device you clicked from stays in (it's the trusted one). Pre-existing sessions with no stamp adopt the current epoch (so a deploy doesn't spuriously log everyone out). `db/reset-password.php` also bumps the epoch (signing out everything, including current, since a reset implies a possible compromise).
 
 ---
 
@@ -226,6 +238,20 @@ Implementation note: the most reliable trigger is for `/cms/account` to attempt 
 
 ## 12. Open items (revisit in Phase 12+ or later)
 
-- **Audit log.** Right now there's no log of login attempts beyond `failed_attempts`. If abuse is ever observed, add a `login_events` table and write each attempt with IP + user-agent.
+- **Audit log.** ~~Right now there's no log of login attempts.~~ **Done in Phase 24** — `login_attempts` (§6) records every attempt with IP, outcome, email, and timestamp.
 - **Session storage.** PHP's default file-based sessions are fine on shared hosting. If a second device is ever added, revisit.
 - **Per-request CSRF rotation.** Currently per-session; if a stored-XSS surface is ever found in the editor, tighten to per-form.
+
+---
+
+## 13. Password recovery (single-user) — Phase 24
+
+There is **no web-facing "forgot password" form.** For a one-user site where the user owns the server, a public reset endpoint is a net loss — it's a permanent account-takeover surface and binds the site's security to the email account. Recovery is kept server-side and offline instead. Three paths, fastest first:
+
+1. **Recovery codes (no SSH).** `lib/recovery_codes.php` + the `recovery_codes` table (migration `0030`). The author generates a set of 8 one-time codes in **Settings → Account** (`xxxx-xxxx`, shown once, stored only as Argon2id hashes; regenerating invalidates the old set). At `/cms/login`, "Lost access? Use a recovery code" swaps the password field for a code field. A successful code login consumes that code, establishes the session, and sets `$_SESSION['must_change_pw']` — `require_login()` then confines the session to the account surface until a new password is set. Recovery-code login goes through the same throttle (§6).
+
+2. **SSH reset (primary).** `db/reset-password.php` — CLI-only (refuses HTTP, like `migrate.php`). Generates a strong temp password (or takes `--password=`), writes the new hash + `password_changed_at`, clears the throttle counters on the row, and bumps `session_epoch` (signs out all sessions). This is the "ask Claude to reset me" path, since the assistant has SSH.
+
+3. **Raw SQL.** Last-resort `UPDATE users SET password_hash=…`. Documented in `DEPLOYMENT.md` §7.3.
+
+The `db/` directory is denied to the web (`db/.htaccess`), so neither the reset script nor the `.sql` files are reachable over HTTP.

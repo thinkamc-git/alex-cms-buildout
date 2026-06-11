@@ -299,8 +299,8 @@ ssh alexmchong-ca 'cd ~/alexmchong.ca && php db/migrate.php'
 
 # 3. Go to /cms/login, sign in with login@alexmchong.ca + the temp password.
 
-# 4. Visit /cms/account and change the password (min 12 chars, must include
-#    upper, lower, and a digit).
+# 4. Visit /cms/settings?tab=account and change the password (min 12 chars,
+#    must include upper, lower, and a digit).
 #
 #    The successful password change triggers setup.php to delete itself.
 #    Next time you visit /setup.php it 404s.
@@ -314,17 +314,43 @@ If you missed step 4 and walked away with setup.php still on the server, the nex
 
 If you ever wipe the `users` table for a clean reinstall, setup.php is already in place — visit it once to seed a new password.
 
-### 7.3 Recovering from a real lockout
+### 7.3 Account recovery (lost password, throttle, sign-out-everywhere)
 
-If wrong passwords lock you out for real (5 failed attempts → 15 min lockout), wait it out or unlock by hand:
+Brute-force defense is an **adaptive per-IP throttle** (Phase 24, `lib/login_throttle.php`), not a per-account lockout — so an attacker can no longer lock *you* out by failing logins. A wrong password just costs that IP an attempt on a decaying budget (10→5→3→1 per new IP in a 15-min window); a known IP that's logged in before always gets the full budget. See AUTH-SECURITY.md §6.
+
+There is **no web-facing "forgot password" form** — recovery is deliberately server-side so a remote attacker has no path to it. Three ways back in, fastest first:
+
+**1. Recovery code (no SSH needed).** If you generated codes in Settings → Account, go to `/cms/login`, click "Lost access? Use a recovery code," and enter one. You'll be signed in and forced to set a new password. Each code works once.
+
+**2. SSH reset script (the primary path — "ask Claude").** Resets the password and signs out every session:
+
+```bash
+ssh alexmchong-ca 'php ~/alexmchong.ca/db/reset-password.php'
+# → prints a strong temp password. Sign in with it, then change it in
+#   Settings → Account. Add --password='YourPass1' to set a specific one,
+#   or --email=login@alexmchong.ca to target a specific user.
+# Staging: php ~/staging.alexmchong.ca/db/reset-password.php
+```
+
+**3. Raw SQL fallback (last resort).** If PHP itself is broken:
 
 ```bash
 ssh alexmchong-ca
+# Generate a hash:  php -r "echo password_hash('YourNewPass1', PASSWORD_DEFAULT), \"\n\";"
 mysql -u cms_prod -p alexmchong_cms_production -e \
-  "UPDATE users SET locked_until = NULL, failed_attempts = 0 WHERE email = 'login@alexmchong.ca';"
+  "UPDATE users SET password_hash='<hash>', password_changed_at=NOW(), session_epoch=session_epoch+1 WHERE email='login@alexmchong.ca';"
 ```
 
 (Substitute `cms_staging` + `alexmchong_cms_staging` for staging.)
+
+**Clearing the throttle / signing out everywhere by hand:**
+
+```sql
+-- Reset the login throttle (let any IP try again immediately):
+DELETE FROM login_attempts WHERE outcome = 'fail';
+-- Force-sign-out every session (same as the Settings button):
+UPDATE users SET session_epoch = session_epoch + 1 WHERE email = 'login@alexmchong.ca';
+```
 
 ### 7.4 The /admin/ → /cms/ 301 redirect
 

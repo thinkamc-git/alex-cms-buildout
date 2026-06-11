@@ -236,7 +236,7 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
 <style>
   /* Editor-specific: tabs row, version selector row, CodeMirror sizing,
      metadata form. All other elements use existing CMS conventions. */
-  /* .pe-tabs / .pe-tab definitions moved to style-cms.css (Batch 2 #14). */
+  /* .cms-tabs / .cms-tab definitions moved to style-cms.css (Batch 2 #14). */
   .pe-version-row { display:flex; gap:var(--space-12); align-items:center; padding:var(--space-12) var(--space-16); background:var(--bg-soft); border:1px solid var(--border); border-radius:4px; margin-bottom:var(--space-16); flex-wrap:wrap; }
   .pe-version-label { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:var(--muted); }
   .pe-version-row select { padding:6px 10px; border:1px solid var(--border); border-radius:4px; font-size:13px; background:var(--surface); color:var(--ink); min-width:280px; font-family:var(--font-cond); }
@@ -311,13 +311,13 @@ require __DIR__ . '/../partials/topbar.php';
       <!-- Tabs — anchored flush below the view-header (positioned OUTSIDE
            .content-area like the filter rail in articles.php so they sit at
            the top-left edge with no padding band around them). -->
-      <div class="pe-tabs" role="tablist">
+      <div class="cms-tabs" role="tablist">
         <?php if (!$is_partial): ?>
-          <a class="pe-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" data-tab-target="metadata" role="tab" aria-selected="<?= $tab === 'metadata' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
+          <a class="cms-tab <?= $tab === 'metadata' ? 'is-active' : '' ?>" data-tab-target="metadata" role="tab" aria-selected="<?= $tab === 'metadata' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=metadata">Metadata</a>
         <?php endif; ?>
-        <a class="pe-tab <?= $tab === 'body' ? 'is-active' : '' ?>" data-tab-target="body" role="tab" aria-selected="<?= $tab === 'body' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
+        <a class="cms-tab <?= $tab === 'body' ? 'is-active' : '' ?>" data-tab-target="body" role="tab" aria-selected="<?= $tab === 'body' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=body<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Body HTML</a>
         <?php if ($preview_tab_available): ?>
-          <a class="pe-tab <?= $tab === 'preview' ? 'is-active' : '' ?>" data-tab-target="preview" role="tab" aria-selected="<?= $tab === 'preview' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=preview<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Preview</a>
+          <a class="cms-tab <?= $tab === 'preview' ? 'is-active' : '' ?>" data-tab-target="preview" role="tab" aria-selected="<?= $tab === 'preview' ? 'true' : 'false' ?>" href="?slug=<?= rawurlencode($slug) ?>&tab=preview<?= !$is_live ? '&version_id=' . $version_id : '' ?>">Preview</a>
         <?php endif; ?>
       </div>
 

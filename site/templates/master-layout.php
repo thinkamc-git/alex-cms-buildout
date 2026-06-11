@@ -53,6 +53,9 @@ $bs = (string)($body_slot ?? '');
        onto articles. -->
   <link rel="stylesheet" href="/_ds/css/public/blocks.css<?= $cssVer('/_ds/css/public/blocks.css') ?>">
   <script src="/_layout/analytics.js" async></script>
+  <!-- Card-grid load/filter motion — exposes window.CardGrid for the per-index
+       filter scripts; auto-runs the load entrance on every .cards-grid. -->
+  <script src="/_ds/js/public/card-grid.js<?= $cssVer('/_ds/js/public/card-grid.js') ?>" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>

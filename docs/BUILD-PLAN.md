@@ -127,16 +127,16 @@ Each row shows the phase, autonomy tier, hour estimate, and (where applicable) w
 - [x] **Phase 22.3** — Pages migration · *Semi-auto* · ~1–1.5h · **Staging-only**
 - [x] **Phase 22.4** — Blocks migration + recipe doc · *Manual* · ~3–4h · **Staging-only** *(highest risk)*
 - [x] **Phase 22.5** — CMS migration · *Semi-auto* · ~1–1.5h · **Staging-only**
-- [~] **Phase 22.6** — Cleanup + sunset · *Manual* · **Ships:** v2.1 public — **22.6a SHIPPED to prod 2026-06-05** (old CSS sunset + consumer rewire + auth-page DS restyle; the full DS reorg v2.1 went live at once since prod hadn't received the additive phases). **22.6b pending:** rebuild `/_ds/index.html` as the 4-tab showcase.
+- [x] **Phase 22.6** — Cleanup + sunset · *Manual* · **Ships:** v2.1 public — **22.6a SHIPPED to prod 2026-06-05** (old CSS sunset + consumer rewire + auth-page DS restyle; the full DS reorg v2.1 went live at once since prod hadn't received the additive phases). **22.6b SHIPPED to prod 2026-06-09** (`/_ds/index.html` rebuilt as the 4-tab showcase + Applied tab; existence audit — commit `22d3117`).
 
 **═══ PROJECT: Mobile (v2.2) — public-site mobile optimization ═══**
 
-- [ ] **Phase 23.1** — Mobile sandbox + UI mock · *Manual* · ~2–3h · **Design canvas only** (deliverable: `docs/design-mockups/mobile.html`)
-- [ ] **Phase 23.2** — Mobile implementation · *Manual* · ~3–4h · **Staging-only** *(consumes 22.1 audit + 23.1 mockups)*
+- [x] **Phase 23.1** — Mobile review pass · *Manual* · **Staging-only** — *superseded the planned `mobile.html` mock; ran a two-pass review-then-implement process instead.* Pass 1 = section-by-section review of every public surface on staging → decisions captured in `docs/MOBILE-DECISIONS.md` (13 cross-cutting rules + per-section notes).
+- [x] **Phase 23.2** — Mobile implementation · *Manual* · **Staging-only** — Pass 2 implementation tracked in `docs/MOBILE-AUDIT.md` (nav drawer, footer, type scale, carousel/hero responsiveness, button rules). Also shipped the CMS-toggle feature set it surfaced: DS Checkbox component, nav "show on mobile" toggle (migration `0026`), and bleed-hero "Background blur" toggle (migration `0027`). Commits `f5c4f84`, `87f51a1`, `7f56aa6`.
 
 **═══ FINAL ═══**
 
-- [ ] **Phase 24** — Public cutover reconciliation · *Manual* · ~0.5–1h · **Ships:** v1.0 public *(may be largely complete — drift-check)*
+- [x] **Phase 24** — Public cutover reconciliation · *Manual* · **SHIPPED to prod 2026-06-10.** Drift-check confirmed the code flip (`c4e4fc4`/`756a412`) was already live; this phase took the pre-cutover backup (DB dump + lean webroot snapshot, stored locally), applied schema migrations `0026`+`0027` on prod, deployed source, and smoke-tested all public routes + marketing pages (all 200, zero PHP/SQL errors). Content itself is authored directly in prod (staging content was dummy — no data migration).
 
 **═══ DEFERRED ═══**
 

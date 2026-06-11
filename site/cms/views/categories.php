@@ -152,7 +152,7 @@ $block_meta = [
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 </head>
 <body>
 

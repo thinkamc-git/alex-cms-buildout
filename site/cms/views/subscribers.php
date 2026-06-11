@@ -133,7 +133,7 @@ $fmt = static function (?string $ts) use ($e): string {
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <style>
   .sub-status { display:inline-flex; align-items:center; padding:2px var(--space-8); border-radius:2px; font-family:var(--font-mono); font-size:var(--text-micro); font-weight:500; letter-spacing:0.06em; text-transform:uppercase; line-height:1.5; white-space:nowrap; }
   .sub-status.sub { color:var(--stage-published); background:color-mix(in srgb,var(--stage-published) 10%,transparent); border:1px solid color-mix(in srgb,var(--stage-published) 28%,transparent); }

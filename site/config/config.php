@@ -70,3 +70,19 @@ if (!isset($CONFIG)) {
         exit($msg);
     }
 }
+
+/**
+ * Cache-bust stamp for a doc-root-relative asset path: returns '?v=<mtime>' so
+ * a redeploy of an existing file invalidates the browser cache automatically,
+ * or '' when the file can't be resolved (safe in any environment). Mirrors the
+ * public master-layout's $cssVer; used by the CMS views, which each render
+ * their own <head>. Guarded so repeated includes don't redeclare it.
+ */
+if (!function_exists('asset_ver')) {
+    function asset_ver(string $rel): string
+    {
+        $root = $_SERVER['DOCUMENT_ROOT'] ?? '';
+        $full = $root . $rel;
+        return ($root !== '' && is_file($full)) ? '?v=' . (int)filemtime($full) : '';
+    }
+}

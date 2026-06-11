@@ -416,7 +416,7 @@ $sourceFileVal = (string)($experiment['source_file'] ?? '');
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <?php /* Phase 20.3: always load tiptap.css — the RTF panel mounts even
    when body_mode starts in html-body/html-swap, so the user can flip
    back to RTF without a stylesheet reload. */ ?>

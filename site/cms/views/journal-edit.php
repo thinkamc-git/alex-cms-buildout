@@ -337,7 +337,7 @@ $entryNumPadded = $journal['journal_number'] !== null
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <?php if ($showBody): ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
 <!-- Phase 22.6: blocks slice styles the .article-prose editor (style-articles.css deleted). -->

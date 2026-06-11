@@ -434,7 +434,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 if ($rowIsCurrentlyLive) {
                     $saveData['show_updated'] = isset($_POST['show_updated']) ? 1 : 0;
                     $udRaw = trim((string)($_POST['updated_display'] ?? ''));
-                    if ($udRaw === '' || $udRaw === $updatedAtDateOnly) {
+                    // Date-only of the row's current updated_at (the render-side
+                    // $updatedAtDateOnly isn't defined yet this far up the file).
+                    $curUpdatedDateOnly = substr((string)($article['updated_at'] ?? ''), 0, 10);
+                    if ($udRaw === '' || $udRaw === $curUpdatedDateOnly) {
                         $saveData['updated_display'] = null;
                     } else {
                         $tsUd = strtotime($udRaw);
@@ -659,7 +662,7 @@ $canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $myStatusIdx >
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <?php if ($showBody): ?>
 <link rel="stylesheet" href="/cms/_assets/tiptap.css">
 <!-- The editor's contenteditable carries class="article-prose" so the SAME

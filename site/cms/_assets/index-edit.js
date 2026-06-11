@@ -156,7 +156,7 @@
     var urlIn = sec.querySelector('[data-hero-img-url-input]');
     var bioTa = sec.querySelector('textarea[name$="[author_body]"]');
     var labIn = sec.querySelector('input[name$="[see_more_label]"]');
-    ['plain', 'transparent', 'shaded', 'white', 'black'].forEach(function (k) { pv.classList.remove('is-abg-' + k); });
+    ['transparent', 'shaded', 'white', 'black'].forEach(function (k) { pv.classList.remove('is-abg-' + k); });
     pv.classList.add('is-abg-' + bg);
     // Photo: custom URL / the Settings auto photo / none.
     var photo = mode === 'custom' ? (urlIn ? (urlIn.value || '').trim() : '')
@@ -777,7 +777,7 @@
       var rows2 = (sec.querySelector('input[name$="[grid_rows]"]') || {}).value || 'all';
       sumEl.textContent = ts + ' · ' + cap(fsort) + ' · ' + cap(fmt2) + (fmt2 === 'grid' ? ' · ' + rows2 + ' rows' : '');
     } else if (type === 'author-info') {
-      var abg = (sec.querySelector('input[name$="[author_background]"]') || {}).value || 'plain';
+      var abg = (sec.querySelector('input[name$="[author_background]"]') || {}).value || 'transparent';
       var apm = (sec.querySelector('input[name$="[hero_image_mode]"]') || {}).value || 'auto';
       sumEl.textContent = cap(abg) + ' · ' + cap(apm) + ' photo';
     }

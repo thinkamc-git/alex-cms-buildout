@@ -231,7 +231,7 @@ $_editor_mode  = (substr((string)$file_row['filename'], -5) === '.html') ? 'html
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <link rel="stylesheet" href="/cms/_assets/codemirror/codemirror.min.css">
 <style>
   /* Editor-specific: tabs row, version selector row, CodeMirror sizing,

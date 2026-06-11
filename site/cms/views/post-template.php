@@ -100,7 +100,7 @@ $tabHref = static function (string $tab) use ($selected): string {
 <link rel="stylesheet" href="/_ds/css/tables.css">
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
-<link rel="stylesheet" href="/cms/_assets/style-cms.css">
+<link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <link rel="stylesheet" href="/cms/_assets/codemirror/codemirror.min.css">
 <style>
   /* View-specific tweaks layered on top of style-cms.css's .templates-layout. */

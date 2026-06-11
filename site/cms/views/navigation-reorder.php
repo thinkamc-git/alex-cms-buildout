@@ -15,6 +15,13 @@ require_once __DIR__ . '/../../lib/nav.php';
 
 Auth::require_login();
 
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+    http_response_code(405);
+    header('Allow: POST');
+    echo 'Method not allowed';
+    return;
+}
+
 if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
     http_response_code(403);
     echo 'CSRF failed';

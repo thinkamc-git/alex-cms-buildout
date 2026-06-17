@@ -715,7 +715,8 @@ a.article-series-pill:hover {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
-  font-size: calc(var(--text-h5) * 1.05); /* X10: blockquote +1.05× on desktop (tablet/mobile reset below) */
+  /* Increased to match 2023 scale */
+  font-size: var(--text-h4);
   line-height: 1.45;
   color: var(--primary);
 }
@@ -1171,7 +1172,7 @@ a.article-series-pill:hover {
     font-size: 18px;
   }
   .article-prose blockquote {
-    font-size: 18px;
+    font-size: var(--text-h4);
     padding-left: var(--space-20);
     margin: var(--space-32) 0;
   }

@@ -1,0 +1,14 @@
+# alexmchong.ca — /tools/ directory .htaccess
+# Bypass the main index.php router and serve PHP files directly
+# This allows utility scripts and interactive tools to run outside the CMS
+
+# Disable directory browsing
+Options -Indexes
+
+# Disable the front controller fallback from the root .htaccess
+# Files and directories in this folder serve directly without routing through index.php
+RewriteEngine Off
+
+# Ensure PHP files execute normally
+# (This is implicit when RewriteEngine is Off, but being explicit for clarity)
+# All .php files will be processed by the PHP handler directly

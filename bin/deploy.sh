@@ -229,6 +229,11 @@ cp site/cron/.htaccess             "$STAGE/cron/"
 # target row no longer resolves; surfaces a BROKEN badge in the editor.
 cp site/cron/nav-sweep.php         "$STAGE/cron/"
 
+# /tools/ — utility scripts and interactive tools that bypass the CMS router.
+# PHP files in /tools/ execute directly without going through index.php.
+mkdir -p "$STAGE/tools"
+cp -R site/tools/. "$STAGE/tools/"
+
 # Target-specific .htaccess
 cp "$HTACCESS_SRC" "$STAGE/.htaccess"
 

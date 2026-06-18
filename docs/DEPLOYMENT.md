@@ -119,38 +119,60 @@ If a machine is compromised or you stop using one, delete the corresponding line
 ## 4. Running a deploy
 
 ```bash
-bin/deploy.sh staging              # → https://staging.alexmchong.ca
-bin/deploy.sh prod                 # → https://alexmchong.ca
+bin/deploy.sh staging              # → https://staging.alexmchong.ca (upsert + delete)
+bin/deploy.sh prod                 # → https://alexmchong.ca (upsert only — no --confirm)
 
 bin/deploy.sh staging --dry-run    # preview every file rsync would touch
-bin/deploy.sh prod --no-delete     # upsert only; do not remove server-side orphans
+bin/deploy.sh prod --confirm       # PRODUCTION ONLY: required to enable file deletion
+bin/deploy.sh prod --dry-run       # preview without uploading
 ```
 
 ### 4.1 What the script does
 
-1. **Assembles** a per-target deploy directory in `/tmp/alexmchong-deploy-XXXX/`. Marketing pages, the layout assets, the design system, and the right `.htaccess` for the target are copied in. `landing.html` is renamed to `index.html` during this step.
-2. **Normalizes permissions** on the local stage (`644` for files, `755` for directories). Rsync `-a` preserves these on the server.
-3. **Rsyncs** to the SSH host alias `alexmchong-ca`, with:
-   - `--delete` (default): orphan files on the server that aren't in source are removed. The exclude list (§2 above) protects DreamHost system files, Let's Encrypt, and your experiments.
-   - `--no-delete` (flag): skip the orphan cleanup. Use this if you're worried something on the server is going to be flagged that shouldn't be.
-   - `--dry-run` (flag): show the transfer plan without writing anything to the server.
+1. **Pre-flight checks.** For production deploys, verifies that `--confirm` was passed. Staging always allows deletion.
+2. **Assembles** a per-target deploy directory in `/tmp/alexmchong-deploy-XXXX/`. Marketing pages, the layout assets, the design system, and the right `.htaccess` for the target are copied in. `landing.html` is renamed to `index.html` during this step.
+3. **Normalizes permissions** on the local stage (`644` for files, `755` for directories). Rsync `-a` preserves these on the server.
+4. **Creates timestamped backups** of all files that will be changed or deleted, storing them in `/home/alexmchong/_backups/deploy-<TIMESTAMP>/` before rsync runs.
+5. **Rsyncs** to the SSH host alias `alexmchong-ca`, with:
+   - **Staging**: `--delete` enabled by default. Orphan files not in source are removed (with automatic backup).
+   - **Production without `--confirm`**: upsert-only mode. No files are deleted; only changed/new files are synced. This is the **safe default**.
+   - **Production with `--confirm`**: `--delete` enabled. Orphans are removed with backup. Only for deliberate cleanup or when you've verified the delete list in `--dry-run`.
+   - `--dry-run` (flag): show the rsync transfer plan without writing anything to the server.
+6. **Logs** all deployments to `/home/alexmchong/_backups/DEPLOY-LOG.txt` (timestamp, target, backup location, confirmation mode).
 
-### 4.2 Typical session
+### 4.2 Deletion safeguards (Phase 24.2)
+
+**Background.** In Phase 24, a caretaker used `rsync --delete` on production without realizing it would wipe all server-only files (DB config, uploads, 20-year content archive, etc.). The backup was restored from DreamHost's automated system, but the deployment process is now hardened to prevent this happening again.
+
+**The new rule:**
+- **Staging** always backs up changed/deleted files to `/home/alexmchong/_backups/deploy-<TIMESTAMP>/`.
+- **Production requires explicit `--confirm` to delete anything.** Without it, the deploy is upsert-only (new + changed files only, no deletion).
+- **All deletions are logged** in `/home/alexmchong/_backups/DEPLOY-LOG.txt` so the operator can trace what happened if something goes wrong.
+
+If you forget `--confirm` and want to clean up orphans, add it to a follow-up deploy:
+```bash
+bin/deploy.sh prod --dry-run --confirm    # preview what would delete
+bin/deploy.sh prod --confirm              # actually delete with backup
+```
+
+### 4.3 Typical session
 
 ```bash
-# Confirm what's about to happen
+# Staging: preview, then deploy (deletes by default, backed up)
 bin/deploy.sh staging --dry-run
-
-# Looks right → really deploy
 bin/deploy.sh staging
 
 # Visit https://staging.alexmchong.ca, verify in browser
 
-# Ship to prod
-bin/deploy.sh prod
+# Production: preview, then deploy SAFELY (no deletion without --confirm)
+bin/deploy.sh prod --dry-run
+bin/deploy.sh prod                    # safe: upsert only
+
+# If you've verified the dry-run and want to delete orphans:
+bin/deploy.sh prod --confirm          # with backup
 ```
 
-### 4.3 Smoke check after deploy
+### 4.4 Smoke check after deploy
 
 ```bash
 for p in / /about/ /coaching/ /_layout/style-pages.css /_ds/ /nope-404; do
@@ -164,7 +186,7 @@ The first five should return `HTTP 200`. The last should return `HTTP 404` (and 
 
 ## 5. Rollback
 
-Phase 1's only state is files. Rollback is a redeploy.
+Phase 1's only state is files. Rollback is a redeploy. Phase 24.2 added per-deploy backups to make recovery even faster.
 
 ### 5.1 Single-file mistake (most common)
 
@@ -191,9 +213,26 @@ ssh alexmchong-ca 'mv ~/alexmchong.ca/.htaccess ~/alexmchong.ca/.htaccess.broken
 bin/deploy.sh prod
 ```
 
-### 5.3 Whole-site catastrophe
+### 5.3 Recover a deleted file
 
-If everything is broken, your latest snapshot lives at `/home/alexmchong/_backups/alexmchong.ca-2026-05-13/` (the Phase 1 pre-deploy backup you made via CloudMounter). New automated backups land in Phase 13.
+If a deploy with `--confirm` deleted a file you needed, the backup is in `/home/alexmchong/_backups/deploy-<TIMESTAMP>/`:
+
+```bash
+# List all backups
+ssh alexmchong-ca 'ls -la ~/._backups/ | grep deploy'
+
+# Restore a specific file from a backup
+ssh alexmchong-ca 'cp ~/.backups/deploy-20260618-094332/path/to/file ~/alexmchong.ca/path/to/file'
+
+# Then redeploy to restore it from source, or keep the manual copy
+bin/deploy.sh prod
+```
+
+Every deploy logs its backup location to `/home/alexmchong/_backups/DEPLOY-LOG.txt` for reference.
+
+### 5.4 Whole-site catastrophe
+
+If everything is broken and you can't roll back via git + redeploy, DreamHost maintains automatic daily backups accessible from the control panel (Content tab → Restore Files). This is the safety net behind the per-deploy backups.
 
 ---
 

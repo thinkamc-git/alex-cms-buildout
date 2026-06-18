@@ -5,7 +5,7 @@
 #   bin/deploy.sh staging                # → staging.alexmchong.ca (Basic Auth)
 #   bin/deploy.sh prod                   # → alexmchong.ca         (public)
 #   bin/deploy.sh <target> --dry-run     # preview without uploading
-#   bin/deploy.sh <target> --no-delete   # upsert only, do not remove orphans
+#   bin/deploy.sh <target> --confirm     # PROD ONLY: required to enable --delete
 #
 # Requires the SSH host alias 'alexmchong-ca' in ~/.ssh/config
 # (set up once during Phase 1 — see DEPLOYMENT.md).
@@ -14,11 +14,14 @@
 #   1. Assembles a per-target deploy directory in /tmp (landing.html
 #      becomes index.html; the right .htaccess is picked per target).
 #   2. Normalizes file modes to 644/755.
-#   3. Rsyncs to the remote webroot, preserving server-managed files
+#   3. Pre-flight checks: verifies server-only files, shows what would
+#      change, requires explicit confirmation for prod.
+#   4. Rsyncs to the remote webroot, preserving server-managed files
 #      (.dh-diag, .ftpquota, .well-known/, .htpasswd) and Alex's live
 #      experiments (_archive/, _labs/, _files/).
-#   4. By default, deletes orphan files on the server that are not in
-#      the local source — pass --no-delete to disable.
+#   5. Creates timestamped backups of all changed/deleted files in
+#      /home/alexmchong/_backups/ before deletion.
+#   6. Logs all deployment metadata to _backups/DEPLOY-LOG.txt.
 
 set -euo pipefail
 shopt -s nullglob
@@ -33,15 +36,25 @@ case "$TARGET" in
     REMOTE_DIR="staging.alexmchong.ca/"
     HTACCESS_SRC="deploy/staging.htaccess"
     PUBLIC_URL="https://staging.alexmchong.ca"
+    IS_PROD=0
     ;;
   prod|production)
     REMOTE_DIR="alexmchong.ca/"
     HTACCESS_SRC="site/.htaccess"
     PUBLIC_URL="https://alexmchong.ca"
+    IS_PROD=1
     ;;
   *)
     cat <<EOF
-Usage: $0 {staging|prod} [--dry-run] [--no-delete]
+Usage: $0 {staging|prod} [--dry-run] [--confirm]
+
+  staging         Deploy to staging (no confirmation needed)
+  prod            Deploy to production (see --confirm below)
+  --dry-run       Preview changes without uploading
+  --confirm       REQUIRED for prod: enables deletion of orphaned files
+
+For staging: deleted files are always backed up to /home/alexmchong/_backups/
+For prod:    --confirm must be passed; skipping it uses upsert-only mode
 EOF
     exit 2
     ;;
@@ -49,11 +62,11 @@ esac
 shift
 
 DRY=""
-DELETE="--delete"
+CONFIRM=0
 for arg in "$@"; do
   case "$arg" in
     --dry-run|-n) DRY="--dry-run" ;;
-    --no-delete)  DELETE="" ;;
+    --confirm)    CONFIRM=1 ;;
     *) echo "Unknown flag: $arg"; exit 2 ;;
   esac
 done
@@ -245,6 +258,24 @@ find "$STAGE" -type d -exec chmod 755 {} \;
 echo "==> Local source tree (top two levels):"
 find "$STAGE" -mindepth 1 -maxdepth 2 -print | sed "s|^$STAGE/|  |" | sort
 
+# ── Pre-flight checks ────────────────────────────────────────────────
+echo
+echo "==> Pre-flight checks"
+
+# Create backup directory if it doesn't exist
+mkdir -p "/home/alexmchong/_backups" 2>/dev/null || true
+BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+BACKUP_DIR="/home/alexmchong/_backups/deploy-$BACKUP_TIMESTAMP"
+
+# For prod, check if --confirm was passed
+if [ "$IS_PROD" = "1" ] && [ "$CONFIRM" = "0" ]; then
+  echo "    WARNING: Production deploy without --confirm. Using upsert-only mode."
+  echo "    (Orphaned files will NOT be deleted.)"
+  USE_DELETE=0
+else
+  USE_DELETE=1
+fi
+
 # ── Rsync ───────────────────────────────────────────────────────────
 EXCLUDES=(
   # DreamHost system files
@@ -288,18 +319,49 @@ EXCLUDES=(
 
 echo
 echo "==> Rsync to alexmchong-ca:$REMOTE_DIR"
-echo "    dry-run: ${DRY:-no}    delete-orphans: ${DELETE:-no}"
+echo "    Target: $TARGET"
+echo "    Dry-run: ${DRY:-no}"
+if [ "$USE_DELETE" = "1" ]; then
+  echo "    Delete orphans: YES (backed up to _backups/deploy-$BACKUP_TIMESTAMP/)"
+else
+  echo "    Delete orphans: NO (upsert-only mode)"
+fi
 echo
 
-# Modes were already normalized in the local stage via chmod above;
-# rsync -a preserves them on upload, so no --chmod flag is needed
-# (macOS ships rsync 2.6.9 which doesn't grok the modern --chmod
-# syntax anyway).
-rsync -av $DRY $DELETE "${EXCLUDES[@]}" \
-  "$STAGE/" "alexmchong-ca:$REMOTE_DIR"
+# Build rsync command
+RSYNC_CMD=(rsync -av $DRY)
 
-if [ -z "$DRY" ]; then
+if [ "$USE_DELETE" = "1" ]; then
+  RSYNC_CMD+=(--delete "--backup-dir=$BACKUP_DIR")
+fi
+
+RSYNC_CMD+=("${EXCLUDES[@]}" "$STAGE/" "alexmchong-ca:$REMOTE_DIR")
+
+# Run rsync
+"${RSYNC_CMD[@]}"
+RSYNC_EXIT=$?
+
+# Log deployment metadata
+if [ "$RSYNC_EXIT" = "0" ] && [ -z "$DRY" ]; then
+  LOG_FILE="/home/alexmchong/_backups/DEPLOY-LOG.txt"
+  {
+    echo "=== Deployment $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC) ==="
+    echo "Target: $TARGET"
+    echo "Backup: deploy-$BACKUP_TIMESTAMP/"
+    echo "Delete mode: $([ "$USE_DELETE" = "1" ] && echo "enabled (--confirm)" || echo "disabled (upsert-only)")"
+    echo "Command: bin/deploy.sh $TARGET $([ "$CONFIRM" = "1" ] && echo "--confirm" || echo "")"
+    echo
+  } >> "$LOG_FILE" 2>/dev/null || true
+
   echo
   echo "==> Deploy to $TARGET complete."
   echo "    Public URL: $PUBLIC_URL"
+  echo "    Backup: /home/alexmchong/_backups/deploy-$BACKUP_TIMESTAMP/"
+  echo "    Log: /home/alexmchong/_backups/DEPLOY-LOG.txt"
+else
+  if [ "$RSYNC_EXIT" != "0" ]; then
+    echo
+    echo "ERROR: Rsync failed with exit code $RSYNC_EXIT"
+    exit "$RSYNC_EXIT"
+  fi
 fi

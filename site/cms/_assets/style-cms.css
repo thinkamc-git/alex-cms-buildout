@@ -1191,6 +1191,25 @@ tr.row-clickable:hover { background: color-mix(in srgb, var(--primary) 3%, trans
    the title on Draft/Published — the bug this replaces.) */
 .content-area[data-tab-panel="edit"] { padding-top: 0; }
 .content-area[data-tab-panel="edit"] > form { padding-top: var(--space-24); }
+/* flash.php/form-errors.php render BEFORE the <form> (so they still show
+   after a redirect that lands back on Idea stage, before the full form
+   unlocks) — they're direct children of the zeroed-padding content-area
+   above, not the form, so they lost the same top gutter the form gives
+   itself. Match it here instead of duplicating the value into the
+   partials (those own zero spacing per their own docblocks). */
+.content-area[data-tab-panel="edit"] > .flash-success,
+.content-area[data-tab-panel="edit"] > .form-errors {
+  margin-top: var(--space-24);
+}
+/* .live-banner/.schedule-banner carry their own margin-top for the
+   general case (sitting directly inside an ordinary form with no other
+   top gutter). Here the form above already re-adds that gutter via
+   padding-top, so the banner's own margin-top would double it up —
+   drop it only in this specific containment. */
+.content-area[data-tab-panel="edit"] > form > .live-banner,
+.content-area[data-tab-panel="edit"] > form > .schedule-banner {
+  margin-top: 0;
+}
 .tiptap-wrap.body-box:focus-within { border-color:var(--primary); }
 .tiptap-wrap.body-box .tiptap-editor { min-height:280px; padding:var(--space-16) var(--space-20); background:var(--surface); }
 .tiptap-wrap.body-box .tiptap-toolbar { background:var(--canvas-raised); border-bottom:var(--rule-faint); }

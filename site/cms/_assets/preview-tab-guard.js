@@ -208,6 +208,19 @@
     f.addEventListener('input',  flipDirty);
     f.addEventListener('change', flipDirty);
     f.addEventListener('submit', function () { submittingNow = true; });
+    // Also bind directly to every element associated via the HTML5
+    // form="<id>" attribute, not just DOM descendants — those don't
+    // bubble into this form's own input/change listeners above (bubbling
+    // follows DOM ancestry, not the form-attribute association). Mirrors
+    // the same fix in dirty-flip.js, needed for the categories/redirects/
+    // navigation per-row editing pattern where inputs live in a table
+    // cell, not inside the <form> itself.
+    Array.prototype.forEach.call(f.elements, function (el) {
+      var tag = el.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') return;
+      var evt = (tag === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
+      el.addEventListener(evt, flipDirty);
+    });
   });
 
   // ── beforeunload: prompt only when leaving the page, not on tab toggle

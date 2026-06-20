@@ -715,9 +715,21 @@ a.article-series-pill:hover {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
-  font-size: calc(var(--text-h5) * 1.05); /* X10: blockquote +1.05× on desktop (tablet/mobile reset below) */
+  font-size: var(--text-h4); /* matches .article-prose p:first-of-type */
   line-height: 1.45;
   color: var(--primary);
+}
+/* Tiptap always wraps blockquote content in a <p> (ProseMirror's
+   blockquote node requires block content). `.article-prose p` matches
+   that inner <p> directly and otherwise wins (same specificity, explicit
+   font-size/weight/line-height/color) — so it silently overrode every
+   property above except font-family/font-style, which inherit untouched.
+   Force the inner <p> back to inheriting from blockquote. */
+.article-prose blockquote p {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
 }
 
 /* Lists */
@@ -785,12 +797,28 @@ a.article-series-pill:hover {
 
 /* Figures (img + caption) */
 .article-prose figure { margin: var(--space-32) 0; }
+/* Longhand border sides (not the `border` shorthand) so the Rounded/Border
+   toggles below and the full-bleed override further down can each turn off
+   one side without having to re-state the others. */
 .article-prose figure img {
   display: block;
   width: 100%;
   height: auto;
   border-radius: var(--r-card);
-  border: var(--rule-faint);
+  border-top: var(--rule-faint);
+  border-bottom: var(--rule-faint);
+  border-left: var(--rule-faint);
+  border-right: var(--rule-faint);
+}
+/* Rounded/Border toggles — CMS floating panel, default both on (matches
+   every figure that existed before this feature shipped: no attribute on
+   the figure means "on" for both). */
+.article-prose figure[data-rounded="0"] img { border-radius: 0; }
+.article-prose figure[data-border="0"] img {
+  border-top: none;
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
 }
 /* Bare <img> (no <figure> wrap) — caps width so an oversized upload doesn't
    blow past the column. TipTap can insert bare images via the toolbar
@@ -813,6 +841,12 @@ a.article-series-pill:hover {
   color: var(--muted);
   margin-top: var(--space-12);
   text-align: center;
+}
+/* No caption authored — collapse fully instead of leaving a dead gap
+   below the image (an empty figcaption still takes its margin-top even
+   with no visible text). */
+.article-prose figcaption:empty {
+  display: none;
 }
 
 /* Figure size variants — author-toggleable per image (CMS sets data-size).
@@ -845,6 +879,24 @@ a.article-series-pill:hover {
   max-width: 640px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* HTML Embed — raw markup pasted into the body (e.g. an exported SVG).
+   Same size-variant mechanics as Figure above; see that comment for the
+   centering trick. Author content fills the block at its natural size. */
+.article-prose .html-embed { margin: var(--space-32) 0; }
+.article-prose .html-embed[data-size="wide"],
+.article-prose .html-embed[data-size="full"] {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: none;
+}
+.article-prose .html-embed[data-size="wide"] {
+  width: min(1080px, calc(100vw - var(--space-32) * 2));
+}
+.article-prose .html-embed[data-size="full"] {
+  width: 100vw;
 }
 
 /* ── Figure size toggle (demo only) ──────────────────────────
@@ -1171,7 +1223,7 @@ a.article-series-pill:hover {
     font-size: 18px;
   }
   .article-prose blockquote {
-    font-size: 18px;
+    font-size: var(--text-h4);
     padding-left: var(--space-20);
     margin: var(--space-32) 0;
   }

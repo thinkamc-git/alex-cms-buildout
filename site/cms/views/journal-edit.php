@@ -339,7 +339,7 @@ $entryNumPadded = $journal['journal_number'] !== null
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <?php if ($showBody): ?>
-<link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<link rel="stylesheet" href="/cms/_assets/tiptap.css<?= asset_ver('/cms/_assets/tiptap.css') ?>">
 <!-- Phase 22.6: blocks slice styles the .article-prose editor (style-articles.css deleted). -->
 <link rel="stylesheet" href="/_ds/css/public/blocks.css">
 <?php endif; ?>
@@ -657,7 +657,7 @@ require __DIR__ . '/../partials/topbar.php';
 
 <?php if ($showBody): ?>
 <script type="module">
-  import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
+  import { setupTiptap } from '/cms/_assets/tiptap-setup.js<?= asset_ver('/cms/_assets/tiptap-setup.js') ?>';
   setupTiptap({
     mount:        document.getElementById('tiptap-editor'),
     fallback:     document.getElementById('journal-body'),

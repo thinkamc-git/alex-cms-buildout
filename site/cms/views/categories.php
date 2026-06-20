@@ -344,5 +344,16 @@ require __DIR__ . '/../partials/topbar.php';
   });
 </script>
 
+<!-- Universal Save-button dirty-flip pattern (mirrors /cms/navigation +
+     /cms/redirects) lives in the shared cms/_assets/dirty-flip.js module.
+     Each row's Save button binds via form="row-form-cat-N"; the module
+     reads that attribute and watches every input/select cross-bound to
+     that form, including the label text input and the colour picker's
+     hidden input above. preview-tab-guard.js's beforeunload guard rides
+     the same cross-bound tracking, so leaving the page with an unsaved
+     label/colour change prompts to confirm. -->
+<script src="/cms/_assets/preview-tab-guard.js" defer></script>
+<script src="/cms/_assets/dirty-flip.js" defer></script>
+
 </body>
 </html>

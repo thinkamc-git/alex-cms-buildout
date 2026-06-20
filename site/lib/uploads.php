@@ -11,7 +11,7 @@ declare(strict_types=1);
  *
  * Phase 6a Decisions:
  *   - max size 5 MB
- *   - allowed: image/jpeg, image/png, image/webp, image/gif
+ *   - allowed: image/jpeg, image/png, image/webp, image/gif, image/svg+xml
  *   - hero images live at /uploads/content/article/{slug}/
  *   - inline-body images live at /uploads/content/article/{slug}/inline/
  *
@@ -22,10 +22,11 @@ declare(strict_types=1);
 const UPLOAD_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 
 const UPLOAD_ALLOWED_MIMES = [
-    'image/jpeg' => 'jpg',
-    'image/png'  => 'png',
-    'image/webp' => 'webp',
-    'image/gif'  => 'gif',
+    'image/jpeg'    => 'jpg',
+    'image/png'     => 'png',
+    'image/webp'    => 'webp',
+    'image/gif'     => 'gif',
+    'image/svg+xml' => 'svg',
 ];
 
 /**
@@ -63,8 +64,17 @@ function accept_upload(array $file, string $subdir): array
             finfo_close($finfo);
         }
     }
+    // finfo sometimes misreads a minimal SVG (no <?xml prolog) as text/plain.
+    // Fall back to sniffing the file's own opening bytes for an <svg> root.
+    if (is_string($mime) && !isset(UPLOAD_ALLOWED_MIMES[$mime]) && in_array($mime, ['text/plain', 'text/html', 'application/xml', 'text/xml'], true)) {
+        $head = (string)@file_get_contents($tmp, false, null, 0, 1024);
+        if (preg_match('/^\s*(<\?xml\b[^>]*\?>\s*)?(<!--.*?-->\s*)*<svg[\s>]/is', $head)) {
+            $mime = 'image/svg+xml';
+        }
+    }
+
     if (!is_string($mime) || !isset(UPLOAD_ALLOWED_MIMES[$mime])) {
-        return ['ok' => false, 'error' => 'Unsupported image type. Allowed: JPEG, PNG, WebP, GIF.'];
+        return ['ok' => false, 'error' => 'Unsupported image type. Allowed: JPEG, PNG, WebP, GIF, SVG.'];
     }
     $ext = UPLOAD_ALLOWED_MIMES[$mime];
 

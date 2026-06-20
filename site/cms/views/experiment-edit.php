@@ -420,7 +420,7 @@ $sourceFileVal = (string)($experiment['source_file'] ?? '');
 <?php /* Phase 20.3: always load tiptap.css — the RTF panel mounts even
    when body_mode starts in html-body/html-swap, so the user can flip
    back to RTF without a stylesheet reload. */ ?>
-<link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<link rel="stylesheet" href="/cms/_assets/tiptap.css<?= asset_ver('/cms/_assets/tiptap.css') ?>">
 <!-- Phase 22.6: blocks slice styles the .article-prose editor (style-articles.css deleted). -->
 <link rel="stylesheet" href="/_ds/css/public/blocks.css">
 </head>
@@ -828,7 +828,7 @@ require __DIR__ . '/../partials/topbar.php';
    across mode toggles. The RTF panel may be hidden by JS, but the editor
    instance lives on in the DOM and its fallback textarea still submits. */ ?>
 <script type="module">
-  import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
+  import { setupTiptap } from '/cms/_assets/tiptap-setup.js<?= asset_ver('/cms/_assets/tiptap-setup.js') ?>';
   setupTiptap({
     mount:        document.getElementById('tiptap-editor'),
     fallback:     document.getElementById('ex-body'),

@@ -542,11 +542,15 @@ The TipTap `content.body` column is preserved across mode toggles so flipping `h
 
 ## 13. Image Uploads
 
+Allowed types (`lib/uploads.php`): JPEG, PNG, WebP, GIF, SVG. Max 5 MB. Validated server-side via `finfo`, with a content-sniff fallback for SVGs that lack an `<?xml` prolog (some libmagic builds misreport those as `text/plain`).
+
 | Use | Path | Notes |
 |---|---|---|
 | Author photo | `/uploads/author/<filename>` | Single file. Replace overwrites; remove deletes. |
-| Hero image | `/uploads/content/[type]/[slug]/<filename>` | One per content row. Stored in `content.hero_image` as the path. |
-| Tiptap inline images | `/uploads/content/[type]/[slug]/<filename>` | Co-located with the hero image folder. URL returned to the editor for `<img>` insertion. |
+| Hero image | `/uploads/content/[type]/[slug]/<filename>` | One per content row. Stored in `content.hero_image` as the path. Articles + live sessions only (experiments deferred). |
+| Tiptap inline images | `/uploads/content/[type]/[slug]/<filename>` | Co-located with the hero image folder. URL returned to the editor for `<img>` insertion. Articles toolbar only. |
+
+The Articles toolbar also has an HTML Embed block for hand-pasted raw markup (e.g. an exported SVG) that doesn't go through the uploader at all — see `docs/BLOCKS.md` (Body row) and the HtmlEmbed node in `cms/_assets/tiptap-setup.js`.
 
 ---
 

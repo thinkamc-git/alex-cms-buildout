@@ -17,6 +17,13 @@ declare(strict_types=1);
  * Output is trusted — see ENGINEERING.md §8: Tiptap-sanitized HTML is
  * the only string output un-escaped at render time, and it goes through
  * THIS function on save.
+ *
+ * One deliberate exception to the "matches the toolbar exactly" rule:
+ * `div.html-embed` (the HTML Embed block). The author pastes raw markup
+ * there on purpose — e.g. an exported SVG that the strict allowlist below
+ * would otherwise strip — so its subtree is exempt from this function
+ * entirely. Single-author site; see the HtmlEmbed node in
+ * cms/_assets/tiptap-setup.js for the full reasoning.
  */
 
 /**
@@ -42,9 +49,21 @@ const SANITIZE_ALLOWED = [
     // Phase 21.x — figure-wrapped images with captions + size preset.
     // data-size accepts: default | wide | full (validated below). The
     // default value is dropped from output to keep stored HTML lean.
-    'figure'     => ['data-size'],
+    // data-rounded / data-border are independent on/off toggles — the only
+    // legal value is "0" (off); "on" is the implicit default (no attribute).
+    'figure'     => ['data-size', 'data-rounded', 'data-border'],
     'figcaption' => [],
+    // HTML Embed — restricted to class="html-embed" below (same pattern as
+    // span/class="m"). Its subtree is deliberately exempt from sanitization;
+    // see the SANITIZE_HTML_EMBED_CLASS note in sanitize_walk().
+    'div'        => ['class', 'data-size'],
 ];
+
+/**
+ * The only legal value for div[class] — anything else makes the div an
+ * unrecognized tag (unwrapped, like any other non-allowlisted element).
+ */
+const SANITIZE_HTML_EMBED_CLASS = 'html-embed';
 
 /**
  * Valid values for figure[data-size]. Anything else is treated as the
@@ -111,7 +130,12 @@ function sanitize_walk(DOMNode $node): void
             continue;
         }
 
-        if (!isset(SANITIZE_ALLOWED[$tag])) {
+        // A <div> is only a recognized tag when it's the HTML Embed
+        // wrapper; any other div (Tiptap shouldn't emit one) falls through
+        // to the unwrap branch below like any unrecognized tag.
+        $isHtmlEmbed = $tag === 'div' && trim($child->getAttribute('class')) === SANITIZE_HTML_EMBED_CLASS;
+
+        if (!isset(SANITIZE_ALLOWED[$tag]) || ($tag === 'div' && !$isHtmlEmbed)) {
             // Unwrap: recurse first so descendants are clean, then
             // move children up and drop the wrapper.
             sanitize_walk($child);
@@ -145,14 +169,29 @@ function sanitize_walk(DOMNode $node): void
                 if (trim($child->getAttribute('class')) !== 'm') {
                     $child->removeAttribute('class');
                 }
-            } elseif ($name === 'data-size' && $tag === 'figure') {
+            } elseif ($name === 'data-size' && ($tag === 'figure' || $isHtmlEmbed)) {
                 // Only allow whitelisted size presets; "default" is implicit
                 // (no attribute) so we drop it too.
                 $v = trim($child->getAttribute('data-size'));
                 if (!in_array($v, SANITIZE_FIGURE_SIZES, true)) {
                     $child->removeAttribute('data-size');
                 }
+            } elseif (($name === 'data-rounded' || $name === 'data-border') && $tag === 'figure') {
+                // "0" (off) is the only legal value; "on" is implicit (no
+                // attribute), same convention as data-size's default.
+                if (trim($child->getAttribute($name)) !== '0') {
+                    $child->removeAttribute($name);
+                }
             }
+        }
+
+        // HTML Embed: deliberate exception to the rest of this function.
+        // The author pastes raw markup (e.g. an SVG) here on purpose — see
+        // the HtmlEmbed node comment in tiptap-setup.js. Skip recursing
+        // into its subtree so that markup ships untouched; only the
+        // wrapper's own class/data-size were validated above.
+        if ($isHtmlEmbed) {
+            continue;
         }
 
         // Drop empty <figcaption> so blank captions don't ship — saves a

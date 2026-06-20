@@ -664,7 +664,7 @@ $canUndo   = $fromStage !== '' && stage_index($fromStage) >= 0 && $myStatusIdx >
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
 <?php if ($showBody): ?>
-<link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<link rel="stylesheet" href="/cms/_assets/tiptap.css<?= asset_ver('/cms/_assets/tiptap.css') ?>">
 <!-- The editor's contenteditable carries class="article-prose" so the SAME
      stylesheet that styles the public post page also styles the editor.
      Loaded after tiptap.css so .article-prose rules win on cascade.
@@ -1020,6 +1020,7 @@ require __DIR__ . '/../partials/topbar.php';
                         <button type="button" data-cmd="code"        title="Inline code"     class="tt-btn">Code</button>
                         <button type="button" data-cmd="muted"       title="Muted word (m)"  class="tt-btn">m</button>
                         <button type="button" data-cmd="image"       title="Insert image"    class="tt-btn">Image</button>
+                        <button type="button" data-cmd="html-embed"  title="Insert HTML/SVG embed" class="tt-btn">HTML</button>
                       </div>
                       <div id="tiptap-editor" class="tiptap-editor"></div>
                       <textarea
@@ -1126,7 +1127,7 @@ require __DIR__ . '/../partials/topbar.php';
                          class="cms-hero-file sr-only"
                          id="article-hero-file"
                          name="hero"
-                         accept="image/jpeg,image/png,image/webp,image/gif">
+                         accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml">
                   <div class="cms-hero-pick-row">
                     <label for="article-hero-file" class="btn-sec cms-hero-pick-btn">
                       <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
@@ -1343,7 +1344,7 @@ require __DIR__ . '/../partials/topbar.php';
 
 <?php if ($showBody): ?>
 <script type="module">
-  import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
+  import { setupTiptap } from '/cms/_assets/tiptap-setup.js<?= asset_ver('/cms/_assets/tiptap-setup.js') ?>';
   setupTiptap({
     mount:        document.getElementById('tiptap-editor'),
     fallback:     document.getElementById('article-body'),

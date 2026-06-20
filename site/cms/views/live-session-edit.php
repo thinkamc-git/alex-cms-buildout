@@ -432,7 +432,7 @@ $showIdeaNotesReadOnly = $status === 'draft';
 <link rel="stylesheet" href="/_ds/css/status.css">
 <link rel="stylesheet" href="/_ds/css/views.css">
 <link rel="stylesheet" href="/cms/_assets/style-cms.css<?= asset_ver('/cms/_assets/style-cms.css') ?>">
-<link rel="stylesheet" href="/cms/_assets/tiptap.css">
+<link rel="stylesheet" href="/cms/_assets/tiptap.css<?= asset_ver('/cms/_assets/tiptap.css') ?>">
 <!-- Phase 22.6: blocks slice styles the .article-prose editor (style-articles.css deleted). -->
 <link rel="stylesheet" href="/_ds/css/public/blocks.css">
 </head>
@@ -783,7 +783,7 @@ require __DIR__ . '/../partials/topbar.php';
                        class="cms-hero-file sr-only"
                        id="ls-hero-file"
                        name="hero"
-                       accept="image/jpeg,image/png,image/webp,image/gif">
+                       accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml">
                 <div class="cms-hero-pick-row">
                   <label for="ls-hero-file" class="btn-sec cms-hero-pick-btn">
                     <?= $hero !== '' ? 'Replace image' : 'Choose image' ?>
@@ -910,7 +910,7 @@ require __DIR__ . '/../partials/topbar.php';
 </div>
 
 <script type="module">
-  import { setupTiptap } from '/cms/_assets/tiptap-setup.js';
+  import { setupTiptap } from '/cms/_assets/tiptap-setup.js<?= asset_ver('/cms/_assets/tiptap-setup.js') ?>';
   setupTiptap({
     mount:        document.getElementById('tiptap-editor'),
     fallback:     document.getElementById('ls-body'),

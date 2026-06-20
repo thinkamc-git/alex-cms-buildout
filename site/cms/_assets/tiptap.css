@@ -133,23 +133,145 @@
 }
 .tiptap-editor .ProseMirror figure.ProseMirror-selectednode,
 .tiptap-editor .ProseMirror figure:has(.ProseMirror-selectednode),
-.tiptap-editor .ProseMirror figure:focus-within {
+.tiptap-editor .ProseMirror figure:focus-within,
+.tiptap-editor .ProseMirror figure.is-editing {
   outline: 2px solid color-mix(in srgb, var(--accent) 65%, transparent);
   outline-offset: 4px;
   border-radius: var(--r-card);
 }
-/* Empty figcaption hint — TipTap can't easily put placeholder text inside
-   a node's inline content, so use a CSS prompt and hide once it gets
-   any text content. */
-.tiptap-editor .ProseMirror figcaption:empty::before {
-  content: 'Caption (optional)';
+/* Soft gradient band behind the top-row controls — Edit/Save/Cancel
+   (top-left) and the Rounded/Border toggles (top-right, see .tt-fig-toggles
+   further down — both now sit directly within the image, not floating
+   above it). Gives the white pills contrast against arbitrary image
+   content. Same hover/is-editing reveal as the controls; never intercepts
+   clicks (aria-hidden, no pointer-events). */
+.tt-fig-top-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0));
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+  z-index: 4;
+}
+.tiptap-editor .ProseMirror figure:hover .tt-fig-top-scrim,
+.tiptap-editor .ProseMirror figure.is-editing .tt-fig-top-scrim {
+  opacity: 1;
+}
+
+/* Edit/Cancel controls (Figure's NodeView, see tiptap-setup.js) — reuse
+   the .tt-fig-btn pill look, positioned over the image's top-left corner,
+   in the same tray chrome (white background, border, shadow — mirrors
+   .tt-fig-panel below) as the size/toggle groups on the right, so all
+   three read as contained sets rather than loose buttons on the image.
+   Hidden until hover, or kept visible for the whole edit session via
+   .is-editing. Edit is the explicit click target for selecting the
+   figure at all (relying on where exactly a click lands on the image is
+   what caused the old "have to click it a few times" bug); entering edit
+   mode is also what reveals the size/Rounded/Border panels — see the
+   editingFigureDom gating in updateFigurePanel. */
+.tt-fig-edit-controls {
+  position: absolute;
+  top: var(--space-8);
+  left: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface, var(--bg));
+  border: 1px solid var(--rule-30);
+  border-radius: var(--r-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.tiptap-editor .ProseMirror figure:hover .tt-fig-edit-controls,
+.tiptap-editor .ProseMirror figure.is-editing .tt-fig-edit-controls,
+.tt-fig-edit-controls:focus-within {
+  opacity: 1;
+}
+/* Save is the primary action while editing — solid pill, same treatment
+   as an active toggle. Cancel stays the default white/outline pill from
+   the rule above (it's never "selected", just the secondary action). */
+.tiptap-editor .ProseMirror figure.is-editing .tt-fig-edit-btn {
+  background: var(--primary);
+  color: var(--surface, var(--bg));
+  border-color: var(--primary);
+}
+/* No caption authored — collapse out of the layout entirely (matches
+   the public page's .article-prose figcaption:empty in blocks.css, so
+   the editor doesn't carry a dead gap the live page won't have either).
+   While the figure is being edited, it expands back out with a
+   placeholder hint instead — that's the moment the author might add
+   one. Driven by the .is-empty class (set in tiptap-setup.js from the
+   node's actual text content), not the :empty CSS pseudo-class —
+   ProseMirror injects its own placeholder elements (a trailing <br>,
+   sometimes a separator <img>) into an empty contentDOM so the cursor
+   still has somewhere to sit, which means figcaption is never truly
+   :empty in the live view even with zero authored caption text. */
+.tiptap-editor .ProseMirror figcaption.is-empty {
+  display: none;
+}
+.tiptap-editor .ProseMirror figure.is-editing figcaption.is-empty {
+  display: block;
+}
+.tiptap-editor .ProseMirror figure.is-editing figcaption.is-empty::before {
+  content: 'Add a caption';
+  color: var(--muted);
+  font-style: italic;
+  pointer-events: none;
+}
+/* Hide ProseMirror's own placeholder elements (trailing <br>, separator
+   <img>) so they don't add a blank line under the placeholder text. */
+.tiptap-editor .ProseMirror figure.is-editing figcaption.is-empty > * {
+  display: none;
+}
+
+/* ── HTML Embed (raw markup + size toggle) ───────────────────────────
+   Mirrors the Figure treatment above — same selected-state outline, same
+   wide/full neutralization inside the bounded editor pane. */
+.tiptap-editor .ProseMirror .html-embed {
+  position: relative;
+  cursor: default;
+}
+.tiptap-editor .ProseMirror .html-embed[data-size="wide"],
+.tiptap-editor .ProseMirror .html-embed[data-size="full"] {
+  position: relative;
+  left: auto;
+  transform: none;
+  max-width: 100%;
+  width: 100%;
+}
+.tiptap-editor .ProseMirror .html-embed.ProseMirror-selectednode,
+.tiptap-editor .ProseMirror .html-embed:focus-within {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  outline-offset: 4px;
+  border-radius: var(--r-card);
+}
+/* Empty embed (e.g. while authoring) — same prompt language as the
+   figcaption hint above, so an empty block doesn't look broken. */
+.tiptap-editor .ProseMirror .html-embed:empty::before {
+  content: 'Empty HTML embed';
+  display: block;
+  padding: var(--space-16);
   color: var(--muted);
   font-style: italic;
   pointer-events: none;
 }
 
-/* Floating size-toggle panel. Pinned above the selected figure by JS
-   (see updateFigurePanel in tiptap-setup.js). */
+/* Size panel (Column width/Full-browser width) — for HTML Embed (a true
+   atom node, selection-based), it's a discrete card lifted fully above
+   its anchor row by the transform below, sized from its own rendered box
+   at paint time, so there's nothing for JS to mis-measure while the
+   panel is still hidden (see updateFigurePanel in tiptap-setup.js). For
+   Figure in edit mode, JS adds `.is-inline` (below) to drop the
+   lift-above transform — it sits within the image instead, in the same
+   top row as the Rounded border/Border panel, but keeps this same tray
+   chrome (white background, border, shadow) so each group of buttons
+   reads as one contained set rather than loose pills on the image. */
 .tt-fig-panel {
   position: absolute;
   display: none;
@@ -159,9 +281,22 @@
   border: 1px solid var(--rule-30);
   border-radius: var(--r-card);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(calc(-100% - 8px));
   z-index: 20;
 }
 .tt-fig-panel.is-visible { display: flex; }
+
+/* Rounded border/Border toggle panel (Figure only), and the inline
+   variant of the size panel above — both sit directly within the image
+   (one row, top-right, anchored via JS), alongside the Edit/Save/Cancel
+   controls. Same tray chrome as the base .tt-fig-panel rule; only the
+   lift-above transform is dropped (these sit within the image, not
+   floating above it). */
+.tt-fig-toggles,
+.tt-fig-panel.is-inline {
+  transform: none;
+  z-index: 5;
+}
 
 .tt-fig-btn {
   font-family: var(--font-cond);
@@ -182,6 +317,11 @@
   background: var(--primary);
   color: var(--surface, var(--bg));
   border-color: var(--primary);
+}
+.tt-fig-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* The textarea fallback is hidden when the editor mounts. If JS fails to

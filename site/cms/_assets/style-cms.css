@@ -272,6 +272,8 @@ a.crumb-active:hover { text-decoration:underline; text-underline-offset:3px; }
 .btn-save { padding:7px 16px; background:var(--primary); border:1px solid var(--primary); border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--white); cursor:pointer; transition:background 0.15s; white-space:nowrap; text-decoration:none; display:inline-block; }
 .btn-pri:hover,
 .btn-save:hover { background:var(--primary-hover); }
+.btn-pri:disabled,
+.btn-save:disabled { opacity:0.35; cursor:not-allowed; pointer-events:none; }
 .btn-danger,
 .btn-row-del,
 .cat-del { padding:7px 14px; background:transparent; border:1px solid transparent; border-radius:var(--r-pill); font-family:var(--font-cond); font-size:var(--text-label); font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--c-terracotta); cursor:pointer; transition:border-color 0.15s,background 0.15s; white-space:nowrap; text-decoration:none; display:inline-block; }
@@ -1587,6 +1589,15 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
 
 .muted { color:var(--muted); }
 
+/* ── Relative time — full form by default, short form in tight cells ── */
+td { container-type: inline-size; }
+.rel-time { display: inline; }
+.rel-short { display: none; }
+@container (max-width: 88px) {
+  .rel-full  { display: none; }
+  .rel-short { display: inline; }
+}
+
 /* Read-only notice (Batch 2 #28). Canonical .readonly-notice; the prior
    .pe-readonly-notice and .ct-readonly-note callers are aliased so old
    markup keeps rendering. Amber accent — read-only is a "heads up" not
@@ -1601,6 +1612,20 @@ tr.row-clickable:focus-within .row-actions-hover { visibility:visible; }
   margin-bottom: var(--space-12);
   color: var(--ink);
 }
+/* Pending Claude draft notice — teal accent, signals "action available". */
+.notice-pending {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--c-teal) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-teal) 30%, transparent);
+  border-radius: 4px;
+  font-size: var(--text-micro);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
 .ct-readonly-note {
   font-size: var(--text-tiny);
   color: var(--muted);

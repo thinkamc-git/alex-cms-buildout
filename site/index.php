@@ -164,14 +164,32 @@ $router->post('/cms/post/preview-form', $cms('views/post-preview-form.php'));
 // published mock is preferred over the file at runtime — see
 // _pages/_layout/_page-shell.php.
 $router->get ('/cms/pages',           $cms('views/pages.php'));
+$router->get ('/cms/pages/new',       $cms('views/page-new.php'));
+$router->post('/cms/pages/new',       $cms('views/page-new.php'));
 $router->get ('/cms/pages/edit',      $cms('views/page-edit.php'));
 $router->post('/cms/pages/edit',      $cms('views/page-edit.php'));
+$router->post('/cms/pages/autosave',  $cms('views/page-autosave.php'));
 // Phase 21.x — form-driven preview for the Pages CMS. Mirrors the
 // /cms/post/preview-form endpoint but routes through _page-shell.php.
 $router->post('/cms/pages/preview-form', $cms('views/pages-preview-form.php'));
 // Archive preview — streams the stored mock body raw (bypasses page-shell)
 // so old self-contained snapshots render with their original chrome.
 $router->get ('/cms/pages/archive-preview', $cms('views/pages-archive-preview.php'));
+
+// Archived marketing pages — served at /archive/<slug>/ with a banner and
+// noindex. The original slug URL redirects here (301) via _page-shell.php
+// when the page_registry marks the slug as archived.
+$router->get('/archive/:slug', static function (array $p): void {
+    $slug = preg_replace('/[^a-z0-9-]/', '', (string)($p['slug'] ?? ''));
+    if ($slug === '') { http_response_code(404); return; }
+    require_once __DIR__ . '/lib/pages.php';
+    if (!is_page_archived($slug)) { http_response_code(404); return; }
+    $title            = ucfirst(str_replace('-', ' ', $slug));
+    $body             = $slug;
+    $noindex          = true;
+    $is_archived_view = true;
+    require __DIR__ . '/_pages/_layout/_page-shell.php';
+});
 
 // Phase 20: Navigation editor. Replaces the hardcoded <a> lists in the
 // static header.html / footer.html with DB-managed nav_items. AJAX
@@ -311,7 +329,7 @@ $router->set_not_found(static function (string $method, string $path): void {
         require_once __DIR__ . '/lib/pages.php';
         if (Auth::current_user() !== null) {
             $mock = get_page_mock((int)$_GET['_preview']);
-            if ($mock !== null && (string)$mock['slug'] === '404') {
+            if ($mock !== null && in_array((string)$mock['slug'], ['error', '404'], true)) {
                 header('Content-Type: text/html; charset=utf-8');
                 echo render_partial_body((string)$mock['body_html']);
                 return;
@@ -319,9 +337,10 @@ $router->set_not_found(static function (string $method, string $path): void {
         }
     }
 
-    $page = __DIR__ . '/404.php';
+    $page = __DIR__ . '/error.php';
     if (is_file($page)) {
         header('Content-Type: text/html; charset=utf-8');
+        $_error_code = 404;   // a route miss is always a 404
         require $page;
         return;
     }

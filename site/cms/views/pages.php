@@ -30,23 +30,22 @@ $filter = ($_GET['filter'] ?? '') === 'archives' ? 'archives' : 'all';
 $files    = list_pages_files();
 $archives = list_archive_mocks();
 
-// Sidecar: mock count + published-mock name + page metadata per slug.
-$mock_counts    = [];
-$published_name = [];
-$meta_titles    = [];
+// Sidecar: draft saved-at per slug.
+$draft_saved_at = [];
+$archived_slugs = [];
 foreach ($files as $f) {
     $mocks = list_page_mocks($f['slug']);
-    $mock_counts[$f['slug']] = count($mocks);
-    foreach ($mocks as $m) {
-        if ((int)$m['is_published'] === 1) { $published_name[$f['slug']] = (string)$m['name']; break; }
+    if (!empty($mocks) && !empty($mocks[0]['updated_at'])) {
+        $draft_saved_at[$f['slug']] = (int)strtotime((string)$mocks[0]['updated_at']);
     }
-    $meta = get_page_metadata($f['slug']);
-    if ($meta !== null && !empty($meta['meta_title'])) {
-        $meta_titles[$f['slug']] = (string)$meta['meta_title'];
+    if ($f['kind'] === 'page' && is_page_archived($f['slug'])) {
+        $archived_slugs[] = $f['slug'];
     }
 }
 
 $pages    = array_values(array_filter($files, fn($f) => $f['kind'] === 'page'));
+// Pin Home (landing) to the top of the marketing pages.
+usort($pages, fn($a, $b) => (page_type($b['slug']) === 'home' ? 1 : 0) <=> (page_type($a['slug']) === 'home' ? 1 : 0));
 $errors   = array_values(array_filter($files, fn($f) => $f['kind'] === 'error'));
 $partials = array_values(array_filter($files, fn($f) => $f['kind'] === 'partial'));
 
@@ -54,40 +53,29 @@ define('CMS_PARTIAL_OK', true);
 header('Content-Type: text/html; charset=utf-8');
 $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 
-$rel_time = static function (int $epoch) use ($e): string {
-    if ($epoch <= 0) return '<span class="muted">—</span>';
-    $diff = time() - $epoch;
-    if ($diff < 60)         return '<span class="muted">just now</span>';
-    if ($diff < 3600)       return '<span class="muted">' . intdiv($diff, 60)   . 'min ago</span>';
-    if ($diff < 86400)      return '<span class="muted">' . intdiv($diff, 3600) . 'hr ago</span>';
-    if ($diff < 86400 * 30) return '<span class="muted">' . intdiv($diff, 86400) . 'd ago</span>';
-    return '<span class="muted">' . $e(date('Y-m-d', $epoch)) . '</span>';
-};
+$rel_time = 'rel_time_html';
 
-$buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $meta_titles, $rel_time): array {
+$buildRow = static function (array $f) use ($e, $draft_saved_at, $rel_time, $archived_slugs): array {
     $slug     = (string)$f['slug'];
     $filename = (string)$f['filename'];
     $editUrl  = '/cms/pages/edit?slug=' . rawurlencode($slug);
-    $liveUrl  = '/' . rawurlencode($slug) . '/';
+    $liveUrl  = page_public_url($slug);   // single source of truth: landing → '/'
 
-    $nameHtml = '<a href="' . $e($editUrl) . '" class="row-title">' . $e($filename) . '</a>';
+    $isArchived = in_array($slug, $archived_slugs, true);
+    $nameHtml = '<a href="' . $e($editUrl) . '" class="row-title">' . $e(page_display_name($slug)) . '</a>';
+    if (page_type($slug) === 'home') {
+        $nameHtml .= ' <span class="home-flag" title="Home page — served at /" aria-label="Home page"'
+            . ' style="display:inline-flex;vertical-align:middle;margin-left:6px;color:var(--muted)">'
+            . '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg>'
+            . '</span>';
+    }
+    if ($isArchived) {
+        $nameHtml .= ' <span class="pill" title="Redirects to /archive/' . $e($slug) . '/">Archived</span>';
+    }
 
-    $title = $meta_titles[$slug] ?? '';
-    $titleHtml = $title !== ''
-        ? $e($title)
+    $draftHtml = isset($draft_saved_at[$slug])
+        ? $rel_time($draft_saved_at[$slug])
         : '<span class="muted">—</span>';
-
-    $n = (int)($mock_counts[$slug] ?? 0);
-    if ($n === 0) {
-        $mockHtml = '<span class="muted">No mocks</span>';
-    } else {
-        $mockHtml = '<span class="val-pill">' . $n . ' mock' . ($n === 1 ? '' : 's') . '</span>';
-    }
-    if (isset($published_name[$slug])) {
-        $mockHtml .= ' <span class="pill pill-published" title="A mock is currently published — overriding the file on staging">LIVE: ' . $e($published_name[$slug]) . '</span>';
-    }
-
-    $modHtml = $rel_time((int)$f['modified_at']);
 
     $actionsHtml = '<div class="row-actions">'
         . '<a href="' . $e($liveUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny" title="Open the live page">Live ↗</a>'
@@ -96,13 +84,15 @@ $buildRow = static function (array $f) use ($e, $mock_counts, $published_name, $
         . '</span>'
         . '</div>';
 
+    $lastPub = page_last_published_at($slug);
+    $publishedHtml = $lastPub !== null ? $rel_time($lastPub) : '<span class="muted">—</span>';
+
     return [
         'href'  => $editUrl,
         'cells' => [
             ['html' => $nameHtml],
-            ['html' => $titleHtml],
-            ['html' => $mockHtml],
-            ['html' => $modHtml],
+            ['html' => $draftHtml],
+            ['html' => $publishedHtml],
             ['html' => $actionsHtml, 'class' => 'cell-actions'],
         ],
     ];
@@ -146,7 +136,8 @@ require __DIR__ . '/../partials/topbar.php';
     <div class="view active" id="view-pages">
       <?php
       $title    = 'Pages';
-      $subtitle = 'Marketing pages live as files on disk and update via deploy. Use mocks to save and preview alternate body content without touching the file. For header.php and footer.php only, you can publish a mock to override the file on staging.';
+      $subtitle = 'Pages managed as files on disk. Edit as drafts, publish to file, then deploy.';
+      $actions  = '<a href="/cms/pages/new" class="btn-pri">+ New page</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
 
@@ -217,11 +208,10 @@ require __DIR__ . '/../partials/topbar.php';
         <?php else: ?>
           <?php
           $columns = [
-              ['label' => 'File',          'width' => '22%'],
-              ['label' => 'Meta title',    'width' => '35%'],
-              ['label' => 'Mocks',         'width' => '13%'],
-              ['label' => 'Last modified', 'width' => '12%'],
-              ['label' => '',              'width' => '18%'],
+              ['label' => 'Page',           'width' => '40%'],
+              ['label' => 'Draft saved',    'width' => '20%'],
+              ['label' => 'Last published', 'width' => '20%'],
+              ['label' => '',               'width' => '20%'],
           ];
           ?>
 
@@ -229,7 +219,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Marketing pages</span>
-                <span class="content-block-sublabel">Editable as mocks · the on-disk file stays canonical</span>
+                <span class="content-block-sublabel">Editable as drafts · the on-disk file stays canonical</span>
               </div>
               <span class="content-block-count"><?= count($pages) ?> files</span>
             </div>
@@ -261,7 +251,7 @@ require __DIR__ . '/../partials/topbar.php';
             <div class="content-block-header">
               <div>
                 <span class="content-block-label">Layout partials</span>
-                <span class="content-block-sublabel">Shared header and footer · publishable on staging</span>
+                <span class="content-block-sublabel">Site header and footer · changes publish to staging without a deploy</span>
               </div>
               <span class="content-block-count"><?= count($partials) ?> files</span>
             </div>

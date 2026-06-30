@@ -1,17 +1,13 @@
 <?php
 /**
- * _layout/header.php — DB-driven marketing nav (Phase 20, staging).
+ * _layout/header.php — DB-driven marketing nav.
  *
- * This file is the LIVE VERSION shown in the Pages CMS editor for the
- * "header" partial. The CMS may also publish a mock that overrides this
- * file at runtime (see _page-shell.php and lib/pages.php).
+ * Used on all environments. The CMS may also publish a mock (staging only)
+ * that overrides this file at runtime (see _page-shell.php and lib/pages.php).
  *
  * The wrapping <nav>, the logo <a>, and the active-link <script> are
  * chrome that stays in code. The inner link list is emitted by
  * render_nav('header'), which reads the nav_items table.
- *
- * Production keeps using the static header.html until the Phase 29
- * cutover — see bin/deploy.sh prod-freeze.
  */
 if (!function_exists('render_nav')) {
     // Post-deploy: webroot/_layout → webroot/lib (../lib). Source:

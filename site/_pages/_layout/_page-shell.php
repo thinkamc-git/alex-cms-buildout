@@ -12,15 +12,12 @@
  *   $preview_mock  array   optional — set by site/index.php's preview hook
  *                                     when ?_preview=<id> is in scope
  *
- * Phase 20 cascade for header / footer (staging only, env-gated):
+ * Cascade for header / footer:
  *
- *   1. Preview mock for 'header' / 'footer' in scope    → render its body
- *   2. Published mock for 'header' / 'footer' in DB     → render its body
- *   3. New file _layout/header.php / footer.php exists  → require it
- *   4. Fallback — the legacy static _layout/header.html / footer.html
- *
- * Production stays on layer 4 (the frozen static files) until Phase 29
- * cutover removes the env gate.
+ *   1. Preview mock for 'header' / 'footer' in scope    → render its body  (staging only)
+ *   2. Published mock for 'header' / 'footer' in DB     → render its body  (staging only)
+ *   3. _layout/header.php / footer.php                  → require it       (all envs)
+ *   4. Fallback — the legacy static _layout/header.html / footer.html      (all envs)
  */
 $title        = $title        ?? 'Alex M. Chong';
 $description  = $description  ?? '';
@@ -67,6 +64,14 @@ $_default_og_image = function_exists('get_setting') ? get_setting('default_og_im
 $_default_og_type  = function_exists('get_setting') ? get_setting('default_og_type', 'website')           : 'website';
 $_default_tw_card  = function_exists('get_setting') ? get_setting('default_twitter_card', 'summary_large_image') : 'summary_large_image';
 $_analytics_script = function_exists('get_setting') ? get_setting('analytics_script', '')                 : '';
+
+// Archive redirect: if this page's slug is archived in the registry, send the
+// visitor to /archive/<slug>/ instead. Skip when we're already serving the
+// archive view ($is_archived_view set by the archive route handler).
+if ($body !== '' && empty($is_archived_view) && function_exists('is_page_archived') && is_page_archived($body)) {
+    header('Location: /archive/' . rawurlencode($body) . '/', true, 301);
+    exit;
+}
 
 if (function_exists('get_page_metadata') && $body !== '') {
     try {
@@ -154,14 +159,14 @@ $_render_partial = static function (string $zone) use ($preview_mock, $_is_stagi
             echo render_partial_body((string)$mock['body_html']);
             return;
         }
-        // 3. New PHP partial.
-        $php = __DIR__ . '/' . $zone . '.php';
-        if (is_file($php)) {
-            require $php;
-            return;
-        }
     }
-    // 4. Frozen static fallback — also the prod path.
+    // 3. DB-driven PHP partial — all environments.
+    $php = __DIR__ . '/' . $zone . '.php';
+    if (is_file($php)) {
+        require $php;
+        return;
+    }
+    // 4. Static fallback.
     require __DIR__ . '/' . $zone . '.html';
 };
 
@@ -172,6 +177,25 @@ if ($preview_mock !== null && ($preview_mock['slug'] ?? '') === $body) {
     $_body_html_override = (string)$preview_mock['body_html'];
     if (!empty($preview_mock['meta_title']))       $title       = (string)$preview_mock['meta_title'];
     if (!empty($preview_mock['meta_description'])) $description = (string)$preview_mock['meta_description'];
+}
+
+// Partial focus mode: hide the opposite partial and replace the page body
+// with a neutral spacer so the editor can focus on just the header or footer.
+// Triggered by $_preview_partial_focus (set by pages-preview-form.php) or
+// ?_partial_focus= query param (used by Page tab / Live version iframes),
+// auth-gated so it never affects public visitors.
+$_partial_focus = null;
+if (isset($_preview_partial_focus) && in_array($_preview_partial_focus, ['header', 'footer'], true)) {
+    // Set by pages-preview-form.php for the Preview pane (POST path — no GET param needed).
+    $_partial_focus = $_preview_partial_focus;
+} elseif ($_is_staging && !empty($_GET['_partial_focus'])) {
+    // Set via URL param for Page tab / Live version iframes. Staging-only:
+    // APP_ENV check is reliable here; no auth needed since this param only
+    // affects layout and staging is already access-controlled.
+    $_pf = (string)$_GET['_partial_focus'];
+    if (in_array($_pf, ['header', 'footer'], true)) {
+        $_partial_focus = $_pf;
+    }
 }
 
 // Composite browser-tab title. Two precedence tiers:
@@ -221,11 +245,22 @@ if (!$_has_pmeta_title && $_site_title !== '' && $_page_title_part !== ''
 </head>
 <body>
 
+<?php if ($_partial_focus !== 'footer'): ?>
 <?php $_render_partial('header'); ?>
+<?php endif; ?>
+
+<?php if (!empty($is_archived_view)): ?>
+<div class="archived-page-banner" role="note">This page has been archived and is no longer active.</div>
+<?php endif; ?>
 
 <?php
-if ($_body_html_override !== null) {
-    // Preview-mock body content. Echoed as-is (HTML is trusted CMS content).
+if ($_partial_focus === 'header') {
+    // Tall tinted spacer — focuses the eye on the header above.
+    echo '<div style="min-height:100vh;background:rgba(0,0,0,.15);"></div>';
+} elseif ($_partial_focus === 'footer') {
+    // Minimal spacer — pushes the footer into view without distraction.
+    echo '<div style="min-height:30vh;background:rgba(0,0,0,.15);"></div>';
+} elseif ($_body_html_override !== null) {
     echo $_body_html_override;
 } else {
     $_body_file = __DIR__ . '/../_bodies/' . $body . '.html';
@@ -235,7 +270,9 @@ if ($_body_html_override !== null) {
 }
 ?>
 
+<?php if ($_partial_focus !== 'header'): ?>
 <?php $_render_partial('footer'); ?>
+<?php endif; ?>
 
 <?php if ($_analytics_script !== ''): /* Phase 21: site-wide analytics injection. Raw output — admin-only trusted input. */ ?>
 <?= $_analytics_script ?>

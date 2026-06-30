@@ -1618,3 +1618,17 @@ html.nav-no-anim .layout-nav::after { transition: none !important; }
   }
   .faq-list { grid-template-columns: 1fr; gap: 0; }
 }
+
+/* ── Archived page banner ────────────────────────────────────────────── */
+.archived-page-banner {
+  width: 100%;
+  padding: var(--space-12) var(--space-24);
+  background: color-mix(in srgb, var(--c-amber) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--c-amber) 35%, transparent);
+  font-family: var(--font-cond);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  text-align: center;
+}

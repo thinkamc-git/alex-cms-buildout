@@ -1,8 +1,84 @@
 <?php
+/**
+ * error.php — shared error page for 404 / 403 / 500.
+ *
+ * One template, the message swaps by HTTP code. The code is resolved from
+ * (in priority order):
+ *   1. $_error_code         — set by index.php's not-found handler (route miss)
+ *   2. $_SERVER['REDIRECT_STATUS'] — set by Apache when it invokes ErrorDocument
+ * and falls back to 404. Unknown codes collapse to 404.
+ *
+ * Design is the "lost-stack" speech-bubble layout (Phase 20.x). 404 keeps the
+ * rotating quotes (a missing page is low-stakes); 403/500 show one calm line.
+ *
+ * P4a: per-code messages are hardcoded defaults below. The CMS "Error pages"
+ * editing surface + DB-down static baking land in P4b.
+ */
+// Served directly by Apache as an ErrorDocument, so config.php (which defines
+// APP_ENV) isn't loaded unless we're being included via index.php. Pull it in
+// so the staging gate, the DB-driven nav, and the ?code preview all resolve.
+if (!defined('APP_ENV')) {
+    foreach ([__DIR__ . '/config/config.php', __DIR__ . '/../config/config.php'] as $_c) {
+        if (is_file($_c)) { require_once $_c; break; }
+    }
+}
 $_is_staging = defined('APP_ENV') && APP_ENV === 'staging';
+
+// ── Resolve the HTTP code this page answers for ─────────────────────────
+$_code = 404;
+if (isset($_error_code)) {
+    $_code = (int)$_error_code;
+} elseif (isset($_SERVER['REDIRECT_STATUS'])) {
+    $_code = (int)$_SERVER['REDIRECT_STATUS'];
+}
+if (!in_array($_code, [403, 404, 500], true)) {
+    $_code = 404;
+}
+// Staging-only preview: /error.php?code=403 renders that variant in the browser
+// so the design can be eyeballed without triggering a real error. Never on prod.
+if ($_is_staging && isset($_GET['code']) && in_array((int)$_GET['code'], [403, 404, 500], true)) {
+    $_code = (int)$_GET['code'];
+}
+http_response_code($_code);
+
+// ── Per-code defaults (P4b moves these into the CMS) ────────────────────
+// 'chrome' => whether to render the header/footer nav. 404/403 keep it (the
+// site works, nav helps you back in). 500 drops it: the system is down, so
+// links to other pages probably fail too — a menu into breakage is worse than
+// none. Dropping it also keeps the 500 dependency-free (no DB nav) and trivial
+// to bake to static (P4b).
+$_messages = [
+    404 => [
+        'title'   => 'Lost',
+        'label'   => '404 · Page Not Found',
+        'message' => 'In the middle of nowhere lies the road to everywhere.',
+        'quotes'  => true,
+        'chrome'  => true,
+        'action'  => ['label' => '← Back to alexmchong.ca', 'reload' => false],
+    ],
+    403 => [
+        'title'   => 'Restricted',
+        'label'   => '403 · Public Access Denied',
+        'message' => 'This page is closed to the public.',
+        'icon'    => 'denied',
+        'quotes'  => false,
+        'chrome'  => true,
+        'action'  => ['label' => '← Back to alexmchong.ca', 'reload' => false],
+    ],
+    500 => [
+        'title'   => 'Server error',
+        'label'   => '500 · Server error',
+        'message' => 'Let’s give the server a moment.',
+        'icon'    => 'alert',
+        'quotes'  => false,
+        'chrome'  => false,
+        'action'  => ['label' => 'Try again', 'reload' => true],
+    ],
+];
+$_m = $_messages[$_code];
+
 // Phase 20.x: pull the nav from the DB on staging so the Navigation editor
-// drives the 404 chrome too. Prod stays on the hardcoded fallback below
-// (matches the rest of the Phase 20 prod-freeze cascade).
+// drives the error chrome too. Prod stays on the hardcoded fallback below.
 if ($_is_staging && !function_exists('render_nav')) {
     foreach ([__DIR__ . '/../lib/nav.php', __DIR__ . '/lib/nav.php'] as $_p) {
         if (is_file($_p)) { require_once $_p; break; }
@@ -13,7 +89,7 @@ if ($_is_staging && !function_exists('render_nav')) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lost — Alex M. Chong</title>
+  <title><?= htmlspecialchars($_m['title'], ENT_QUOTES, 'UTF-8') ?> — Alex M. Chong</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -22,8 +98,8 @@ if ($_is_staging && !function_exists('render_nav')) {
   <link rel="icon" type="image/png" href="/_layout/favicon<?= $_is_staging ? '-stage' : '' ?>.png" />
 
   <style>
-    /* The 404 leads with the speech bubble alone; the nav + footer chrome
-       fades in after a 2s pause to keep "you wandered off" as the first
+    /* The error page leads with the speech bubble alone; the nav + footer
+       chrome fades in after a 2s pause to keep the message as the first
        focal beat. The body itself is a column flex container so the
        chrome animates around the centered lost-stack without shifting it. */
 
@@ -54,12 +130,20 @@ if ($_is_staging && !function_exists('render_nav')) {
     }
 
     .lost-code {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-8);
       font-family: var(--font-cond);
       font-size: var(--text-label);
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--muted);
+    }
+    .lost-code-icon {
+      width: 1.1em;
+      height: 1.1em;
+      flex: none;
     }
 
     .lost-bubble {
@@ -130,6 +214,17 @@ if ($_is_staging && !function_exists('render_nav')) {
       border-color: var(--primary);
     }
 
+    /* Reload variant (500): static refresh glyph + label, same underline. */
+    .lost-back-reload {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-8);
+    }
+    .lost-refresh-icon {
+      width: 0.9em;
+      height: 0.9em;
+    }
+
     @media (max-width: 720px) {
       .lost-bubble { font-size: var(--text-h4); padding: var(--space-20) var(--space-24); }
     }
@@ -138,6 +233,7 @@ if ($_is_staging && !function_exists('render_nav')) {
 </head>
 <body>
 
+<?php if ($_m['chrome']): ?>
   <nav class="layout-nav">
     <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
       <img src="/_layout/logo.png" alt="Alex M. Chong" />
@@ -153,11 +249,26 @@ if ($_is_staging && !function_exists('render_nav')) {
 <?php endif; ?>
     </div>
   </nav>
+<?php endif; ?>
 
   <main class="lost-stack">
-    <span class="lost-code">404 · You wandered off the path</span>
+    <span class="lost-code">
+<?php if (($_m['icon'] ?? '') === 'denied'): ?>
+      <svg class="lost-code-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+      </svg>
+<?php elseif (($_m['icon'] ?? '') === 'alert'): ?>
+      <svg class="lost-code-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+<?php endif; ?>
+      <?= htmlspecialchars($_m['label'], ENT_QUOTES, 'UTF-8') ?>
+    </span>
 
-    <p class="lost-bubble" id="lost-quote">In the middle of nowhere lies the road to everywhere.</p>
+    <p class="lost-bubble" id="lost-quote"><?= htmlspecialchars($_m['message'], ENT_QUOTES, 'UTF-8') ?></p>
 
     <div class="profile-circle is-lg lost-spin">
       <img class="profile-circle-img" src="/_layout/profile-bw.png" alt="Alex M. Chong"
@@ -165,9 +276,21 @@ if ($_is_staging && !function_exists('render_nav')) {
       <span class="profile-circle-initials" aria-hidden="true">AC</span>
     </div>
 
-    <a class="lost-back" href="/">Back to alexmchong.ca →</a>
+<?php if ($_m['action']['reload']): ?>
+    <a class="lost-back lost-back-reload" href="/" onclick="location.reload();return false;">
+      <svg class="lost-refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </svg>
+      <?= htmlspecialchars($_m['action']['label'], ENT_QUOTES, 'UTF-8') ?>
+    </a>
+<?php else: ?>
+    <a class="lost-back" href="/"><?= htmlspecialchars($_m['action']['label'], ENT_QUOTES, 'UTF-8') ?></a>
+<?php endif; ?>
   </main>
 
+<?php if ($_m['chrome']): ?>
   <footer class="layout-footer">
     <span class="layout-footer-left">© <?= date('Y') ?> alex m. chong</span>
     <div class="layout-footer-right">
@@ -181,7 +304,9 @@ if ($_is_staging && !function_exists('render_nav')) {
 <?php endif; ?>
     </div>
   </footer>
+<?php endif; ?>
 
+<?php if ($_m['quotes']): ?>
   <script>
     (function () {
       var quotes = [
@@ -200,6 +325,7 @@ if ($_is_staging && !function_exists('render_nav')) {
       if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
     })();
   </script>
+<?php endif; ?>
 
 </body>
 </html>

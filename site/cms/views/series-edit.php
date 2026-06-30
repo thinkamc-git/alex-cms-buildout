@@ -350,44 +350,35 @@ require __DIR__ . '/../partials/topbar.php';
                     <div class="part-title"><?= $e((string)$part['title']) ?></div>
                     <span class="part-date"><?= $e($dateOut) ?></span>
                     <?= $pillHtml ?>
-                    <form method="post"
-                          action="/cms/series/edit?id=<?= (int)$id ?>"
-                          class="series-part-remove-form"
-                          data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
-                      <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                      <input type="hidden" name="action" value="remove_part">
-                      <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
-                      <button type="submit" class="btn-icon btn-icon-danger" title="Remove from series" aria-label="Remove">
-                        <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                      </button>
-                    </form>
+                    <button type="submit"
+                            form="series-remove-<?= (int)$part['id'] ?>"
+                            class="btn-icon btn-icon-danger"
+                            title="Remove from series"
+                            aria-label="Remove"
+                            data-confirm="Remove &quot;<?= $e((string)$part['title']) ?>&quot; from this series? The article stays — only the series link is removed.">
+                      <svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l0.5 8h5l0.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                   </div>
                 <?php endforeach; ?>
 
-                <!-- Add-part row — own form, same POST shape as the
-                     original add_part action. Lives inside the rowform-list
-                     so it shares the row visual treatment. -->
+                <!-- Add-part row — inputs/button reference the external
+                     #series-add-part-form via the form= attribute so the
+                     outer save form is not nested. Visual layout unchanged
+                     (was display:contents on the form wrapper). -->
                 <div class="rowform-row rowform-add-row">
                   <span></span>
                   <span></span>
-                  <form method="post"
-                        action="/cms/series/edit?id=<?= (int)$id ?>"
-                        class="series-add-part-form"
-                        style="display:contents">
-                    <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
-                    <input type="hidden" name="action" value="add_part">
-                    <select name="article_id" required class="field-select">
-                      <option value="">+ Add article…</option>
-                      <?php foreach ($unassignedPicks as $ua):
-                        $st = (string)($ua['status'] ?? '');
-                      ?>
-                        <option value="<?= (int)$ua['id'] ?>"><?= $e((string)$ua['title']) ?> · <?= $e(ucfirst($st)) ?></option>
-                      <?php endforeach; ?>
-                    </select>
-                    <span></span>
-                    <span></span>
-                    <button type="submit" class="btn-sec btn-tiny" data-add-part-btn>Add</button>
-                  </form>
+                  <select name="article_id" required class="field-select" form="series-add-part-form">
+                    <option value="">+ Add article…</option>
+                    <?php foreach ($unassignedPicks as $ua):
+                      $st = (string)($ua['status'] ?? '');
+                    ?>
+                      <option value="<?= (int)$ua['id'] ?>"><?= $e((string)$ua['title']) ?> · <?= $e(ucfirst($st)) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                  <span></span>
+                  <span></span>
+                  <button type="submit" form="series-add-part-form" class="btn-sec btn-tiny" data-add-part-btn>Add</button>
                 </div>
               </div>
             </div>
@@ -422,6 +413,32 @@ require __DIR__ . '/../partials/topbar.php';
             <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
             <input type="hidden" name="action" value="delete">
           </form>
+        <?php endif; ?>
+
+        <?php if (!$isNew): ?>
+          <!-- Standalone add-part form. The select and submit button inside
+               the parts list reference this via form="series-add-part-form"
+               so the outer save form contains no nested forms. -->
+          <form id="series-add-part-form"
+                method="post"
+                action="/cms/series/edit?id=<?= (int)$id ?>"
+                hidden>
+            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+            <input type="hidden" name="action" value="add_part">
+          </form>
+
+          <!-- One standalone remove-part form per part. Each remove button
+               in the list references its form via form="series-remove-N". -->
+          <?php foreach ($parts as $part): ?>
+          <form id="series-remove-<?= (int)$part['id'] ?>"
+                method="post"
+                action="/cms/series/edit?id=<?= (int)$id ?>"
+                hidden>
+            <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
+            <input type="hidden" name="action" value="remove_part">
+            <input type="hidden" name="article_id" value="<?= (int)$part['id'] ?>">
+          </form>
+          <?php endforeach; ?>
         <?php endif; ?>
       </div>
     </div>
@@ -547,10 +564,11 @@ require __DIR__ . '/../partials/topbar.php';
 // Add-part button: promote to .btn-pri once an article is picked. Mirrors
 // the same affordance the original series view had on its add-row.
 (function () {
-  var form = document.querySelector('.series-add-part-form');
+  var form = document.getElementById('series-add-part-form');
   if (!form) return;
-  var sel = form.querySelector('select[name="article_id"]');
-  var btn = form.querySelector('[data-add-part-btn]');
+  // form.elements includes inputs/selects associated via form= attribute.
+  var sel = form.elements['article_id'];
+  var btn = document.querySelector('[data-add-part-btn]');
   if (!sel || !btn) return;
   function sync() {
     var ready = !!sel.value;

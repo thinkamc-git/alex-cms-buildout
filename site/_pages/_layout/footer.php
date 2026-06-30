@@ -1,10 +1,10 @@
 <?php
 /**
- * _layout/footer.php — DB-driven marketing footer (Phase 20, staging).
+ * _layout/footer.php — DB-driven marketing footer.
  *
- * Live version for the "footer" partial in the Pages CMS. Wrapping
- * <footer> + copyright label stay in code; the right-hand link list is
- * emitted by render_nav('footer') reading the nav_items table.
+ * Used on all environments. Wrapping <footer> + copyright label stay in
+ * code; the right-hand link list is emitted by render_nav('footer') reading
+ * the nav_items table.
  */
 if (!function_exists('render_nav')) {
     foreach ([__DIR__ . '/../lib/nav.php', __DIR__ . '/../../lib/nav.php'] as $_p) {

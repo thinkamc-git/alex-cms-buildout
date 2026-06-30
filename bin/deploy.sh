@@ -89,7 +89,7 @@ cp site/_pages/newsletter-confirmed.php  "$STAGE/"
 cp site/_pages/newsletter.php            "$STAGE/"
 cp site/_pages/resume.php                "$STAGE/"
 cp site/_pages/work-with-me.php          "$STAGE/"
-cp site/_pages/404.php                   "$STAGE/"
+cp site/_pages/error.php                 "$STAGE/"   # shared 404/403/500 template
 
 # Asset folder for marketing pages — picks up header.html, footer.html,
 # _page-shell.php, analytics.js, style-pages.css, images, etc.
@@ -224,9 +224,9 @@ cp site/templates/experiment-html.php  "$STAGE/templates/"
 # index-card partial that the two templates share.
 cp site/templates/index-editorial.php  "$STAGE/templates/"
 cp site/templates/index-listing.php    "$STAGE/templates/"
-# 404 is served from _pages/404.php (speech-bubble design with env-gated
-# favicon) on both staging and prod. See site/index.php's not-found
-# handler + .htaccess ErrorDocument.
+# 404/403/500 are served from _pages/error.php (one speech-bubble template,
+# message swaps by code) on both staging and prod. See site/index.php's
+# not-found handler + .htaccess ErrorDocument lines.
 cp site/templates/partials/*.php   "$STAGE/templates/partials/"
 # Phase 22.6: style-articles.css deleted — article styling now ships via the
 # blocks slice (/_ds/css/public/blocks.css), copied with _design-system above.

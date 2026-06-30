@@ -11,7 +11,9 @@ AuthName "alexmchong.ca staging"
 AuthUserFile "/home/alexmchong/staging.alexmchong.ca/.htpasswd"
 Require valid-user
 
-ErrorDocument 404 /404.php
+ErrorDocument 403 /error.php
+ErrorDocument 404 /error.php
+ErrorDocument 500 /error.php
 
 RewriteEngine On
 
@@ -41,6 +43,14 @@ RewriteRule ^work-with-me/?$ /work-with-me.php [END]
 RewriteRule ^resume/?$ /resume.php [END]
 RewriteRule ^newsletter/?$ /newsletter.php [END]
 RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.php [END]
+
+# === CMS-created marketing pages ============================================
+# Any bare slug whose <slug>.php exists on disk is served by that assembler.
+# The file-existence check (RewriteCond -f) means this never catches /cms/ or
+# other paths where no .php assembler was created. Explicit rules above still
+# take priority for the hardcoded pages.
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+RewriteRule ^([a-z][a-z0-9-]*)/?$ /$1.php [END]
 
 # === Front controller fallback (Phase 3) ====================================
 # Mirrors site/.htaccess. For any URL that isn't a real file or directory,

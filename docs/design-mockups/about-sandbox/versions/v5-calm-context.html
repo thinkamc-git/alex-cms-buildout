@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Alex M. Chong  ·  SANDBOX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../../../site/_design-system/css/system-public.css" />
+
+  <!-- ⚠ SANDBOX — calm context "about" page. One editorial grid (label rail + content)
+       down the whole page. PROTOTYPE styles quarantined (real DS tokens); promote on
+       sign-off. Copy is your starting point / filler — judge the LAYOUT + structure. -->
+  <style id="sandbox-proto">
+    /* Intro — positioning + portrait, the one warm anchor. */
+    .about-intro {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-64);
+      align-items: center;
+      padding-bottom: var(--space-40);
+      border-bottom: var(--rule);
+    }
+    .about-intro .statement { margin: var(--space-16) 0 var(--space-20); }
+
+    /* The one repeating grid: label rail + content. Aligns the whole page. */
+    .prof-section {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: var(--space-64);
+      padding: var(--space-40) 0;
+      border-bottom: var(--rule-faint);
+    }
+    .prof-section:last-of-type { border-bottom: 0; }
+    .prof-section-label {
+      font-family: var(--font-cond);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: var(--text-label);
+      font-weight: 700;
+      color: var(--muted);
+      padding-top: 6px;
+    }
+
+    /* What I do — three light, labelled lines (context, not a manifesto). */
+    .do-list > * + * { margin-top: var(--space-20); }
+    .do-row { font-size: var(--text-body); line-height: 1.6; color: var(--secondary); max-width: 64ch; }
+    .do-row b { color: var(--primary); font-weight: 600; }
+
+    /* Credentials — the mini-CV: highlights that point to the full record. */
+    .cred-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-24);
+      align-items: baseline;
+      padding: var(--space-16) 0;
+      border-top: var(--rule-faint);
+    }
+    .cred-row:first-child { border-top: 0; padding-top: 0; }
+    .cred-role { font-size: var(--text-h5); font-weight: 600; color: var(--primary); }
+    .cred-org { font-size: var(--text-sm); color: var(--muted); margin-top: 2px; }
+    .cred-year {
+      font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.14em;
+      font-size: var(--text-meta); color: var(--muted); white-space: nowrap;
+    }
+
+    @media (max-width: 820px) {
+      .about-intro { grid-template-columns: 1fr; gap: var(--space-32); }
+      .prof-section { grid-template-columns: 1fr; gap: var(--space-12); padding: var(--space-28) 0; }
+      .prof-section-label { padding-top: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="../../../../site/_pages/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/">What's UX 2.0</a>
+    <a href="/writing/">Thoughts</a>
+    <a href="/live-sessions/">Talks</a>
+    <a href="/work-with-me/">Work with me</a>
+  </div>
+</nav>
+
+
+  <main class="page">
+
+    <!-- INTRO — who + what, with the portrait -->
+    <header class="about-intro">
+      <div>
+        <div class="eyebrow">About</div>
+        <h1 class="statement is-h1">
+          Alex works with organizations on their design practice, operations, and product strategy.
+        </h1>
+        <p class="lead is-sm">
+          His current focus: following the signals of UX 2.0 to help guide practices
+          and coach individuals toward their best work.
+        </p>
+      </div>
+      <div class="profile-circle is-lg">
+        <img class="profile-circle-img" src="../../../../site/_pages/_layout/profile-bw.png" alt="Alex M. Chong"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="profile-circle-initials" aria-hidden="true">AC</span>
+      </div>
+    </header>
+
+
+    <!-- WHAT I DO — light context, doubles as "where I stand" -->
+    <section class="prof-section">
+      <div class="prof-section-label">What I do</div>
+      <div class="do-list">
+        <p class="do-row"><b>Practice &amp; Operations.</b> Shaping how design organizations are built, structured, and run.</p>
+        <p class="do-row"><b>Product Strategy.</b> Advising on direction — what gets built, and why.</p>
+        <p class="do-row"><b>Coaching &amp; UX 2.0.</b> Guiding practices and individuals through where the discipline is heading.</p>
+      </div>
+    </section>
+
+
+    <!-- CREDENTIALS — the mini-CV, previewing out to the full résumé -->
+    <section class="prof-section">
+      <div class="prof-section-label">Credentials</div>
+      <div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-role">Director of User Experience</div>
+            <div class="cred-org">Hudson's Bay · Saks Global</div>
+          </div>
+          <div class="cred-year">2023 — 2025</div>
+        </div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-role">UX Curriculum Architect &amp; Lead Educator</div>
+            <div class="cred-org">BrainStation</div>
+          </div>
+          <div class="cred-year">2017 — 2019</div>
+        </div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-role">Advisor &amp; Lead Designer, Fortune 500 brands</div>
+            <div class="cred-org">Independent · across 13 years</div>
+          </div>
+          <div class="cred-year">2009 — Now</div>
+        </div>
+        <div class="cred-row">
+          <div>
+            <div class="cred-role">Coach &amp; UX Practice Advisor</div>
+            <div class="cred-org">Independent</div>
+          </div>
+          <div class="cred-year">2019 — Now</div>
+        </div>
+
+        <div class="btn-row" style="margin-top: var(--space-28)">
+          <a class="btn-ul" href="/resume/">Full résumé &amp; career history →</a>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ELSEWHERE — point to the thinking + ways to engage -->
+    <section class="prof-section">
+      <div class="prof-section-label">Elsewhere</div>
+      <div>
+        <p class="do-row" style="margin-bottom: var(--space-24)">
+          The thinking lives in the work — start with
+          <a href="/ux2.0/how-we-got-here/">UX 2.0</a> or the
+          <a href="/writing/">writing</a>.
+        </p>
+        <div class="btn-row">
+          <a class="btn-dark"  href="/work-with-me/">Work with Alex →</a>
+          <a class="btn-light" href="/coaching/">Coaching →</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a>
+    <a href="/coaching/">Coaching</a>
+    <a href="/work-with-me/">Services</a>
+    <a href="/resume/">Resume</a>
+  </div>
+</footer>
+
+</body>
+</html>

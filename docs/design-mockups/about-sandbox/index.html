@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — version switcher · SANDBOX</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #111; }
+    .vbar {
+      position: fixed; inset: 0 0 auto 0; height: 52px; z-index: 10;
+      display: flex; align-items: center; gap: 8px; padding: 0 16px;
+      background: #1a1a1a; border-bottom: 1px solid #333;
+      font: 12px/1.2 'JetBrains Mono', ui-monospace, monospace; color: #ddd; overflow: hidden;
+    }
+    .vbar .brand { font-weight: 700; color: #fff; letter-spacing: .04em; margin-right: 4px; white-space: nowrap; }
+    .vbar button {
+      background: #2a2a2a; color: #cfcfcf; border: 1px solid #444; flex: 0 0 auto;
+      padding: 7px 9px; border-radius: 5px; cursor: pointer; font: inherit; white-space: nowrap;
+    }
+    .vbar button:hover { background: #333; color: #fff; }
+    .vbar button.active { background: #f2f2f2; color: #111; border-color: #f2f2f2; font-weight: 700; }
+    .vbar .desc { margin-left: auto; flex: 0 1 auto; min-width: 0; color: #8a8a8a; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    iframe { position: absolute; inset: 52px 0 0 0; width: 100%; height: calc(100% - 52px); border: 0; background: #fff; }
+  </style>
+</head>
+<body>
+  <div class="vbar">
+    <span class="brand">SANDBOX</span>
+    <button data-src="versions/v0-original.html"          data-desc="The current LIVE about page — our starting point / baseline.">v0 · Live</button>
+    <button data-src="versions/v6-original-plus.html"     data-desc="Original + Track Record mini-résumé (→ full) + light 'Developing the Discipline'.">v6 · Track record</button>
+    <button data-src="versions/v7-themes-highlights.html" data-desc="Original + a 'What I do' section: capability themes with curated, contribution-led highlights.">v7 · Themed</button>
+    <button data-src="versions/v8-themed-ledger.html"     data-desc="Dated ledger grouped under themes via a LEFT LABEL RAIL (the right-heavy one).">v8 · Themed ledger</button>
+    <button data-src="versions/v9-spread.html"            data-default data-desc="v9 — v8 spread out: each role is [theme | when (date + company) | what (role + description)], so the left carries weight.">v9 · Spread ★</button>
+    <span class="desc"></span>
+  </div>
+  <iframe id="stage" title="version preview"></iframe>
+
+  <script>
+    var bar   = document.querySelector('.vbar');
+    var stage = document.getElementById('stage');
+    var desc  = bar.querySelector('.desc');
+    var btns  = Array.prototype.slice.call(bar.querySelectorAll('button[data-src]'));
+
+    function select(btn) {
+      stage.src = btn.dataset.src;
+      desc.textContent = btn.dataset.desc;
+      btns.forEach(function (b) { b.classList.toggle('active', b === btn); });
+      try { history.replaceState(null, '', '#' + btn.dataset.src); } catch (e) {}
+    }
+    btns.forEach(function (b) { b.addEventListener('click', function () { select(b); }); });
+
+    // Open on the version named in the hash, else the marked default, else v0.
+    var start = btns.find(function (b) { return '#' + b.dataset.src === location.hash; })
+              || btns.find(function (b) { return b.hasAttribute('data-default'); })
+              || btns[0];
+    select(start);
+  </script>
+</body>
+</html>

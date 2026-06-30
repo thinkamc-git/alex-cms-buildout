@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Navigation — alexmchong.ca CMS (mockup)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../site/_design-system/css/system-cms.css">
+<link rel="stylesheet" href="../../../site/cms/_assets/style-cms.css">
+<style>
+
+/* ── Mockup bar ── */
+.mockup-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+  background: #1a1a2e; color: #a8b4ff;
+  font-family: var(--font-cond); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 5px 20px; text-align: center;
+}
+.topbar { top: 26px; }
+
+/* ── Links tab: nav rowform ── */
+.nav-list {
+  --rowform-cols:
+    18px
+    minmax(140px, 1.4fr)
+    80px
+    100px
+    minmax(160px, 1.6fr)
+    76px
+    92px
+    80px
+    44px
+    64px
+    34px;
+}
+.nav-row .grip { cursor: grab; color: var(--muted); user-select: none; text-align: center; font-size: 14px; }
+.np-mark { display: flex; align-items: center; gap: 6px; }
+.np-dot  { width: 14px; height: 14px; border-radius: 50%; background: var(--np-color, #d63031); flex-shrink: 0; }
+
+/* ── View pills: right side of .cms-tabs (mirrors page-edit.php) ── */
+.pe-view-pills {
+  margin-left: auto;
+  display: flex; align-items: center;
+  padding: 0 var(--space-16);
+  border-left: var(--rule-faint);
+  gap: 3px;
+}
+
+/* ── Draft panel: full-bleed column (mirrors page-edit.php) ── */
+.pe-draft-panel {
+  flex: 1; display: flex; flex-direction: column;
+  min-height: 0; overflow: hidden;
+}
+.pe-panes {
+  display: flex; flex: 1; min-height: 0; overflow: hidden;
+}
+.pe-pane {
+  display: none; flex-direction: column;
+  flex: 1; min-width: 0; overflow: hidden;
+}
+.pe-pane.is-active { display: flex; }
+.pe-pane.is-active + .pe-pane.is-active { border-left: var(--rule-faint); }
+
+/* ── Edit pane ── */
+.pe-pane[data-view="edit"] .pe-edit-inner {
+  flex: 1; display: flex; flex-direction: column;
+  padding: var(--space-16) var(--space-20);
+  overflow: hidden; min-height: 0;
+}
+
+/* ── Mock CodeMirror ── */
+.pe-editor-mock {
+  flex: 1; display: flex; flex-direction: column;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface); overflow: hidden; min-height: 0;
+}
+.pe-editor-body { display: flex; flex: 1; overflow: hidden; }
+.pe-editor-gutter {
+  width: 44px; background: #f7f7f7; border-right: 1px solid var(--border);
+  flex-shrink: 0; display: flex; flex-direction: column; padding: 14px 0;
+}
+.pe-editor-gutter span {
+  display: block; font-family: var(--font-mono); font-size: 12px; color: #bbb;
+  text-align: right; padding-right: 10px; line-height: 21px;
+}
+.pe-editor-code {
+  flex: 1; padding: 14px 18px; font-family: var(--font-mono); font-size: 13px;
+  line-height: 21px; color: var(--ink); overflow: auto; white-space: pre;
+}
+.pe-editor-code .t  { color: #7d4492; }
+.pe-editor-code .a  { color: #217a3c; }
+.pe-editor-code .s  { color: #0761a1; }
+.pe-editor-code .c  { color: #999; font-style: italic; }
+.pe-editor-code .p  { color: #b5419b; }
+.pe-cursor-line { background: rgba(0,0,0,0.03); display: block; margin: 0 -18px; padding: 0 18px; }
+
+/* ── Preview pane ── */
+.pe-pane-notice {
+  font-family: var(--font-mono); font-size: var(--text-micro); color: var(--muted);
+  padding: var(--space-8) var(--space-16);
+  background: var(--canvas-raised); border-bottom: var(--rule-faint); flex-shrink: 0;
+}
+.pe-pane-frame { flex: 1; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: var(--text-meta); font-family: var(--font-mono); }
+
+/* ── Bottom action bar (mirrors page-edit.php) ── */
+.pe-actions-bar {
+  justify-content: space-between;
+  padding: var(--space-12) var(--space-20);
+  background: var(--canvas-raised);
+  flex-shrink: 0;
+}
+.pe-actions-right { display: flex; align-items: center; gap: var(--space-8); }
+#pe-save-status { font-size: var(--text-micro); font-family: var(--font-mono); color: var(--muted); }
+
+/* ── Overflow menu ── */
+.pe-overflow { position: relative; display: inline-block; }
+.pe-overflow > summary { list-style: none; cursor: pointer; }
+.pe-overflow > summary::-webkit-details-marker { display: none; }
+.pe-overflow-menu {
+  position: absolute; right: 0; top: calc(100% + 6px);
+  background: var(--surface); border: 0.5px solid var(--ink-18);
+  border-radius: 6px; min-width: 172px; z-index: 20; padding: 4px;
+  box-shadow: var(--shadow-h);
+}
+.pe-overflow-menu button {
+  display: block; width: 100%; padding: 7px 12px; text-align: left;
+  background: none; border: none; font-size: var(--text-meta); font-family: var(--font);
+  font-weight: 500; color: var(--ink); cursor: pointer; border-radius: 4px;
+  transition: background 0.1s; box-sizing: border-box; white-space: nowrap;
+}
+.pe-overflow-menu button:hover { background: var(--ink-08); }
+.pe-overflow-danger { color: var(--c-terracotta) !important; }
+.pe-overflow-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.pe-overflow > summary.btn-sec {
+  padding: 7px 14px; font-family: var(--font-cond); font-size: var(--text-label);
+  font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  line-height: 1; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+.is-hidden-tab { display: none !important; }
+
+/* ── Sizing: the draft panels need the view to flex ── */
+#view-navigation { display: flex; flex-direction: column; }
+#view-navigation .pe-draft-panel:not(.is-hidden-tab) { flex: 1; }
+
+</style>
+</head>
+<body>
+
+<div class="mockup-bar">Sandbox mockup — Navigation CMS redesign · editor matches page-edit.php pattern</div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar dot-surface" role="banner">
+  <div class="topbar-logo">alexmchong<span class="topbar-logo-sep"></span><em>cms</em></div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-breadcrumb" id="breadcrumb">
+    <a class="crumb-active" href="/cms/navigation">Navigation</a>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="btn-sec">Log out</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <nav class="sidebar dot-surface" aria-label="CMS navigation">
+    <div class="nav-section">
+      <span class="nav-label">Overview</span>
+      <span class="nav-item is-placeholder" aria-disabled="true"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="7.5" y="1" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7.5" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/><rect x="7.5" y="7.5" width="5.5" height="5.5" stroke="currentColor" stroke-width="1.2"/></svg>Dashboard</span>
+      <span class="nav-item is-placeholder" aria-disabled="true"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M1 12h12M3 10V6M6 10V3M9 10V7M12 10V5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Analytics</span>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Writer's Desk</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="6" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 10.5h3M6.5 12.5h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Ideation Board</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="2.5" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="5.5" y="3" width="2.5" height="10" rx="1" stroke="currentColor" stroke-width="1.2"/><rect x="10" y="5" width="2.5" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>Draft Writing</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Library</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 2h10M2 5h10M2 8h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Articles</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Journals</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg>Live Sessions</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Experiments</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Site</span>
+      <a class="nav-item active" aria-current="page" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 3h10M2 7h10M2 11h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Navigation</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M3 1h6l2 2v10H3z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9 1v2h2" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Pages</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>Indexes</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M2 7h8M7 4l3 3-3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Redirects</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Collections</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="3" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="11" cy="7" r="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 7h1M8.5 7h1" stroke="currentColor" stroke-width="1.2"/></svg>Series</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="4" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="4" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="4" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="10" r="2" stroke="currentColor" stroke-width="1.2"/></svg>Categories</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Audience</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><path d="M1.5 3.5h11v7h-11z" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4l5.5 4 5.5-4" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>Subscribers</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">System</span>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="4" stroke="currentColor" stroke-width="1.2"/><rect x="1" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="7" width="5" height="6" stroke="currentColor" stroke-width="1.2"/></svg>Post Templates</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 14 14" fill="none"><circle cx="4.5" cy="4.5" r="3" stroke="currentColor" stroke-width="1.2"/><rect x="8" y="8" width="5" height="5" stroke="currentColor" stroke-width="1.2"/><path d="M8.5 1.5h4v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Design System</a>
+      <a class="nav-item" href="#"><svg class="nav-icon" viewBox="0 0 24 24" fill="none"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>Settings</a>
+    </div>
+  </nav>
+
+  <main class="main" id="main" tabindex="-1">
+    <div class="view active" id="view-navigation">
+
+      <div class="view-header">
+        <div class="view-header-text">
+          <h1 class="view-title">Navigation</h1>
+          <p class="view-subtitle">Manage nav links and the header / footer templates.</p>
+        </div>
+        <div class="view-header-actions">
+          <a href="/" target="_blank" class="btn-sec">Open homepage ↗</a>
+        </div>
+      </div>
+
+      <!-- ── Tab bar: Links | Header | Footer — view pills appear when editing a zone ── -->
+      <div class="cms-tabs" role="tablist" id="nav-tabs">
+        <a class="cms-tab is-active" role="tab" data-tab="links"  href="#" onclick="switchTab('links');return false">Links</a>
+        <a class="cms-tab"           role="tab" data-tab="header" href="#" onclick="switchTab('header');return false">Header</a>
+        <a class="cms-tab"           role="tab" data-tab="footer" href="#" onclick="switchTab('footer');return false">Footer</a>
+
+        <!-- View pills — hidden on Links tab, shown on Header/Footer -->
+        <div class="pe-view-pills is-hidden-tab" id="view-pills">
+          <div class="filter-group">
+            <button type="button" class="filter-pill active" data-view-toggle="edit"    onclick="setPane(this,'edit')">Edit</button>
+            <button type="button" class="filter-pill"        data-view-toggle="preview" onclick="setPane(this,'preview')">Preview</button>
+            <button type="button" class="filter-pill"        data-view-toggle="live"    onclick="setPane(this,'live')">Live version</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LINKS TAB ═══════════════════════════════════════════════════════ -->
+      <div data-tab-panel="links" class="content-area">
+
+        <div class="content-block">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Header</span>
+              <span class="content-block-sublabel">Top nav shown on every public page</span>
+            </div>
+            <span class="content-block-count">4 items</span>
+          </div>
+          <div class="rowform-list nav-list reveal">
+            <div class="rowform-headers">
+              <span></span><span>Label</span><span>Key</span><span>Type</span><span>Target</span>
+              <span>Mark</span><span>Label</span><span>Color</span>
+              <span title="Mobile"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="4" y="1.5" width="6" height="11" rx="1" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="10.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+              <span></span><span></span>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="What's UX 2.0">
+                <input type="text" value="ux2">
+                <select><option>index</option><option selected>content</option><option>series</option><option>page</option><option>custom</option></select>
+                <select><option selected>live-session: What's UX 2.0 — How We Got Here</option></select>
+                <select><option>—</option><option selected>dot</option><option>pill</option></select>
+                <span class="np-mark" style="--np-color:#d63031"><span class="np-dot"></span></span>
+                <input type="text" value="#d63031">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="Thoughts">
+                <input type="text" value="writing">
+                <select><option selected>index</option><option>content</option><option>series</option><option>page</option><option>custom</option></select>
+                <select><option selected>writing (/writing/)</option></select>
+                <select><option selected>—</option><option>dot</option><option>pill</option></select>
+                <span class="np-mark"></span>
+                <input type="text" placeholder="#d63031" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="Talks">
+                <input type="text" value="talks">
+                <select><option selected>index</option><option>content</option><option>series</option><option>page</option><option>custom</option></select>
+                <select><option selected>live-sessions (/live-sessions/)</option></select>
+                <select><option selected>—</option><option>dot</option><option>pill</option></select>
+                <span class="np-mark"></span>
+                <input type="text" placeholder="#d63031" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="Work with me">
+                <input type="text" value="work">
+                <select><option>index</option><option>content</option><option>series</option><option selected>page</option><option>custom</option></select>
+                <input type="text" value="work-with-me">
+                <select><option selected>—</option><option>dot</option><option>pill</option></select>
+                <span class="np-mark"></span>
+                <input type="text" placeholder="#d63031" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row rowform-add-row nav-row">
+              <div class="grip">+</div>
+              <form style="display:contents">
+                <input type="text" placeholder="New item label">
+                <input type="text" placeholder="nav_key">
+                <select><option selected>custom</option><option>index</option><option>series</option><option>content</option><option>page</option></select>
+                <input type="text" placeholder="/path/ or https://…">
+                <select><option selected>—</option><option>dot</option><option>pill</option></select>
+                <span></span>
+                <input type="text" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Add</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-block" style="margin-top:var(--space-24)">
+          <div class="content-block-header">
+            <div>
+              <span class="content-block-label">Footer</span>
+              <span class="content-block-sublabel">Bottom links shown in the page footer</span>
+            </div>
+            <span class="content-block-count">2 items</span>
+          </div>
+          <div class="rowform-list nav-list reveal">
+            <div class="rowform-headers">
+              <span></span><span>Label</span><span>Key</span><span>Type</span><span>Target</span>
+              <span>Mark</span><span>Label</span><span>Color</span>
+              <span><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="4" y="1.5" width="6" height="11" rx="1" stroke="currentColor" stroke-width="1.2"/><line x1="6" y1="10.5" x2="8" y2="10.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+              <span></span><span></span>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="About"><input type="text" value="about">
+                <select><option>index</option><option>content</option><option>series</option><option selected>page</option><option>custom</option></select>
+                <input type="text" value="about">
+                <select><option selected>—</option></select><span></span>
+                <input type="text" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row nav-row" draggable="true">
+              <div class="grip">⋮⋮</div>
+              <form style="display:contents">
+                <input type="text" value="Newsletter"><input type="text" value="newsletter">
+                <select><option>index</option><option>content</option><option>series</option><option>page</option><option selected>custom</option></select>
+                <input type="text" value="/subscribe/">
+                <select><option selected>—</option></select><span></span>
+                <input type="text" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Save</button>
+              </form>
+              <button type="button" class="btn-icon btn-icon-danger"><svg viewBox="0 0 14 14" fill="none"><path d="M3 4h8M5.5 4V2.5h3V4M4 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="rowform-row rowform-add-row nav-row">
+              <div class="grip">+</div>
+              <form style="display:contents">
+                <input type="text" placeholder="New item label"><input type="text" placeholder="nav_key">
+                <select><option selected>custom</option></select>
+                <input type="text" placeholder="/path/ or https://…">
+                <select><option selected>—</option></select><span>
+                </span><input type="text" style="visibility:hidden">
+                <label style="justify-self:center"><input type="checkbox" checked></label>
+                <button type="button" class="btn-sec btn-tiny">Add</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /links -->
+
+
+      <!-- ══ HEADER TAB ══════════════════════════════════════════════════════ -->
+      <div data-tab-panel="header" class="pe-draft-panel is-hidden-tab">
+        <div class="pe-panes">
+
+          <!-- Edit pane -->
+          <div class="pe-pane is-active" data-view="edit">
+            <div class="pe-edit-inner">
+              <div class="pe-editor-mock">
+                <div class="pe-editor-body">
+                  <div class="pe-editor-gutter">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                    <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                    <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+                    <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+                  </div>
+                  <div class="pe-editor-code"><span class="t">&lt;nav</span> <span class="a">class</span>=<span class="s">"layout-nav"</span><span class="t">&gt;</span>
+  <span class="t">&lt;a</span> <span class="a">href</span>=<span class="s">"/"</span> <span class="a">class</span>=<span class="s">"layout-nav-logo"</span> <span class="a">aria-label</span>=<span class="s">"Alex M. Chong — home"</span><span class="t">&gt;</span>
+    <span class="t">&lt;img</span> <span class="a">src</span>=<span class="s">"/_layout/logo.png"</span> <span class="a">alt</span>=<span class="s">"Alex M. Chong"</span> <span class="t">/&gt;</span>
+  <span class="t">&lt;/a&gt;</span>
+  <span class="t">&lt;button</span> <span class="a">class</span>=<span class="s">"layout-nav-toggle"</span> <span class="a">type</span>=<span class="s">"button"</span>
+          <span class="a">aria-label</span>=<span class="s">"Menu"</span> <span class="a">aria-expanded</span>=<span class="s">"false"</span><span class="t">&gt;</span>
+    <span class="t">&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;span&gt;&lt;/span&gt;</span>
+  <span class="t">&lt;/button&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"layout-nav-links"</span> <span class="a">id</span>=<span class="s">"layout-nav-drawer"</span><span class="t">&gt;</span>
+<span class="pe-cursor-line">    <span class="p">&lt;?php render_nav('header'); ?&gt;</span></span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/nav&gt;</span>
+<span class="t">&lt;script&gt;</span>
+  <span class="c">// Active-link prefix-match + mobile drawer.</span>
+  (function () { <span class="c">/* … */</span> })();
+<span class="t">&lt;/script&gt;</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview pane -->
+          <div class="pe-pane" data-view="preview">
+            <div class="pe-pane-notice">Previewing saved draft — not yet published</div>
+            <div class="pe-pane-frame">loads /about/?_preview=&lt;id&gt;</div>
+          </div>
+
+          <!-- Live pane -->
+          <div class="pe-pane" data-view="live">
+            <div class="pe-pane-notice">Live version — what visitors see now</div>
+            <div class="pe-pane-frame">loads /about/</div>
+          </div>
+
+        </div><!-- /.pe-panes -->
+
+        <!-- Bottom action bar -->
+        <div class="form-actions pe-actions-bar">
+          <button type="button" class="btn-sec" id="hdr-save-btn">Save draft</button>
+          <a href="/cms/navigation" class="btn-sec">Cancel</a>
+          <span id="pe-save-status">Saved 5d ago</span>
+          <div class="pe-actions-right">
+            <details class="pe-overflow">
+              <summary class="btn-sec">⋯</summary>
+              <div class="pe-overflow-menu">
+                <button onclick="return false">+ New draft</button>
+                <hr class="pe-overflow-divider">
+                <button onclick="return false">Rename</button>
+                <button onclick="return false">Duplicate</button>
+                <hr class="pe-overflow-divider">
+                <button class="pe-overflow-danger" onclick="return false">Delete draft</button>
+              </div>
+            </details>
+            <button type="button" class="btn-pri">Publish →</button>
+          </div>
+        </div>
+
+      </div><!-- /header -->
+
+
+      <!-- ══ FOOTER TAB ══════════════════════════════════════════════════════ -->
+      <div data-tab-panel="footer" class="pe-draft-panel is-hidden-tab">
+        <div class="pe-panes">
+
+          <!-- Edit pane -->
+          <div class="pe-pane is-active" data-view="edit">
+            <div class="pe-edit-inner">
+              <div class="pe-editor-mock">
+                <div class="pe-editor-body">
+                  <div class="pe-editor-gutter">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                    <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                    <span>11</span><span>12</span><span>13</span><span>14</span>
+                  </div>
+                  <div class="pe-editor-code"><span class="p">&lt;?php</span>
+<span class="c">// render_nav('footer') drives the right-hand link list.</span>
+<span class="c">// $_footer_copy comes from Settings → Footer copyright.</span>
+<span class="p">if (!function_exists('render_nav')) { require_once __DIR__ . '/lib/nav.php'; }</span>
+<span class="p">if (!function_exists('get_setting')) { require_once __DIR__ . '/lib/settings.php'; }</span>
+<span class="p">$_footer_copy = get_setting('footer_copyright', 'alex m. chong');</span>
+<span class="p">?&gt;</span>
+<span class="t">&lt;footer</span> <span class="a">class</span>=<span class="s">"layout-footer"</span><span class="t">&gt;</span>
+  <span class="t">&lt;span</span> <span class="a">class</span>=<span class="s">"layout-footer-left"</span><span class="t">&gt;</span>
+    © <span class="pe-cursor-line"><span class="p">&lt;?= date('Y') ?&gt;</span> <span class="p">&lt;?= htmlspecialchars($_footer_copy, ENT_QUOTES, 'UTF-8') ?&gt;</span></span>
+  <span class="t">&lt;/span&gt;</span>
+  <span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"layout-footer-right"</span><span class="t">&gt;</span>
+    <span class="p">&lt;?php render_nav('footer'); ?&gt;</span>
+  <span class="t">&lt;/div&gt;</span>
+<span class="t">&lt;/footer&gt;</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview pane -->
+          <div class="pe-pane" data-view="preview">
+            <div class="pe-pane-notice">Previewing saved draft — not yet published</div>
+            <div class="pe-pane-frame">loads /about/?_preview=&lt;id&gt;</div>
+          </div>
+
+          <!-- Live pane -->
+          <div class="pe-pane" data-view="live">
+            <div class="pe-pane-notice">Live version — what visitors see now</div>
+            <div class="pe-pane-frame">loads /about/</div>
+          </div>
+
+        </div><!-- /.pe-panes -->
+
+        <!-- Bottom action bar -->
+        <div class="form-actions pe-actions-bar">
+          <button type="button" class="btn-sec" id="ftr-save-btn">Save draft</button>
+          <a href="/cms/navigation" class="btn-sec">Cancel</a>
+          <span id="pe-save-status">Saved 15d ago</span>
+          <div class="pe-actions-right">
+            <details class="pe-overflow">
+              <summary class="btn-sec">⋯</summary>
+              <div class="pe-overflow-menu">
+                <button onclick="return false">+ New draft</button>
+                <hr class="pe-overflow-divider">
+                <button onclick="return false">Rename</button>
+                <button onclick="return false">Duplicate</button>
+                <hr class="pe-overflow-divider">
+                <button class="pe-overflow-danger" onclick="return false">Delete draft</button>
+              </div>
+            </details>
+            <button type="button" class="btn-pri">Publish →</button>
+          </div>
+        </div>
+
+      </div><!-- /footer -->
+
+    </div><!-- /#view-navigation -->
+  </main>
+</div>
+
+<script>
+var _currentTab = 'links';
+
+function switchTab(tab) {
+  _currentTab = tab;
+
+  // Tab pills
+  document.querySelectorAll('.cms-tab').forEach(function (t) {
+    t.classList.toggle('is-active', t.getAttribute('data-tab') === tab);
+  });
+
+  // Tab panels
+  document.querySelectorAll('[data-tab-panel]').forEach(function (p) {
+    p.classList.toggle('is-hidden-tab', p.getAttribute('data-tab-panel') !== tab);
+  });
+
+  // View pills: only visible on Header / Footer tabs
+  var pills = document.getElementById('view-pills');
+  if (pills) pills.classList.toggle('is-hidden-tab', tab === 'links');
+
+  // Reset to Edit pane when switching zones
+  if (tab !== 'links') {
+    var panel = document.querySelector('[data-tab-panel="' + tab + '"]');
+    if (panel) {
+      panel.querySelectorAll('.pe-pane').forEach(function (p) {
+        p.classList.toggle('is-active', p.getAttribute('data-view') === 'edit');
+      });
+    }
+    document.querySelectorAll('[data-view-toggle]').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-view-toggle') === 'edit');
+    });
+  }
+}
+
+function setPane(btn, name) {
+  var panel = document.querySelector('[data-tab-panel="' + _currentTab + '"]');
+  if (!panel) return;
+
+  // Toggle: clicking active pane toggles it off (unless it's the last active)
+  var targetPane = panel.querySelector('.pe-pane[data-view="' + name + '"]');
+  if (!targetPane) return;
+
+  var activePanes = panel.querySelectorAll('.pe-pane.is-active');
+  var isActive = targetPane.classList.contains('is-active');
+
+  if (isActive && activePanes.length === 1) return; // can't close last pane
+
+  targetPane.classList.toggle('is-active');
+  btn.classList.toggle('active');
+}
+
+document.addEventListener('click', function (e) {
+  if (!e.target.closest('.pe-overflow')) {
+    document.querySelectorAll('.pe-overflow[open]').forEach(function (d) {
+      d.removeAttribute('open');
+    });
+  }
+});
+</script>
+
+</body>
+</html>

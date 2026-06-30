@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About v3 — mini-résumé + expandable Selected Work · SANDBOX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../../../site/_design-system/css/system-public.css" />
+  <!-- VERSION SNAPSHOT — v3: scaffold with expandable "Selected Work" cases + mini-résumé. -->
+  <style id="sandbox-proto">
+    .ph { color: var(--muted); font-style: italic; }
+    .case-list { margin-top: var(--space-12); }
+    .case { border-top: var(--rule-faint); }
+    .case:last-of-type { border-bottom: var(--rule-faint); }
+    .case > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 200px 1fr 28px; gap: var(--space-32); align-items: baseline; padding: var(--space-20) 0; }
+    .case > summary::-webkit-details-marker { display: none; }
+    .case-org { font-size: var(--text-h5); font-weight: 600; color: var(--primary); }
+    .case-headline { font-size: var(--text-body); color: var(--secondary); }
+    .case-meta { display: block; font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.14em; font-size: var(--text-meta); color: var(--muted); margin-top: 4px; }
+    .case-toggle { justify-self: end; font-size: var(--text-h4); line-height: 1; color: var(--muted); transition: transform 0.2s ease; }
+    .case[open] .case-toggle { transform: rotate(45deg); }
+    .case-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-32); padding: 0 0 var(--space-28) calc(200px + var(--space-32)); }
+    .case-block-label { font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.14em; font-size: var(--text-meta); color: var(--muted); margin-bottom: var(--space-8); }
+    @media (max-width: 820px) { .case > summary { grid-template-columns: 1fr 28px; } .case-body { grid-template-columns: 1fr; padding-left: 0; gap: var(--space-20); } }
+  </style>
+</head>
+<body>
+
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="../../../../site/_pages/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/">What's UX 2.0</a>
+    <a href="/writing/">Thoughts</a>
+    <a href="/live-sessions/">Talks</a>
+    <a href="/work-with-me/">Work with me</a>
+  </div>
+</nav>
+
+  <main class="page">
+
+    <header class="page-header two-col is-center has-rule">
+      <div>
+        <div class="eyebrow">About</div>
+        <h1 class="statement is-h1"><span class="ph">[ One-line positioning statement — your words ]</span></h1>
+        <div class="page-header-sub">Director of Design &amp; UX · 13+ years · startups to Fortune 500 · Toronto, remote-first</div>
+      </div>
+      <div class="profile-circle is-lg">
+        <img class="profile-circle-img" src="../../../../site/_pages/_layout/profile-bw.png" alt="Alex M. Chong"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="profile-circle-initials" aria-hidden="true">AC</span>
+      </div>
+    </header>
+
+    <section class="two-col">
+      <div class="narrative">
+        <p class="serif-intro ph">[ One line of voice — the through-line of how you work. ]</p>
+        <p class="ph">[ 1–2 sentences: who you are and what you do, in your words. ]</p>
+      </div>
+      <aside class="detail-card">
+        <div class="detail-card-label">Details</div>
+        <div class="detail-list">
+          <div><div class="detail-row-label">Location</div><div class="detail-row-value">Toronto · remote-first</div></div>
+          <div><div class="detail-row-label">Practice</div><div class="detail-row-value">Design &amp; UX Director · Practice Leadership</div></div>
+          <div><div class="detail-row-label">Focus</div><div class="detail-row-value">Product vision · Operating model</div></div>
+          <div><div class="detail-row-label">Education</div><div class="detail-row-value">MID, Interaction Design · BAS, Architecture</div></div>
+          <div><div class="detail-row-label">Available For</div><div class="detail-row-value">Fractional · Advisory · Talks</div></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="page-section">
+      <h2 class="section-heading">Selected Work</h2>
+      <div class="case-list">
+        <details class="case" open>
+          <summary>
+            <span class="case-org">Hudson's Bay</span>
+            <span><span class="case-headline">A siloed practice, rebuilt as one integrated product design &amp; innovation org</span><span class="case-meta">Director of UX · 2023 — 2025</span></span>
+            <span class="case-toggle" aria-hidden="true">+</span>
+          </summary>
+          <div class="case-body">
+            <div><div class="case-block-label">Situation</div><p class="point-desc ph">[ Canada's oldest national retailer; design split across silos, resources tight. ]</p></div>
+            <div><div class="case-block-label">What I did</div><p class="point-desc ph">[ Shaped the practice operationally; built cross-functional relationships. ]</p></div>
+            <div><div class="case-block-label">Outcome</div><p class="point-desc ph">[ A lean, integrated strategic team; raised design maturity. ]</p></div>
+          </div>
+        </details>
+        <details class="case">
+          <summary>
+            <span class="case-org">Outwitly</span>
+            <span><span class="case-headline ph">[ One-line outcome ]</span><span class="case-meta">Director of Design, Leadership &amp; Practice — Fractional · 2025 — Present</span></span>
+            <span class="case-toggle" aria-hidden="true">+</span>
+          </summary>
+          <div class="case-body">
+            <div><div class="case-block-label">Situation</div><p class="point-desc ph">[ … ]</p></div>
+            <div><div class="case-block-label">What I did</div><p class="point-desc ph">[ … ]</p></div>
+            <div><div class="case-block-label">Outcome</div><p class="point-desc ph">[ … ]</p></div>
+          </div>
+        </details>
+        <details class="case">
+          <summary>
+            <span class="case-org">BrainStation</span>
+            <span><span class="case-headline ph">[ One-line outcome — built the UX curriculum, 300+ designers trained ]</span><span class="case-meta">UX Curriculum Architect &amp; Lead Educator · 2017 — 2019</span></span>
+            <span class="case-toggle" aria-hidden="true">+</span>
+          </summary>
+          <div class="case-body">
+            <div><div class="case-block-label">Situation</div><p class="point-desc ph">[ … ]</p></div>
+            <div><div class="case-block-label">What I did</div><p class="point-desc ph">[ … ]</p></div>
+            <div><div class="case-block-label">Outcome</div><p class="point-desc ph">[ … ]</p></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="page-section">
+      <h2 class="section-heading">Career</h2>
+      <div class="ledger">
+        <span class="ledger-date">2025 — Present</span>
+        <div class="ledger-entry"><div class="ledger-role">Director of Design, UX Leadership &amp; Practice — Fractional</div><div class="ledger-org">Outwitly · Remote</div></div>
+        <span class="ledger-date">2023 — 2025</span>
+        <div class="ledger-entry"><div class="ledger-role">Director of User Experience</div><div class="ledger-org">Hudson's Bay · Saks Global</div></div>
+        <span class="ledger-date">2019 — Now</span>
+        <div class="ledger-entry"><div class="ledger-role">Product &amp; Service Strategy, Design Operations</div><div class="ledger-org">Independent · Toronto / Remote</div></div>
+        <span class="ledger-date">2017 — 2019</span>
+        <div class="ledger-entry"><div class="ledger-role">UX Curriculum Architect &amp; Lead Educator</div><div class="ledger-org">BrainStation</div></div>
+        <span class="ledger-date">2014 — 2016</span>
+        <div class="ledger-entry"><div class="ledger-role">Sr. Interaction &amp; Service Designer, Team Lead</div><div class="ledger-org">Kinetic Commerce</div></div>
+        <span class="ledger-date">2009 — 2014</span>
+        <div class="ledger-entry"><div class="ledger-role">Product Designer → Partner</div><div class="ledger-org">Pivotal Labs · GestureTek · SoCreative</div></div>
+      </div>
+      <div class="btn-row" style="margin-top: var(--space-24)"><a class="btn-ul" href="/resume/">Full résumé &amp; education →</a></div>
+    </section>
+
+    <section class="page-section">
+      <h2 class="section-heading">Teaching &amp; Coaching</h2>
+      <p class="lead is-sm ph">[ One or two lines: BrainStation curriculum, 300+ designers; coaching practitioners and leaders today. ]</p>
+      <div class="btn-row" style="margin-top: var(--space-24)"><a class="btn-ul" href="/coaching/">The coaching practice →</a></div>
+    </section>
+
+    <section class="section-outro">
+      <p><strong>Toronto-based, remote-first.</strong> Available for fractional leadership, practice advisory, and talks.</p>
+      <div class="btn-row">
+        <a class="btn-dark"  href="/work-with-me/">Work with Alex →</a>
+        <a class="btn-light" href="/coaching/">Coaching →</a>
+      </div>
+    </section>
+
+  </main>
+
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a><a href="/coaching/">Coaching</a><a href="/work-with-me/">Services</a><a href="/resume/">Resume</a>
+  </div>
+</footer>
+
+</body>
+</html>

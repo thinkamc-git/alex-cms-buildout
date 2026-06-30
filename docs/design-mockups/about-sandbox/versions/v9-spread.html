@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About v9 — spread: company in the when-column · SANDBOX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../../../site/_design-system/css/system-public.css" />
+  <!-- VERSION SNAPSHOT — v9: v8's themed structure, spread out. Each role is a row of
+       [theme | when (date + company) | what (role + description)] so the left side
+       carries weight and the right stops bunching. -->
+  <style id="sandbox-proto">
+    .xp-theme { display: grid; grid-template-columns: 170px 1fr; gap: var(--space-40); padding: var(--space-28) 0; border-top: var(--rule-faint); }
+    .xp-theme:first-of-type { border-top: 0; }
+    .xp-label { font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.16em; font-size: var(--text-label); font-weight: 700; color: var(--primary); padding-top: 4px; }
+    .xp-rows { display: grid; gap: var(--space-24); }
+    .xp-row { display: grid; grid-template-columns: 210px 1fr; gap: var(--space-32); align-items: baseline; }
+    .xp-date { font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.14em; font-size: var(--text-meta); color: var(--muted); }
+    .xp-co { font-size: var(--text-sm); font-weight: 600; color: var(--secondary); margin-top: var(--space-4); }
+    .xp-role { font-size: var(--text-h5); font-weight: 600; color: var(--primary); }
+    .xp-desc { font-size: var(--text-sm); line-height: 1.5; color: var(--muted); margin-top: var(--space-4); max-width: 60ch; }
+    @media (max-width: 860px) { .xp-theme { grid-template-columns: 1fr; gap: var(--space-12); } .xp-row { grid-template-columns: 1fr; gap: var(--space-4); } }
+  </style>
+</head>
+<body>
+
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="../../../../site/_pages/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/">What's UX 2.0</a>
+    <a href="/writing/">Thoughts</a>
+    <a href="/live-sessions/">Talks</a>
+    <a href="/work-with-me/">Work with me</a>
+  </div>
+</nav>
+
+  <main class="page">
+
+    <header class="page-header two-col is-center has-rule">
+      <div>
+        <div class="eyebrow">About</div>
+        <h1 class="page-header-title is-serif">alex m. chong</h1>
+        <div class="page-header-sub">Director of UX · Design Coach · Educator · Toronto, Ontario</div>
+      </div>
+      <div class="profile-circle is-lg">
+        <img class="profile-circle-img" src="../../../../site/_pages/_layout/profile-bw.png" alt="Alex M. Chong"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="profile-circle-initials" aria-hidden="true">AC</span>
+      </div>
+    </header>
+
+    <section class="two-col">
+      <div class="narrative">
+        <p class="serif-intro">
+          A way of thinking differently about what design can do — well beyond
+          fixing your process.
+        </p>
+        <p>
+          I'm a product design leader, strategist and coach. For the past thirteen
+          years I've shipped consumer and enterprise software end-to-end —
+          across agencies, accelerators, scaling startups and large product
+          companies — and built the practices and teams behind it.
+        </p>
+        <p>
+          Most of the work I'm proudest of lives outside the standard process
+          or framework. It sits in the seam between strategy and craft, where
+          the real work is finding the sharper question that makes the answer
+          clear. That's the work I want to keep doing, and the work I want to
+          help other designers learn how to do.
+        </p>
+        <p>
+          Today I split my time between a small number of fractional design
+          partnerships, structured 1:1 coaching with mid-to-senior designers,
+          and the occasional workshop or talk — with a growing focus on where
+          the practice goes next. I write here when I have something I'd be
+          willing to defend in person, and I teach as often as the practice
+          will allow.
+        </p>
+        <p>
+          I'm based in Toronto. I work remote-first, and I travel for the
+          right room.
+        </p>
+        <div class="btn-row">
+          <a class="btn-dark"  href="/coaching/">View Coaching →</a>
+          <a class="btn-light" href="/work-with-me/">View Services →</a>
+        </div>
+      </div>
+
+      <aside class="detail-card">
+        <div class="detail-card-label">Details</div>
+        <div class="detail-list">
+          <div><div class="detail-row-label">Location</div><div class="detail-row-value">Toronto, Ontario</div></div>
+          <div><div class="detail-row-label">Practice</div><div class="detail-row-value">Design Director, Practice Advisor, Career Coach</div></div>
+          <div><div class="detail-row-label">Education</div><div class="detail-row-value">MID · BAS</div></div>
+          <div><div class="detail-row-label">Years Active</div><div class="detail-row-value">13+</div></div>
+          <div><div class="detail-row-label">Available For</div><div class="detail-row-value">Fractional, Coaching, Talks</div></div>
+        </div>
+      </aside>
+    </section>
+
+
+    <section class="page-section">
+      <h2 class="section-heading">Selected Experience</h2>
+
+      <div class="xp-theme">
+        <div class="xp-label">Practice &amp; Operations</div>
+        <div class="xp-rows">
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2023 — 2025</div>
+              <div class="xp-co">Hudson's Bay · Saks Global</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">Director of User Experience</div>
+              <p class="xp-desc">Rebuilt a siloed practice into an integrated product design &amp; innovation org.</p>
+            </div>
+          </div>
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2025 — Present</div>
+              <div class="xp-co">Outwitly</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">Director of Design, Leadership &amp; Practice — Fractional</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp-theme">
+        <div class="xp-label">Product &amp; Service Strategy</div>
+        <div class="xp-rows">
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2019 — Now</div>
+              <div class="xp-co">Independent · Fortune 500</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">Product &amp; Service Strategy, Design Operations</div>
+              <p class="xp-desc">Advising on direction and operating models across the product &amp; service lifecycle.</p>
+            </div>
+          </div>
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2014 — 2016</div>
+              <div class="xp-co">Kinetic Commerce</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">Sr. Interaction &amp; Service Designer, Team Lead</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp-theme">
+        <div class="xp-label">Education &amp; Coaching</div>
+        <div class="xp-rows">
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2017 — 2019</div>
+              <div class="xp-co">BrainStation</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">UX Curriculum Architect &amp; Lead Educator</div>
+              <p class="xp-desc">Built the UX curriculum and the experiential model behind it — 300+ designers.</p>
+            </div>
+          </div>
+          <div class="xp-row">
+            <div class="xp-when">
+              <div class="xp-date">2019 — Now</div>
+              <div class="xp-co">Independent</div>
+            </div>
+            <div class="xp-what">
+              <div class="xp-role">Coach &amp; UX Practice Advisor</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top: var(--space-32)">
+        <a class="btn-ul" href="/resume/">Full résumé &amp; history →</a>
+      </div>
+    </section>
+
+  </main>
+
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a><a href="/coaching/">Coaching</a><a href="/work-with-me/">Services</a><a href="/resume/">Resume</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Landing v1 — with email signup · SANDBOX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../../../site/_design-system/css/system-public.css" />
+  <!-- VERSION SNAPSHOT — v1: current landing + a simple email signup under the hero.
+       Reuses the /subscribe endpoint + .form-input / .btn-dark / .form-fineprint.
+       PROTOTYPE .hero-signup layout (quarantined; promote on sign-off). -->
+  <style id="sandbox-proto">
+    .hero-signup { max-width: 400px; margin: var(--space-40) 0 0; text-align: left; }
+    .hero-signup-row { display: flex; align-items: baseline; gap: var(--space-16); }
+    /* Subtle underline field — just a line, italic example, type on the line. */
+    .hero-signup-row .form-input {
+      flex: 1; margin: 0;
+      border: 0; border-bottom: 1px solid var(--ink-30, #cbc9c6); border-radius: 0;
+      background: transparent; padding: var(--space-8) 2px;
+    }
+    .hero-signup-row .form-input::placeholder { font-family: var(--font-serif); font-style: italic; font-size: 1.05em; color: var(--muted); }
+    .hero-signup-row .form-input:focus { outline: none; box-shadow: none; border-bottom-color: var(--primary); }
+    .hero-signup-row .btn-ul { flex: 0 0 auto; white-space: nowrap; background: transparent; border: 0; padding: 0; cursor: pointer; }
+    .hero-signup .form-fineprint { margin-top: var(--space-8); }
+    @media (max-width: 540px) { .hero-signup-row { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="../../../../site/_pages/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/">What's UX 2.0</a>
+    <a href="/writing/">Thoughts</a>
+    <a href="/live-sessions/">Talks</a>
+    <a href="/work-with-me/">Work with me</a>
+  </div>
+</nav>
+
+  <main class="hero">
+    <div class="profile-circle is-md">
+      <img class="profile-circle-img" src="../../../../site/_pages/_layout/profile-bw.png" alt="Alex M. Chong"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <span class="profile-circle-initials" aria-hidden="true">AC</span>
+    </div>
+    <div class="serif-eyebrow">Design Leadership &amp; Practice</div>
+
+    <h1 class="statement is-h0">
+      Alex is a <span class="m">UX Design Director</span>, practice
+      <span class="m">advisor</span>, and <span class="m">coach</span> —
+      with over <span class="ac">13 years</span> leading the discipline
+      through the <em class="serif">mobile and digital revolution</em>.
+    </h1>
+
+    <div class="statement is-h0">
+      He has built and scaled <span class="m">design practices</span>
+      across agencies, startups and product companies, developing the
+      <span class="ac">next generation</span> of design practitioners
+      and leaders.
+    </div>
+
+    <p class="lead">
+      Today, he's tracking the signals of what comes next in our
+      <span class="serif">post-AI</span> world, as we enter
+      <span class="serif">UX 2.0</span>.
+    </p>
+
+    <div class="btn-row">
+      <a class="btn-dark"  href="/ux2.0/how-we-got-here/">Read About UX 2.0 →</a>
+      <a class="btn-light" href="/work-with-me/">Work With Alex →</a>
+      <a class="btn-ul"    href="/about/">About Alex →</a>
+    </div>
+
+    <!-- Simple email signup — POSTs to the existing /subscribe handler -->
+    <form class="hero-signup" action="/subscribe" method="post" novalidate>
+      <div class="hero-signup-row">
+        <input class="form-input" type="email" id="email" name="email"
+               placeholder="you@example.com" required autocomplete="email">
+        <button class="btn-ul" type="submit">Subscribe →</button>
+      </div>
+      <!-- Honeypot: hidden from users, fillable by bots. -->
+      <div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <p class="form-fineprint">Occasional updates. Unsubscribe anytime.</p>
+    </form>
+  </main>
+
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a><a href="/coaching/">Coaching</a><a href="/work-with-me/">Services</a><a href="/resume/">Resume</a>
+  </div>
+</footer>
+
+</body>
+</html>

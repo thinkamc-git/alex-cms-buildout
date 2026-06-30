@@ -4,6 +4,18 @@ A short, human-readable changelog of public-facing ships. For phase-by-phase bui
 
 ---
 
+## Maintenance (post-v1.0)
+
+- **2026-06-28 — Fix: Series edit Publish button not activating/submitting.** Nested
+  `<form>` elements in `site/cms/views/series-edit.php` (per-row remove forms + the
+  add-part form, all inside the main save form) were being implicitly closed by the
+  browser, leaving the Publish button outside the main form's DOM scope — so
+  `dirty-flip.js` couldn't find its owning form and never wired listeners. Replaced the
+  nested forms with standalone hidden forms referenced via `form=` attributes. CMS-only,
+  no schema change. (staging + prod)
+
+---
+
 ## v1.0 — alexmchong.ca CMS (2026-06)
 
 The first public release. Replaces a hand-built static site with a custom PHP + MySQL CMS, hosted on DreamHost. Single-author, desktop-only admin.

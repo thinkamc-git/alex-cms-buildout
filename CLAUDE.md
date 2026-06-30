@@ -4,6 +4,22 @@ This file is the orientation guide for any assistant working in this repo. Read 
 
 ---
 
+## ⛓ ALWAYS give a viewable link after a visible edit (non-negotiable)
+
+> **THE CONTRACT (Alex's words):** *"If there are no links, I will assume there is nothing to review."*
+> A link is the signal that says **"look at this."** Its absence means **"nothing to look at."** So any time there is *anything* for Alex to see — a change, a result, a page, a comparison — the clickable link **MUST** be in that message. Every single time. No link is itself a statement, so never let one be missing by accident.
+>
+> **The link is always a real, openable URL — NEVER a local file path and NEVER a `file://` link.** A path like `site/_pages/error.php` is a code reference, not a "look at this" link; it does not satisfy this rule. The reviewable link is a `https://staging.alexmchong.ca/…` (or local-server `http://127.0.0.1:…`) URL.
+
+Whenever you change anything Alex would look at — a CMS view, a marketing `_pages` file, a template, a sandbox/mockup — you **MUST end that turn with a clickable URL where the change can be seen**, plus a one-line "where it changed." Every time, **unprompted**. Alex should never have to ask "where's my link?"
+
+- **`site/**` (CMS / marketing / templates):** deploy to staging — `bin/deploy.sh staging` — and give the `https://staging.alexmchong.ca/…` URL for the exact page or view affected (for `/cms/` views, name the screen + how to reach it).
+- **`docs/design-mockups/**` (sandboxes / mockups):** serve locally — `python3 -m http.server 8765 --bind 127.0.0.1` at the repo root — and give the `http://127.0.0.1:8765/…` URL. **Never** a `file://` link (the design-system CSS won't resolve). Keep the server running across the session; restart it if a link 404s.
+- If a change genuinely has **no** viewable surface (pure backend / docs / config), say so **explicitly in that message** ("no link — backend only") — silence is not allowed, because silence reads as "nothing to review."
+- **Self-check before every send:** does this message reference anything Alex could look at? If yes → the openable URL is present. If I'm pointing at a file path instead of a URL, that's a miss — fix it before sending.
+
+---
+
 ## What this project is
 
 A custom CMS for **alexmchong.ca**, a single-author personal site (designer / writer / coach). The CMS lets the author capture, develop, and publish four content types — Articles, Journals, Live Sessions, and Experiments — through a Pipeline (Idea → Concept → Outline → Draft → Published).
@@ -115,6 +131,28 @@ This governs **everything built or written in this repo** — code, styles, cont
 - **Done means:** fits the system; lean and organized; reusable additions documented where their kind lives (styles → the `/_ds/` showcase, rendered from the real CSS); linked surfaces updated; any exception assessed and approved.
 
 **Full rule + the design-system specifics: `docs/BUILD-DISCIPLINE.md`.** The three-way linkage rule below is one specific case of this.
+
+---
+
+## 🚦 Pre-Build Gate — required before any UI implementation
+
+**No UI code is written until a Pre-Build Brief is produced and confirmed by Alex.**
+
+This is a hard gate, not a guideline. It applies to every UI task — new components,
+layout changes, style updates, sandbox work. The brief is short; skipping it is not
+allowed.
+
+The brief covers four things, produced inline in conversation before any code:
+
+1. **Component scan** — does this already exist? Name it exactly.
+2. **Token scan** — what tokens cover the visual properties needed?
+3. **Pattern scan** — how does the closest existing interaction work? Name the file.
+4. **Proposed approach** — one paragraph spec. What's reused, what (if any) is new.
+
+Alex confirms the brief. Then code is written to that spec. If Alex redirects, the
+brief is updated — not the implementation.
+
+**Template and full instructions: `docs/_principles/PRE-BUILD-BRIEF.md`**
 
 ---
 

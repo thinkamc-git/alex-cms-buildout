@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About v8 — between: themed ledger · SANDBOX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../../../site/_design-system/css/system-public.css" />
+  <!-- VERSION SNAPSHOT — v8: BETWEEN v6 and v7. Dated ledger (résumé credibility)
+       grouped under capability themes, each role with room for a short description.
+       Full chronology → /resume/. -->
+  <style id="sandbox-proto">
+    /* About hero — text rows + photo. Desktop: photo right, spanning. Mobile:
+       photo left-aligned, between the eyebrow and the name. */
+    .about-hero { display: grid; grid-template-columns: 1fr auto; column-gap: var(--space-64); align-items: center; padding-bottom: var(--space-40); border-bottom: var(--rule); margin-bottom: var(--space-40); }
+    .about-hero .eyebrow { grid-column: 1; grid-row: 1; }
+    .about-hero .page-header-title { grid-column: 1; grid-row: 2; margin: var(--space-12) 0 var(--space-8); }
+    .about-hero .page-header-sub { grid-column: 1; grid-row: 3; }
+    .about-hero-photo { grid-column: 2; grid-row: 1 / 4; }
+    @media (max-width: 820px) {
+      .about-hero { grid-template-columns: 1fr; column-gap: 0; }
+      .about-hero .eyebrow { grid-row: 1; }
+      .about-hero-photo { grid-column: 1; grid-row: 2; justify-self: start; margin: var(--space-16) 0; }
+      .about-hero .page-header-title { grid-row: 3; }
+      .about-hero .page-header-sub { grid-row: 4; }
+    }
+    .xp-theme { display: grid; grid-template-columns: 190px 1fr; gap: var(--space-48); padding: var(--space-28) 0; border-top: var(--rule-faint); }
+    .xp-theme:first-of-type { border-top: 0; }
+    .xp-label { font-family: var(--font-cond); text-transform: uppercase; letter-spacing: 0.14em; font-size: var(--text-meta); font-weight: 700; color: var(--primary); padding-top: 4px; }
+    .xp-theme .ledger { gap: var(--space-12) var(--space-24); }
+    /* Room for a short description under each role. */
+    .xp-desc { font-size: var(--text-sm); line-height: 1.5; color: var(--muted); margin-top: var(--space-4); max-width: 52ch; }
+    @media (max-width: 820px) { .xp-theme { grid-template-columns: 1fr; gap: var(--space-12); } }
+  </style>
+</head>
+<body>
+
+<nav class="layout-nav">
+  <a href="/" class="layout-nav-logo" aria-label="Alex M. Chong — home">
+    <img src="../../../../site/_pages/_layout/logo.png" alt="Alex M. Chong" />
+  </a>
+  <div class="layout-nav-links">
+    <a href="/ux2.0/how-we-got-here/">What's UX 2.0</a>
+    <a href="/writing/">Thoughts</a>
+    <a href="/live-sessions/">Talks</a>
+    <a href="/work-with-me/">Work with me</a>
+  </div>
+</nav>
+
+  <main class="page">
+
+    <!-- Hero — eyebrow / name / sub with photo (right on desktop, left between
+         eyebrow & name on mobile) -->
+    <header class="about-hero">
+      <div class="eyebrow">About</div>
+      <div class="profile-circle is-lg about-hero-photo">
+        <img class="profile-circle-img" src="../../../../site/_pages/_layout/profile-bw.png" alt="Alex M. Chong"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="profile-circle-initials" aria-hidden="true">AC</span>
+      </div>
+      <h1 class="page-header-title is-serif">alex m. chong</h1>
+      <div class="page-header-sub">Director of UX · Design Coach · Educator · Toronto, Ontario</div>
+    </header>
+
+    <!-- ORIGINAL narrative + details -->
+    <section class="two-col">
+      <div class="narrative">
+        <p class="serif-intro">
+          A way of thinking differently about what design can do — well beyond
+          fixing your process.
+        </p>
+        <p>
+          I'm a product design leader, strategist and coach. For the past thirteen
+          years I've shipped consumer and enterprise software end-to-end —
+          across agencies, accelerators, scaling startups and large product
+          companies — and built the practices and teams behind it.
+        </p>
+        <p>
+          Most of the work I'm proudest of lives outside the standard process
+          or framework. It sits in the seam between strategy and craft, where
+          the real work is finding the sharper question that makes the answer
+          clear. That's the work I want to keep doing, and the work I want to
+          help other designers learn how to do.
+        </p>
+        <p>
+          Today I split my time between a small number of fractional design
+          partnerships, structured 1:1 coaching with mid-to-senior designers,
+          and the occasional workshop or talk — with a growing focus on where
+          the practice goes next. I write here when I have something I'd be
+          willing to defend in person, and I teach as often as the practice
+          will allow.
+        </p>
+        <p>
+          I'm based in Toronto. I work remote-first, and I travel for the
+          right room.
+        </p>
+        <div class="btn-row">
+          <a class="btn-dark"  href="/coaching/">View Coaching →</a>
+          <a class="btn-light" href="/work-with-me/">View Services →</a>
+        </div>
+      </div>
+
+      <aside class="detail-card">
+        <div class="detail-card-label">Details</div>
+        <div class="detail-list">
+          <div><div class="detail-row-label">Location</div><div class="detail-row-value">Toronto, Ontario</div></div>
+          <div><div class="detail-row-label">Practice</div><div class="detail-row-value">Design Director, Practice Advisor, Career Coach</div></div>
+          <div><div class="detail-row-label">Education</div><div class="detail-row-value">MID · BAS</div></div>
+          <div><div class="detail-row-label">Years Active</div><div class="detail-row-value">13+</div></div>
+          <div><div class="detail-row-label">Available For</div><div class="detail-row-value">Fractional, Coaching, Talks</div></div>
+        </div>
+      </aside>
+    </section>
+
+
+    <!-- Selected experience — dated ledger, grouped by capability theme, with descriptions -->
+    <section class="page-section">
+      <h2 class="section-heading">Selected Experience</h2>
+
+      <div class="xp-theme">
+        <div class="xp-label">Practice &amp; Operations</div>
+        <div class="ledger">
+          <span class="ledger-date">2023 — 2025</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">Director of User Experience</div>
+            <div class="ledger-org">Hudson's Bay · Saks Global</div>
+            <p class="xp-desc">Rebuilt a siloed practice into an integrated product design &amp; innovation org.</p>
+          </div>
+          <span class="ledger-date">2025 — Present</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">Director of Design, Leadership &amp; Practice — Fractional</div>
+            <div class="ledger-org">Outwitly</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp-theme">
+        <div class="xp-label">Product &amp; Service Strategy</div>
+        <div class="ledger">
+          <span class="ledger-date">2019 — Now</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">Product &amp; Service Strategy, Design Operations</div>
+            <div class="ledger-org">Independent · Fortune 500 brands</div>
+            <p class="xp-desc">Advising on direction and operating models across the product &amp; service lifecycle.</p>
+          </div>
+          <span class="ledger-date">2014 — 2016</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">Sr. Interaction &amp; Service Designer, Team Lead</div>
+            <div class="ledger-org">Kinetic Commerce</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp-theme">
+        <div class="xp-label">Education &amp; Coaching</div>
+        <div class="ledger">
+          <span class="ledger-date">2017 — 2019</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">UX Curriculum Architect &amp; Lead Educator</div>
+            <div class="ledger-org">BrainStation · 300+ designers</div>
+            <p class="xp-desc">Built the UX curriculum and the experiential model behind it.</p>
+          </div>
+          <span class="ledger-date">2019 — Now</span>
+          <div class="ledger-entry">
+            <div class="ledger-role">Coach &amp; UX Practice Advisor</div>
+            <div class="ledger-org">Independent</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top: var(--space-32)">
+        <a class="btn-ul" href="/resume/">Full résumé &amp; history →</a>
+      </div>
+    </section>
+
+  </main>
+
+<footer class="layout-footer">
+  <span class="layout-footer-left">© 2026 alex m. chong</span>
+  <div class="layout-footer-right">
+    <a href="/about/">About</a><a href="/coaching/">Coaching</a><a href="/work-with-me/">Services</a><a href="/resume/">Resume</a>
+  </div>
+</footer>
+
+</body>
+</html>

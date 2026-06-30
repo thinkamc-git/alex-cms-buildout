@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Editor v2 — Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../site/_design-system/css/tokens.css">
+<link rel="stylesheet" href="../../site/_design-system/css/base.css">
+<link rel="stylesheet" href="../../site/_design-system/css/typography.css">
+<link rel="stylesheet" href="../../site/_design-system/css/shell.css">
+<link rel="stylesheet" href="../../site/_design-system/css/components.css">
+<link rel="stylesheet" href="../../site/cms/_assets/style-cms.css">
+<style>
+  /* ── Sandbox controls ── */
+  .sandbox-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #1a1a1a; color: #fff;
+    padding: 10px 20px; display: flex; gap: 16px; align-items: center;
+    font-family: var(--font-mono); font-size: 11px; z-index: 9999;
+  }
+  .sandbox-bar strong { color: #f5c842; }
+  .sandbox-bar button {
+    background: #333; border: 1px solid #555; color: #fff;
+    padding: 4px 10px; border-radius: 3px; font-size: 11px;
+    font-family: var(--font-mono); cursor: pointer;
+  }
+  .sandbox-bar button.active { background: #f5c842; color: #1a1a1a; border-color: #f5c842; }
+
+  /* ── Tab bar — tabs left, view pills right ── */
+  .pe2-tab-bar {
+    display: flex;
+    align-items: center;
+    background: var(--canvas-raised);
+    border-bottom: var(--rule-faint);
+    flex-shrink: 0;
+  }
+  .pe2-tab-bar .cms-tabs {
+    flex: 1;
+    border-bottom: none;
+    background: transparent;
+  }
+  /* View pill group sits right-aligned inside the tab bar */
+  .pe2-view-group {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-16);
+    border-left: var(--rule-faint);
+  }
+
+  /* ── Panes row — up to 3 columns ── */
+  .pe2-panes {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  [data-view] {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    border-right: var(--rule-faint);
+    overflow: hidden;
+  }
+  [data-view].is-active { display: flex; }
+  /* Last visible pane has no right border */
+  [data-view].is-active:last-child { border-right: none; }
+
+  /* ── Pane: notice banner ── */
+  .pe2-pane-notice {
+    font-family: var(--font-mono);
+    font-size: var(--text-micro);
+    color: var(--muted);
+    padding: var(--space-8) var(--space-16);
+    background: var(--canvas-raised);
+    border-bottom: var(--rule-faint);
+    flex-shrink: 0;
+  }
+
+  /* ── Pane: editor ── */
+  .pe2-editor-wrap {
+    padding: var(--space-16) var(--space-20);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    min-height: 0;
+  }
+  .pe2-editor-mock {
+    border: 1px solid var(--ink-18);
+    border-radius: 4px;
+    background: var(--surface);
+    flex: 1;
+    padding: var(--space-16);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.6;
+    overflow: auto;
+    min-height: 0;
+  }
+  .pe2-editor-mock pre { margin: 0; white-space: pre-wrap; color: var(--secondary); }
+  .pe2-editor-mock .cm-tag    { color: #e06c75; }
+  .pe2-editor-mock .cm-attr   { color: #d19a66; }
+  .pe2-editor-mock .cm-string { color: #98c379; }
+
+  /* ── Pane: preview content area ── */
+  .pe2-preview-body {
+    flex: 1;
+    background: var(--canvas-bg);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: auto;
+    padding: var(--space-24);
+  }
+  .pe2-page-mock {
+    background: #fff;
+    width: 100%;
+    max-width: 680px;
+    padding: 48px;
+    box-shadow: 0 2px 24px rgba(0,0,0,0.08);
+    border-radius: 2px;
+  }
+  .pe2-page-mock.is-live { opacity: 0.75; }
+  .pe2-page-mock h1 { font-family: 'Instrument Serif', serif; font-size: 32px; margin: 0 0 16px; }
+  .pe2-page-mock p  { font-family: 'Barlow', sans-serif; font-size: 15px; color: #555; line-height: 1.7; margin: 0; }
+  .pe2-page-mock hr { margin: 28px 0; border: none; border-top: 1px solid #e0ddd8; }
+
+  /* ── Tab panels ── */
+  [data-panel] { display: none; flex: 1; flex-direction: column; min-height: 0; }
+  [data-panel].is-active { display: flex; }
+
+  /* ── Layout: fill viewport ── */
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; padding-bottom: 36px; }
+  .layout { flex: 1; display: flex; overflow: hidden; }
+  .main   { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .view.active { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="#">AC</a>
+  <span class="topbar-breadcrumb">Pages → about.php</span>
+</div>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-section">
+      <span class="nav-label">Content</span>
+      <a class="nav-item" href="#">Articles</a>
+      <a class="nav-item" href="#">Journals</a>
+      <a class="nav-item" href="#">Sessions</a>
+      <a class="nav-item" href="#">Experiments</a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Site</span>
+      <a class="nav-item active" href="#">Pages</a>
+      <a class="nav-item" href="#">Categories</a>
+      <a class="nav-item" href="#">Series</a>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="view active">
+
+      <div class="view-header">
+        <div class="view-header-left">
+          <a href="#" class="btn-sec">← Pages</a>
+          <div>
+            <div class="view-title">about.php</div>
+            <div class="view-subtitle">Edit, preview, and publish this page.</div>
+          </div>
+        </div>
+        <div class="view-header-right">
+          <a href="#" class="btn-sec" target="_blank">Live ↗</a>
+        </div>
+      </div>
+
+      <!-- Tab bar: Draft / Settings tabs left; view pills right -->
+      <div class="pe2-tab-bar">
+        <div class="cms-tabs" role="tablist">
+          <a class="cms-tab is-active" href="#" onclick="switchTab('draft', this); return false;">Draft</a>
+          <a class="cms-tab"           href="#" onclick="switchTab('settings', this); return false;">Settings</a>
+        </div>
+        <div class="pe2-view-group" id="pe2-view-group">
+          <!-- filter-pill pattern: same as Layout/Format/Background pills in index sections -->
+          <div class="filter-group">
+            <button type="button" class="filter-pill active" id="toggle-edit"    onclick="toggleView('edit')"   >Edit</button>
+            <button type="button" class="filter-pill"        id="toggle-preview" onclick="toggleView('preview')">Preview</button>
+            <button type="button" class="filter-pill"        id="toggle-live"    onclick="toggleView('live')"   >Live version</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Draft tab -->
+      <div data-panel="draft" class="is-active">
+
+        <div class="pe2-panes">
+
+          <!-- Edit pane -->
+          <div data-view="edit" class="is-active">
+            <div class="pe2-editor-wrap">
+              <div class="pe2-editor-mock">
+<pre><span class="cm-tag">&lt;main</span> <span class="cm-attr">class</span>=<span class="cm-string">"page-body"</span><span class="cm-tag">&gt;</span>
+
+  <span class="cm-tag">&lt;section</span> <span class="cm-attr">class</span>=<span class="cm-string">"about-hero"</span><span class="cm-tag">&gt;</span>
+    <span class="cm-tag">&lt;h1&gt;</span>Alex M. Chong<span class="cm-tag">&lt;/h1&gt;</span>
+    <span class="cm-tag">&lt;p</span> <span class="cm-attr">class</span>=<span class="cm-string">"about-lead"</span><span class="cm-tag">&gt;</span>
+      Director of UX &amp; Product Design. I help teams
+      build software people actually want to use.
+    <span class="cm-tag">&lt;/p&gt;</span>
+  <span class="cm-tag">&lt;/section&gt;</span>
+
+  <span class="cm-tag">&lt;section</span> <span class="cm-attr">class</span>=<span class="cm-string">"about-body"</span><span class="cm-tag">&gt;</span>
+    <span class="cm-tag">&lt;p&gt;</span>Thirteen years working at the intersection of
+    design, product, and people...<span class="cm-tag">&lt;/p&gt;</span>
+  <span class="cm-tag">&lt;/section&gt;</span>
+
+<span class="cm-tag">&lt;/main&gt;</span></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview pane -->
+          <div data-view="preview">
+            <div class="pe2-pane-notice">Previewing saved draft — not yet published</div>
+            <div class="pe2-preview-body">
+              <div class="pe2-page-mock">
+                <h1>Alex M. Chong</h1>
+                <p>Director of UX &amp; Product Design. I help teams build software people actually want to use.</p>
+                <hr>
+                <p>Thirteen years working at the intersection of design, product, and people...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live version pane -->
+          <div data-view="live">
+            <div class="pe2-pane-notice">Live version — what visitors see now at <strong>/about/</strong></div>
+            <div class="pe2-preview-body">
+              <div class="pe2-page-mock is-live">
+                <h1>Alex M. Chong</h1>
+                <p>Director of UX &amp; Product Design. I help teams build software people actually want to use.</p>
+                <hr>
+                <p>Last published version — may differ from your saved draft.</p>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /.pe2-panes -->
+
+        <!-- Action bar: always rendered. Save starts btn-sec, flips to btn-pri on dirty (dirty-flip.js pattern). -->
+        <div class="form-actions" style="padding: var(--space-12) var(--space-20); border-top: var(--rule-faint); margin-top: 0; background: var(--canvas-raised);">
+          <button type="button" class="btn-sec" id="sandbox-save-btn" onclick="simulateSave()">Save draft</button>
+          <button type="button" class="btn-pri btn-actions-end" onclick="simulatePublish()">Publish →</button>
+        </div>
+
+      </div><!-- /data-panel="draft" -->
+
+      <!-- Settings tab -->
+      <div data-panel="settings">
+        <div style="padding:var(--space-24);">
+          <p style="color:var(--muted);font-family:var(--font);font-size:var(--text-meta);">Settings panel — meta title, description, etc.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="sandbox-bar">
+  <strong>SANDBOX</strong> · Page Editor v2 ·
+  <button onclick="simulateDirty()">Simulate dirty</button>
+  <button onclick="simulateSave()">Simulate save</button>
+  <span style="margin-left:8px;opacity:0.5">Toggle Edit / Preview / Live version pills to show columns side by side</span>
+</div>
+
+<script>
+  function switchTab(name, btn) {
+    document.querySelectorAll('[data-panel]').forEach(p => p.classList.remove('is-active'));
+    document.querySelectorAll('.cms-tab').forEach(t => t.classList.remove('is-active'));
+    const panel = document.querySelector('[data-panel="' + name + '"]');
+    if (panel) panel.classList.add('is-active');
+    btn.classList.add('is-active');
+    document.getElementById('pe2-view-group').style.display = (name === 'draft') ? '' : 'none';
+  }
+
+  function toggleView(name) {
+    const pane = document.querySelector('[data-view="' + name + '"]');
+    const btn  = document.getElementById('toggle-' + name);
+    const activeCount = document.querySelectorAll('[data-view].is-active').length;
+    if (pane.classList.contains('is-active') && activeCount === 1) return;
+    pane.classList.toggle('is-active');
+    btn.classList.toggle('active');
+  }
+
+  // Sandbox dirty simulation — mirrors dirty-flip.js behavior
+  function simulateDirty() {
+    var btn = document.getElementById('sandbox-save-btn');
+    btn.classList.remove('btn-sec');
+    btn.classList.add('btn-pri');
+  }
+  function simulateSave() {
+    var btn = document.getElementById('sandbox-save-btn');
+    btn.classList.remove('btn-pri');
+    btn.classList.add('btn-sec');
+  }
+
+  function simulatePublish() {
+    if (confirm('Publish /about/ to file?\n\nThis overwrites the live file. Deploy to push to production.')) {
+      alert('Published.');
+    }
+  }
+</script>
+</body>
+</html>

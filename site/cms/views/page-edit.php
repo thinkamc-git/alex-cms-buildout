@@ -630,7 +630,7 @@ require __DIR__ . '/../partials/topbar.php';
               <div class="pe-pane-frame">
                 <iframe id="pe-live-iframe"
                         title="Live · <?= $e($slug) ?>"
-                        src="<?= $e($live_url) ?>"></iframe>
+                        data-live-src="<?= $e($live_url) ?>"></iframe>
               </div>
             </div>
 
@@ -980,6 +980,18 @@ require __DIR__ . '/../partials/topbar.php';
     if (draftCM) setTimeout(function () { draftCM.refresh(); }, 0);
   }
 
+  // Live pane loads lazily on activation, fresh + cache-busted. An eager src
+  // set at page load renders inside a display:none pane and comes up blank or
+  // stale when revealed; loading on toggle mirrors the preview pane and always
+  // reflects the currently-published page.
+  function peLoadLive() {
+    var iframe = document.getElementById('pe-live-iframe');
+    if (!iframe) return;
+    var base = iframe.getAttribute('data-live-src') || '';
+    if (!base) return;
+    iframe.src = base + (base.indexOf('?') !== -1 ? '&' : '?') + '_t=' + Date.now();
+  }
+
   window.peToggleView = function (name) {
     var pane = document.querySelector('.pe-pane[data-view="' + name + '"]');
     var btn  = document.querySelector('[data-view-toggle="' + name + '"]');
@@ -997,6 +1009,7 @@ require __DIR__ . '/../partials/topbar.php';
 
     if (activating) {
       if (name === 'preview') peLoadPreview();
+      if (name === 'live') peLoadLive();
       if (name === 'style' && styleCM) setTimeout(function () { styleCM.refresh(); }, 0);
     }
   };

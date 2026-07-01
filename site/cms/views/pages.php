@@ -33,7 +33,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     $pslug  = preg_replace('/[^a-z0-9-]/', '', (string)($_POST['slug'] ?? ''));
     if ($pslug !== '' && $action === 'restore_page') {
         restore_page($pslug);
-        header('Location: /cms/pages?filter=archives&flash=' . rawurlencode('Page restored — active again.'));
+        // Back to the All list, where the now-active page reappears.
+        header('Location: /cms/pages?flash=' . rawurlencode('Page restored — active again.'));
         exit;
     }
     if ($pslug !== '' && $action === 'delete_page') {

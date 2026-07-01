@@ -333,6 +333,14 @@ RSYNC_CMD=(rsync -av $DRY)
 
 if [ "$USE_DELETE" = "1" ]; then
   RSYNC_CMD+=(--delete "--backup-dir=$BACKUP_DIR")
+  # Protect CMS-created page surfaces from --delete. Pages authored through
+  # the CMS (New page → Publish) are written at runtime on the server and
+  # never exist in the source tree, so --delete would treat them as orphans
+  # and wipe them on every prod deploy. These protect rules keep --delete
+  # cleaning up genuine orphans (css/js/templates) while making root-level
+  # page assemblers and their bodies untouchable. Source pages still transfer
+  # and update normally — protect only blocks deletion, not transfer.
+  RSYNC_CMD+=(--filter='protect /*.php' --filter='protect /_bodies/*.html')
 fi
 
 RSYNC_CMD+=("${EXCLUDES[@]}" "$STAGE/" "alexmchong-ca:$REMOTE_DIR")

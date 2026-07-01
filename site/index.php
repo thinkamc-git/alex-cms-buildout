@@ -164,6 +164,7 @@ $router->post('/cms/post/preview-form', $cms('views/post-preview-form.php'));
 // published mock is preferred over the file at runtime — see
 // _pages/_layout/_page-shell.php.
 $router->get ('/cms/pages',           $cms('views/pages.php'));
+$router->post('/cms/pages',           $cms('views/pages.php'));   // restore / hard-delete from Archives
 $router->get ('/cms/pages/new',       $cms('views/page-new.php'));
 $router->post('/cms/pages/new',       $cms('views/page-new.php'));
 $router->get ('/cms/pages/edit',      $cms('views/page-edit.php'));
@@ -188,7 +189,12 @@ $router->get('/archive/:slug', static function (array $p): void {
     $body             = $slug;
     $noindex          = true;
     $is_archived_view = true;
-    require __DIR__ . '/_pages/_layout/_page-shell.php';
+    // bin/deploy.sh flattens _pages/_layout/ → _layout/, so the source path
+    // only exists when running from the repo. Resolve both layouts.
+    $_shell = is_file(__DIR__ . '/_pages/_layout/_page-shell.php')
+        ? __DIR__ . '/_pages/_layout/_page-shell.php'
+        : __DIR__ . '/_layout/_page-shell.php';
+    require $_shell;
 });
 
 // Phase 20: Navigation editor. Replaces the hardcoded <a> lists in the

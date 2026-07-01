@@ -595,6 +595,42 @@ function restore_page(string $slug): bool
     return $stmt->execute([$slug]);
 }
 
+/**
+ * Every archived page (registry status = 'archived'), newest first.
+ * These are what the Pages "Archives" tab surfaces — distinct from the
+ * legacy archive *mocks* (name-prefixed snapshots).
+ */
+function list_archived_pages(): array
+{
+    return db()->query(
+        "SELECT slug, archived_at FROM page_registry
+          WHERE status = 'archived'
+          ORDER BY archived_at DESC, slug ASC"
+    )->fetchAll();
+}
+
+/**
+ * Permanently delete a standard marketing page — assembler file, body file,
+ * every mock version, metadata, and the registry row. Guarded to 'standard'
+ * pages only: Home / Error / Header / Footer can never be hard-deleted.
+ * Returns true on success, false if the slug is not a deletable page type.
+ */
+function delete_page(string $slug): bool
+{
+    if (page_type($slug) !== 'standard') {
+        return false;
+    }
+    db()->prepare('DELETE FROM page_mock_versions WHERE slug = ?')->execute([$slug]);
+    db()->prepare('DELETE FROM page_metadata      WHERE slug = ?')->execute([$slug]);
+    db()->prepare('DELETE FROM page_registry      WHERE slug = ?')->execute([$slug]);
+
+    $assembler = _pages_root() . '/' . $slug . '.php';
+    $body      = _pages_root() . '/_bodies/' . $slug . '.html';
+    if (is_file($assembler)) { @unlink($assembler); }
+    if (is_file($body))      { @unlink($body); }
+    return true;
+}
+
 // ── Pending drafts (Claude Code → CMS import) ─────────────────────────
 //
 // Claude Code writes changes to _bodies/_pending/<slug>-<YYYYMMDD>.html

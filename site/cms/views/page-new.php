@@ -60,6 +60,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             } else {
                 // Register as active (upsert — handles edge case of a restored slug).
                 restore_page($slug);
+                // Seed SEO metadata from the page title so the editor's Meta
+                // Title field is pre-filled (still editable). That's the point
+                // of asking for a title at creation.
+                upsert_page_metadata($slug, ['meta_title' => $title]);
                 header('Location: /cms/pages/edit?slug=' . rawurlencode($slug) . '&tab=body&flash=' . rawurlencode('Page created.'));
                 exit;
             }

@@ -23,12 +23,35 @@ $csrf_token = Csrf::token();
 
 $flash = isset($_GET['flash']) ? (string)$_GET['flash'] : '';
 
+// ── POST: restore / hard-delete a page from the Archives tab ──────────
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
+        header('Location: /cms/pages?filter=archives&flash=' . rawurlencode('Session expired. Try again.'));
+        exit;
+    }
+    $action = (string)($_POST['action'] ?? '');
+    $pslug  = preg_replace('/[^a-z0-9-]/', '', (string)($_POST['slug'] ?? ''));
+    if ($pslug !== '' && $action === 'restore_page') {
+        restore_page($pslug);
+        header('Location: /cms/pages?filter=archives&flash=' . rawurlencode('Page restored — active again.'));
+        exit;
+    }
+    if ($pslug !== '' && $action === 'delete_page') {
+        $ok  = delete_page($pslug);
+        $msg = $ok ? 'Page deleted permanently.' : 'That page type can’t be deleted.';
+        header('Location: /cms/pages?filter=archives&flash=' . rawurlencode($msg));
+        exit;
+    }
+    header('Location: /cms/pages');
+    exit;
+}
+
 // Filter mode: 'all' (default) shows the 3 file sections;
 // 'archives' shows a flat list of mocks whose name starts with "Archive ".
 $filter = ($_GET['filter'] ?? '') === 'archives' ? 'archives' : 'all';
 
-$files    = list_pages_files();
-$archives = list_archive_mocks();
+$files          = list_pages_files();
+$archived_pages = list_archived_pages();
 
 // Sidecar: draft saved-at per slug.
 $draft_saved_at = [];
@@ -43,7 +66,8 @@ foreach ($files as $f) {
     }
 }
 
-$pages    = array_values(array_filter($files, fn($f) => $f['kind'] === 'page'));
+// Active marketing pages only — archived ones live under the Archives tab.
+$pages    = array_values(array_filter($files, fn($f) => $f['kind'] === 'page' && !in_array($f['slug'], $archived_slugs, true)));
 // Pin Home (landing) to the top of the marketing pages.
 usort($pages, fn($a, $b) => (page_type($b['slug']) === 'home' ? 1 : 0) <=> (page_type($a['slug']) === 'home' ? 1 : 0));
 $errors   = array_values(array_filter($files, fn($f) => $f['kind'] === 'error'));
@@ -164,24 +188,39 @@ require __DIR__ . '/../partials/topbar.php';
         <?php if ($filter === 'archives'): ?>
           <?php
           $arch_columns = [
-              ['label' => 'Archive name', 'width' => '40%'],
-              ['label' => 'Page',         'width' => '20%'],
-              ['label' => 'Captured',     'width' => '20%'],
-              ['label' => '',             'width' => '20%'],
+              ['label' => 'Page',     'width' => '35%'],
+              ['label' => 'Archived', 'width' => '20%'],
+              ['label' => '',         'width' => '45%'],
           ];
 
           $arch_rows = [];
-          foreach ($archives as $a) {
-              $previewUrl = '/cms/pages/archive-preview?id=' . (int)$a['id'];
-              $captured   = !empty($a['created_at']) ? strtotime((string)$a['created_at']) : 0;
+          foreach ($archived_pages as $a) {
+              $aslug    = (string)$a['slug'];
+              $viewUrl  = '/archive/' . rawurlencode($aslug) . '/';
+              $archived = !empty($a['archived_at']) ? strtotime((string)$a['archived_at']) : 0;
+
+              $restoreForm = '<form method="post" action="/cms/pages" style="display:inline">'
+                  . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                  . '<input type="hidden" name="action" value="restore_page">'
+                  . '<input type="hidden" name="slug" value="' . $e($aslug) . '">'
+                  . '<button type="submit" class="btn-sec btn-tiny">Restore</button>'
+                  . '</form>';
+              $deleteForm = '<form method="post" action="/cms/pages" style="display:inline" '
+                  . 'onsubmit="return confirm(\'Permanently delete /' . $e($aslug) . '/ ?\\n\\nThis removes the page files, every draft, and its metadata. It cannot be undone.\');">'
+                  . '<input type="hidden" name="csrf_token" value="' . $e($csrf_token) . '">'
+                  . '<input type="hidden" name="action" value="delete_page">'
+                  . '<input type="hidden" name="slug" value="' . $e($aslug) . '">'
+                  . '<button type="submit" class="btn-danger btn-tiny">Delete permanently</button>'
+                  . '</form>';
+
               $arch_rows[] = [
-                  'href'  => $previewUrl,
+                  'href'  => $viewUrl,
                   'cells' => [
-                      ['html' => '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="row-title">' . $e((string)$a['name']) . '</a>'],
-                      ['html' => $e((string)$a['slug'])],
-                      ['html' => $rel_time((int)$captured)],
+                      ['html' => '<a href="' . $e($viewUrl) . '" target="_blank" rel="noopener" class="row-title">/' . $e($aslug) . '/</a>'],
+                      ['html' => $archived ? $rel_time((int)$archived) : '<span class="muted">—</span>'],
                       ['html' => '<div class="row-actions row-actions-always">'
-                          . '<a href="' . $e($previewUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny">Preview ↗</a>'
+                          . '<a href="' . $e($viewUrl) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny">View ↗</a>'
+                          . $restoreForm . $deleteForm
                           . '</div>', 'class' => 'cell-actions'],
                   ],
               ];
@@ -191,16 +230,16 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block">
             <div class="content-block-header">
               <div>
-                <span class="content-block-label">Archives</span>
-                <span class="content-block-sublabel">Past page snapshots · preview-only, no public URL</span>
+                <span class="content-block-label">Archived pages</span>
+                <span class="content-block-sublabel">Retired pages · served at /archive/&lt;slug&gt;/ with a notice · restore or delete permanently</span>
               </div>
-              <span class="content-block-count"><?= count($archives) ?> <?= count($archives) === 1 ? 'archive' : 'archives' ?></span>
+              <span class="content-block-count"><?= count($archived_pages) ?> <?= count($archived_pages) === 1 ? 'page' : 'pages' ?></span>
             </div>
 
             <?php
             $columns = $arch_columns;
             $rows = $arch_rows;
-            $empty_text = 'No archives yet — to archive a page, create a mock whose name starts with "Archive ".';
+            $empty_text = 'No archived pages — archive a page from its editor to retire it here.';
             require __DIR__ . '/../partials/table.php';
             ?>
           </div>

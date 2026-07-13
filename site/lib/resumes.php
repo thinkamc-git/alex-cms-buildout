@@ -47,14 +47,17 @@ function publish_resume(): bool
     $pdo = db();
 
     // Snapshot outgoing published version (if any) before overwriting.
+    // published_html already has its CSS folded into the document head
+    // (see _resume_inject_style() below), so there's no separate outgoing
+    // style_css to save alongside it.
     if ((bool)$row['is_published'] && trim((string)$row['published_html']) !== '') {
         $pdo->prepare(
             'INSERT INTO resume_snapshots (resume_id, name, html_body, style_css, created_at)
              VALUES (1, ?, ?, ?, NOW())'
         )->execute([
             'Published ' . date('Y-m-d'),
-            (string)$row['draft_html'],   // separate body (pre-fold)
-            (string)($row['draft_css'] ?? ''),
+            (string)$row['published_html'],
+            '',
         ]);
     }
 

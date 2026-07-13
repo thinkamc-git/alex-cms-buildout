@@ -186,7 +186,7 @@ captured, not just file diffs).
 **Intent:** Pick up the outstanding item from the previous Objective — get
 the Kicker code and the thinking-system content, both proven only on
 staging, live on production. Complicated mid-flight by discovering a second
-live session (see `0712_ROX_thinking-system-eyebrow-kicker.md`) working
+live session (see `260712_ROX_thinking-system-eyebrow-kicker.md`) working
 the identical checkout concurrently; Alex chose to have that session close
 out and have this one finish the job.
 

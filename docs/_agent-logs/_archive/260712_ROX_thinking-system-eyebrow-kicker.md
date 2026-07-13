@@ -21,7 +21,7 @@ LAST TOUCHED: 2026-07-12
   → All SUCCEEDED, all direct staging server writes (same `main.html`, edited/re-uploaded repeatedly), no commits.
 
 ### Outstanding (as of 2026-07-12)
-- **RESOLVED** — see `0712_TIM_categories-plan-and-consolidation.md`. `main.html` copied to production, `content.id=17` inserted, live at `alexmchong.ca/field-work/thinking-system` (note: canonical public path changed from `/experiments/` to `/field-work/` by the content-type rename that landed in the same reconciliation pass — old links still 301).
+- **RESOLVED** — see `260712_TIM_categories-plan-and-consolidation.md`. `main.html` copied to production, `content.id=17` inserted, live at `alexmchong.ca/field-work/thinking-system` (note: canonical public path changed from `/experiments/` to `/field-work/` by the content-type rename that landed in the same reconciliation pass — old links still 301).
 
 ---
 
@@ -49,4 +49,4 @@ LAST TOUCHED: 2026-07-12
 - All of the above deployed to **staging only** via `bin/deploy.sh staging` (run several times as fixes landed) — confirmed correct file state on the server after each deploy.
 
 ### Outstanding (as of 2026-07-12)
-- **RESOLVED** — see `0712_TIM_categories-plan-and-consolidation.md`. Committed (`69105bf`), pushed, deployed to production via `bin/deploy.sh prod`, verified live.
+- **RESOLVED** — see `260712_TIM_categories-plan-and-consolidation.md`. Committed (`69105bf`), pushed, deployed to production via `bin/deploy.sh prod`, verified live.

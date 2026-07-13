@@ -28,7 +28,7 @@ record of who did what, where. This doc is the fix.
 
 **Chat = agent = log, 1:1:1.** Every agent session doing non-trivial work
 (more than a quick fix) keeps exactly one log at
-`docs/_agent-logs/MMDD_XXX_short-task-slug.md` for its whole lifetime, where
+`docs/_agent-logs/YYMMDD_XXX_short-task-slug.md` for its whole lifetime, where
 `XXX` is the session's 3-letter name (see below). **Create it as soon as the
 work becomes non-trivial — not at the end.** The point is mid-flight
 visibility (Alex asking "what's the agent on X doing right now"), which only
@@ -124,11 +124,25 @@ useful even when abandoned mid-work. The periodic staleness check (below) is
 what surfaces it later.
 
 **On close-out** (Alex says "close this out," or a staleness check flags it
-as done): finalize each open Objective's Outstanding section — write in
-anything genuinely unresolved, or state "none." Set `STATUS: closed`, move
-the file into `docs/_agent-logs/_archive/`. Same shape as the existing
-sandbox workflow (`docs/design-mockups/` → `_completed/`) — reuse the
-pattern, don't invent a new one.
+as done): finalize each open Objective's Outstanding section. **Every item
+gets an explicit disposition — no bare, untagged bullets once a log is
+actually closed:**
+
+```
+### Outstanding (as of <date>)
+- <item> — HANDED OFF (open for another session to pick up — normal,
+  expected, not a sign anything went wrong)
+- <item> — DROPPED (Alex decided not to pursue)
+- <item> — RESOLVED, see 260712_TIM_categories-plan-and-consolidation.md
+- none — fully resolved
+```
+
+An untagged item in a *closed* log is itself a sign something's wrong —
+either it should have been resolved before closing, or it should have been
+tagged HANDED OFF. Set `STATUS: closed`, move the file into
+`docs/_agent-logs/_archive/`. Same shape as the existing sandbox workflow
+(`docs/design-mockups/` → `_completed/`) — reuse the pattern, don't invent a
+new one.
 
 **On request, staleness review:** scan active (non-archived) logs for old
 `LAST TOUCHED` dates (rule of thumb: 4-5+ days) where the content reads as
@@ -137,6 +151,16 @@ the log, always — logs are a helpful signal, never ground truth. The only
 ground truth in this project is git commits and live server state (see
 §0 — this is exactly what a stale memory got wrong on 2026-07-12).
 
+**Don't trust a single archived log's Outstanding section in isolation —
+cross-check newer logs first.** A HANDED-OFF or untagged item might already
+be done: the RESOLVED annotation (below) depends on whoever finishes the
+work remembering to write it, which is a manual step that can be missed
+(nearly was, for ROX's log, on 2026-07-12). Before reporting something as
+genuinely still outstanding — to Alex, or in a new log's Intent section —
+search *other* logs (active and archived, not just the one being read) for
+any mention of that same task. Treat "no RESOLVED tag found" as "probably
+still open," not "definitely still open."
+
 **On consolidation** (Alex merging several open agents into one): the new
 agent reads the relevant logs' Objectives + Outstanding sections to
 reconstruct pending work. This gets most of the way there but not all of
@@ -144,18 +168,26 @@ it — a log can't capture something an agent was about to raise but hadn't
 yet. Treat it as "read the logs, then a quick human gut-check," not as a
 complete transfer.
 
-**When a closed session's Outstanding item gets resolved by a *different*
-session** (this happened 2026-07-12: an agent was closed out with real
-outstanding work, which Alex then had a different session pick up and
-finish — the closed/archived log's Outstanding section was left reading
-"unresolved" even though it wasn't anymore). Archived logs are otherwise
-left alone as a historical record, but this is a narrow, explicit exception:
-add a one-line annotation directly next to the original entry —
-`**RESOLVED** — see 0712_TIM_categories-plan-and-consolidation.md` — rather
-than deleting or rewriting the original text. This is safe specifically
-*because* the session is closed: there's no other live session concurrently
-editing that file, so the single-writer concurrency rule isn't actually
-being violated — a closed log has no writer left to collide with.
+**Amending a closed session's log — two states, two triggers.** Archived
+logs are otherwise left alone as a historical record, but this is a narrow,
+explicit exception with two forms:
+
+- **PICKED UP** — Alex explicitly says an active session is taking on a
+  closed session's outstanding work (e.g. "TIM, we're taking on ROX's
+  tasks"). That statement is what authorizes TIM to write into ROX's
+  archived file — not just "it's closed so it's fair game." Annotate the
+  item: `**PICKED UP** — being handled by 260712_TIM_..., not done yet`.
+- **RESOLVED** — once that work is actually finished (this happened
+  2026-07-12: a closed session had real outstanding work, a different
+  session picked it up and finished it, but the original log's Outstanding
+  section still read as unresolved). Annotate:
+  `**RESOLVED** — see 260712_TIM_categories-plan-and-consolidation.md`.
+
+Both are one-line additions directly next to the original entry, never
+deleting or rewriting the original text. Safe specifically *because* the
+session being amended is closed — there's no other live session
+concurrently editing that file, so the single-writer concurrency rule isn't
+actually being violated; a closed log has no writer left to collide with.
 
 **Log any direct server write.** A one-off diagnostic script run over SSH and
 deleted immediately after doesn't need a log entry (see §2 for the cleanup

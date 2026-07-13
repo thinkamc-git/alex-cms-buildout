@@ -203,7 +203,7 @@ $allCats = list_categories();
 // Each entry: { slug, label, colour }. Consumed by index-edit.js for
 // the dynamic per-type rebuild of category pill rails.
 $catsByType = [];
-foreach (['article', 'journal', 'live-session', 'experiment'] as $t) {
+foreach (['article', 'journal', 'experiment', 'live-session'] as $t) {
     $catsByType[$t] = [];
 }
 foreach ($allCats as $c) {
@@ -225,7 +225,7 @@ foreach (db()->query('SELECT slug, title FROM indexes ORDER BY slug') as $r) {
     $u = '/' . $r['slug'] . '/';
     $seeTargetOpts['index'][] = ['url' => $u, 'label' => ((string)($r['title'] ?: $r['slug'])) . ' (' . $u . ')'];
 }
-foreach (db()->query('SELECT label, value_slug FROM categories ORDER BY label') as $r) {
+foreach (db()->query('SELECT label, value_slug FROM categories ORDER BY sort_order ASC, label ASC') as $r) {
     $seeTargetOpts['category'][] = ['url' => '/writing/?category=' . rawurlencode((string)$r['value_slug']), 'label' => (string)$r['label']];
 }
 foreach (db()->query('SELECT name, slug FROM series ORDER BY name') as $r) {
@@ -291,8 +291,8 @@ $e = static fn(string $s): string => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 $typeLabels = [
     'article'      => 'Articles',
     'journal'      => 'Journals',
-    'live-session' => 'Live Sessions',
     'experiment'   => 'Experiments',
+    'live-session' => 'Live Sessions',
 ];
 
 $pickLabel = static function (array $row) use ($e): string {
@@ -526,6 +526,13 @@ require __DIR__ . '/../partials/topbar.php';
         $bl_filter_on = $filterMode !== 'none';
         $bl_filter_by = $bl_filter_on ? $filterMode : 'categories';
         ?>
+
+        <div class="content-block-header">
+          <div>
+            <span class="content-block-label">Feed</span>
+            <span class="content-block-sublabel">Filters determine which content appears in the listing</span>
+          </div>
+        </div>
 
         <div class="sec-card"><div class="sec-card-body">
 

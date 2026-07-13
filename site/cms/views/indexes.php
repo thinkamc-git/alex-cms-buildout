@@ -28,7 +28,10 @@ $csrf_token = Csrf::token();
 $indexes = list_indexes();
 
 // Split: built-in type indexes (seeded slugs) vs. author-created.
-$builtinSlugs = ['writing', 'journal', 'live-sessions', 'experiments'];
+$builtinSlugs = ['essays', 'field-notes', 'live-sessions', 'field-work'];
+
+// Icon + type label shown alongside each post-type index title.
+$builtinMeta = ['essays', 'field-notes', 'live-sessions', 'field-work'];
 $builtIn   = [];
 $custom    = [];
 foreach ($indexes as $i) {
@@ -112,7 +115,7 @@ require __DIR__ . '/../partials/topbar.php';
         ];
         $columns = $indexColumns;
 
-        $buildRow = static function (array $i) use ($e, $csrf_token, $layoutPill): array {
+        $buildRow = static function (array $i, ?array $meta = null) use ($e, $csrf_token, $layoutPill): array {
             $id        = (int)$i['id'];
             $slug      = (string)$i['slug'];
             $titleStr  = (string)($i['title'] ?? '');
@@ -129,9 +132,8 @@ require __DIR__ . '/../partials/topbar.php';
             $rows     = (string)($i['feed_rows_shown'] ?? 'all');
             $feedSummary = $typesStr . ' · ' . $sort . ' · ' . ($rows === 'all' ? 'all rows' : $rows . ' row' . ($rows === '1' ? '' : 's'));
 
-            $titleHtml = '<a href="/cms/indexes/edit?id=' . $id . '" class="row-title">'
-                       . $e($titleStr !== '' ? $titleStr : '(untitled)')
-                       . '</a>'
+            $displayTitle = $titleStr !== '' ? $titleStr : '(untitled)';
+            $titleHtml = '<a href="/cms/indexes/edit?id=' . $id . '" class="row-title">' . $e($displayTitle) . '</a>'
                        . '<div class="row-slug">/' . $e($slug) . '/</div>';
 
             // Phase 20.3: same row-action pattern as the post-library tables —
@@ -172,7 +174,7 @@ require __DIR__ . '/../partials/topbar.php';
             <span class="content-block-count"><?= count($builtIn) ?> indexes</span>
           </div>
           <?php
-          $rows = array_map($buildRow, $builtIn);
+          $rows = array_map(static fn($i) => $buildRow($i, $builtinMeta[$i['slug']] ?? null), $builtIn);
           $empty_text = 'Seed missing. Run migration 0007 to restore the four built-in indexes.';
           require __DIR__ . '/../partials/table.php';
           ?>
@@ -201,17 +203,18 @@ require __DIR__ . '/../partials/topbar.php';
               $sSlug = (string)$sr['slug'];
               $sName = (string)$sr['name'];
               $count = (int)($sr['parts_count'] ?? 0);
+              $editHref = '/cms/series/edit?id=' . $sid . '&from=indexes';
               $sRows[] = [
-                  'href' => '/cms/series',
+                  'href' => $editHref,
                   'cells' => [
-                      ['html' => '<a class="row-title" href="/cms/series">' . $e($sName) . '</a><div class="row-slug">/series/' . $e($sSlug) . '/</div>'],
+                      ['html' => '<a class="row-title" href="' . $editHref . '">' . $e($sName) . '</a><div class="row-slug">/series/' . $e($sSlug) . '/</div>'],
                       ['html' => $layoutPill('editorial')],
                       ['html' => '<span class="muted">' . $count . ' part' . ($count === 1 ? '' : 's') . '</span>'],
                       ['html' => ''],
                       ['html' => '<div class="row-actions">'
                           . '<a href="/series/' . $e($sSlug) . '/" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live series index">Live ↗</a>'
                           . '<span class="row-actions-hover">'
-                          .   '<a href="/cms/series" class="btn-sec btn-tiny">Manage</a>'
+                          .   '<a href="' . $editHref . '" class="btn-sec btn-tiny">Manage</a>'
                           . '</span>'
                           . '</div>', 'class' => 'cell-actions'],
                   ],

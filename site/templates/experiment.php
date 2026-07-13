@@ -20,7 +20,7 @@ $catLabel  = is_array($cat) ? (string)($cat['label']  ?? '') : '';
 ?>
 <?php if (empty($preview_no_chrome)): ?>
 <nav class="article-breadcrumb" aria-label="Breadcrumb">
-  <a class="article-breadcrumb-root" href="/experiments">Experiments</a>
+  <a class="article-breadcrumb-root" href="/field-work">Field Work</a>
   <?php if ($catLabel !== ''): ?>
     <span class="article-breadcrumb-sep" aria-hidden="true">→</span>
     <span class="article-breadcrumb-current"><?= htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8') ?></span>

@@ -121,8 +121,8 @@ function preview_ctx(string $tpl_slug): ?array
             $base['summary']        = '';
             $base['read_time']      = null;
             $category = [
-                'value_slug' => 'introspection',
-                'label'      => 'Introspection',
+                'value_slug' => 'observation',
+                'label'      => 'Observation',
                 'colour'     => 'purple',
             ];
             break;
@@ -151,8 +151,8 @@ function preview_ctx(string $tpl_slug): ?array
             $base['title']     = 'Design-Native Spec Workflow';
             $base['summary']   = 'A working prototype exploring how spec authoring can be co-located with design output.';
             $category = [
-                'value_slug' => 'prototype',
-                'label'      => 'Prototype',
+                'value_slug' => 'experiment',
+                'label'      => 'Experiment',
                 'colour'     => 'violet',
             ];
             break;
@@ -166,8 +166,8 @@ function preview_ctx(string $tpl_slug): ?array
             $base['body']        = '';
             $base['source_file'] = 'main.html';
             $category = [
-                'value_slug' => 'prototype',
-                'label'      => 'Prototype',
+                'value_slug' => 'experiment',
+                'label'      => 'Experiment',
                 'colour'     => 'violet',
             ];
             break;
@@ -181,8 +181,8 @@ function preview_ctx(string $tpl_slug): ?array
             $base['body_mode']   = 'html-swap';
             $base['source_file'] = 'main.html';
             $category = [
-                'value_slug' => 'prototype',
-                'label'      => 'Prototype',
+                'value_slug' => 'experiment',
+                'label'      => 'Experiment',
                 'colour'     => 'violet',
             ];
             break;

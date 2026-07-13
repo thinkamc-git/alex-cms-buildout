@@ -386,7 +386,7 @@
     var ptype = opt.getAttribute('data-type') || '';
     var title = opt.getAttribute('data-title') || '';
     var date  = opt.getAttribute('data-date')  || '';
-    var typeLabels = { article:'Articles', journal:'Journals', 'live-session':'Live Sessions', experiment:'Experiments' };
+    var typeLabels = { article:'Articles', journal:'Journals', experiment:'Experiments', 'live-session':'Live Sessions' };
     var tr = document.createElement('tr');
     tr.setAttribute('draggable', 'true');
     tr.setAttribute('data-post-id', id);
@@ -587,7 +587,7 @@
    * Categories are grouped per type with visible separation, sourced from
    * window.CMS_CATEGORIES_BY_TYPE (emitted by the view).
    */
-  var CAT_TYPE_ORDER = ['article', 'journal', 'live-session', 'experiment'];
+  var CAT_TYPE_ORDER = ['article', 'journal', 'experiment', 'live-session'];
 
   function renderCatRail(rail) {
     if (!rail) return;

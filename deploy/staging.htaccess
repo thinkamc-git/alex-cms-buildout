@@ -29,7 +29,7 @@ RewriteRule ^admin/(.*)$    /cms/$1  [R=301,L]
 RewriteRule ^about\.html$ /about/ [R=302,L]
 RewriteRule ^coaching\.html$ /coaching/ [R=302,L]
 RewriteRule ^work-with-me\.html$ /work-with-me/ [R=302,L]
-RewriteRule ^resume\.html$ /resume/ [R=302,L]
+RewriteRule ^cv\.html$ /cv/ [R=302,L]
 RewriteRule ^newsletter\.html$ /newsletter/ [R=302,L]
 RewriteRule ^newsletter-confirmed\.html$ /newsletter-confirmed/ [R=302,L]
 
@@ -40,7 +40,7 @@ RewriteRule ^$ /landing.php [END]
 RewriteRule ^about/?$ /about.php [END]
 RewriteRule ^coaching/?$ /coaching.php [END]
 RewriteRule ^work-with-me/?$ /work-with-me.php [END]
-RewriteRule ^resume/?$ /resume.php [END]
+RewriteRule ^cv/?$ /cv.php [END]
 RewriteRule ^newsletter/?$ /newsletter.php [END]
 RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.php [END]
 
@@ -51,6 +51,11 @@ RewriteRule ^newsletter-confirmed/?$ /newsletter-confirmed.php [END]
 # take priority for the hardcoded pages.
 RewriteCond %{DOCUMENT_ROOT}/$1.php -f
 RewriteRule ^([a-z][a-z0-9-]*)/?$ /$1.php [END]
+
+# === CMS root (/cms and /cms/) — route through front controller =============
+# cms/ is a real directory on disk so the !-d condition below would skip it.
+# This explicit rule catches the root path before that check fires.
+RewriteRule ^cms/?$ index.php [L]
 
 # === Front controller fallback (Phase 3) ====================================
 # Mirrors site/.htaccess. For any URL that isn't a real file or directory,

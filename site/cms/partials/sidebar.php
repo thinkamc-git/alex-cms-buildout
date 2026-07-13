@@ -103,13 +103,17 @@ $activeAria = static function (string $id) use ($active_nav_id): string {
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M3 1h8v12H3z" stroke="currentColor" stroke-width="1.2"/><path d="M5 4h4M5 7h4M5 10h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
       Journals<?= $count('journals') ?>
     </a>
+    <a class="nav-item<?= $activeClass('experiments') ?>"<?= $activeAria('experiments') ?> href="/cms/experiments" data-nav-id="experiments">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Experiments<?= $count('experiments') ?>
+    </a>
     <a class="nav-item<?= $activeClass('live-sessions') ?>"<?= $activeAria('live-sessions') ?> href="/cms/live-sessions" data-nav-id="live-sessions">
       <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="7" cy="7" r="2" fill="currentColor" opacity="0.4"/></svg>
       Live Sessions<?= $count('live-sessions') ?>
     </a>
-    <a class="nav-item<?= $activeClass('experiments') ?>"<?= $activeAria('experiments') ?> href="/cms/experiments" data-nav-id="experiments">
-      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><path d="M5 1v5L2 12h10L9 6V1" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 1h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      Experiments<?= $count('experiments') ?>
+    <a class="nav-item<?= $activeClass('resumes') ?>"<?= $activeAria('resumes') ?> href="/cms/resumes" data-nav-id="resumes">
+      <svg class="nav-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Résumé
     </a>
   </div>
 

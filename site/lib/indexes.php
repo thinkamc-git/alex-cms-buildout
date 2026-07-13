@@ -458,7 +458,8 @@ function list_index_feed(array $config, array $excludeIds = []): array
     $sort = (string)($config['feed_sort'] ?? 'newest');
     $order = $sort === 'oldest' ? 'c.published_at ASC' : 'c.published_at DESC';
 
-    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail, c.hero_image,
+    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.key_statement, c.body,
+                   c.thumbnail, c.hero_image,
                    c.published_at, c.read_time, c.special_tag,
                    c.series_id, c.series_order,
                    c.journal_number,
@@ -502,7 +503,8 @@ function list_index_feed(array $config, array $excludeIds = []): array
 function get_index_content_card(int $id): ?array
 {
     if ($id <= 0) return null;
-    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail, c.hero_image,
+    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.key_statement, c.body,
+                   c.thumbnail, c.hero_image,
                    c.published_at, c.read_time, c.special_tag,
                    c.series_id, c.series_order,
                    c.journal_number,
@@ -952,8 +954,8 @@ function list_section_feed(array $section, array $excludeIds = []): array
     $sort = (string)($section['feed_sort'] ?? 'newest');
     $order = $sort === 'oldest' ? 'c.published_at ASC' : 'c.published_at DESC';
 
-    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.thumbnail,
-                   c.published_at, c.read_time, c.special_tag,
+    $sql = "SELECT c.id, c.slug, c.type, c.title, c.summary, c.key_statement, c.body,
+                   c.thumbnail, c.published_at, c.read_time, c.special_tag,
                    c.series_id, c.series_order,
                    c.journal_number,
                    c.event_date, c.event_time, c.event_end_time,

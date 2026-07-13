@@ -30,9 +30,9 @@ $summary = (string)($card['summary'] ?? '');
 
 $prefixes = [
     'article'      => '/writing/',
-    'journal'      => '/journal/',
+    'journal'      => '/field-notes/',
     'live-session' => '/live-sessions/',
-    'experiment'   => '/experiments/',
+    'experiment'   => '/field-work/',
 ];
 $href = isset($prefixes[$type]) ? $prefixes[$type] . $slug : '#';
 
@@ -62,6 +62,10 @@ if ($type !== '' && isset($card['id'])) {
         $catColour = (string)($cat['colour']    ?? '');
     }
 }
+// Card accent colour, sourced live from the category's DB colour token —
+// keeps every card in sync with the Categories admin, including future
+// categories that have no bespoke CSS entry.
+$catColourStyle = $catColour !== '' ? '--c-current:var(--c-' . $e($catColour) . ');' : '';
 
 // Bookmark SVG used in every non-experiment card header (the .bm icon).
 $bookmarkSvg = '<div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>';
@@ -122,7 +126,7 @@ switch ($type):
         }
     }
   ?>
-  <div class="card card--article<?= $seriesWatermark > 0 ? ' card--has-series-number' : '' ?>" data-type="article" data-category="<?= $e($catSlug) ?>">
+  <div class="card card--article<?= $seriesWatermark > 0 ? ' card--has-series-number' : '' ?>" data-type="article" data-category="<?= $e($catSlug) ?>" style="<?= $catColourStyle ?>">
     <?php if ($seriesWatermark > 0): ?>
       <span class="card-series-number" aria-hidden="true"><?= str_pad((string)$seriesWatermark, 2, '0', STR_PAD_LEFT) ?></span>
     <?php endif; ?>
@@ -176,9 +180,12 @@ switch ($type):
 
   /* ════════ JOURNAL ═══════════════════════════════════════════════════ */
   case 'journal':
-    $published     = (string)($card['published_at'] ?? '');
-    $pubShort      = $published !== '' ? date('M j, Y', strtotime($published)) : '';
-    $journalNumber = (int)($card['journal_number'] ?? 0);
+    $published      = (string)($card['published_at'] ?? '');
+    $pubShort       = $published !== '' ? date('M j, Y', strtotime($published)) : '';
+    $journalNumber  = (int)($card['journal_number'] ?? 0);
+    $keyStatement   = (string)($card['key_statement'] ?? '');
+    $rawBody        = strip_tags(preg_replace('/<\/?(p|br|div|li|h[1-6])[^>]*>/i', ' ', (string)($card['body'] ?? '')));
+    $bodyExcerpt    = mb_strlen($rawBody) > 140 ? mb_substr($rawBody, 0, 140) . '…' : $rawBody;
 
     // Per-category glyph (matches the DS journal-card reference exactly).
     // Falls back to a generic open-book mark when the category has no
@@ -187,18 +194,18 @@ switch ($type):
         $colour = $colourToken !== '' ? ('var(--c-' . $e($colourToken) . ')') : 'var(--muted)';
         $stroke = ' stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"';
         switch ($slug) {
-            case 'introspection':
+            case 'observation':
                 return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:' . $colour . ';flex-shrink:0">'
                      . '<path d="M5 1 Q2 7 5 13"' . $stroke . '/>'
                      . '<path d="M9 1 Q12 7 9 13"' . $stroke . '/>'
                      . '</svg>';
-            case 'contemplation':
+            case 'inquiry':
                 return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:' . $colour . ';flex-shrink:0">'
                      . '<circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.4"/>'
                      . '<path d="M7 2 A5 5 0 0 1 12 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>'
                      . '<path d="M7 12 A5 5 0 0 1 2 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>'
                      . '</svg>';
-            case 'insight':
+            case 'principle':
                 return '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:' . $colour . ';flex-shrink:0">'
                      . '<circle cx="7" cy="7" r="2.2" stroke="currentColor" stroke-width="1.4"/>'
                      . '<line x1="7" y1="1.1" x2="7" y2="2.9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
@@ -210,7 +217,7 @@ switch ($type):
         return '';
     };
   ?>
-  <div class="card card--journal" data-type="journal" data-category="<?= $e($catSlug) ?>">
+  <div class="card card--journal" data-type="journal" data-category="<?= $e($catSlug) ?>" style="<?= $catColourStyle ?>">
     <div class="card-header">
       <div style="display:flex;align-items:center;gap: 7px">
         <?= $journalIcon($catSlug, $catColour) ?>
@@ -219,13 +226,12 @@ switch ($type):
       <?= $bookmarkSvg ?>
     </div>
     <div class="card-body">
-      <?php if ($title !== ''): ?>
-        <p class="j-ruled"><a class="card-link" href="<?= $e($href) ?>"><?= $e($title) ?></a></p>
-      <?php else: ?>
-        <a class="card-link" href="<?= $e($href) ?>" aria-label="Open journal entry"></a>
+      <a class="card-link" href="<?= $e($href) ?>" aria-label="Open field note"></a>
+      <?php if ($keyStatement !== ''): ?>
+        <p class="j-ruled"><?= $e($keyStatement) ?></p>
       <?php endif; ?>
-      <?php if ($summary !== ''): ?>
-        <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"><?= $e($summary) ?></p>
+      <?php if ($bodyExcerpt !== ''): ?>
+        <p class="excerpt" style="margin-bottom: var(--space-16);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden"><?= $e($bodyExcerpt) ?></p>
       <?php endif; ?>
       <div class="j-footer-push"></div>
       <div style="height:1px;background:var(--ink-18);margin-bottom: 18px"></div>
@@ -308,7 +314,7 @@ switch ($type):
       $ctaLabel = $isPast ? 'View Details' : 'Register Now';
       $ctaSub   = (string)($card['custom_pill'] ?? '');
     ?>
-    <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>">
+    <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>" style="<?= $catColourStyle ?>">
       <div class="card-header">
         <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Masterclass') ?></span>
         <?php if ($isPast): ?>
@@ -355,7 +361,7 @@ switch ($type):
     <?php break;
     }
   ?>
-  <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>">
+  <div class="card card--event<?= $isPast ? ' past' : '' ?>" data-type="event" data-category="<?= $e($catSlug) ?>" style="<?= $catColourStyle ?>">
     <div class="ev-top"><!-- dark top (header + location) — single block so the past hatch spans both seamlessly -->
     <div class="card-header">
       <span class="<?= $isPast ? 'ev-type-past' : 'ev-type' ?>"><?= $e($catLabel !== '' ? $catLabel : 'Talk') ?></span>
@@ -424,8 +430,8 @@ switch ($type):
   case 'experiment':
     $published = (string)($card['published_at'] ?? '');
     $pubShort  = $published !== '' ? date('M Y', strtotime($published)) : '';
-    $scrim     = $catSlug === 'concept' ? 'scrim-concept' : 'scrim-proto';
-    $bgToken   = $catSlug !== '' ? ('var(--c-experiment-' . $e($catSlug) . ')') : 'var(--c-experiment-prototype)';
+    $scrim     = $catSlug === 'case-study' ? 'scrim-case-study' : 'scrim-experiment';
+    $bgToken   = $catSlug !== '' ? ('var(--c-experiment-' . $e($catSlug) . ')') : 'var(--c-experiment-experiment)';
     $tagsRaw   = (string)($card['tags'] ?? '');
     $tags      = $tagsRaw !== '' ? array_filter(array_map('trim', explode(',', $tagsRaw))) : [];
     // Constellation background — matches the DS showcase experiment card

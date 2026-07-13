@@ -79,7 +79,7 @@ if ($flash === '' && isset($_GET['flash'])) {
 // Group categories by type. list_categories() returns every row sorted
 // by (type, sort_order, label); we partition into the four blocks below.
 $all = list_categories();
-$byType = ['article' => [], 'journal' => [], 'live-session' => [], 'experiment' => []];
+$byType = ['article' => [], 'journal' => [], 'experiment' => [], 'live-session' => []];
 foreach ($all as $cat) {
     $t = (string)($cat['type'] ?? '');
     if (isset($byType[$t])) $byType[$t][] = $cat;
@@ -205,6 +205,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="cat-block-note"><?= $e($meta['note']) ?></div>
           <?php
           $columns = [
+              ['label' => '', 'width' => '28px', 'thclass' => 'cat-grip-cell'],
               ['label' => 'Label',     'width' => '32%'],
               ['label' => 'Value slug','width' => '22%'],
               ['label' => 'Colour',    'width' => '22%'],
@@ -216,6 +217,7 @@ require __DIR__ . '/../partials/topbar.php';
               $use       = (int)($cat['usage_count'] ?? 0);
               $canDelete = $use === 0;
               $rid       = 'row-form-cat-' . (int)$cat['id'];
+              $gripCell    = '<span class="cms-grip" aria-hidden="true" title="Drag to reorder">⠿</span>';
               $labelCell =
                   '<div style="display:flex;align-items:center;gap:6px">'
                 . '<div class="cat-swatch" style="background:var(--c-' . $e((string)$cat['colour']) . ')"></div>'
@@ -240,15 +242,23 @@ require __DIR__ . '/../partials/topbar.php';
                     . '</button>';
               }
               $rows[] = [
-                  $labelCell,
-                  $slugCell,
-                  $colourCell,
-                  ['html' => $useCell, 'class' => 'cat-count' . ($canDelete ? ' zero' : '')],
-                  ['html' => $actionsCell, 'class' => 'cell-actions'],
+                  'cells' => [
+                      ['html' => $gripCell, 'class' => 'cat-grip-cell'],
+                      $labelCell,
+                      $slugCell,
+                      $colourCell,
+                      ['html' => $useCell, 'class' => 'cat-count' . ($canDelete ? ' zero' : '')],
+                      ['html' => $actionsCell, 'class' => 'cell-actions'],
+                  ],
+                  'attrs' => [
+                      'draggable' => 'true',
+                      'data-id'   => (string)(int)$cat['id'],
+                  ],
               ];
           }
-          $empty_text = 'No categories yet — add one below.';
-          $variant    = 'cat';
+          $empty_text  = 'No categories yet — add one below.';
+          $variant     = 'cat';
+          $table_attrs = 'data-cat-type="' . $e($type) . '"';
           require __DIR__ . '/../partials/table.php';
           ?>
           <form method="post" action="/cms/categories" class="cat-add-row">
@@ -354,6 +364,129 @@ require __DIR__ . '/../partials/topbar.php';
      label/colour change prompts to confirm. -->
 <script src="/cms/_assets/preview-tab-guard.js" defer></script>
 <script src="/cms/_assets/dirty-flip.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var csrf = '<?= $e($csrf_token) ?>';
+
+  function persist(type, ids) {
+    var body = new FormData();
+    body.append('csrf_token', csrf);
+    body.append('type', type);
+    ids.forEach(function (id) { body.append('ids[]', id); });
+    return fetch('/cms/categories/reorder', {
+      method: 'POST',
+      body: body,
+      credentials: 'same-origin',
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status));
+        return j;
+      });
+    });
+  }
+
+  document.querySelectorAll('.cms-table--cat[data-cat-type]').forEach(function (table) {
+    var type  = table.getAttribute('data-cat-type');
+    var tbody = table.querySelector('tbody');
+    var block = table.closest('.cat-block');
+    if (!tbody || !block) return;
+
+    // Overlay drop-line: absolutely positioned in .cat-block so it never
+    // inserts into the table DOM and causes no layout shift.
+    block.style.position = 'relative';
+    var line = document.createElement('div');
+    line.className = 'cat-drop-line';
+    block.appendChild(line);
+
+    var dragging   = null;
+    var snapshot   = null;
+    var dropBefore = null;
+
+    function items() {
+      return Array.from(tbody.querySelectorAll('tr[draggable="true"][data-id]'));
+    }
+
+    function hideLine() { line.style.display = 'none'; }
+
+    function showLine(targetRow) {
+      var blockRect = block.getBoundingClientRect();
+      var rowRect   = targetRow.getBoundingClientRect();
+      line.style.top     = (rowRect.top - blockRect.top + block.scrollTop) + 'px';
+      line.style.display = 'block';
+    }
+
+    function showLineAfterLast() {
+      var all = items();
+      if (!all.length) { hideLine(); return; }
+      var last      = all[all.length - 1];
+      var blockRect = block.getBoundingClientRect();
+      var rowRect   = last.getBoundingClientRect();
+      line.style.top     = (rowRect.bottom - blockRect.top + block.scrollTop) + 'px';
+      line.style.display = 'block';
+    }
+
+    tbody.addEventListener('dragstart', function (e) {
+      var row = e.target.closest('tr[data-id]');
+      if (!row || !tbody.contains(row)) return;
+      dragging = row;
+      snapshot = items().slice();
+      row.classList.add('is-dragging');
+      if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+    });
+
+    tbody.addEventListener('dragend', function () {
+      if (dragging) dragging.classList.remove('is-dragging');
+      hideLine();
+      dragging   = null;
+      snapshot   = null;
+      dropBefore = null;
+    });
+
+    tbody.addEventListener('dragover', function (e) {
+      if (!dragging) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      var sibs   = items().filter(function (r) { return r !== dragging; });
+      var target = null;
+      for (var i = 0; i < sibs.length; i++) {
+        var b = sibs[i].getBoundingClientRect();
+        if (e.clientY < b.top + b.height / 2) { target = sibs[i]; break; }
+      }
+
+      dropBefore = target;
+      if (target) showLine(target);
+      else showLineAfterLast();
+    });
+
+    tbody.addEventListener('dragleave', function (e) {
+      if (!tbody.contains(e.relatedTarget)) hideLine();
+    });
+
+    tbody.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!dragging) return;
+      hideLine();
+
+      var moved = dragging;
+      var snap  = snapshot;
+      dragging  = null;
+      snapshot  = null;
+
+      if (dropBefore) tbody.insertBefore(moved, dropBefore);
+      else tbody.appendChild(moved);
+      dropBefore = null;
+
+      var ids = items().map(function (r) { return r.getAttribute('data-id'); });
+      persist(type, ids).catch(function (err) {
+        if (snap) snap.forEach(function (el) { tbody.appendChild(el); });
+        alert('Reorder failed: ' + (err && err.message ? err.message : 'unknown error'));
+      });
+    });
+  });
+})();
+</script>
 
 </body>
 </html>

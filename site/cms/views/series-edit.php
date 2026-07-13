@@ -59,6 +59,10 @@ if (!$isNew) {
 $errors = [];
 $flash  = '';
 
+$fromIndexes = (($_GET['from'] ?? '') === 'indexes');
+$backUrl      = $fromIndexes ? '/cms/indexes' : '/cms/series';
+$backLabel    = $fromIndexes ? '← Back to Indexes' : '← Back to Series';
+
 // Form scratch — populated from the DB row (or blanks on create), then
 // overlaid with POST values on a failed save so the author doesn't lose
 // what they typed.
@@ -72,7 +76,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
     } else {
-        $action = (string)($_POST['action'] ?? 'save');
+        $action     = (string)($_POST['action'] ?? 'save');
+        $fromSuffix = (($_POST['from'] ?? '') === 'indexes') ? '&from=indexes' : '';
 
         if ($action === 'save') {
             $form['name']        = trim((string)($_POST['name']        ?? ''));
@@ -89,7 +94,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 ]);
                 if ($res['ok']) {
                     header('Location: /cms/series/edit?id=' . (int)$res['id']
-                        . '&flash=' . rawurlencode('Series created.'));
+                        . $fromSuffix . '&flash=' . rawurlencode('Series created.'));
                     exit;
                 }
                 $errors[] = $res['error'];
@@ -101,7 +106,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 ]);
                 if ($res['ok']) {
                     header('Location: /cms/series/edit?id=' . $id
-                        . '&flash=' . rawurlencode('Saved.'));
+                        . $fromSuffix . '&flash=' . rawurlencode('Saved.'));
                     exit;
                 }
                 $errors[] = $res['error'];
@@ -113,7 +118,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             );
             if ($res['ok']) {
                 header('Location: /cms/series/edit?id=' . $id
-                    . '&flash=' . rawurlencode('Article added to series.'));
+                    . $fromSuffix . '&flash=' . rawurlencode('Article added to series.'));
                 exit;
             }
             $errors[] = $res['error'];
@@ -121,14 +126,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $res = remove_article_from_series((int)($_POST['article_id'] ?? 0));
             if ($res['ok']) {
                 header('Location: /cms/series/edit?id=' . $id
-                    . '&flash=' . rawurlencode('Article removed from series.'));
+                    . $fromSuffix . '&flash=' . rawurlencode('Article removed from series.'));
                 exit;
             }
             $errors[] = $res['error'];
         } elseif ($action === 'delete' && !$isNew) {
             $res = delete_series($id);
             if ($res['ok']) {
-                header('Location: /cms/series?flash=' . rawurlencode('Series deleted.'));
+                $deleteTarget = $fromSuffix ? '/cms/indexes' : '/cms/series';
+                header('Location: ' . $deleteTarget . '?flash=' . rawurlencode('Series deleted.'));
                 exit;
             }
             $errors[] = $res['error'];
@@ -210,7 +216,7 @@ require __DIR__ . '/../partials/topbar.php';
 
 <div class="layout">
   <?php
-  $active_nav_id = 'series';
+  $active_nav_id = $fromIndexes ? 'indexes' : 'series';
   $nav_counts    = [];
   require __DIR__ . '/../partials/sidebar.php';
   ?>
@@ -222,7 +228,7 @@ require __DIR__ . '/../partials/topbar.php';
       $subtitle = $isNew
           ? 'Pick a name and slug. You can add parts and edit the description after creating.'
           : '/series/' . $slugForUrl . '/ · Edit name, description, and parts.';
-      $actionsHtml  = '<a href="/cms/series" class="btn-sec">← Back to Series</a>';
+      $actionsHtml  = '<a href="' . $e($backUrl) . '" class="btn-sec">' . $e($backLabel) . '</a>';
       if ($showLiveBtn) {
           $actionsHtml .= ' <a href="' . $e($liveHref) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
       }
@@ -242,6 +248,7 @@ require __DIR__ . '/../partials/topbar.php';
               class="cms-form cms-form-wide reveal-page">
           <input type="hidden" name="csrf_token" value="<?= $e($csrf_token) ?>">
           <input type="hidden" name="action" value="save">
+          <?php if ($fromIndexes): ?><input type="hidden" name="from" value="indexes"><?php endif; ?>
 
           <div class="field-group">
             <label class="field-label" for="series-name">Series Name <span class="field-req">required</span></label>
@@ -390,7 +397,7 @@ require __DIR__ . '/../partials/topbar.php';
             <?php else: ?>
               <button type="submit" name="action" value="save" class="btn-sec" data-save-btn>Publish</button>
             <?php endif; ?>
-            <a href="/cms/series" class="btn-sec">Cancel</a>
+            <a href="<?= $e($backUrl) ?>" class="btn-sec">Cancel</a>
             <?php if (!$isNew && $canDelete): ?>
               <button type="submit"
                       form="series-delete-form"

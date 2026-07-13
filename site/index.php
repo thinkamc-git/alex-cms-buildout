@@ -112,8 +112,9 @@ $router->post('/cms/experiments/upload-image', $cms('views/experiment-upload-ima
 // POST dispatch (add/update/delete) via $_POST['action'] — one route
 // per view, GET and POST share the handler. Series also has a JSON
 // reorder endpoint hit by the drag-drop handler in the series cards.
-$router->get ('/cms/categories',     $cms('views/categories.php'));
-$router->post('/cms/categories',     $cms('views/categories.php'));
+$router->get ('/cms/categories',        $cms('views/categories.php'));
+$router->post('/cms/categories',        $cms('views/categories.php'));
+$router->post('/cms/categories/reorder',$cms('views/categories-reorder.php'));
 $router->get ('/cms/series',         $cms('views/series.php'));
 $router->get ('/cms/series/edit',    $cms('views/series-edit.php'));
 $router->post('/cms/series/edit',    $cms('views/series-edit.php'));
@@ -216,6 +217,25 @@ $router->post('/cms/settings', $cms('views/settings.php'));
 // names + slice tags. First consumer of the system-cms.css barrel.
 $router->get ('/cms/design-system', $cms('views/design-system.php'));
 
+// Library → Résumé: single-record résumé editor (draft/publish/snapshot/PDF exports).
+require_once __DIR__ . '/lib/resumes.php';
+$router->get ('/cms/resumes',                  $cms('views/resume-edit.php'));
+$router->post('/cms/resumes',                  $cms('views/resume-edit.php'));
+$router->post('/cms/resumes/autosave',         $cms('views/resume-autosave.php'));
+$router->post('/cms/resumes/preview',          $cms('views/resume-preview.php'));
+$router->post('/cms/resumes/pdf/upload',       $cms('views/resume-pdf-upload.php'));
+$router->post('/cms/resumes/pdf/delete',       $cms('views/resume-pdf-delete.php'));
+$router->post('/cms/resumes/pdf/save',         $cms('views/resume-pdf-save.php'));
+$router->get ('/cms/resumes/pdf/:id/download', static function (array $p) use ($cms): void {
+    $_GET['id'] = $p['id'] ?? '';
+    ($cms('views/resume-pdf-download.php'))();
+});
+$router->get ('/cms/resumes/pdf/:id/view', static function (array $p) use ($cms): void {
+    $_GET['id'] = $p['id'] ?? '';
+    ($cms('views/resume-pdf-view.php'))();
+});
+$router->get('/resume', $cms('views/resume-public.php'));
+
 // ── Public subscribe (Phase 14) ─────────────────────────────────────
 // POST /subscribe handles the newsletter-form submission: honeypot,
 // rate-limit (1/min, 10/day per IP), email validation, upsert.
@@ -262,8 +282,13 @@ $router->get('/writing/:slug', static function (array $p): void {
 
 // Phase 8: Journals public route. render_content() is type-agnostic;
 // the template enum on the row routes to templates/journal-entry.php.
-$router->get('/journal/:slug', static function (array $p): void {
+$router->get('/field-notes/:slug', static function (array $p): void {
     render_content((string)($p['slug'] ?? ''));
+});
+$router->get('/journal/:slug', static function (array $p): void {
+    http_response_code(301);
+    header('Location: /field-notes/' . rawurlencode((string)($p['slug'] ?? '')));
+    exit;
 });
 
 // Phase 9: Live Sessions public route. Same dispatch — the row's
@@ -275,8 +300,13 @@ $router->get('/live-sessions/:slug', static function (array $p): void {
 // Phase 10: Experiments public route. Same type-agnostic dispatch — the
 // row's template column picks experiment.php (article-format) vs
 // experiment-html.php (raw passthrough).
-$router->get('/experiments/:slug', static function (array $p): void {
+$router->get('/field-work/:slug', static function (array $p): void {
     render_content((string)($p['slug'] ?? ''));
+});
+$router->get('/experiments/:slug', static function (array $p): void {
+    http_response_code(301);
+    header('Location: /field-work/' . rawurlencode((string)($p['slug'] ?? '')));
+    exit;
 });
 
 // Phase 12: Public index routes. The four built-in type indexes resolve
@@ -289,9 +319,19 @@ $router->get('/experiments/:slug', static function (array $p): void {
 // are matched by segment count, so they coexist cleanly — declaration
 // order doesn't matter.
 $router->get('/writing',       static function (): void { render_index('writing'); });
-$router->get('/journal',       static function (): void { render_index('journal'); });
+$router->get('/field-notes',   static function (): void { render_index('field-notes'); });
+$router->get('/field-work',    static function (): void { render_index('field-work'); });
 $router->get('/live-sessions', static function (): void { render_index('live-sessions'); });
-$router->get('/experiments',   static function (): void { render_index('experiments'); });
+$router->get('/journal',       static function (): void {
+    http_response_code(301);
+    header('Location: /field-notes');
+    exit;
+});
+$router->get('/experiments',   static function (): void {
+    http_response_code(301);
+    header('Location: /field-work');
+    exit;
+});
 $router->get('/series/:slug',  static function (array $p): void {
     render_series_index((string)($p['slug'] ?? ''));
 });

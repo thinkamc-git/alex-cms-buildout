@@ -213,8 +213,8 @@
       <span class="section-label">Experiment Card Backgrounds — deep tonal solids</span>
       <p class="comp-rule">Two near-black tones used only as the full-bleed background of experiment cards. Separate from the category pool — these create the surface for content rather than carrying its identity.</p>
       <div class="color-grid">
-        <div class="chip"><div class="swatch" style="background:var(--c-experiment-prototype)"></div><div class="cname">Prototype</div><div class="ctoken">--c-experiment-prototype</div><div class="chex">#1C1028</div></div>
-        <div class="chip"><div class="swatch" style="background:var(--c-experiment-concept)"></div><div class="cname">Concept</div><div class="ctoken">--c-experiment-concept</div><div class="chex">#0A1F1A</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-experiment-experiment)"></div><div class="cname">Experiment</div><div class="ctoken">--c-experiment-experiment</div><div class="chex">#1C1028</div></div>
+        <div class="chip"><div class="swatch" style="background:var(--c-experiment-case-study)"></div><div class="cname">Case Study</div><div class="ctoken">--c-experiment-case-study</div><div class="chex">#0A1F1A</div></div>
       </div>
     </div>
 
@@ -538,7 +538,7 @@
 
     <div class="comp-section">
       <span class="section-label">Experiment Constellation — generative background</span>
-      <p class="comp-rule">A generated background for experiment cards: concentric rings and satellite dots, seeded per card from a hash of its id, so rotation and arrangement vary card to card. The forest ramp marks concepts; the purple ramp marks prototypes.</p>
+      <p class="comp-rule">A generated background for experiment cards: concentric rings and satellite dots, seeded per card from a hash of its id, so rotation and arrangement vary card to card. The forest ramp marks case studies; the purple ramp marks experiments.</p>
       <div class="icon-constellation-row">
         <div class="icon-constellation" style="background:#0A1F1A">
           <svg viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%">
@@ -944,7 +944,7 @@
   <div class="comp-section">
     <span class="section-label">The shell — every card</span>
     <div class="spec-grid" style="max-width:780px">
-      <span class="spec-key">background</span><span class="spec-val">var(--surface) — light cards · var(--c-experiment-prototype/concept) — dark cards</span>
+      <span class="spec-key">background</span><span class="spec-val">var(--surface) — light cards · var(--c-experiment-experiment/case-study) — dark cards</span>
       <span class="spec-key">border</span><span class="spec-val">1px solid var(--ink-18) · darkens to var(--primary) on hover</span>
       <span class="spec-key">border-radius</span><span class="spec-val">var(--r-card) = 4px (near-square)</span>
       <span class="spec-key">box-shadow</span><span class="spec-val">none — depth is border-only</span>
@@ -1313,15 +1313,15 @@
   <div class="section-header">
     <div class="section-num">04</div>
     <div class="section-title">Experiment Cards</div>
-    <div class="section-desc">Working drafts and prototypes. Deep tonal background with SVG decoration, status dot, and a Launch / Read CTA bar. Distinct from articles to signal "in progress."</div>
+    <div class="section-desc">Experiments and case studies. Deep tonal background with SVG decoration, status dot, and a Launch / Read CTA bar. Distinct from articles to signal "in progress."</div>
   </div>
   <div class="cards-grid">
-  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="experiment" style="min-height:320px;background:var(--c-experiment-experiment);position:relative">
     <svg class="exp-bg" aria-hidden="true" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"><g transform="translate(-40 -30) rotate(20 190 140)"><circle cx="190" cy="140" r="100" fill="none" stroke="rgba(107,48,128,0.10)" stroke-width="1"/><circle cx="190" cy="140" r="64" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/><circle cx="190" cy="140" r="30" fill="none" stroke="rgba(107,48,128,0.22)" stroke-width="1"/><circle cx="190" cy="140" r="8" fill="rgba(107,48,128,0.65)"/><line x1="190" y1="140" x2="248" y2="84" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="248" cy="84" r="5" fill="rgba(180,120,220,0.7)"/><line x1="190" y1="140" x2="132" y2="188" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="132" cy="188" r="4" fill="rgba(180,120,220,0.52)"/><line x1="190" y1="140" x2="268" y2="168" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="268" cy="168" r="4" fill="rgba(180,120,220,0.44)"/><line x1="190" y1="140" x2="296" y2="124" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="296" cy="124" r="5" fill="rgba(180,120,220,0.58)"/></g></svg>
-    <div class="scrim-proto"></div>
+    <div class="scrim-experiment"></div>
     <div class="exp-content">
       <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Prototype</span>
+        <span class="od-type">Experiment</span>
         <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-forest);flex-shrink:0"></span>Live</div>
       </div>
       <div style="flex:1;min-height:80px"></div>
@@ -1335,12 +1335,12 @@
     </div>
   </div>
 
-  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="case-study" style="min-height:320px;background:var(--c-experiment-case-study);position:relative">
     <svg class="exp-bg" aria-hidden="true" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"><g transform="translate(55 25) rotate(200 190 140)"><circle cx="190" cy="140" r="100" fill="none" stroke="rgba(73,99,75,0.10)" stroke-width="1"/><circle cx="190" cy="140" r="64" fill="none" stroke="rgba(73,99,75,0.15)" stroke-width="1"/><circle cx="190" cy="140" r="30" fill="none" stroke="rgba(73,99,75,0.22)" stroke-width="1"/><circle cx="190" cy="140" r="8" fill="rgba(73,99,75,0.65)"/><line x1="190" y1="140" x2="118" y2="100" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="118" cy="100" r="5" fill="rgba(130,180,150,0.66)"/><line x1="190" y1="140" x2="230" y2="68" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="230" cy="68" r="4" fill="rgba(130,180,150,0.5)"/><line x1="190" y1="140" x2="278" y2="192" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="278" cy="192" r="5" fill="rgba(130,180,150,0.55)"/><line x1="190" y1="140" x2="160" y2="220" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="160" cy="220" r="4" fill="rgba(130,180,150,0.46)"/></g></svg>
-    <div class="scrim-concept"></div>
+    <div class="scrim-case-study"></div>
     <div class="exp-content">
       <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Concept</span>
+        <span class="od-type">Case Study</span>
         
       </div>
       <div style="flex:1;min-height:80px"></div>
@@ -1354,12 +1354,12 @@
     </div>
   </div>
 
-  <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:320px;background:var(--c-experiment-prototype);position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="experiment" style="min-height:320px;background:var(--c-experiment-experiment);position:relative">
     <svg class="exp-bg" aria-hidden="true" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"><g transform="translate(30 -55) rotate(110 190 140)"><circle cx="190" cy="140" r="100" fill="none" stroke="rgba(107,48,128,0.10)" stroke-width="1"/><circle cx="190" cy="140" r="64" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/><circle cx="190" cy="140" r="30" fill="none" stroke="rgba(107,48,128,0.22)" stroke-width="1"/><circle cx="190" cy="140" r="8" fill="rgba(107,48,128,0.65)"/><line x1="190" y1="140" x2="260" y2="200" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="260" cy="200" r="5" fill="rgba(180,120,220,0.6)"/><line x1="190" y1="140" x2="104" y2="150" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="104" cy="150" r="4" fill="rgba(180,120,220,0.5)"/><line x1="190" y1="140" x2="214" y2="56" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="214" cy="56" r="5" fill="rgba(180,120,220,0.6)"/><line x1="190" y1="140" x2="300" y2="96" stroke="rgba(180,120,220,0.12)" stroke-width="1"/><circle cx="300" cy="96" r="4" fill="rgba(180,120,220,0.5)"/></g></svg>
-    <div class="scrim-proto"></div>
+    <div class="scrim-experiment"></div>
     <div class="exp-content">
       <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Prototype</span>
+        <span class="od-type">Experiment</span>
         <div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-amber);flex-shrink:0"></span>In Progress</div>
       </div>
       <div style="flex:1;min-height:80px"></div>
@@ -1373,12 +1373,12 @@
     </div>
   </div>
 
-  <div class="card card--experiment" data-type="experiment" data-category="concept" style="min-height:320px;background:var(--c-experiment-concept);position:relative">
+  <div class="card card--experiment" data-type="experiment" data-category="case-study" style="min-height:320px;background:var(--c-experiment-case-study);position:relative">
     <svg class="exp-bg" aria-hidden="true" viewBox="0 0 380 320" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"><g transform="translate(-60 40) rotate(300 190 140)"><circle cx="190" cy="140" r="100" fill="none" stroke="rgba(73,99,75,0.10)" stroke-width="1"/><circle cx="190" cy="140" r="64" fill="none" stroke="rgba(73,99,75,0.15)" stroke-width="1"/><circle cx="190" cy="140" r="30" fill="none" stroke="rgba(73,99,75,0.22)" stroke-width="1"/><circle cx="190" cy="140" r="8" fill="rgba(73,99,75,0.65)"/><line x1="190" y1="140" x2="248" y2="84" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="248" cy="84" r="5" fill="rgba(130,180,150,0.7)"/><line x1="190" y1="140" x2="132" y2="188" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="132" cy="188" r="4" fill="rgba(130,180,150,0.52)"/><line x1="190" y1="140" x2="268" y2="168" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="268" cy="168" r="4" fill="rgba(130,180,150,0.44)"/><line x1="190" y1="140" x2="296" y2="124" stroke="rgba(130,180,150,0.12)" stroke-width="1"/><circle cx="296" cy="124" r="5" fill="rgba(130,180,150,0.58)"/></g></svg>
-    <div class="scrim-concept"></div>
+    <div class="scrim-case-study"></div>
     <div class="exp-content">
       <div class="card-header" style="position:relative;z-index:2">
-        <span class="od-type">Concept</span>
+        <span class="od-type">Case Study</span>
         
       </div>
       <div style="flex:1;min-height:80px"></div>
@@ -1400,7 +1400,7 @@
     <div class="section-desc">Short reflective entries. Italic Instrument Serif quote with a left-rule in the journal category colour, a thin excerpt, and a date in the meta strip.</div>
   </div>
   <div class="cards-grid">
-  <div class="card card--journal" data-type="journal" data-category="contemplation">
+  <div class="card card--journal" data-type="journal" data-category="inquiry">
     <div class="card-header">
       <div style="display:flex;align-items:center;gap: 7px">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-teal);flex-shrink:0">
@@ -1408,7 +1408,7 @@
           <path d="M7 2 A5 5 0 0 1 12 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
           <path d="M7 12 A5 5 0 0 1 2 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
-        <span class="cat">Contemplation<span class="j-num"> 001</span></span>
+        <span class="cat">Inquiry<span class="j-num"> 001</span></span>
       </div>
       <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
     </div>
@@ -1424,7 +1424,7 @@
     </div>
   </div>
 
-  <div class="card card--journal" data-type="journal" data-category="insight">
+  <div class="card card--journal" data-type="journal" data-category="principle">
     <div class="card-header">
       <div style="display:flex;align-items:center;gap: 7px">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-ochre);flex-shrink:0">
@@ -1434,7 +1434,7 @@
           <line x1="1.1" y1="7" x2="2.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
           <line x1="11.1" y1="7" x2="12.9" y2="7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
-        <span class="cat">Insight<span class="j-num"> 001</span></span>
+        <span class="cat">Principle<span class="j-num"> 001</span></span>
       </div>
       <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
     </div>
@@ -1450,14 +1450,14 @@
     </div>
   </div>
 
-  <div class="card card--journal" data-type="journal" data-category="introspection">
+  <div class="card card--journal" data-type="journal" data-category="observation">
     <div class="card-header">
       <div style="display:flex;align-items:center;gap: 7px">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-violet);flex-shrink:0">
           <path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
           <path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
         </svg>
-        <span class="cat">Introspection<span class="j-num"> 001</span></span>
+        <span class="cat">Observation<span class="j-num"> 001</span></span>
       </div>
       <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
     </div>
@@ -1565,7 +1565,7 @@
       </div>
       <div>
         <div style="font-family:var(--font-cond);font-size: var(--text-tiny);font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom: var(--space-4)">Experiment</div>
-        <div style="background:var(--c-experiment-prototype);border-radius:0 0 4px 4px;overflow:hidden">
+        <div style="background:var(--c-experiment-experiment);border-radius:0 0 4px 4px;overflow:hidden">
           <div class="row-between" style="padding: 11px var(--space-20);border-top:1px solid var(--white-06)">
             <span style="font-family:var(--font-cond);font-size: var(--text-meta);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--white-45)">May 2026 · Launch</span>
             <span style="font-size: var(--text-sm);font-weight:300;color:var(--white-45)">→</span>
@@ -2201,8 +2201,8 @@
               <div class="loc-zone"><div class="loc-ghost">Toronto</div><div style="position:relative"><div class="loc-city">Toronto, ON</div><div class="loc-venue">Centre for Social Innovation</div></div></div>
               <div class="ev-body"><div class="ev-date-row"><span class="ev-date">May 12, 2026</span><span class="ev-time">Wed · 7 PM</span></div><div class="ev-title" style="font-size:var(--space-20);margin-bottom: var(--space-8)">Design Leadership in the Age of AI</div><p class="ev-desc" style="font-size: var(--text-meta);margin-bottom: 14px">A live conversation on leading teams through disruption.</p><div class="push-divider"></div><div class="ev-footer"><div class="fmt-row"><span class="fmt fmt-inperson">In-Person</span><span class="fmt fmt-free">Free</span></div><span class="arrow">→</span></div></div>
             </div>
-            <div class="card card--journal" data-type="journal" data-category="introspection">
-              <div class="card-header"><div style="display:flex;align-items:center;gap: 7px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-purple);flex-shrink:0"><path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="cat">Introspection<span class="j-num"> 001</span></span></div><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
+            <div class="card card--journal" data-type="journal" data-category="observation">
+              <div class="card-header"><div style="display:flex;align-items:center;gap: 7px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-purple);flex-shrink:0"><path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg><span class="cat">Observation<span class="j-num"> 001</span></span></div><div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div></div>
               <div class="card-body"><p class="j-ruled" style="font-size: var(--text-body)">The designers struggling most with AI were already struggling.</p><p class="excerpt" style="font-size: var(--text-base)">The tool surfaced a gap that was already there.</p><div class="j-footer-push"></div></div>
               <div class="meta-strip"><span>May 4, 2026</span><span>→</span></div>
             </div><!-- right-col-card-2 -->
@@ -2504,11 +2504,11 @@
           </div>
           <div class="meta-strip"><span>Apr 20, 2026 · 12 min</span><span>→</span></div>
         </div>
-        <div class="card card--journal" data-type="journal" data-category="introspection">
+        <div class="card card--journal" data-type="journal" data-category="observation">
           <div class="card-header">
             <div style="display:flex;align-items:center;gap: 7px">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="color:var(--c-purple);flex-shrink:0"><path d="M5 1 Q2 7 5 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><path d="M9 1 Q12 7 9 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
-              <span class="cat">Introspection<span class="j-num"> 001</span></span>
+              <span class="cat">Observation<span class="j-num"> 001</span></span>
             </div>
             <div class="bm"><svg viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4-7 4V5a1 1 0 0 1 1-1z"/></svg></div>
           </div>
@@ -2543,11 +2543,11 @@
           </div>
           <div class="meta-strip"><span>Apr 3, 2026 · 8 min</span><span>→</span></div>
         </div>
-        <div class="card card--experiment" data-type="experiment" data-category="prototype" style="min-height:240px;background:var(--c-experiment-prototype);position:relative">
+        <div class="card card--experiment" data-type="experiment" data-category="experiment" style="min-height:240px;background:var(--c-experiment-experiment);position:relative">
           <svg style="position:absolute;inset: 0;z-index:0;width:100%;height:100%" viewBox="0 0 380 240" preserveAspectRatio="xMidYMid slice"><circle cx="190" cy="120" r="80" fill="none" stroke="rgba(107,48,128,0.1)" stroke-width="1"/><circle cx="190" cy="120" r="48" fill="none" stroke="rgba(107,48,128,0.15)" stroke-width="1"/><circle cx="190" cy="120" r="8" fill="rgba(107,48,128,0.65)"/><circle cx="240" cy="72" r="5" fill="rgba(180,120,220,0.7)"/></svg>
-          <div class="scrim-proto"></div>
+          <div class="scrim-experiment"></div>
           <div class="exp-content">
-            <div class="card-header" style="background:transparent;position:relative;z-index:2"><span class="od-type">Prototype</span><div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-forest);flex-shrink:0"></span>Live</div></div>
+            <div class="card-header" style="background:transparent;position:relative;z-index:2"><span class="od-type">Experiment</span><div class="od-status-dot"><span style="width:6px;height:6px;border-radius:50%;background:var(--c-forest);flex-shrink:0"></span>Live</div></div>
             <div style="flex:1;min-height:40px"></div>
             <div style="padding: 0 var(--pad) var(--space-12);position:relative;z-index:2">
               <div class="od-title" style="font-size: var(--text-body-lg);margin-bottom: 6px">UX Audit Generator</div>

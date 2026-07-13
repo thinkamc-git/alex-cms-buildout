@@ -80,7 +80,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Experiments';
       $subtitle = 'Prototypes, custom HTML, and standalone pieces. Three body modes: rich text, HTML body file, or full HTML swap.';
-      $actions  = '<a href="/experiments/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
+      $actions  = '<a href="/field-work/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
                 . '<a href="/cms/experiments/new" class="btn-pri">+ New Experiment</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -167,7 +167,7 @@ require __DIR__ . '/../partials/topbar.php';
             $isLiveRow = (string)($x['status'] ?? '') === 'published'
                       && (string)($x['published_status'] ?? '') !== 'scheduled';
             $liveBtn = $isLiveRow && $slug !== ''
-                ? '<a href="/experiments/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
+                ? '<a href="/field-work/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
@@ -235,7 +235,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live at /experiments/&lt;slug&gt;</span>
+              <span class="content-block-sublabel">Live at /field-work/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

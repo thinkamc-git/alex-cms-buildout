@@ -1377,6 +1377,47 @@ function delete_category(int $id): array
     return ['ok' => true, 'error' => ''];
 }
 
+/**
+ * Reorder categories within a type by writing new sort_order values.
+ * $ids must be an ordered list of every category ID in the type; the
+ * server validates all IDs belong to that type before writing.
+ */
+function reorder_categories(string $type, array $ids): array
+{
+    if (!in_array($type, CATEGORY_TYPES, true)) {
+        return ['ok' => false, 'error' => 'Invalid type.'];
+    }
+    $cleanIds = array_values(array_filter(array_map('intval', $ids), fn($i) => $i > 0));
+    if (count($cleanIds) === 0) {
+        return ['ok' => false, 'error' => 'No IDs supplied.'];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($cleanIds), '?'));
+    $stmt = db()->prepare(
+        "SELECT id FROM categories WHERE type = ? AND id IN ($placeholders)"
+    );
+    $stmt->execute(array_merge([$type], $cleanIds));
+    $validIds = array_column($stmt->fetchAll(\PDO::FETCH_ASSOC), 'id');
+
+    if (count($validIds) !== count($cleanIds)) {
+        return ['ok' => false, 'error' => 'One or more IDs are invalid for this type.'];
+    }
+
+    $db = db();
+    $db->beginTransaction();
+    try {
+        $upd = $db->prepare('UPDATE categories SET sort_order = ? WHERE id = ?');
+        foreach ($cleanIds as $i => $id) {
+            $upd->execute([($i + 1) * 10, $id]);
+        }
+        $db->commit();
+        return ['ok' => true, 'error' => ''];
+    } catch (\Throwable $ex) {
+        $db->rollBack();
+        return ['ok' => false, 'error' => 'Database error.'];
+    }
+}
+
 // ═════════════════════════════════════════════════════════════════════
 // Series (Phase 11)
 // ═════════════════════════════════════════════════════════════════════

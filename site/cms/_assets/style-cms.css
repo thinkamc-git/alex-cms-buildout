@@ -123,9 +123,9 @@
   --type-live-session: var(--c-amber);
   --type-experiment:   var(--c-forest);
 
-  /* Experiment card surfaces (mirror design system) */
-  --c-experiment-prototype: #1c1028;
-  --c-experiment-concept:   #0a1f1a;
+  /* Field Work card surfaces (mirror design system) */
+  --c-experiment-experiment: #1c1028;
+  --c-experiment-case-study: #0a1f1a;
 
   /* Live green */
   --live-green: #3E7A54;
@@ -616,10 +616,10 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .pub-card-ft { display:flex; align-items:center; justify-content:space-between; padding-top:var(--space-8); border-top:var(--rule-faint); margin-top:auto; }
 .pub-card-meta { font-family:var(--font-cond); font-size:var(--text-micro); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
 .pub-card-arrow { font-size:14px; color:var(--ink-mid); }
-.pub-card.dark { background:var(--c-experiment-concept); border-color:color-mix(in srgb,var(--c-forest) 28%,var(--c-experiment-concept)); }
-.pub-card.dark.proto { background:var(--c-experiment-prototype); border-color:color-mix(in srgb,var(--c-violet) 28%,var(--c-experiment-prototype)); }
-.pub-card.dark:hover { border-color:color-mix(in srgb,var(--c-forest) 60%,var(--c-experiment-concept)); }
-.pub-card.dark.proto:hover { border-color:color-mix(in srgb,var(--c-violet) 60%,var(--c-experiment-prototype)); }
+.pub-card.dark { background:var(--c-experiment-case-study); border-color:color-mix(in srgb,var(--c-forest) 28%,var(--c-experiment-case-study)); }
+.pub-card.dark.proto { background:var(--c-experiment-experiment); border-color:color-mix(in srgb,var(--c-violet) 28%,var(--c-experiment-experiment)); }
+.pub-card.dark:hover { border-color:color-mix(in srgb,var(--c-forest) 60%,var(--c-experiment-case-study)); }
+.pub-card.dark.proto:hover { border-color:color-mix(in srgb,var(--c-violet) 60%,var(--c-experiment-experiment)); }
 .pub-card.dark .pub-card-title { color:#eef0ec; }
 .pub-card.dark .pub-card-summary { color:color-mix(in srgb,#eef0ec 55%,transparent); }
 .pub-card.dark .pub-card-ft { border-top-color:color-mix(in srgb,#eef0ec 14%,transparent); }
@@ -775,7 +775,7 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 /* ══ CATEGORIES ══ */
 .categories-layout { padding:var(--space-20) var(--space-24); overflow-y:auto; display:grid; grid-template-columns:1fr 1fr; gap:var(--space-24); }
 .cat-block { background:var(--surface); border:var(--rule-faint); border-radius:var(--r-card); padding:var(--space-20); box-shadow:0 1px 3px var(--ink-08); }
-.cat-block-title { font-family:var(--font-serif); font-style:italic; font-size:17px; font-weight:400; color:var(--primary); margin-bottom:2px; }
+.cat-block-title { font-family:var(--font-serif); font-style:italic; font-size:var(--text-h5); font-weight:400; color:var(--primary); margin-bottom:2px; }
 .cat-block-note { font-size:var(--text-meta); color:var(--muted); margin-bottom:var(--space-16); line-height:1.4; }
 /* Categories variant of the shared .cms-table partial (#7 + #8). The
    legacy .cat-table selector is kept as an alias for any inline-table
@@ -966,6 +966,14 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cms-table--cat tbody tr:focus-within .btn-icon-danger { visibility:visible; }
 /* Save + trash baseline-align with the row's input by sharing vertical-align */
 .cms-table--cat td.cell-actions .btn-icon { vertical-align:middle; }
+/* Drag-to-reorder: grip handle column */
+.cms-table--cat td.cat-grip-cell { width:28px; padding-left:var(--space-8); padding-right:4px; cursor:grab; }
+.cms-table--cat th.cat-grip-cell { width:28px; padding-left:var(--space-8); padding-right:4px; }
+.cms-table--cat tr[draggable="true"] { cursor:grab; }
+.cms-table--cat tr[draggable="true"]:active { cursor:grabbing; }
+.cms-table--cat tr.is-dragging { opacity:0.4; }
+/* Drop-line indicator — absolutely positioned overlay in .cat-block; no DOM insertion into the table so no layout shift */
+.cat-drop-line { position:absolute; left:0; right:0; height:2px; background:var(--primary); pointer-events:none; display:none; z-index:2; border-radius:1px; }
 
 /* ══ SERIES ══ */
 .series-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-16); padding:var(--space-20) var(--space-24); overflow-y:auto; }
@@ -1434,7 +1442,7 @@ button[disabled] .spinner { opacity:0.9; }
 .row-title:hover { color:var(--primary-hover); text-decoration:underline; }
 /* Phase 20.3: slug renders on its own line under the title — easier to
    scan than the inline " /slug" trailing the title text. */
-.row-slug { display:block; font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); margin-top:2px; }
+.row-slug { display:block; font-family:var(--font-mono); font-size:var(--text-micro); color:var(--muted); margin-top:3px; }
 .row-actions { display:inline-flex; align-items:center; gap:var(--space-6); justify-content:flex-end; }
 /* Pages list opts into always-visible row actions (no .row-actions-hover
    children). The class is a documentation marker — no extra style needed,

@@ -137,7 +137,7 @@ require __DIR__ . '/../partials/topbar.php';
               pattern="[a-z0-9\-]*"
               placeholder="auto-from-title">
             <p class="field-hint">
-              Becomes part of <code>/journal/&lt;slug&gt;</code>. Permanent once published.
+              Becomes part of <code>/field-notes/&lt;slug&gt;</code>. Permanent once published.
             </p>
           </div>
 

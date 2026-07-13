@@ -33,11 +33,11 @@
 .fp[data-cat="talk"]:hover            { border-color: var(--c-amber); color: var(--c-amber); }
 .fp[data-cat="workshop"]:hover        { border-color: var(--c-mauve); color: var(--c-mauve); }
 .fp[data-cat="masterclass"]:hover     { border-color: var(--c-purple); color: var(--c-purple); }
-.fp[data-cat="introspection"]:hover   { border-color: var(--c-violet); color: var(--c-violet); }
-.fp[data-cat="contemplation"]:hover   { border-color: var(--c-teal); color: var(--c-teal); }
-.fp[data-cat="insight"]:hover         { border-color: var(--c-ochre); color: var(--c-ochre); }
-.fp[data-cat="prototype"]:hover       { border-color: var(--c-experiment-prototype); color: var(--c-experiment-prototype); }
-.fp[data-cat="concept"]:hover         { border-color: var(--c-experiment-concept); color: var(--c-experiment-concept); }
+.fp[data-cat="observation"]:hover     { border-color: var(--c-violet); color: var(--c-violet); }
+.fp[data-cat="inquiry"]:hover         { border-color: var(--c-teal); color: var(--c-teal); }
+.fp[data-cat="principle"]:hover       { border-color: var(--c-ochre); color: var(--c-ochre); }
+.fp[data-cat="experiment"]:hover      { border-color: var(--c-experiment-experiment); color: var(--c-experiment-experiment); }
+.fp[data-cat="case-study"]:hover      { border-color: var(--c-experiment-case-study); color: var(--c-experiment-case-study); }
 .fp.on                                { background: var(--primary); border-color: var(--primary); color: var(--white); }
 .fp[data-cat="ux-industry"].on        { background: var(--c-terracotta); border-color: var(--c-terracotta); color: var(--white); }
 .fp[data-cat="leading-design"].on     { background: var(--c-forest); border-color: var(--c-forest); color: var(--white); }
@@ -45,11 +45,11 @@
 .fp[data-cat="talk"].on               { background: var(--c-amber); border-color: var(--c-amber); color: var(--white); }
 .fp[data-cat="workshop"].on           { background: var(--c-mauve); border-color: var(--c-mauve); color: var(--white); }
 .fp[data-cat="masterclass"].on        { background: var(--c-purple); border-color: var(--c-purple); color: var(--white); }
-.fp[data-cat="introspection"].on      { background: var(--c-violet); border-color: var(--c-violet); color: var(--white); }
-.fp[data-cat="contemplation"].on      { background: var(--c-teal); border-color: var(--c-teal); color: var(--white); }
-.fp[data-cat="insight"].on            { background: var(--c-ochre); border-color: var(--c-ochre); color: var(--white); }
-.fp[data-cat="prototype"].on          { background: var(--c-experiment-prototype); border-color: var(--c-experiment-prototype); color: var(--white); }
-.fp[data-cat="concept"].on            { background: var(--c-experiment-concept); border-color: var(--c-experiment-concept); color: var(--white); }
+.fp[data-cat="observation"].on        { background: var(--c-violet); border-color: var(--c-violet); color: var(--white); }
+.fp[data-cat="inquiry"].on            { background: var(--c-teal); border-color: var(--c-teal); color: var(--white); }
+.fp[data-cat="principle"].on          { background: var(--c-ochre); border-color: var(--c-ochre); color: var(--white); }
+.fp[data-cat="experiment"].on         { background: var(--c-experiment-experiment); border-color: var(--c-experiment-experiment); color: var(--white); }
+.fp[data-cat="case-study"].on         { background: var(--c-experiment-case-study); border-color: var(--c-experiment-case-study); color: var(--white); }
 
 /* ── Content status badges (.st-pub, .st-dft, .st-sch) ── */
 .st { display: inline-block; padding: 2px var(--space-8); border-radius: 2px; font-family: var(--font-mono); font-size: var(--text-micro); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }

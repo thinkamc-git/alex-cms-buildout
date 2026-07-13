@@ -381,7 +381,7 @@ $prevStage = $myStatusIdx > 0 ? $sessionStages[$myStatusIdx - 1] : null;
 $nextStage = $myStatusIdx >= 0 && $myStatusIdx < count($sessionStages) - 1
     ? $sessionStages[$myStatusIdx + 1] : null;
 
-$saveLabel = $status === 'published' ? 'Save changes' : 'Save ' . ucfirst($status);
+$saveLabel = $status === 'published' ? 'Publish changes' : 'Save ' . ucfirst($status);
 
 $fromStage = (string)($_GET['from_stage'] ?? '');
 $canUndo   = $fromStage !== '' && $myStatusIdx > 0;

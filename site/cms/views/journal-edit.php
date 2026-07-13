@@ -237,7 +237,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     exit;
                 }
                 if ($targetStage === 'published') {
-                    $stageMsg = 'Published — live at /journal/' . $slug;
+                    $stageMsg = 'Published — live at /field-notes/' . $slug;
                 }
                 header('Location: /cms/journals/edit?id=' . $id
                     . '&flash=' . rawurlencode($stageMsg)
@@ -301,7 +301,7 @@ $prevStage = $myStatusIdx > 0 ? $journalStages[$myStatusIdx - 1] : null;
 $nextStage = $myStatusIdx >= 0 && $myStatusIdx < count($journalStages) - 1
     ? $journalStages[$myStatusIdx + 1] : null;
 
-$saveLabel = $status === 'published' ? 'Save changes' : 'Save ' . ucfirst($status);
+$saveLabel = $status === 'published' ? 'Publish changes' : 'Save ' . ucfirst($status);
 
 $showIdeaNotesReadOnly = $status === 'draft';  // archived after Draft
 $showBody              = $status === 'draft' || $status === 'published';

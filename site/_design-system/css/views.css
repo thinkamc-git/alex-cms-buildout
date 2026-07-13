@@ -9,14 +9,14 @@
 .card[data-category="ux-industry"]    { --c-current: var(--c-terracotta); }
 .card[data-category="leading-design"] { --c-current: var(--c-forest); }
 .card[data-category="for-designers"]  { --c-current: var(--c-denim); }
-.card[data-category="introspection"]  { --c-current: var(--c-purple); }
-.card[data-category="contemplation"]  { --c-current: var(--c-denim); }
-.card[data-category="insight"]        { --c-current: var(--c-amber); }
+.card[data-category="observation"]    { --c-current: var(--c-purple); }
+.card[data-category="inquiry"]        { --c-current: var(--c-denim); }
+.card[data-category="principle"]      { --c-current: var(--c-amber); }
 .card[data-category="talk"]           { --c-current: var(--c-amber); }
 .card[data-category="workshop"]       { --c-current: var(--c-mauve); }
 .card[data-category="masterclass"]    { --c-current: var(--c-purple); }
-.card[data-category="prototype"]      { --c-current: var(--c-experiment-prototype); }
-.card[data-category="concept"]        { --c-current: var(--c-experiment-concept); }
+.card[data-category="experiment"]     { --c-current: var(--c-experiment-experiment); }
+.card[data-category="case-study"]     { --c-current: var(--c-experiment-case-study); }
 
 /* ── Unified card category label — shared font/size/positioning across
    articles, journal, events, and experiments. Variants only override colour. ── */
@@ -213,8 +213,8 @@ a.card .series-pill, .card a.series-pill { /* defensive: ensure no underline whe
 .od-excerpt { font-size: var(--text-sm); font-weight: 400; line-height: 1.65; color: var(--white-45); }
 .od-tag { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-label); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 9px; border-radius: 3px; border: 1px solid var(--white-15); color: var(--white-45); white-space: nowrap; }
 .od-meta { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--white-45); }
-.scrim-proto { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(28,16,40,0) 0%, rgba(28,16,40,0.08) 38%, rgba(28,16,40,0.97) 100%); }
-.scrim-concept { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(10,31,26,0) 0%, rgba(10,31,26,0.2) 42%, rgba(10,31,26,0.98) 100%); }
+.scrim-experiment { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(28,16,40,0) 0%, rgba(28,16,40,0.08) 38%, rgba(28,16,40,0.97) 100%); }
+.scrim-case-study { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(10,31,26,0) 0%, rgba(10,31,26,0.2) 42%, rgba(10,31,26,0.98) 100%); }
 .exp-content { position: relative; z-index: 2; display: flex; flex-direction: column; flex: 1; }
 .cta-launch { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--pad); background: rgba(0,0,0,0.4); border-top: 1px solid var(--white-06); }
 .cta-launch .label { font-family: 'Barlow Condensed', sans-serif; font-size: var(--text-meta); font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--white); }

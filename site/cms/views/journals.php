@@ -79,7 +79,7 @@ require __DIR__ . '/../partials/topbar.php';
       <?php
       $title    = 'Journals';
       $subtitle = 'Short, declarative entries. Each gets a per-category entry number on first publish.';
-      $actions  = '<a href="/journal/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
+      $actions  = '<a href="/field-notes/" target="_blank" rel="noopener" class="btn-sec">View live index ↗</a>'
                 . '<a href="/cms/journals/new" class="btn-pri">+ New Journal</a>';
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -162,7 +162,7 @@ require __DIR__ . '/../partials/topbar.php';
             $isLiveRow = (string)($j['status'] ?? '') === 'published'
                       && (string)($j['published_status'] ?? '') !== 'scheduled';
             $liveBtn = $isLiveRow && $slug !== ''
-                ? '<a href="/journal/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
+                ? '<a href="/field-notes/' . $e($slug) . '" target="_blank" rel="noopener" class="btn-sec btn-tiny row-action-live" title="Open the live published page">Live ↗</a>'
                 : '';
 
             $actionsHtml = '<div class="row-actions">'
@@ -230,7 +230,7 @@ require __DIR__ . '/../partials/topbar.php';
           <div class="content-block-header">
             <div>
               <span class="content-block-label">Published</span>
-              <span class="content-block-sublabel">Live at /journal/&lt;slug&gt;</span>
+              <span class="content-block-sublabel">Live at /field-notes/&lt;slug&gt;</span>
             </div>
             <span class="content-block-count"><?= (int)count($published) ?> entries</span>
           </div>

@@ -135,9 +135,9 @@ $grid_rows_for = static function (array $sec): int {
           $eyebrowText = $eyebrowParts !== [] ? strtoupper(implode(' ', $eyebrowParts)) : '';
           $hUrlBase = [
               'article'      => '/writing/',
-              'journal'      => '/journal/',
+              'journal'      => '/field-notes/',
               'live-session' => '/live-sessions/',
-              'experiment'   => '/experiments/',
+              'experiment'   => '/field-work/',
           ][$hType] ?? '/writing/';
           $hUrl   = $hSlug !== '' ? $hUrlBase . $hSlug : '#';
           $hDate  = $hPub !== '' ? strtoupper(date('M j, Y', strtotime($hPub))) : '';

@@ -113,9 +113,9 @@
   --c-mauve:      #6f4b61;   /* hue 320° · dusty mauve */
   --c-rose:       #7a5160;   /* hue 345° · muted rose */
 
-  /* Experiment card backgrounds (deep tonal solids behind dark previews) */
-  --c-experiment-prototype: #1c1028;
-  --c-experiment-concept:   #0a1f1a;
+  /* Field Work card backgrounds (deep tonal solids behind dark previews) */
+  --c-experiment-experiment: #1c1028;
+  --c-experiment-case-study: #0a1f1a;
 
   /* Mid-grey ramp (between secondary and muted) */
   --ink-mid:   #646361;   /* was #656360 */

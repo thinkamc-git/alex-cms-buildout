@@ -231,9 +231,9 @@ function resolve_nav_target(array $item): ?string
             $type_slug = (string)$row['type'];
             $prefix = match ($type_slug) {
                 'article'      => '/writing/',
-                'journal'      => '/journal/',
+                'journal'      => '/field-notes/',
                 'live-session' => '/live-sessions/',
-                'experiment'   => '/experiments/',
+                'experiment'   => '/field-work/',
                 default        => '/' . $type_slug . '/',
             };
             return $prefix . (string)$row['slug'] . '/';

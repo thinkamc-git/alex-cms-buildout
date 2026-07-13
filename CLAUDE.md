@@ -56,8 +56,12 @@ Keep context cost low: read this file, then only the canonical doc relevant to t
 - **`docs/DEPLOYMENT.md`** — deploy + cron + backup ops. Read before any deploy.
 - **`docs/APPLIED-SPECS.md`** — how to build "Applied" concept pages (the sandbox-driven process).
 - **`docs/RELEASES.md`** — release log.
+- **`docs/RESUME-SYSTEM.md`** — the Library → Résumés CMS system (draft/publish/snapshot/PDF).
+- **`docs/SESSION-HYGIENE.md`** — agent work logs, docs freshness, git push discipline. Read at the start of a session if it's unclear what other sessions/agents have been touching, or before any multi-file consolidation.
 
-Build-era history (the full 24-phase plan, the DS + mobile audits, phase notes, onboarding) lives in **`docs/_completed/`** — history only, not part of the working set.
+Build-era history (the full 24-phase plan, the DS + mobile audits, phase notes, onboarding) lives in **`docs/_completed/`** — history only, not part of the working set. **`docs/_agent-logs/`** holds one work-log file per session (never a shared file multiple sessions edit — see SESSION-HYGIENE.md §1); closed-out logs move to `docs/_agent-logs/_archive/`.
+
+**Git: commit and push promptly.** A commit alone only exists on this machine — push to `origin` right after committing (or after a small batch of related commits), don't let local `main` sit far ahead of `origin/main`. See SESSION-HYGIENE.md §4.
 
 ---
 
@@ -77,6 +81,9 @@ alex-cms-buildout/
 │   ├── BUILD-DISCIPLINE.md         ← lean-build rule + sandbox→promote→archive loop
 │   ├── DESIGN.md · DS-IA.md · MOTION.md      ← design system brief / IA / motion
 │   ├── AUTH-SECURITY.md · DEPLOYMENT.md · APPLIED-SPECS.md · RELEASES.md
+│   ├── RESUME-SYSTEM.md · SESSION-HYGIENE.md
+│   ├── _agent-logs/                ← one work-log file per session · never shared/co-edited
+│   │   └── _archive/               ← closed-out session logs
 │   ├── _completed/                 ← build-era archive (full plan, audits, onboarding) · history only
 │   └── design-mockups/             ← sandbox area for new work (intake → promote)
 │       └── _completed/             ← archived sandboxes · do NOT reference as source of truth

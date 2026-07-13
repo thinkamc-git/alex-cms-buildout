@@ -33,10 +33,21 @@ $csrf_token = Csrf::token();
 
 $errors = [];
 $flash  = '';
+// Row Save uses fetch() instead of a real form submit (site/cms/views/
+// categories.php inline script below) so saving one row doesn't blow away
+// unsaved edits sitting in other rows via a full page reload. Only the
+// 'update' action supports this — add/delete still redirect normally.
+$isAjax = (($_POST['ajax'] ?? '') === '1');
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Session expired. Reload the page and try again.';
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => $errors[0]]);
+            exit;
+        }
     } else {
         $action = (string)($_POST['action'] ?? '');
         if ($action === 'add') {
@@ -55,6 +66,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             ]);
             $flash = $res['ok'] ? 'Category updated.' : '';
             if (!$res['ok']) $errors[] = $res['error'];
+
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                if (!$res['ok']) http_response_code(400);
+                echo json_encode([
+                    'ok'     => $res['ok'],
+                    'error'  => $res['ok'] ? '' : $res['error'],
+                    'id'     => $res['id'],
+                    'label'  => (string)($_POST['label']  ?? ''),
+                    'colour' => (string)($_POST['colour'] ?? ''),
+                ]);
+                exit;
+            }
         } elseif ($action === 'delete') {
             $res = delete_category((int)($_POST['id'] ?? 0));
             $flash = $res['ok'] ? 'Category deleted.' : '';
@@ -483,6 +507,97 @@ require __DIR__ . '/../partials/topbar.php';
         if (snap) snap.forEach(function (el) { tbody.appendChild(el); });
         alert('Reorder failed: ' + (err && err.message ? err.message : 'unknown error'));
       });
+    });
+  });
+})();
+</script>
+
+<!-- Row Save without a full page reload — 2026-07-12, rebuilt after the
+     first version shipped with real bugs (button lost its styling because
+     .btn-sec was never restored after .btn-pri was removed; the colour
+     circle never updated because the colour input was looked up inside
+     the wrong element). dirty-flip.js's default behaviour is a real form
+     submit (full page reload), right for every other CMS view but wrong
+     here: with several rows editable at once, saving one wipes out
+     unsaved edits sitting in the others.
+     Rather than racing dirty-flip.js's click handler (the first version's
+     mistake — fragile, depended on script-load ordering), this listens
+     for the form's `submit` event instead. dirty-flip.js still runs
+     first exactly as on every other page — flips the button to .btn-pri,
+     shows "Saving…", disables it, injects the action=update hidden
+     field, then calls form.requestSubmit() — and requestSubmit() is what
+     actually fires `submit`, which this intercepts deterministically
+     regardless of what triggered it. Only the network step changes: a
+     fetch() instead of a real navigation, same JSON-response pattern as
+     the reorder handler above. -->
+<script>
+(function () {
+  'use strict';
+  var csrf = '<?= $e($csrf_token) ?>';
+
+  document.querySelectorAll('.cms-table--cat td.cell-actions [data-save-btn]').forEach(function (btn) {
+    var formId = btn.getAttribute('form');
+    var form   = formId ? document.getElementById(formId) : btn.closest('form');
+    if (!form) return;
+
+    var row    = btn.closest('tr');
+    var swatch = row ? row.querySelector('.cat-swatch') : null;
+    // The colour input is cross-bound via form="row-N" from OUTSIDE the
+    // form element (same as the label input) — it lives in the table row,
+    // not inside <form>. Looking it up via form.querySelector() (the
+    // first version's bug) always returns null.
+    var colourInput = row ? row.querySelector('[data-colour-input]') : null;
+
+    function resetIfAlreadySaved() {
+      if (!btn.hasAttribute('data-save-state')) return;
+      btn.removeAttribute('data-save-state');
+      btn.disabled = false;
+      btn.textContent = 'Save';
+      btn.classList.remove('btn-pri'); // dirty-flip's own listener (bound
+      btn.classList.add('btn-sec');    // the same way, below) re-flips it dirty
+    }
+    // Bind directly to each form-associated control (via form.elements),
+    // not a delegated form-level listener — the label input and the
+    // colour picker's hidden input are cross-bound via form="row-N" from
+    // OUTSIDE this <form> element (it's a disconnected element rendered
+    // elsewhere; they live in the table row), so their change/input
+    // events never actually bubble up to a listener sitting on the form.
+    // Mirrors dirty-flip.js's own binding for exactly this reason.
+    for (var i = 0; i < form.elements.length; i++) {
+      var el  = form.elements[i];
+      var tag = el.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') continue;
+      var evt = (tag === 'SELECT' || el.type === 'hidden') ? 'change' : 'input';
+      el.addEventListener(evt, resetIfAlreadySaved);
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      btn.setAttribute('data-save-state', 'saving');
+
+      var body = new FormData(form);
+      body.set('csrf_token', csrf);
+      body.set('action', 'update');
+      body.set('ajax', '1');
+
+      fetch('/cms/categories', { method: 'POST', body: body, credentials: 'same-origin' })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); })
+        .then(function (res) {
+          if (!res.ok || !res.json.ok) throw new Error(res.json.error || 'Save failed');
+          if (swatch && colourInput) {
+            swatch.style.background = 'var(--c-' + colourInput.value + ')';
+          }
+          btn.textContent = 'Saved';
+          btn.setAttribute('data-save-state', 'saved');
+          // Stays showing "Saved" (no hover needed) until the row is
+          // edited again or the page is reloaded — no auto-revert timer.
+        })
+        .catch(function (err) {
+          btn.removeAttribute('data-save-state');
+          btn.textContent = 'Save';
+          btn.disabled = false;
+          alert('Save failed: ' + (err && err.message ? err.message : 'unknown error'));
+        });
     });
   });
 })();

@@ -859,11 +859,23 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
    property overrides. */
 
 /* Categories table: trash icon hover-reveal — same affordance as the
-   library tables. Disabled (in-use) trash stays visible since it's
-   communicating "you can't delete this". */
-.cms-table--cat .btn-icon-danger { visibility: hidden; }
-.cms-table--cat tr:hover .btn-icon-danger,
-.cms-table--cat tr:focus-within .btn-icon-danger { visibility: visible; }
+   library tables. Covers BOTH trash variants — the real clickable one
+   (.btn-icon-danger) and the disabled in-use placeholder (plain
+   .btn-icon, no distinguishing class) — every category on the page
+   currently has usage > 0, so the disabled variant was the only one
+   ever visible, and it had no hover-gating CSS applied to it at all
+   before this (2026-07-12): confirmed as the actual cause of "trash
+   always showing" after the .btn-icon-danger-only rule below appeared
+   to fix nothing. On request, no exception for the disabled state —
+   hover-only always, it just stays non-clickable while shown.
+   Keyboard reveal is scoped to .cell-actions (not the whole row) — Save
+   lives there and is always focusable, so tabbing into the actions cell
+   still reveals trash for keyboard users. Scoping to the whole row via
+   :focus-within would keep trash stuck visible any time focus was still
+   sitting in the label input or colour picker elsewhere in the row. */
+.cms-table--cat td.cell-actions .btn-icon { visibility: hidden; vertical-align: middle; }
+.cms-table--cat tr:hover td.cell-actions .btn-icon,
+.cms-table--cat td.cell-actions:focus-within .btn-icon { visibility: visible; }
 /* Phase 21.7 #3: cat-add-row is now a single horizontal line of separately-
    bordered fields with consistent 30px heights — input | colour pill | Add.
    All three children align via box-sizing:border-box + matching paddings. */
@@ -950,22 +962,28 @@ textarea.field-input { min-height:80px; resize:vertical; line-height:1.6; }
 .cat-colour-opt:hover { filter: brightness(1.12); }
 .cat-colour-opt.is-selected { outline: 2px solid #fff; outline-offset: -3px; }
 
-/* Phase 21.7 — categories row actions: Save always visible but disabled-
-   looking (faded + pointer-events:none) until the dirty-flip promotes it
-   to .btn-pri. Trash hidden until row-hover. Mirrors author's preference:
-   the affordance is always present so users see the action exists. */
+/* Categories row actions — 2026-07-12 revision. Save now matches every
+   other CMS table's icon-button pattern: hidden until row-hover or the
+   actions cell has focus, same as the trash icon below (previously Save
+   was always visible, just faded — that was a deliberate earlier choice,
+   changed here on request). Once a row is actually dirty (.btn-pri, set
+   by dirty-flip.js the moment an edit is made) Save stays visible
+   regardless of hover, all the way through Saving/Saved — clearing only
+   on the next full page load, or the moment the row is edited again
+   after a completed save (data-save-state, set by the row-save script,
+   resets that back to a fresh hover-gated Save). */
 .cms-table--cat td.cell-actions [data-save-btn] {
-  opacity:0.45; pointer-events:none; vertical-align:middle;
-  transition: opacity 0.15s;
+  visibility: hidden; pointer-events: none; vertical-align: middle;
+}
+.cms-table--cat tr:hover td.cell-actions [data-save-btn],
+.cms-table--cat td.cell-actions:focus-within [data-save-btn],
+.cms-table--cat td.cell-actions [data-save-btn].btn-pri,
+.cms-table--cat td.cell-actions [data-save-btn][data-save-state] {
+  visibility: visible;
 }
 .cms-table--cat td.cell-actions [data-save-btn].btn-pri {
-  opacity:1; pointer-events:auto;
+  pointer-events: auto;
 }
-.cms-table--cat tbody tr .btn-icon-danger { visibility:hidden; }
-.cms-table--cat tbody tr:hover .btn-icon-danger,
-.cms-table--cat tbody tr:focus-within .btn-icon-danger { visibility:visible; }
-/* Save + trash baseline-align with the row's input by sharing vertical-align */
-.cms-table--cat td.cell-actions .btn-icon { vertical-align:middle; }
 /* Drag-to-reorder: grip handle column */
 .cms-table--cat td.cat-grip-cell { width:28px; padding-left:var(--space-8); padding-right:4px; cursor:grab; }
 .cms-table--cat th.cat-grip-cell { width:28px; padding-left:var(--space-8); padding-right:4px; }

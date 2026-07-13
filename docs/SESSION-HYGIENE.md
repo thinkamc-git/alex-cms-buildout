@@ -44,9 +44,32 @@ STATUS: active | handed-off | closed
 LAST TOUCHED: <date>
 ```
 
-**Body**, kept short: goal, what got touched (files / DB / **direct server
-pushes — this is the field that would have prevented the 2026-07-12
-incident**), decisions made, handoff notes for whoever picks this up next.
+**Body is a real timeline, not a summary written at the end.** Append an
+entry *as each thing happens*, not reconstructed from memory later —
+reconstruction is exactly the failure this doc exists to prevent. Two kinds
+of entry:
+
+- **Anything committed to git** — don't hand-write a timestamp, **reference
+  the commit hash** (`git log` gives you the exact one). The hash is a
+  verifiable fact; a hand-typed timestamp next to it is just a second copy
+  that can drift or be wrong.
+  ```
+  ### 96c0441 — Content-type rename
+  Verified matching both live servers before committing. Pushed immediately.
+  ```
+- **Anything that is *not* a commit** — a direct server push, a DB write, an
+  SSH session — has no other record anywhere, so it needs an explicit
+  timestamp (`date` on the shell, or whatever real clock is available).
+  ```
+  ### 2026-07-12 14:32 — Journal category migration applied to prod
+  Ran migrate_journal_categories.php via SSH (scp'd, deleted after use — see
+  §2). 4 new categories added, 5 entries reassigned. No git commit — data
+  only, not code.
+  ```
+
+Close with goal/decisions/handoff-notes prose if useful, but the timeline of
+timestamped-or-hash-referenced entries is the part that actually earns this
+the name "log."
 
 **On close-out:** update `STATUS: closed`, then move the file into
 `docs/_agent-logs/_archive/`. Same shape as the existing sandbox workflow

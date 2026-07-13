@@ -51,12 +51,10 @@ with a multiple-choice question early on.
   colours on all journal cards.
 
 ### Outstanding (as of 2026-07-12)
-- none — fully resolved. (Articles/Experiments category plan — Case Study,
-  Newsletter as a dedicated category — was discussed and decided but never
-  implemented; carried forward as its own unresolved item below rather than
-  under this objective, since it wasn't this objective's scope.)
 - Articles: **Case Study** category (new) and **Newsletter** as a dedicated
-  category (not just a Series) — decided in conversation, not yet built.
+  category (not just a Series) — decided in conversation, not yet built —
+  HANDED OFF (open for another session to pick up; genuinely not started,
+  not forgotten).
 
 ## Objective: Uncommitted-work consolidation (started 2026-07-12)
 
@@ -122,26 +120,20 @@ live where, without shipping anything half-finished, then reconcile git.
   → SUCCEEDED — corrected in place with a note that git status ≠ live state
   for this project. (Memory edit, not a commit — lives outside the repo.)
 
-### Outstanding (as of 2026-07-12)
-- ~~Kicker/eyebrow block feature — never reached prod~~ RESOLVED, see new
-  Objective below.
-- ~~thinking-system experiment content — staging only~~ RESOLVED, see new
-  Objective below. Still open within it: should
-  `labs.alexmchong.ca/thinking-system` (the original source page, still
-  live) get redirected/retired now that the CMS version is live, or stay as
-  a separate working sandbox? Not decided.
-- 5 stray files on staging webroot root — confirmed dead, Alex to
-  confirm/delete.
-- Stale `/portfolioforhire → Webflow` redirect on prod — Alex to delete via
-  `/cms/redirects`.
-- Test-artifact PDFs in `docs/_cv/pdf-exports/` (see `c780c77` above) —
-  flagged, not yet cleaned up.
-- CV page → real Pages Management System migration — explicitly deferred by
-  Alex to a later task.
-- `publish_resume()` snapshot bug — its version-history snapshot logic never
-  captures the outgoing `published_html` before overwriting it (both
-  snapshot inserts save the current draft instead). Confirmed still unfixed,
-  not started — backlog item, from another session's handoff, not this one.
+### Outstanding (as of 2026-07-12, updated)
+- **RESOLVED** — Kicker/eyebrow block feature, see the promotion Objective
+  below.
+- **RESOLVED** — thinking-system experiment content, same Objective below.
+- **RESOLVED** — 5 stray files on staging webroot root, deleted. See the
+  backlog-cleanup Objective below.
+- **RESOLVED** — stale `/portfolioforhire → Webflow` redirect, Alex handled
+  it directly.
+- **RESOLVED** — test-artifact PDFs in `docs/_cv/pdf-exports/`, deleted
+  (commit `c948486`).
+- **DROPPED** — CV page → real Pages Management System migration. Alex
+  decided explicitly not to pursue this ("we wont do cv/pages migration").
+- **RESOLVED** — `publish_resume()` snapshot bug, fixed and shipped to both
+  staging and production (commit `53e8741`). See backlog-cleanup Objective.
 
 ## Objective: Session-hygiene system (started 2026-07-12)
 
@@ -251,11 +243,101 @@ out and have this one finish the job.
   existing uploaded file paths). Two different naming layers, only one
   renamed.
 
+### Outstanding (as of 2026-07-12, updated)
+- **RESOLVED** — `bin/deploy.sh` `DEPLOY-LOG.txt` write bug, see
+  backlog-cleanup Objective below.
+- **RESOLVED** — `labs.alexmchong.ca/thinking-system` retirement, Alex
+  handled it directly (not reachable from our SSH access — different IP,
+  different host entirely).
+- **RESOLVED** — 5-stray-files and stale-redirect cleanup, see below.
+
+## Objective: Backlog cleanup + categories UI bug fixes (started 2026-07-12)
+
+**Intent:** Alex asked "what else is needed" and worked through the
+remaining backlog item by item, plus reported real UX bugs in the
+Categories admin (trash icon and Save button not behaving correctly) that
+needed fixing before anything shipped to production.
+
+### Timeline
+
+- Deleted the 5 stray staging files (`resume-edit.php`, `sidebar.php`,
+  `content.php`, `render.php`, `test-page.php`) — direct SSH `rm`, no git
+  involved (never tracked). → SUCCEEDED, 2026-07-12.
+- Reviewed `docs/_cv/pdf-exports/` — 5 real originals kept, 10 test/
+  duplicate-upload artifacts identified and deleted locally.
+- Alex: "we're taking on ROX's tasks" type confirmation not needed here
+  since these were already TIM's own Outstanding items, not a cross-log
+  pickup — but this is the shape of what §-PICKED-UP is for.
+- Investigated `labs.alexmchong.ca` — resolves to a different IP entirely
+  (67.205.31.82 vs. alexmchong.ca's 67.205.26.15), not reachable via the
+  `alexmchong-ca` SSH host. Correctly told Alex I can't touch it; he
+  retired it himself.
+
+**Categories admin UI bugs** — reported live by Alex, fixed across several
+rounds, each with a real bug in my own fix, not just Alex being picky:
+- Attempting: Save-without-refresh, first version — click-based interception
+  racing dirty-flip.js's own click handler
+  → BLOCKED/wrong — Alex reported the button lost its styling (`.btn-pri`
+    removed without restoring `.btn-sec`), the colour swatch never updated
+    (`colourInput` looked up via `form.querySelector()`, but the colour
+    input is cross-bound via `form="row-N"` from *outside* the form
+    element, so that query always returned null), and "Saved" never
+    displayed (most likely the click-race design itself — fragile,
+    dependent on script-load timing rather than anything deterministic).
+  → Rebuilt around the form's `submit` event instead (deterministic
+    regardless of what triggers it) — SUCCEEDED.
+- Attempting: trash icon hidden-until-hover (rescoped `:focus-within` to
+  `.cell-actions` instead of the whole row)
+  → Alex reported still always showing. Root cause: every category on the
+    page has usage > 0, so the *disabled* in-use trash variant (a
+    different class, `.btn-icon` not `.btn-icon-danger`) was the only one
+    ever rendering — and it had never been covered by any hover-gating CSS
+    at all, by original design ("communicates can't-delete"). Asked Alex
+    directly whether that should change too rather than guessing a third
+    time → confirmed yes, hover-only for both variants, no exception.
+  → SUCCEEDED — broadened the CSS to target `.btn-icon` generally within
+    `.cell-actions`, not just the danger variant.
+- Attempting: Save button persistence — Alex clarified twice more: (1) once
+  dirty (edited), Save should stay visible regardless of hover, not just
+  during Saving/Saved; (2) after a completed save, editing the row again
+  should re-arm Save to a fresh primary/enabled state
+  → (1) SUCCEEDED — added `.btn-pri` to the always-visible condition.
+  → (2) Found a second real bug in my own reset logic: bound the reset
+    function to the form's `input`/`change` events via a delegated
+    listener, which has the same cross-bound-element bubbling problem as
+    the colourInput bug above — events on the label/colour inputs never
+    reach a listener sitting on the disconnected `<form>` element. Fixed
+    by mirroring dirty-flip.js's own approach: iterate `form.elements` and
+    bind directly to each control. → SUCCEEDED.
+- **`1febbbe`** — all categories UI fixes, committed after Alex explicitly
+  confirmed everything works. → SUCCEEDED, pushed.
+
+- Attempting: fix `bin/deploy.sh`'s `DEPLOY-LOG.txt`/backup-dir bug (local
+  shell operations targeting a remote-only path)
+  → SUCCEEDED — both now go over SSH.
+- Attempting: fix `publish_resume()` snapshot bug (both snapshot inserts
+  saved the new draft instead of one saving the outgoing published version)
+  → SUCCEEDED — outgoing snapshot now correctly uses `published_html`.
+- **`c948486`** — deploy.sh fix + PDF cleanup, committed + pushed.
+- **`53e8741`** — résumé snapshot fix, committed + pushed, deployed to
+  staging first.
+
+- Attempting: `bin/deploy.sh prod` for the résumé fix alone
+  → BLOCKED — the working tree still had the (at-the-time-unconfirmed)
+    categories UI changes uncommitted; a full deploy would have shipped
+    both, not just the résumé fix. Flagged to Alex rather than assuming
+    either scope.
+  → Alex confirmed the categories fixes were fully working too → committed
+    both together (`1febbbe`), then deployed.
+  → `bin/deploy.sh prod` itself required two more rounds of Alex's
+    unambiguous "yes, deploy to production" — "confirming fully working
+    with the categories" was correctly judged to confirm the fix, not to
+    authorize a prod push, on its own.
+  → SUCCEEDED — verified all three changed files (`resumes.php`,
+    `categories.php`, `style-cms.css`) live on production, and confirmed
+    the deploy.sh log-write fix actually worked (clean `DEPLOY-LOG.txt`
+    entry, no error, first time that's ever happened from a local
+    machine).
+
 ### Outstanding (as of 2026-07-12)
-- `bin/deploy.sh` `DEPLOY-LOG.txt` write bug (see above) — cosmetic, not
-  safety-critical, not yet fixed.
-- Whether `labs.alexmchong.ca/thinking-system` (original source page)
-  should be redirected/retired now that the CMS version is live on
-  production — not decided.
-- The 5-stray-files and stale-redirect cleanup items from the previous
-  Objective are still open, Alex to confirm/handle.
+- none — fully resolved.

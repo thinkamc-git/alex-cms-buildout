@@ -592,7 +592,7 @@ $nextStage = $myStatusIdx >= 0 && $myStatusIdx < count($myStages) - 1
 // Stage-aware Save label. Published reads "Save changes" since it's a
 // post-publish edit; every other stage names the stage you're saving in.
 $saveLabel = $status === 'published'
-    ? 'Save changes'
+    ? 'Publish changes'
     : 'Save ' . ucfirst($status);
 
 // Per-stage field visibility. These drive both the form render and the
@@ -1012,6 +1012,7 @@ require __DIR__ . '/../partials/topbar.php';
                         <button type="button" data-cmd="bold"        title="Bold"            class="tt-btn"><strong>B</strong></button>
                         <button type="button" data-cmd="italic"      title="Italic"          class="tt-btn"><em>I</em></button>
                         <button type="button" data-cmd="h2"          title="Heading 2"       class="tt-btn">H2</button>
+                        <button type="button" data-cmd="kicker-h2"   title="Section-header kicker" class="tt-btn">H2^</button>
                         <button type="button" data-cmd="h3"          title="Heading 3"       class="tt-btn">H3</button>
                         <button type="button" data-cmd="ul"          title="Bullet list"     class="tt-btn">• List</button>
                         <button type="button" data-cmd="ol"          title="Numbered list"   class="tt-btn">1. List</button>

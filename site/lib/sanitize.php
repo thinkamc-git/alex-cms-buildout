@@ -7,7 +7,8 @@ declare(strict_types=1);
  * Phase 6a Decision: the allowlist must match the Tiptap toolbar EXACTLY,
  * with no extras. Toolbar surface area:
  *   bold (strong), italic (em), H2, H3, ul/li, ol/li, link (a[href]),
- *   blockquote, inline code (code), muted-word (span.m), image (img).
+ *   blockquote, inline code (code), muted-word (span.m), image (img),
+ *   section-header kicker (p.kicker).
  *
  * The function uses DOMDocument so we work on a real parse tree rather
  * than regexes. Anything not on the allowlist is unwrapped (kept as text
@@ -32,7 +33,7 @@ declare(strict_types=1);
  * permitted — see filter logic below.
  */
 const SANITIZE_ALLOWED = [
-    'p'          => [],
+    'p'          => ['class'],   // restricted to class="kicker" below
     'strong'     => [],
     'em'         => [],
     'h2'         => [],
@@ -167,6 +168,11 @@ function sanitize_walk(DOMNode $node): void
             } elseif ($name === 'class' && $tag === 'span') {
                 // The only legal span class is "m" (muted-word).
                 if (trim($child->getAttribute('class')) !== 'm') {
+                    $child->removeAttribute('class');
+                }
+            } elseif ($name === 'class' && $tag === 'p') {
+                // The only legal p class is "kicker" (section-header label).
+                if (trim($child->getAttribute('class')) !== 'kicker') {
                     $child->removeAttribute('class');
                 }
             } elseif ($name === 'data-size' && ($tag === 'figure' || $isHtmlEmbed)) {

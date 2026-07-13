@@ -689,6 +689,29 @@ a.article-series-pill:hover {
   color: var(--primary);
   margin-top: var(--space-48);
 }
+
+/* Kicker — small label directly preceding an H2, for a repeating in-body
+   section header ("The problem" → "Projects fail before they begin").
+   Distinct from .index-eyebrow/.editorial-hero-eyebrow/.group-header-eyebrow
+   (blocks.css) — those are built for listing/hero contexts, not a pattern
+   repeated many times down one long body. Not category-tinted (--c-current)
+   on purpose — a kicker used seven times down an article shouldn't compete
+   with the color the rest of the page uses to signal category. */
+.article-prose .kicker {
+  font-family: var(--font-cond);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--secondary);
+  margin-top: var(--space-48);
+  margin-bottom: var(--space-12);
+}
+/* The H2 immediately following a kicker owns no extra top margin — the
+   kicker already carries the section-break spacing above the pair. */
+.article-prose .kicker + h2 {
+  margin-top: 0;
+}
 .article-prose h3 {
   font-size: var(--text-body-lg);
   font-weight: 600;

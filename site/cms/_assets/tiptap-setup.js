@@ -18,6 +18,14 @@
 // contents through untouched. See the HtmlEmbed node + sanitize.php for
 // the reasoning.
 //
+// Kicker (added later, both Articles and Experiments): the "H2^" button
+// toggles the current block to/from <p class="kicker"> — same toggleNode
+// pattern H2/H3 use, just to 'kicker' instead of 'heading'. A small label
+// for a repeating in-body section header. Not required to pair with an H2;
+// if one immediately follows, .article-prose .kicker + h2 (blocks.css)
+// zeroes that H2's own top margin so the pair reads as one unit — but the
+// kicker works standalone too, same as any other paragraph-level block.
+//
 // Heading levels are restricted to [2, 3] because the article template
 // reserves <h1> for the title block — body headings must be H2 or H3.
 
@@ -443,6 +451,37 @@ const HtmlEmbed = Node.create({
 });
 
 /**
+ * Custom block node for the section-header kicker: <p class="kicker">…</p>.
+ *
+ * A plain paragraph variant, not an atom — behaves exactly like a normal
+ * paragraph (editable inline text, no NodeView) so it stays "simple html
+ * tags" for the author. The "H2^" toolbar button inserts one of these
+ * immediately followed by an H2; the design system's .kicker + h2 rule
+ * (blocks.css) handles the pairing spacing automatically.
+ */
+const Kicker = Node.create({
+  name: 'kicker',
+  group: 'block',
+  content: 'inline*',
+  parseHTML() {
+    return [{ tag: 'p.kicker' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['p', mergeAttributes(HTMLAttributes, { class: 'kicker' }), 0];
+  },
+  addCommands() {
+    return {
+      // toggleNode is the same core primitive Heading's own toggleHeading
+      // uses internally — converts the current block to/from 'kicker' vs
+      // 'paragraph', exactly like the H2/H3 buttons toggle to/from heading.
+      // No H2 is created or required; pairing with one is optional (see
+      // the .kicker + h2 rule in blocks.css).
+      toggleKicker: () => ({ commands }) => commands.toggleNode(this.name, 'paragraph'),
+    };
+  },
+});
+
+/**
  * Custom inline mark for muted-word: <span class="m">…</span>.
  *
  * Tiptap stores this as a mark (not a node) so it composes with bold/italic
@@ -506,6 +545,7 @@ export function setupTiptap({ mount, fallback, toolbar, uploadUrl, csrfToken }) 
       Figure,
       HtmlEmbed,
       Muted,
+      Kicker,
     ],
     content: fallback.value,
     onUpdate({ editor }) {
@@ -563,6 +603,7 @@ function runCommand(cmd, editor, ctx) {
     case 'italic':     chain.toggleItalic().run(); break;
     case 'h2':         chain.toggleHeading({ level: 2 }).run(); break;
     case 'h3':         chain.toggleHeading({ level: 3 }).run(); break;
+    case 'kicker-h2':  chain.toggleKicker().run(); break;
     case 'ul':         chain.toggleBulletList().run(); break;
     case 'ol':         chain.toggleOrderedList().run(); break;
     case 'blockquote': chain.toggleBlockquote().run(); break;

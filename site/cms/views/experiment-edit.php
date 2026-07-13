@@ -298,7 +298,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     exit;
                 }
                 if ($targetStage === 'published') {
-                    $stageMsg = 'Published — live at /experiments/' . $slug;
+                    $stageMsg = 'Published — live at /field-work/' . $slug;
                 }
                 header('Location: /cms/experiments/edit?id=' . $id
                     . '&flash=' . rawurlencode($stageMsg)
@@ -371,7 +371,7 @@ if (!in_array($bodyMode, ['rtf', 'html-body', 'html-swap'], true)) $bodyMode = '
 $myStatusIdx = array_search($status, $expStages, true);
 if ($myStatusIdx === false) $myStatusIdx = -1;
 
-$saveLabel = $status === 'published' ? 'Save changes' : 'Save ' . ucfirst($status);
+$saveLabel = $status === 'published' ? 'Publish changes' : 'Save ' . ucfirst($status);
 $fromStage = (string)($_GET['from_stage'] ?? '');
 $canUndo   = $fromStage !== '' && $myStatusIdx > 0;
 
@@ -493,7 +493,7 @@ require __DIR__ . '/../partials/topbar.php';
       [$backHref, $backLabel] = $backMap[$fromKey] ?? ['/cms/experiments', '← Back to list'];
       $actions  = '<a href="' . $e($backHref) . '" class="btn-sec">' . $e($backLabel) . '</a>';
       if ((string)($experiment['status'] ?? '') === 'published' && !empty($experiment['slug'])) {
-          $actions .= ' <a href="/experiments/' . $e((string)$experiment['slug']) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
+          $actions .= ' <a href="/field-work/' . $e((string)$experiment['slug']) . '" target="_blank" rel="noopener" class="btn-sec">Live ↗</a>';
       }
       require __DIR__ . '/../partials/view-header.php';
       ?>
@@ -639,6 +639,7 @@ require __DIR__ . '/../partials/topbar.php';
                       <button type="button" data-cmd="bold"        class="tt-btn"><strong>B</strong></button>
                       <button type="button" data-cmd="italic"      class="tt-btn"><em>I</em></button>
                       <button type="button" data-cmd="h2"          class="tt-btn">H2</button>
+                      <button type="button" data-cmd="kicker-h2"   title="Section-header kicker" class="tt-btn">H2^</button>
                       <button type="button" data-cmd="h3"          class="tt-btn">H3</button>
                       <button type="button" data-cmd="ul"          class="tt-btn">• List</button>
                       <button type="button" data-cmd="ol"          class="tt-btn">1. List</button>

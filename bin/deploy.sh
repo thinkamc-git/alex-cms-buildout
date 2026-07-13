@@ -270,8 +270,12 @@ find "$STAGE" -mindepth 1 -maxdepth 2 -print | sed "s|^$STAGE/|  |" | sort
 echo
 echo "==> Pre-flight checks"
 
-# Create backup directory if it doesn't exist
-mkdir -p "/home/alexmchong/_backups" 2>/dev/null || true
+# Create backup directory if it doesn't exist. /home/alexmchong/_backups
+# is a path on the REMOTE server, not on the machine running this script —
+# must go over SSH, not a local mkdir (which silently no-ops on a dev
+# machine where that path doesn't exist; found 2026-07-12, see
+# docs/_agent-logs/260712_TIM_categories-plan-and-consolidation.md).
+ssh alexmchong-ca 'mkdir -p "/home/alexmchong/_backups"' 2>/dev/null || true
 BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="/home/alexmchong/_backups/deploy-$BACKUP_TIMESTAMP"
 
@@ -357,17 +361,18 @@ RSYNC_CMD+=("${EXCLUDES[@]}" "$STAGE/" "alexmchong-ca:$REMOTE_DIR")
 "${RSYNC_CMD[@]}"
 RSYNC_EXIT=$?
 
-# Log deployment metadata
+# Log deployment metadata. Same remote-path issue as the mkdir above —
+# this must be appended over SSH, not a local shell redirect.
 if [ "$RSYNC_EXIT" = "0" ] && [ -z "$DRY" ]; then
-  LOG_FILE="/home/alexmchong/_backups/DEPLOY-LOG.txt"
-  {
+  LOG_ENTRY=$(
     echo "=== Deployment $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC) ==="
     echo "Target: $TARGET"
     echo "Backup: deploy-$BACKUP_TIMESTAMP/"
     echo "Delete mode: $([ "$USE_DELETE" = "1" ] && echo "enabled (--confirm)" || echo "disabled (upsert-only)")"
     echo "Command: bin/deploy.sh $TARGET $([ "$CONFIRM" = "1" ] && echo "--confirm" || echo "")"
     echo
-  } >> "$LOG_FILE" 2>/dev/null || true
+  )
+  ssh alexmchong-ca "cat >> /home/alexmchong/_backups/DEPLOY-LOG.txt" <<< "$LOG_ENTRY" 2>/dev/null || true
 
   echo
   echo "==> Deploy to $TARGET complete."

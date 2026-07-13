@@ -126,7 +126,15 @@ what surfaces it later.
 **On close-out** (Alex says "close this out," or a staleness check flags it
 as done): finalize each open Objective's Outstanding section. **Every item
 gets an explicit disposition — no bare, untagged bullets once a log is
-actually closed:**
+actually closed.**
+
+**Disposition tags are decided *with* Alex, not inferred.** For anything
+where HANDED OFF vs. DROPPED vs. actually-still-needs-doing isn't obvious
+from the conversation, ask him directly before tagging it — closing isn't
+the session unilaterally guessing what each loose end means and writing
+that down as settled. If it's genuinely unambiguous (he already said "drop
+that" or "someone else can pick that up" earlier in the conversation), no
+need to re-ask — but default to checking, not assuming.
 
 ```
 ### Outstanding (as of <date>)

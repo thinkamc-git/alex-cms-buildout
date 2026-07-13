@@ -122,16 +122,13 @@ live where, without shipping anything half-finished, then reconcile git.
   for this project. (Memory edit, not a commit — lives outside the repo.)
 
 ### Outstanding (as of 2026-07-12)
-- Kicker/eyebrow block feature — complete, proven on staging only
-  (`blocks.css`, `tiptap-setup.js`, `article-edit.php`, `experiment-edit.php`,
-  `sanitize.php`, `docs/BLOCKS.md`), never reached prod, still uncommitted.
-- thinking-system experiment content (content.id=43, staging only) — DB row
-  + `content/experiment/thinking-system/main.html` (server-only, excluded
-  from git/deploy by design). Needs: deploy Kicker code to prod first, copy
-  `main.html` to the prod server manually, publish the content row via CMS.
-  Also open: should `labs.alexmchong.ca/thinking-system` (the original
-  source page, still live) get redirected/retired once this ships, or stay
-  as a separate working sandbox? Not decided.
+- ~~Kicker/eyebrow block feature — never reached prod~~ RESOLVED, see new
+  Objective below.
+- ~~thinking-system experiment content — staging only~~ RESOLVED, see new
+  Objective below. Still open within it: should
+  `labs.alexmchong.ca/thinking-system` (the original source page, still
+  live) get redirected/retired now that the CMS version is live, or stay as
+  a separate working sandbox? Not decided.
 - 5 stray files on staging webroot root — confirmed dead, Alex to
   confirm/delete.
 - Stale `/portfolioforhire → Webflow` redirect on prod — Alex to delete via
@@ -175,7 +172,89 @@ captured, not just file diffs).
   → SUCCEEDED — this rewrite.
 
 ### Outstanding (as of 2026-07-12)
-- This log itself needs to be committed + pushed (next step).
-- Not yet tested in practice across a real multi-agent-concurrent scenario —
-  the design is reasoned through, not battle-tested. Worth revisiting after
-  Alex has actually used it for a few sessions.
+- ~~Not yet tested in practice~~ — tested for real the same day, see the
+  next Objective: a second live session (`2026-07-12_thinking-system-
+  eyebrow-kicker.md`) was working the *same directory* concurrently, and
+  the system caught it (Kicker/thinking-system handoff described files
+  that didn't match this checkout — `git rev-parse HEAD` cross-check
+  confirmed same commit, same directory, genuinely concurrent). Worked as
+  designed; still only one real data point.
+
+## Objective: Kicker + thinking-system → production promotion (started 2026-07-12)
+
+**Intent:** Pick up the outstanding item from the previous Objective — get
+the Kicker code and the thinking-system content, both proven only on
+staging, live on production. Complicated mid-flight by discovering a second
+live session (see `2026-07-12_thinking-system-eyebrow-kicker.md`) working
+the identical checkout concurrently; Alex chose to have that session close
+out and have this one finish the job.
+
+### Timeline
+
+- Attempting: reconcile a handoff message from the other live session
+  claiming the working tree had ~50 files of unrelated uncommitted work
+  that would block a safe prod deploy
+  → Checked directly: not true for this checkout at this moment (only the
+    7 Kicker-related files were uncommitted). Cross-checked `git rev-parse
+    HEAD` with the other session — identical commit, identical directory,
+    genuinely the same checkout being edited concurrently. One claimed
+    discrepancy (`tools/ux-pulse/` "missing") turned out to be my own
+    mistake — checked `tools/` at repo root instead of `site/tools/`
+    (deploy-destination path vs. source path). Resolved via direct
+    questions relayed through Alex rather than assuming either side.
+
+- **`69105bf`** — Kicker/eyebrow block feature (the 5 code files +
+  `docs/BLOCKS.md` + archived `eyebrow-options.html` decision record).
+  Verified matching staging exactly before committing. → SUCCEEDED, pushed.
+- **`0318960`** — added the other session's work-log file to git.
+  → SUCCEEDED, pushed.
+
+- Attempting: `bin/deploy.sh prod` (upsert-only, no `--confirm`)
+  → BLOCKED twice by the sandbox classifier, each time requiring an
+    unambiguous "yes, deploy to production" in Alex's own words — his
+    earlier "close out that agent" and "as long as you have all the
+    information" were correctly judged not explicit enough on their own.
+  → SUCCEEDED after Alex's explicit confirmation. All 5 Kicker files
+    verified live on production via direct diff afterward.
+  → Found a real (non-blocking) bug while checking: `bin/deploy.sh`'s
+    `DEPLOY-LOG.txt` audit-trail write uses a local shell redirect instead
+    of writing over SSH, so on a Mac dev machine it silently fails every
+    time (`/home/alexmchong/_backups/` doesn't exist locally). The actual
+    safety-critical backup mechanism (rsync `--backup-dir`, only relevant
+    with `--confirm`/delete mode) is unaffected — this is a logging-only
+    gap, flagged to Alex, not yet fixed.
+
+- Attempting: copy `content/experiment/thinking-system/main.html` from
+  staging to production, then insert the content row
+  → BLOCKED once (needed separate explicit confirmation from the code
+    deploy — Alex clarified the intent instead: "recreate thinking-system
+    in experiments that's in staging, do the exact same thing for
+    production").
+  → SUCCEEDED: pulled the *current* full staging row fresh (not the
+    handoff's possibly-stale hardcoded values) before replicating, so
+    production is a true mirror rather than a guess. First INSERT attempt
+    failed (`SQLSTATE[HY093]: Invalid parameter number` — reused one named
+    placeholder 3× in the query, which native prepared statements
+    (`PDO::ATTR_EMULATE_PREPARES => false`) don't allow); fixed by giving
+    each occurrence its own placeholder name. content.id=17 on production.
+  → Verified live: `https://alexmchong.ca/field-work/thinking-system`
+    returns 200; `https://alexmchong.ca/experiments/thinking-system`
+    correctly 301s to it (confirming the rename's legacy redirect still
+    works).
+
+- Noted along the way: the handoff's reference URL
+  (`/experiments/thinking-system`) was the pre-rename path — the
+  content-type rename earlier this session moved the canonical public
+  route to `/field-work/`, while deliberately leaving the DB `type` value
+  and `content/experiment/` folder convention unchanged (to avoid breaking
+  existing uploaded file paths). Two different naming layers, only one
+  renamed.
+
+### Outstanding (as of 2026-07-12)
+- `bin/deploy.sh` `DEPLOY-LOG.txt` write bug (see above) — cosmetic, not
+  safety-critical, not yet fixed.
+- Whether `labs.alexmchong.ca/thinking-system` (original source page)
+  should be redirected/retired now that the CMS version is live on
+  production — not decided.
+- The 5-stray-files and stale-redirect cleanup items from the previous
+  Objective are still open, Alex to confirm/handle.

@@ -51,11 +51,14 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
       <thead>
         <tr>
           <?php foreach ($columns as $col):
-              $label = (string)($col['label'] ?? '');
-              $width = (string)($col['width'] ?? '');
-              $style = $width !== '' ? ' style="width:' . htmlspecialchars($width, ENT_QUOTES, 'UTF-8') . '"' : '';
+              $label   = (string)($col['label']   ?? '');
+              $width   = (string)($col['width']   ?? '');
+              $thclass = (string)($col['thclass'] ?? '');
+              $thAttr  = '';
+              if ($width   !== '') $thAttr .= ' style="width:' . htmlspecialchars($width, ENT_QUOTES, 'UTF-8') . '"';
+              if ($thclass !== '') $thAttr .= ' class="' . htmlspecialchars($thclass, ENT_QUOTES, 'UTF-8') . '"';
           ?>
-            <th<?= $style ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></th>
+            <th<?= $thAttr ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></th>
           <?php endforeach; ?>
         </tr>
       </thead>
@@ -83,6 +86,7 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
                 $rowHref  = '';
                 $rowClass = '';
             }
+            $rowAttrs = isset($row['attrs']) && is_array($row['attrs']) ? $row['attrs'] : [];
             $classParts = [];
             if ($rowHref !== '')  $classParts[] = 'row-clickable';
             if ($rowClass !== '') $classParts[] = $rowClass;
@@ -92,6 +96,12 @@ $tableClass  = 'cms-table'  . ($variantSafe !== '' ? ' cms-table--'  . $variantS
             }
             if ($rowHref !== '') {
                 $trAttr .= ' data-row-href="' . htmlspecialchars($rowHref, ENT_QUOTES, 'UTF-8') . '"';
+            }
+            foreach ($rowAttrs as $attrK => $attrV) {
+                $safeName = preg_replace('/[^a-z0-9_-]/i', '', (string)$attrK);
+                if ($safeName !== '') {
+                    $trAttr .= ' ' . $safeName . '="' . htmlspecialchars((string)$attrV, ENT_QUOTES, 'UTF-8') . '"';
+                }
             }
         ?>
           <tr<?= $trAttr ?>>

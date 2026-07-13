@@ -10,6 +10,9 @@
  *     container:    listEl,               // the element that holds the rows
  *     itemSelector: '.rowform-row',       // draggable rows (must have draggable="true" + data-id)
  *     tailSelector: '.rowform-add-row',   // optional: keep the line/row before this trailing affordance
+ *     createLine:   function () { … },    // optional: return custom drop-indicator element
+ *                                         //   default: <div class="drop-line">
+ *                                         //   table use: return a <tr class="drop-line"><td…></td></tr>
  *     onDrop: function (info) {           // info = { orderedIds:[…], item, revert() }
  *       // persist info.orderedIds; call info.revert() to restore order on failure
  *     },
@@ -23,9 +26,14 @@
   'use strict';
 
   function wire(opts) {
-    var container = opts.container;
-    var itemSel   = opts.itemSelector;
-    var tailSel   = opts.tailSelector || null;
+    var container  = opts.container;
+    var itemSel    = opts.itemSelector;
+    var tailSel    = opts.tailSelector || null;
+    var createLine = typeof opts.createLine === 'function' ? opts.createLine : function () {
+      var line = document.createElement('div');
+      line.className = 'drop-line';
+      return line;
+    };
     if (!container || !itemSel) return;
 
     var dragging = null;
@@ -74,8 +82,7 @@
         var b = s.getBoundingClientRect();
         return e.clientY < b.top + b.height / 2;
       });
-      var line = document.createElement('div');
-      line.className = 'drop-line';
+      var line = createLine();
       if (after) container.insertBefore(line, after);
       else placeAtEnd(line);
     });

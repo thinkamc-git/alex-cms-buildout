@@ -83,6 +83,7 @@
 .tiptap-editor .ProseMirror {
   outline: none;
   min-height: 360px;
+  margin-top: var(--space-4);
 }
 
 /* Tiptap's contenteditable doesn't suppress the first-of-type margin-top

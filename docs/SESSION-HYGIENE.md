@@ -28,10 +28,34 @@ record of who did what, where. This doc is the fix.
 
 **Chat = agent = log, 1:1:1.** Every agent session doing non-trivial work
 (more than a quick fix) keeps exactly one log at
-`docs/_agent-logs/<date>_<short-task-slug>.md` for its whole lifetime.
-**Create it as soon as the work becomes non-trivial — not at the end.** The
-point is mid-flight visibility (Alex asking "what's the agent on X doing
-right now"), which only works if the log exists *while* the work happens.
+`docs/_agent-logs/MMDD_XXX_short-task-slug.md` for its whole lifetime, where
+`XXX` is the session's 3-letter name (see below). **Create it as soon as the
+work becomes non-trivial — not at the end.** The point is mid-flight
+visibility (Alex asking "what's the agent on X doing right now"), which only
+works if the log exists *while* the work happens.
+
+### Agent naming
+
+Remembering "the agent working on categories" across several concurrent
+sessions is hard — a short name is a much easier handle than a filename or a
+task description. Every session picks a **3-letter name** for itself the
+moment it creates its log:
+
+1. **Scan `docs/_agent-logs/` (active) and recently-archived logs, read-only,
+   for names already in use.** This is a read, not a write — safe even with
+   other sessions active concurrently (see the concurrency rule above; only
+   simultaneous *writes* to the same file are the hazard).
+2. **Pick an unused name that doesn't visually resemble one already in
+   play** (avoid picking TIM when ROX is already active, but also avoid
+   picking TOM when TIM is active — they read as the same shape at a
+   glance). A starting pool of reasonably distinct 3-letter names:
+   `TIM, ROX, ZED, KAI, LUX, JAX, NIA, PIP, VEX, ORO, FIN, WYN, ACE, BEN,
+   IVO, MOX, QIN, RYE, SAL, UMA, DOV, ELI, GUS, HOP` — add more as needed,
+   same principle (short, pronounceable, visually distinct as a set).
+3. **Introduce yourself in chat once the log exists** — a short, natural
+   "Hi, I'm TIM — starting on the categories redesign" the first time you'd
+   otherwise just start working. Gives Alex an immediate, low-effort handle
+   to reference the session by, without opening any files.
 
 **Concurrency rule: a log file is only ever written by the session that
 created it.** No shared/central index file — two agents editing the same file
@@ -49,6 +73,7 @@ not a standing file.
 **Header block**, same idea as a memory file's frontmatter:
 
 ```
+NAME: XXX (the 3-letter name, e.g. TIM)
 PURPOSE: one-line summary (can span multiple objectives over the log's life)
 STATUS: active | closed
 LAST TOUCHED: <date>
@@ -118,6 +143,19 @@ reconstruct pending work. This gets most of the way there but not all of
 it — a log can't capture something an agent was about to raise but hadn't
 yet. Treat it as "read the logs, then a quick human gut-check," not as a
 complete transfer.
+
+**When a closed session's Outstanding item gets resolved by a *different*
+session** (this happened 2026-07-12: an agent was closed out with real
+outstanding work, which Alex then had a different session pick up and
+finish — the closed/archived log's Outstanding section was left reading
+"unresolved" even though it wasn't anymore). Archived logs are otherwise
+left alone as a historical record, but this is a narrow, explicit exception:
+add a one-line annotation directly next to the original entry —
+`**RESOLVED** — see 0712_TIM_categories-plan-and-consolidation.md` — rather
+than deleting or rewriting the original text. This is safe specifically
+*because* the session is closed: there's no other live session concurrently
+editing that file, so the single-writer concurrency rule isn't actually
+being violated — a closed log has no writer left to collide with.
 
 **Log any direct server write.** A one-off diagnostic script run over SSH and
 deleted immediately after doesn't need a log entry (see §2 for the cleanup

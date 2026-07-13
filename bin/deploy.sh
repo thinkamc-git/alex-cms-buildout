@@ -87,7 +87,7 @@ cp site/_pages/coaching.php              "$STAGE/"
 cp site/_pages/landing.php               "$STAGE/"
 cp site/_pages/newsletter-confirmed.php  "$STAGE/"
 cp site/_pages/newsletter.php            "$STAGE/"
-cp site/_pages/resume.php                "$STAGE/"
+cp site/_pages/cv.php                    "$STAGE/"
 cp site/_pages/work-with-me.php          "$STAGE/"
 cp site/_pages/error.php                 "$STAGE/"   # shared 404/403/500 template
 
@@ -137,6 +137,12 @@ cp site/cms/login.php              "$STAGE/cms/"
 cp site/cms/logout.php             "$STAGE/cms/"
 cp site/cms/account.php            "$STAGE/cms/"
 cp site/cms/unlock-account.php     "$STAGE/cms/"
+
+# Portfolio-for-hire — self-contained static single-page portfolio.
+# Lives at /portfolioforhire/ (overrides the DB redirect to Webflow).
+mkdir -p "$STAGE/portfolioforhire/assets"
+cp site/portfolioforhire/index.html       "$STAGE/portfolioforhire/"
+cp -R site/portfolioforhire/assets/. "$STAGE/portfolioforhire/assets/"
 
 # Phase 5: admin shell partials + CMS-specific stylesheet.
 # The 5 partials (sidebar/topbar/view-header/filter-bar/table) compose every
@@ -208,6 +214,8 @@ cp site/lib/pills.php              "$STAGE/lib/"
 # Phase 21: site-wide settings (key/value bag) read by _page-shell.php
 # and footer.php for title suffix, og defaults, analytics, footer copy.
 cp site/lib/settings.php           "$STAGE/lib/"
+# Library → Resumes data layer (single-record résumé, draft/publish/snapshot/PDF).
+cp site/lib/resumes.php            "$STAGE/lib/"
 # Vendored CodeMirror 5 — used by the Pages editor for PHP-mode editing
 # of mock versions. ~280KB, no CDN dependency at runtime.
 mkdir -p "$STAGE/cms/_assets/codemirror"

@@ -1,0 +1,399 @@
+/* ============================================================================
+   alex m. chong — résumé (screen styles)
+   Print/PDF rules live in print.css. Layout is a centered white "paper"
+   (.cv-container) on a tiled gray background (.cv on <body>).
+
+   Sections:
+     1. Reset            8. Header block (name / tagline / contact / intro)
+     2. Base type        9. Content (sections / entries / text weights)
+     3. Links           10. Responsive — Tablet ≤991 / Mobile ≤767 / Small ≤479
+     4. The paper       11. Motion (load fade-in)
+     5. Grid system
+   ============================================================================ */
+
+
+/* 1. Reset ----------------------------------------------------------------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
+
+
+/* 2. Base type ------------------------------------------------------------- */
+
+body {
+  min-height: 100%;
+  background-color: #fff;
+  color: #333;
+  font-family: Arial, sans-serif; /* .cv (below) upgrades this to Barlow */
+  font-size: 14px;
+  line-height: 20px;
+}
+
+h3,
+h4 {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+h3 {
+  margin-top: 20px;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+h4 {
+  margin-top: 10px;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+ul {
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding-left: 17px;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+b,
+strong {
+  font-weight: bold;
+}
+
+
+/* 3. Links ----------------------------------------------------------------- */
+
+a {
+  color: #000;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+/* 4. The paper ------------------------------------------------------------- */
+
+/* <body class="cv"> — the tiled gray backdrop the paper sits on.
+   The doubled `.cv.cv` is an intentional specificity bump (from the original
+   template); it must out-weigh the base `.cv`, so keep both selectors. */
+.cv {
+  margin-top: 30px;
+  font-family: Barlow, sans-serif;
+}
+
+.cv.cv {
+  height: auto;
+  min-height: 100%;
+  margin-top: 0;
+  padding-bottom: 32px;
+  border-radius: 0;
+  background-color: #e8e8e8;
+  background-image: url('background2x.png');
+  background-size: 200px;
+  color: #000;
+}
+
+/* The white "sheet" — centered, max 940px, with the paper padding we tune. */
+.cv-container {
+  display: flex;
+  max-width: 940px;
+  margin: 32px auto 0;
+  padding: 50px 50px 0;
+  background-color: #fff;
+  border-color: #fff;
+  border-style: none solid solid;
+  border-width: 0 1px 1px;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.02);
+}
+
+
+/* 5. Grid system ----------------------------------------------------------- */
+
+.cv-grid {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+
+.cv-grid-3col {
+  padding-bottom: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+}
+
+.cv-grid-4col {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
+}
+
+/* Header row: 6 columns; the children below claim spans within it. */
+.cv-grid-header {
+  margin-bottom: 40px;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: auto auto auto auto;
+  gap: 0 24px;
+}
+
+/* Column spans within .cv-grid-header (was per-element grid-id rules). */
+.cv-tagline { grid-column: span 3; align-self: start; }
+.cv-contact { grid-column: span 2; align-self: start; }
+.cv-intro   { grid-column: span 5; }
+.cv-column  { grid-column: span 3; }
+.cv-impact  { grid-column: span 6; }
+
+/* Wraps the two .cv-column entries ("workplaces" / "notable projects")
+   as their own nested grid, spanning the full header row. Kept
+   separate from .cv-grid-header so print styles can flip just this
+   part to floats without disturbing the name/tagline/contact layout
+   above it (see print.css). */
+.cv-columns {
+  grid-column: span 6;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0 24px;
+}
+
+
+/* 8. Header block ---------------------------------------------------------- */
+
+.cv-name {
+  margin-top: -3px;
+  margin-bottom: 0;
+  font-size: 19px;
+}
+
+.cv-tagline {
+  margin-bottom: 0;
+  font-size: 19px;
+  line-height: 25px;
+}
+
+.cv-contact {
+  font-weight: 500;
+  text-align: right;
+}
+
+.cv-intro {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  font-size: 14px;
+}
+
+.cv-summary {
+  font-size: 16px;
+  line-height: 23px;
+}
+
+
+/* 9. Content --------------------------------------------------------------- */
+
+.cv-section {
+  padding-bottom: 6px;
+}
+
+.cv-section.is-hidden {
+  display: none;
+}
+
+.cv-section-head {
+  margin-bottom: 28px;
+  padding-bottom: 0;
+}
+
+.cv-section-title {
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  color: #000;
+  font-weight: 500;
+}
+
+.cv-column {
+  padding-top: 0;
+}
+
+.cv-entry-head {
+  font-size: 15px;
+}
+
+.cv-entry-desc {
+  margin-bottom: 32px;
+}
+
+.cv-list-item {
+  margin-bottom: 16px;
+}
+
+/* Inline text weights */
+.cv-medium { font-weight: 500; }
+.cv-strong { font-weight: 600; }
+
+
+/* 10. Responsive ----------------------------------------------------------- */
+
+/* Tablet — ≤991px */
+@media screen and (max-width: 991px) {
+  .cv {
+    margin-right: 30px;
+    margin-left: 30px;
+  }
+  .cv-container {
+    max-width: 728px;
+    margin-top: 30px;
+    padding: 35px 35px 0;
+  }
+  .cv-summary {
+    font-size: 16px;
+    line-height: 23px;
+  }
+  .cv-section-head {
+    margin-bottom: 16px;
+  }
+  .cv-section-title {
+    margin-top: 0;
+  }
+  .cv-grid-header {
+    column-gap: 12px;
+  }
+  .cv-name {
+    margin-top: 1px;
+    font-size: 16px;
+    line-height: 20px;
+  }
+  .cv-tagline {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .cv-intro {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}
+
+/* Mobile — ≤767px : single column, drop the paper shadow + contact block */
+@media screen and (max-width: 767px) {
+  .cv.cv {
+    background-image: none;
+    background-size: auto;
+  }
+  .cv-container {
+    margin-top: 20px;
+    padding: 35px 35px 0;
+    box-shadow: none;
+  }
+  .cv-contact {
+    display: none;
+    overflow: visible;
+    text-align: center;
+  }
+  .cv-grid-4col {
+    display: block;
+  }
+  .cv-grid-3col {
+    display: block;
+  }
+  .cv-grid-header {
+    display: block;
+    grid-template-columns: 1fr;
+  }
+  .cv-columns {
+    display: block;
+  }
+  .cv-section {
+    padding-bottom: 8px;
+  }
+  .cv-section-head {
+    margin-bottom: 4px;
+    padding-top: 0;
+    padding-bottom: 4px;
+  }
+  .cv-name {
+    margin-top: 0;
+    font-size: 22px;
+    text-align: center;
+  }
+  .cv-tagline {
+    margin-top: 8px;
+    margin-bottom: 20px;
+    padding-right: 45px;
+    padding-left: 45px;
+    font-size: 18px;
+    text-align: center;
+  }
+  .cv-intro {
+    padding-bottom: 0;
+  }
+  .cv-entry-head {
+    margin-top: 6px;
+    padding-bottom: 0;
+    font-size: 15px;
+  }
+  .cv-entry-desc {
+    margin-bottom: 20px;
+  }
+  .cv-list-item {
+    margin-bottom: 8px;
+  }
+}
+
+/* Small mobile — ≤479px */
+@media screen and (max-width: 479px) {
+  .cv {
+    margin-top: 16px;
+    margin-right: 16px;
+    margin-left: 16px;
+  }
+  .cv-container {
+    max-width: none;
+    margin-top: 18px;
+  }
+  .cv-tagline {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}
+
+
+/* 11. Motion --------------------------------------------------------------- */
+
+/* Fade the résumé in on load — pure CSS (replaces the old Webflow IX2 script).
+   `both` holds the end state; print + reduced-motion skip it so the PDF and
+   motion-sensitive users get the content instantly. */
+@keyframes cv-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cv-container {
+  animation: cv-fade-in 0.7s ease-out both;
+}
+
+@media print {
+  .cv-container { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-container { animation: none; }
+}

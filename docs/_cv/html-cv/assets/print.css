@@ -1,0 +1,49 @@
+/* ================================================================
+   print.css — THE PDF MAGIC ✦  (do not delete)
+   ----------------------------------------------------------------
+   Turns the résumé into a clean PDF. Cmd/Ctrl+P → "Save as PDF".
+   Scoped entirely to @media print, so it never affects the screen.
+   ================================================================ */
+
+/* Page margins for the printed sheet */
+@page {
+  margin: 12mm;
+}
+
+@media print {
+  /* Clean white page — the on-screen gray lives on .cv/.cv.cv (high
+     specificity), so force it off with !important. */
+  html,
+  body,
+  .cv,
+  .cv-container {
+    background: #fff !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Drop the on-screen frame + the load animation. Horizontal centering
+     (margin: auto left/right) must survive here — zeroing all four
+     sides left-aligns the sheet instead of centering it, leaving extra
+     blank space on the right. */
+  .cv-container {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    animation: none !important;
+  }
+
+  /* Scale to fit the sheet */
+  body {
+    zoom: 0.75;
+  }
+
+  /* No break-inside/break-before rules here on purpose: the "workplaces"
+     / "notable projects" columns (.cv-columns, .cv-column — a nested
+     grid, see resume.css) are each far taller than one page. Any rule
+     that tries to keep a section/entry from splitting forces browsers
+     to defer the whole (still-too-tall) block to the next page instead
+     — that's what produced the blank-page gaps. Left unconstrained,
+     the grid just fills each page and cuts off wherever the content
+     naturally ends, continuing on the next page — plain pagination,
+     no gaps. */
+}

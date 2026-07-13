@@ -26,55 +26,98 @@ record of who did what, where. This doc is the fix.
 
 ## 1. Agent work logs
 
-Every agent session doing non-trivial work (more than a quick fix) keeps a log
-at `docs/_agent-logs/<date>_<short-task-slug>.md`.
+**Chat = agent = log, 1:1:1.** Every agent session doing non-trivial work
+(more than a quick fix) keeps exactly one log at
+`docs/_agent-logs/<date>_<short-task-slug>.md` for its whole lifetime.
+**Create it as soon as the work becomes non-trivial — not at the end.** The
+point is mid-flight visibility (Alex asking "what's the agent on X doing
+right now"), which only works if the log exists *while* the work happens.
 
 **Concurrency rule: a log file is only ever written by the session that
 created it.** No shared/central index file — two agents editing the same file
-at the same time will silently clobber each other with no warning, since nothing
-here has real locking. Wanting a combined view of "what's active right now"?
-Read the directory listing and open the files — computed fresh, never a
-maintained artifact that could go stale or collide.
+at the same time will silently clobber each other with no warning, since
+nothing here has real locking. Wanting a combined view of "what's active
+right now," or "what's outstanding across every closed-out session"? Scan the
+directory (active logs) or `_archive/` (closed ones) and compute the answer
+fresh, on request — never a maintained file that could go stale or collide.
+This applies to outstanding-task rollups too: don't create a shared
+`OUTSTANDING.md` that gets appended to at close-out — same collision risk,
+just rarer. Every archived log keeps its own Outstanding section; "what's
+outstanding" is a question any agent answers on demand by reading them all,
+not a standing file.
 
 **Header block**, same idea as a memory file's frontmatter:
 
 ```
-PURPOSE: one-line what this session is working on
-STATUS: active | handed-off | closed
+PURPOSE: one-line summary (can span multiple objectives over the log's life)
+STATUS: active | closed
 LAST TOUCHED: <date>
 ```
 
-**Body is a real timeline, not a summary written at the end.** Append an
-entry *as each thing happens*, not reconstructed from memory later —
-reconstruction is exactly the failure this doc exists to prevent. Two kinds
-of entry:
+### Structure: Objectives → Timeline → Outstanding
 
-- **Anything committed to git** — don't hand-write a timestamp, **reference
-  the commit hash** (`git log` gives you the exact one). The hash is a
-  verifiable fact; a hand-typed timestamp next to it is just a second copy
-  that can drift or be wrong.
-  ```
-  ### 96c0441 — Content-type rename
-  Verified matching both live servers before committing. Pushed immediately.
-  ```
-- **Anything that is *not* a commit** — a direct server push, a DB write, an
-  SSH session — has no other record anywhere, so it needs an explicit
-  timestamp (`date` on the shell, or whatever real clock is available).
-  ```
-  ### 2026-07-12 14:32 — Journal category migration applied to prod
-  Ran migrate_journal_categories.php via SSH (scp'd, deleted after use — see
-  §2). 4 new categories added, 5 entries reassigned. No git commit — data
-  only, not code.
-  ```
+A single chat can cover more than one objective over its life (this session
+did — categories redesign, then consolidation, then this hygiene system).
+That doesn't mean multiple files — it means multiple `## Objective` sections
+inside the one log:
 
-Close with goal/decisions/handoff-notes prose if useful, but the timeline of
-timestamped-or-hash-referenced entries is the part that actually earns this
-the name "log."
+```
+## Objective: <name> (started <date>)
 
-**On close-out:** update `STATUS: closed`, then move the file into
-`docs/_agent-logs/_archive/`. Same shape as the existing sandbox workflow
-(`docs/design-mockups/` → `_completed/`) — reuse the pattern, don't invent a
-new one.
+**Intent:** what Alex actually asked for, in plain terms — not just the
+mechanical output. Update this if the ask evolves mid-objective.
+
+### Timeline
+- Attempting: <what's about to be tried>
+  → SUCCEEDED — <commit hash, or timestamp if not a commit>
+- Attempting: <what's about to be tried>
+  → BLOCKED — <why, e.g. sandbox denied a direct prod write>
+- Attempting: <retry, with whatever changed>
+  → SUCCEEDED — <commit hash>
+
+### Outstanding (as of <date>)
+- <unresolved item, or "none — fully resolved">
+```
+
+**Log the attempt, then the outcome — including failure.** Don't just record
+what worked; a blocked/failed attempt is exactly the information that stops
+another agent from repeating a known dead end, and it's the honest shape of
+what actually happened (see the SSH permission-denial → retry arc in the
+2026-07-12 log for a real example).
+
+**Two kinds of outcome reference:**
+- **Committed to git** → reference the commit hash, don't hand-write a
+  timestamp. The hash is verifiable; a hand-typed time next to it is just a
+  second copy that can drift or be wrong.
+- **Not a commit** (a direct server push, a DB write, an SSH session) → has
+  no other record anywhere, so it needs an explicit timestamp.
+
+**Update Outstanding continuously, not just at a final ritual.** This is the
+backstop for the failure mode where Alex just closes a chat tab without
+running a formal close-out — if the log was kept live throughout, it's still
+useful even when abandoned mid-work. The periodic staleness check (below) is
+what surfaces it later.
+
+**On close-out** (Alex says "close this out," or a staleness check flags it
+as done): finalize each open Objective's Outstanding section — write in
+anything genuinely unresolved, or state "none." Set `STATUS: closed`, move
+the file into `docs/_agent-logs/_archive/`. Same shape as the existing
+sandbox workflow (`docs/design-mockups/` → `_completed/`) — reuse the
+pattern, don't invent a new one.
+
+**On request, staleness review:** scan active (non-archived) logs for old
+`LAST TOUCHED` dates (rule of thumb: 4-5+ days) where the content reads as
+resolved, and propose closing them. This is an educated guess from reading
+the log, always — logs are a helpful signal, never ground truth. The only
+ground truth in this project is git commits and live server state (see
+§0 — this is exactly what a stale memory got wrong on 2026-07-12).
+
+**On consolidation** (Alex merging several open agents into one): the new
+agent reads the relevant logs' Objectives + Outstanding sections to
+reconstruct pending work. This gets most of the way there but not all of
+it — a log can't capture something an agent was about to raise but hadn't
+yet. Treat it as "read the logs, then a quick human gut-check," not as a
+complete transfer.
 
 **Log any direct server write.** A one-off diagnostic script run over SSH and
 deleted immediately after doesn't need a log entry (see §2 for the cleanup

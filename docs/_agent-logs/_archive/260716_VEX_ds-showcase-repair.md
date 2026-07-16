@@ -83,10 +83,10 @@ Outstanding — the git-commit gap below is a direct consequence of the same mis
   commits. 17 files modified (`site/_design-system/index.html` +
   16 `site/_design-system/showcase/*.html`), currently sitting as uncommitted
   local changes while already live on staging and production. This is the
-  exact failure mode SESSION-HYGIENE.md §0 documents. — **PICKED UP by TIM**
+  exact failure mode SESSION-HYGIENE.md §0 documents. — **RESOLVED** by TIM
   (Alex explicitly directed this, 2026-07-16: "look at everything from VEX
-  and make sure that's all closed out"). Verified all 17 files match
-  production byte-for-byte before touching anything.
+  and make sure that's all closed out"). Verified all 17 files matched
+  production byte-for-byte before committing. See commit `1654309`.
 - Agent log itself was created retroactively (this file), not at the start of
   non-trivial work as SESSION-HYGIENE.md §1 specifies. — **RESOLVED**, see
   `feedback_session_hygiene_trigger` memory (written this session to prevent

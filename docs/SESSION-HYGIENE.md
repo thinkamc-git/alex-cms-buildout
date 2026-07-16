@@ -191,6 +191,14 @@ explicit exception with two forms:
   section still read as unresolved). Annotate:
   `**RESOLVED** — see 260712_TIM_categories-plan-and-consolidation.md`.
 
+**A closed session never resolves its own handed-off items — it can't, it's
+already done and archived.** HANDED OFF is where a closing session's
+responsibility ends. The full loop is always: closing session tags an item
+HANDED OFF → Alex names who picks it up → that session marks it PICKED UP
+the moment it accepts the task (not skipped straight to RESOLVED — the
+two-step record matters, it's what shows *when* the work was claimed vs.
+*when* it finished) → RESOLVED once actually done.
+
 Both are one-line additions directly next to the original entry, never
 deleting or rewriting the original text. Safe specifically *because* the
 session being amended is closed — there's no other live session

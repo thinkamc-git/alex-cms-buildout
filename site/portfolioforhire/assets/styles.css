@@ -2009,3 +2009,39 @@ label {
 }
 
 .w-webflow-badge { display: none !important; }
+
+/* ── Grain overlay on photos ──────────────────────────────────────── */
+@keyframes grain {
+  0%   { transform: translate(0,    0);    }
+  10%  { transform: translate(-5%,  -10%); }
+  20%  { transform: translate(-15%, 5%);   }
+  30%  { transform: translate(7%,   -25%); }
+  40%  { transform: translate(-5%,  25%);  }
+  50%  { transform: translate(-15%, 10%);  }
+  60%  { transform: translate(15%,  0%);   }
+  70%  { transform: translate(0%,   15%);  }
+  80%  { transform: translate(3%,   35%);  }
+  90%  { transform: translate(-10%, 10%);  }
+  100% { transform: translate(0,    0);    }
+}
+.last-project-image,
+.last-project-image-mini,
+.bio-right-image {
+  position: relative;
+}
+
+.last-project-image::after,
+.last-project-image-mini::after,
+.bio-right-image::after {
+  content: '';
+  position: absolute;
+  inset: -200%;
+  width: 400%;
+  height: 400%;
+  background: url('tex-noise.png') repeat;
+  background-size: 256px 256px;
+  opacity: 0.08;
+  pointer-events: none;
+  animation: grain 8s steps(10) infinite;
+}
+

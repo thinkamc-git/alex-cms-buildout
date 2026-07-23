@@ -205,6 +205,26 @@ session being amended is closed — there's no other live session
 concurrently editing that file, so the single-writer concurrency rule isn't
 actually being violated; a closed log has no writer left to collide with.
 
+**A session has no way to know its own log was amended by someone else —
+it has to be told, or asked, to go look.** This happened for real
+2026-07-17: TIM closed out ZED's and KAI's logs during a consolidation,
+then Alex asked ZED and KAI directly in their own chats "is this agent
+closed?" — both said no, because neither had any reason to re-read their
+own log file and notice it had changed. That's not a bug, it's the
+structural consequence of sessions having no way to push notifications to
+each other; a cross-session amendment is authoritative in the file the
+moment it's written, but invisible to the amended session until it
+actually looks.
+
+**Trigger: if Alex asks a session about its own status** ("is this agent
+closed," "are you still working on X," "what's your status") **— that
+session re-reads its own log file fresh from disk before answering,
+rather than answering from memory.** Memory can be stale in exactly this
+way; the file is the current truth. If the file says `STATUS: closed` and
+the session didn't close itself, that means another session closed it out
+(check for a PICKED UP/RESOLVED annotation to see who and why) — say so
+plainly, don't just report the stale in-memory status.
+
 **Log any direct server write.** A one-off diagnostic script run over SSH and
 deleted immediately after doesn't need a log entry (see §2 for the cleanup
 rule that makes it safe to skip). Anything left running or referenced by a
